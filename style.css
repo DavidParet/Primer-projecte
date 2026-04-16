@@ -366,8 +366,8 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   display: none;
   position: fixed; inset: 0;
   z-index: 9999;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  overflow: hidden;
   background: var(--bg);
   color: var(--dark);
   font-family: 'Nunito', sans-serif;
@@ -421,8 +421,12 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Main wrapper */
 #pageApp main {
-  padding: 20px 16px 52px;
-  max-width: 460px; margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px 16px;
+  max-width: 460px; width: 100%; margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Cards */
@@ -598,9 +602,9 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Bottom nav */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
+  flex-shrink: 0;
   background: #ffffff; border-top: 1px solid var(--border);
-  display: flex; z-index: 20;
+  display: flex;
   padding-bottom: env(safe-area-inset-bottom);
 }
 .nav-btn {
@@ -835,4 +839,4 @@ body.dark {
 #pageApp footer b { color: var(--gold); }
 
 /* Spacer above bottom nav */
-.bottom-spacer { height: 70px; }
+.bottom-spacer { display: none; }

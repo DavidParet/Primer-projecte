@@ -14,7 +14,7 @@ function obrirApp() {
   if (!landing || !app) return;
 
   landing.style.display = 'none';
-  app.style.display     = 'block';
+  app.style.display     = 'flex';
   document.body.classList.add('app-active');
   app.scrollTop = 0;
   navTo('inici');
