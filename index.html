@@ -247,9 +247,8 @@
   </header>
 
   <!-- DEMO BANNER -->
-  <div class="demo-banner" id="demoBanner">
-    🎬 MODE DEMO — Les respostes són simulades ·
-    <span style="text-decoration:underline;cursor:pointer;" onclick="toggleDemo()">Desactivar</span>
+  <div class="demo-banner" id="demoBanner" style="display:none;">
+    🎬 MODE DEMO — Les respostes són simulades
   </div>
 
   <!-- ONBOARDING OVERLAY -->
@@ -375,6 +374,15 @@
           <button class="btn-calendar" id="btnCalendar" onclick="exportCalendar()" style="display:none;margin-top:14px;">
             📅 Afegir totes les dates a Google Calendar
           </button>
+        </div>
+
+        <!-- Accions ràpides -->
+        <div class="card">
+          <div class="card-head"><div class="c-icon ci-green">⚡</div><div class="c-label">Accions ràpides</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <button class="btn-demo-action" onclick="alert('📅 Afegit al calendari!')">📅 Afegir al calendari</button>
+            <button class="btn-demo-action btn-demo-confirm" onclick="alert('✅ Confirmació enviada!')">✅ Confirmar assistència</button>
+          </div>
         </div>
 
         <!-- Share -->

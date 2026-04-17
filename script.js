@@ -19,6 +19,10 @@ function obrirApp() {
   app.scrollTop = 0;
   navTo('inici');
 
+  /* Pre-omplir textarea amb text de demo si està buit */
+  var txtEl = document.getElementById('txt');
+  if (txtEl && !txtEl.value.trim()) { txtEl.value = DEFAULT_TEXT; }
+
   if (!_motorInit) {
     _motorInit = true;
     try { checkLimit(); }    catch(e) { console.warn('checkLimit:', e); }
@@ -96,8 +100,10 @@ function saveApiKey(key) {
 }
 
 /* ── EXAMPLE TEXTS ── */
+var DEFAULT_TEXT = "Hola famílies,\n\nEsperem que estigueu tots bé! 😊\n\nUs escrivim per recordar-vos algunes coses de cara als propers dies. Sabem que hi ha moltes comunicacions i pot ser difícil estar al dia de tot.\n\nAquest divendres 11 d'abril celebrarem la jornada esportiva a l'escola. L'activitat començarà a les 17:00 i està previst que duri aproximadament fins a les 19:30, tot i que pot variar una mica segons com evolucioni la tarda.\n\nÉs important que els alumnes portin roba esportiva adequada i còmoda. També recomanem portar una ampolla d'aigua.\n\nRecordeu que és imprescindible portar l'autorització signada. Sense aquesta autorització no podran participar a l'activitat.\n\nEn cas que algun alumne tingui intoleràncies alimentàries o necessitats especials, si us plau, feu-nos-ho saber amb antelació responent a aquest mateix correu.\n\nA més, la setmana vinent començarem els preparatius per la sortida de final de curs, de la qual us enviarem informació més detallada pròximament.\n\nMoltes gràcies per la vostra col·laboració i confiança!\n\nSalutacions,\nEquip docent";
+
 var EX = {
-  escola: "Bon dia, famílies,\n\nUs escrivim per recordar-vos que el proper divendres 11 d'abril celebrarem a l'escola la jornada esportiva de primavera.\n\nCaldrà que els nens portin roba esportiva adequada, una cantimplora d'aigua i protecció solar.\n\nÉs molt important que entregeu l'autorització signada abans del dijous 10 d'abril.\n\nA més, el termini per avisar d'intoleràncies alimentàries és el dimecres 9 d'abril.\n\nMoltes gràcies!",
+  escola: DEFAULT_TEXT,
   ampa:   "Hola a totes les famílies!\n\nLa propera reunió de l'AMPA serà el dimarts 15 d'abril a les 19h al saló d'actes. Votarem el pressupost de fi de curs.\n\nEl termini de pagament de les extraescolars del 2n trimestre és el 8 d'abril.\n\nBusquem voluntaris per a la festa de final de curs (20 de juny). Escriviu a ampa@escola.cat abans del 20 d'abril.\n\nGràcies!",
   feina:  "Hola equip,\n\nLlançament de la nova versió el 30 d'abril. Necessitem:\n- Assets de disseny finals abans del 18 d'abril\n- Revisió QA entre el 19 i el 23 d'abril\n- Presentació inversors pel 25 d'abril (Marc)\n\nDijous 10 reunió client Barcelona a les 10h. Confirmeu assistència abans de dimecres.\n\nPressupost Q2 per aprovar abans del 12 d'abril.\n\nSalutacions"
 };
@@ -120,19 +126,16 @@ var _lastData = null;
 /* ── DEMO MODE ── */
 var _demoMode = false;
 var DEMO_RESULTS = {
-  resum: "Jornada esportiva el divendres 11 d'abril. Cal portar roba esportiva i entregar l'autorització signada.",
+  resum: "Jornada esportiva divendres 11 d'abril a les 17:00. Cal portar roba esportiva i autorització signada.",
   urgencia: 4,
   urgencia_text: "Termini proper — cal actuar avui",
   accions: [
-    "Preparar roba esportiva i calçat",
+    "Preparar roba esportiva",
     "Signar l'autorització",
-    "Portar cantimplora i crema solar",
     "Avisar intoleràncies alimentàries"
   ],
   dates: [
-    { descripcio: "Entregar autorització", data: "10 d'abril", urgent: true },
-    { descripcio: "Avisar intoleràncies",  data: "9 d'abril",  urgent: true },
-    { descripcio: "Jornada esportiva",     data: "11 d'abril", urgent: false }
+    { descripcio: "Jornada esportiva", data: "Div. 17:00", urgent: false }
   ]
 };
 
@@ -239,14 +242,26 @@ function handleImg(e) {
 }
 
 async function analyze() {
-  /* Demo mode bypass */
-  if (_demoMode) { render(DEMO_RESULTS); return; }
-
   var apiKey = getApiKey();
-  if (!apiKey) {
-    showErr('⚠️ Falta la clau API. Ves a Config → Clau API per configurar-la.');
+
+  /* ── DEMO: sense API o mode demo activat ── */
+  if (_demoMode || !apiKey) {
+    var btnD  = document.getElementById('btnAnalyze');
+    var loadD = document.getElementById('loading');
+    var resD  = document.getElementById('results');
+    var errD  = document.getElementById('errMsg');
+    if (btnD)  btnD.disabled = true;
+    if (loadD) loadD.classList.add('on');
+    if (resD)  resD.classList.remove('on');
+    if (errD)  errD.style.display = 'none';
+    setTimeout(function () {
+      if (loadD) loadD.classList.remove('on');
+      if (btnD)  btnD.disabled = false;
+      render(DEMO_RESULTS);
+    }, 1200);
     return;
   }
+
   if (!checkLimit()) { navTo('premium'); return; }
 
   var isImg = _currentTab === 'img';

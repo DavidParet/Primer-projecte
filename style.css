@@ -826,6 +826,22 @@ body.dark {
 }
 .btn-reset:hover { border-color: var(--dark); color: var(--dark); }
 
+/* Botons d'acció ràpida demo */
+.btn-demo-action {
+  flex: 1; padding: 12px 10px;
+  background: var(--blue-bg); color: var(--blue);
+  border: 1.5px solid #bfdbfe; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn-demo-action:hover { background: #dbeafe; transform: translateY(-1px); }
+.btn-demo-confirm {
+  background: var(--green-bg); color: var(--green);
+  border-color: #a7f3d0;
+}
+.btn-demo-confirm:hover { background: #d1fae5; }
+
 /* Error */
 .err { display: none; background: var(--red-bg); color: var(--red); padding: 12px; border-radius: 10px; font-size: 12px; margin-top: 10px; text-align: center; font-weight: 600; }
 .err.on { display: block; }
