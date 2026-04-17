@@ -76,7 +76,39 @@ nav {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(245,197,24,.12);
 }
-.nav-logo img { height: 34px; display: block; }
+/* Logo CSS pur (PNG no té canal alpha) */
+.nav-logo {
+  display: flex; align-items: baseline;
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.logo-ne   { color: #ffffff; }
+.logo-x    {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(245,197,24,.9), 0 0 22px rgba(245,197,24,.5);
+  position: relative;
+}
+/* Estrella petita sobre la X */
+.logo-x::before {
+  content: '✦';
+  position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  font-size: 8px; color: var(--gold);
+  opacity: .75;
+}
+.logo-lupa {
+  color: #ffffff;
+  position: relative;
+}
+/* Punt lupa sobre la 'a' */
+.logo-dot {
+  color: var(--gold);
+  font-size: 8px;
+  vertical-align: super;
+  margin-left: 1px;
+  text-shadow: 0 0 6px rgba(245,197,24,.8);
+}
 .nav-cta {
   padding: 10px 22px;
   background: var(--gold); color: var(--navy);
