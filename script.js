@@ -62,6 +62,52 @@ document.addEventListener('DOMContentLoaded', function () {
     obs.observe(el);
   });
 
+  /* ── LOGO: eliminar fons blanc del PNG via canvas flood-fill ── */
+  (function () {
+    var img = document.querySelector('.nav-logo img');
+    if (!img) return;
+    function processLogo() {
+      try {
+        var c = document.createElement('canvas');
+        c.width  = img.naturalWidth  || img.width;
+        c.height = img.naturalHeight || img.height;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        var id   = ctx.getImageData(0, 0, c.width, c.height);
+        var data = id.data, w = c.width, h = c.height;
+        // Mostra color de fons (cantonada sup-esq)
+        var br = data[0], bg = data[1], bb = data[2];
+        // Si la cantonada no és quasi blanca, ja és transparent
+        if (br < 220 || bg < 220 || bb < 220) return;
+        // Flood-fill des de totes les vores
+        var visited = new Uint8Array(w * h);
+        var queue   = [];
+        var tol = 38;
+        for (var x = 0; x < w; x++) { queue.push(x); queue.push((h - 1) * w + x); }
+        for (var y = 0; y < h; y++) { queue.push(y * w); queue.push(y * w + w - 1); }
+        while (queue.length) {
+          var idx = queue.pop();
+          if (visited[idx]) continue;
+          visited[idx] = 1;
+          var p = idx * 4;
+          var dr = data[p] - br, dg = data[p+1] - bg, db = data[p+2] - bb;
+          if (Math.sqrt(dr*dr + dg*dg + db*db) <= tol) {
+            data[p + 3] = 0; // transparent
+            var cx = idx % w, cy = (idx / w) | 0;
+            if (cx > 0)     queue.push(idx - 1);
+            if (cx < w - 1) queue.push(idx + 1);
+            if (cy > 0)     queue.push(idx - w);
+            if (cy < h - 1) queue.push(idx + w);
+          }
+        }
+        ctx.putImageData(id, 0, 0);
+        img.src = c.toDataURL('image/png');
+      } catch (e) { /* canvas bloquejat per CORS → no fer res */ }
+    }
+    if (img.complete && img.naturalWidth > 0) { processLogo(); }
+    else { img.addEventListener('load', processLogo); }
+  })();
+
   /* Drag-and-drop on image drop zone (only when app is initialised) */
   var drop = document.getElementById('imgDrop');
   if (drop) {
