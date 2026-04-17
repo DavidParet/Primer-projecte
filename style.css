@@ -76,7 +76,7 @@ nav {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(245,197,24,.12);
 }
-.nav-logo img { height: 36px; }
+.nav-logo img { height: 34px; display: block; }
 .nav-cta {
   padding: 10px 22px;
   background: var(--gold); color: var(--navy);
@@ -156,10 +156,21 @@ nav {
 }
 .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
 
-/* ── MOCKUP ── */
+/* ── LUPA VISUAL ── */
 .hero-mockup {
-  margin-top: 70px; position: relative;
+  margin-top: 60px;
+  width: min(540px, 92vw);
+  position: relative;
   animation: fadeUp .8s .4s ease both;
+}
+.hero-lupa-img {
+  width: 100%;
+  border-radius: 28px;
+  display: block;
+  box-shadow:
+    0 50px 120px rgba(0,0,0,.65),
+    0 0 90px rgba(245,197,24,.18),
+    0 0 0 1px rgba(245,197,24,.12);
 }
 .mockup-phone {
   width: min(320px, 85vw);
