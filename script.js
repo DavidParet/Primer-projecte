@@ -597,7 +597,7 @@ function navTo(page) {
   if (appHero) appHero.style.display = page === 'inici' ? 'block' : 'none';
 
   if      (page === 'inici')    { document.getElementById('pageInici').style.display = 'block'; }
-  else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistorial(); }
+  else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistory(); }
   else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); }
   else if (page === 'config')    { document.getElementById('pageConfig').style.display = 'block'; }
   else if (page === 'premium')   {
@@ -649,6 +649,34 @@ function saveToHistorial(d) {
   });
   localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
   updateBadges();
+  renderHistory();
+}
+
+function renderHistory() {
+  var el = document.getElementById('historyList');
+  if (!el) return;
+
+  var history = getHistory(); // newest first
+
+  if (history.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha anàlisis guardades.</p>';
+    return;
+  }
+
+  el.innerHTML = '';
+  history.forEach(function (item) {
+    var div = document.createElement('div');
+    div.className = 'hist-item';
+    div.innerHTML =
+      '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
+      '<div class="hist-meta">' +
+        escHtml(item.date) + ' &nbsp;·&nbsp; ' +
+        (item.accions ? item.accions.length : 0) + ' accions &nbsp;·&nbsp; ' +
+        (item.dates   ? item.dates.length   : 0) + ' dates' +
+      '</div>';
+    div.onclick = function () { render(item); navTo('inici'); };
+    el.appendChild(div);
+  });
 }
 
 function renderHistorial() {
