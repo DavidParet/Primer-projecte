@@ -62,6 +62,14 @@ document.addEventListener('DOMContentLoaded', function () {
     obs.observe(el);
   });
 
+  /* Cerca historial en temps real */
+  var histSearch = document.getElementById('historySearch');
+  if (histSearch) {
+    histSearch.addEventListener('input', function () {
+      renderHistory(histSearch.value);
+    });
+  }
+
   /* Drag-and-drop on image drop zone (only when app is initialised) */
   var drop = document.getElementById('imgDrop');
   if (drop) {
@@ -652,19 +660,32 @@ function saveToHistorial(d) {
   renderHistory();
 }
 
-function renderHistory() {
+function renderHistory(query) {
   var el = document.getElementById('historyList');
   if (!el) return;
 
-  var history = getHistory(); // newest first
+  var all = getHistory(); // newest first
 
-  if (history.length === 0) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha anàlisis guardades.</p>';
+  /* Filtre de cerca */
+  var q = (query || '').toLowerCase().trim();
+  var items = q ? all.filter(function (item) {
+    var text = [
+      item.resum || '',
+      (item.accions || []).join(' '),
+      (item.dates   || []).map(function (d) { return d.descripcio || ''; }).join(' ')
+    ].join(' ').toLowerCase();
+    return text.includes(q);
+  }) : all;
+
+  /* Sense resultats */
+  if (items.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">' +
+      (q ? 'No s\'ha trobat cap anàlisi.' : 'Encara no hi ha anàlisis guardades.') + '</p>';
     return;
   }
 
   el.innerHTML = '';
-  history.forEach(function (item) {
+  items.forEach(function (item) {
     var div = document.createElement('div');
     div.className = 'hist-item';
     div.innerHTML =
