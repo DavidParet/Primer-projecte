@@ -619,12 +619,29 @@ function navTo(page) {
 }
 
 /* ── HISTORIAL & TASQUES ── */
+
+/* Retorna una còpia de l'historial ordenada del més nou al més antic */
+function getHistory() {
+  return _historial.slice().reverse();
+}
+
 function saveToHistorial(d) {
   var now     = new Date();
-  var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  var entry   = Object.assign({}, d, { date: dateStr, id: Date.now() });
+  var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
+              + ' · '
+              + now.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+  var entry = {
+    id:            Date.now(),
+    timestamp:     now.toISOString(),
+    date:          dateStr,
+    resum:         d.resum         || '',
+    urgencia:      d.urgencia      || 1,
+    urgencia_text: d.urgencia_text || '',
+    accions:       d.accions       || [],
+    dates:         d.dates         || []
+  };
   _historial.push(entry);
-  if (_historial.length > 20) _historial.shift();
+  if (_historial.length > 30) _historial.shift();
   localStorage.setItem('nxl_hist', JSON.stringify(_historial));
 
   (d.accions || []).forEach(function (a) {
