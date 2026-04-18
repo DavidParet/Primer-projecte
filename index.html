@@ -242,14 +242,8 @@
   </div>
 
   <!-- LIMIT BANNER -->
-  <div id="limitBanner" style="display:none; background:linear-gradient(135deg,#1c1c1c,#2e2e2e); padding:14px 20px; text-align:center;">
-    <div style="font-size:13px;color:#fff;font-weight:700;">
-      Has fet <span id="limitCount">3</span>/3 anàlisis gratuïts avui 🔒
-    </div>
-    <button onclick="navTo('premium')"
-      style="margin-top:8px;padding:8px 20px;background:var(--gold);color:var(--darker);border:none;border-radius:20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">
-      Desbloqueja Premium →
-    </button>
+  <div id="limitBanner" style="display:none; background:#fffbea; border-left:4px solid #F5C518; padding:12px 18px; font-size:13px; color:#1c1c1c; font-family:'Nunito',sans-serif;">
+    🔒 <strong>Has arribat al límit d'avui (<span id="limitCount">3</span>/3).</strong> Demà en tens 3 més. &nbsp;·&nbsp; <span style="color:#888;">L'historial segueix accessible.</span>
   </div>
 
   <!-- APP HERO -->
@@ -306,8 +300,12 @@
         </button>
 
         <div class="usage-counter" id="usageCounter">
-          <span id="usageBar"></span>
-          <span id="usageText">0 de 3 anàlisis usats avui</span>
+          <div style="font-size:11px;font-weight:800;color:var(--gold2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">Free · 3 anàlisis al dia</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="usageBar"></span>
+            <span id="usageText">0 de 3 utilitzats avui</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;">Els teus anàlisis es guarden i es poden buscar</div>
         </div>
 
         <div class="err" id="errMsg"></div>
