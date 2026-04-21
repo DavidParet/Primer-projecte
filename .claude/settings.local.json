@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check \"C:/Users/Gemma/Documents/GitHub/Primer-projecte/script.js\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx --yes serve -l 3001 .)",
+      "Bash(gh auth:*)",
+      "Bash(powershell -File -)",
+      "Bash(python3 -c ':*)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const b=fs.readFileSync\\('NEXLUPA/MARCA/LOGO/Logo nextlupa blanc.png'\\);console.log\\('ColorType:'+b[25],'\\(2=RGB,6=RGBA\\)','BitDepth:'+b[24],'Size:'+b.length\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const b=fs.readFileSync\\('NEXLUPA/MARCA/LUPA/Prototip_visual_Nexlupa.png'\\);console.log\\('LUPA ColorType:'+b[25],'Size:'+b.length\\)\")"
+    ]
+  }
+}
