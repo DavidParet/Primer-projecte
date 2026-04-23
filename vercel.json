@@ -1,3 +1,19 @@
 {
-  "version": 2
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "app.nexlupa.app" }],
+      "destination": "/app/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "nexlupa.app" }],
+      "destination": "/landing/:path*"
+    }
+  ]
 }

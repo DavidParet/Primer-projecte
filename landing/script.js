@@ -1,0 +1,801 @@
+/* ============================================================
+   script.js — NexLupa unified JavaScript
+   ============================================================ */
+
+'use strict';
+
+/* ── APP INIT FLAG ── */
+var _motorInit = false;
+
+/* ── OPEN / CLOSE APP ── */
+function obrirApp() {
+  var landing = document.getElementById('pageLanding');
+  var app     = document.getElementById('pageApp');
+  if (!landing || !app) return;
+
+  landing.style.display = 'none';
+  app.style.display     = 'flex';
+  document.body.classList.add('app-active');
+  app.scrollTop = 0;
+  navTo('inici');
+
+  /* Pre-omplir textarea amb text de demo si està buit */
+  var txtEl = document.getElementById('txt');
+  if (txtEl && !txtEl.value.trim()) { txtEl.value = DEFAULT_TEXT; }
+
+  if (!_motorInit) {
+    _motorInit = true;
+    try { checkLimit(); }    catch(e) { console.warn('checkLimit:', e); }
+    try { updateCounter(); } catch(e) { console.warn('updateCounter:', e); }
+    try { showOnboarding(); }catch(e) { console.warn('showOnboarding:', e); }
+    try { loadConfig(); }    catch(e) { console.warn('loadConfig:', e); }
+    try { updateBadges(); }  catch(e) { console.warn('updateBadges:', e); }
+  }
+}
+
+function tornarLanding() {
+  var landing = document.getElementById('pageLanding');
+  var app     = document.getElementById('pageApp');
+  if (!landing || !app) return;
+
+  app.style.display     = 'none';
+  landing.style.display = 'block';
+  document.body.classList.remove('app-active');
+  window.scrollTo(0, 0);
+}
+
+/* ── LANDING: reveal on scroll + botons CTA ── */
+document.addEventListener('DOMContentLoaded', function () {
+  /* Connectar tots els botons que obren l'app */
+  ['btnObrirApp1', 'btnObrirApp2', 'btnObrirApp3'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', obrirApp);
+  });
+
+  /* Scroll-reveal for landing */
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('#pageLanding .reveal').forEach(function (el) {
+    obs.observe(el);
+  });
+
+  /* Cerca historial en temps real */
+  var histSearch = document.getElementById('historySearch');
+  if (histSearch) {
+    histSearch.addEventListener('input', function () {
+      renderHistory(histSearch.value);
+    });
+  }
+
+  /* Drag-and-drop on image drop zone (only when app is initialised) */
+  var drop = document.getElementById('imgDrop');
+  if (drop) {
+    drop.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      drop.style.borderColor = 'var(--gold)';
+    });
+    drop.addEventListener('dragleave', function () {
+      drop.style.borderColor = '';
+    });
+    drop.addEventListener('drop', function (e) {
+      e.preventDefault();
+      var file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleImg({ target: { files: [file] } });
+      }
+    });
+  }
+});
+
+/* ── API KEY ── */
+function getApiKey() {
+  return localStorage.getItem('nxl_apikey') || '';
+}
+function saveApiKey(key) {
+  localStorage.setItem('nxl_apikey', key.trim());
+  var st = document.getElementById('apiKeyStatus');
+  if (st) {
+    if (key.trim()) {
+      st.textContent = '✓ Clau configurada';
+      st.style.color = 'var(--green)';
+    } else {
+      st.textContent = '';
+    }
+  }
+}
+
+/* ── EXAMPLE TEXTS ── */
+var DEFAULT_TEXT = "Hola famílies,\n\nEsperem que estigueu tots bé! 😊\n\nUs escrivim per recordar-vos algunes coses de cara als propers dies. Sabem que hi ha moltes comunicacions i pot ser difícil estar al dia de tot.\n\nAquest divendres 11 d'abril celebrarem la jornada esportiva a l'escola. L'activitat començarà a les 17:00 i està previst que duri aproximadament fins a les 19:30, tot i que pot variar una mica segons com evolucioni la tarda.\n\nÉs important que els alumnes portin roba esportiva adequada i còmoda. També recomanem portar una ampolla d'aigua.\n\nRecordeu que és imprescindible portar l'autorització signada. Sense aquesta autorització no podran participar a l'activitat.\n\nEn cas que algun alumne tingui intoleràncies alimentàries o necessitats especials, si us plau, feu-nos-ho saber amb antelació responent a aquest mateix correu.\n\nA més, la setmana vinent començarem els preparatius per la sortida de final de curs, de la qual us enviarem informació més detallada pròximament.\n\nMoltes gràcies per la vostra col·laboració i confiança!\n\nSalutacions,\nEquip docent";
+
+var EX = {
+  escola: DEFAULT_TEXT,
+  ampa:   "Hola a totes les famílies!\n\nLa propera reunió de l'AMPA serà el dimarts 15 d'abril a les 19h al saló d'actes. Votarem el pressupost de fi de curs.\n\nEl termini de pagament de les extraescolars del 2n trimestre és el 8 d'abril.\n\nBusquem voluntaris per a la festa de final de curs (20 de juny). Escriviu a ampa@escola.cat abans del 20 d'abril.\n\nGràcies!",
+  feina:  "Hola equip,\n\nLlançament de la nova versió el 30 d'abril. Necessitem:\n- Assets de disseny finals abans del 18 d'abril\n- Revisió QA entre el 19 i el 23 d'abril\n- Presentació inversors pel 25 d'abril (Marc)\n\nDijous 10 reunió client Barcelona a les 10h. Confirmeu assistència abans de dimecres.\n\nPressupost Q2 per aprovar abans del 12 d'abril.\n\nSalutacions"
+};
+
+function loadEx(k) {
+  var el = document.getElementById('txt');
+  if (el) el.value = EX[k] || '';
+}
+
+/* ── ACTION CHECKBOX ── */
+function chk(el, row) {
+  el.classList.toggle('on');
+  el.innerHTML = el.classList.contains('on') ? '✓' : '';
+  row.classList.toggle('done');
+}
+
+/* ── LAST RESULT ── */
+var _lastData = null;
+
+/* ── DEMO MODE ── */
+var _demoMode = false;
+var DEMO_RESULTS = {
+  resum: "Jornada esportiva divendres 11 d'abril a les 17:00. Cal portar roba esportiva i autorització signada.",
+  urgencia: 4,
+  urgencia_text: "Termini proper — cal actuar avui",
+  accions: [
+    "Preparar roba esportiva",
+    "Signar l'autorització",
+    "Avisar intoleràncies alimentàries"
+  ],
+  dates: [
+    { descripcio: "Jornada esportiva", data: "Div. 17:00", urgent: false }
+  ]
+};
+
+function toggleDemo() {
+  _demoMode = !_demoMode;
+  var banner = document.getElementById('demoBanner');
+  if (banner) banner.style.display = _demoMode ? 'block' : 'none';
+  if (_demoMode) {
+    navTo('inici');
+    var txtEl = document.getElementById('txt');
+    if (txtEl) txtEl.value = EX.escola;
+    setTimeout(function () { render(DEMO_RESULTS); }, 300);
+  } else {
+    var txtEl2 = document.getElementById('txt');
+    if (txtEl2) txtEl2.value = '';
+    var res = document.getElementById('results');
+    if (res) res.classList.remove('on');
+  }
+}
+
+/* ── USAGE LIMIT ── */
+var FREE_LIMIT = 3;
+
+function getUsageToday() {
+  var today = new Date().toDateString();
+  var stored = JSON.parse(localStorage.getItem('nxl_usage') || '{}');
+  if (stored.date !== today) return 0;
+  return stored.count || 0;
+}
+
+function incrementUsage() {
+  var today = new Date().toDateString();
+  var count = getUsageToday() + 1;
+  localStorage.setItem('nxl_usage', JSON.stringify({ date: today, count: count }));
+  return count;
+}
+
+function checkLimit() {
+  var used = getUsageToday();
+  var banner = document.getElementById('limitBanner');
+  var btn = document.getElementById('btnAnalyze');
+  if (!banner || !btn) return true;
+  if (used >= FREE_LIMIT) {
+    banner.style.display = 'block';
+    btn.disabled = true;
+    btn.innerHTML = '🔒 Límit assolit — Activa Premium';
+    var lc = document.getElementById('limitCount');
+    if (lc) lc.textContent = used;
+    return false;
+  }
+  banner.style.display = 'none';
+  btn.disabled = false;
+  btn.innerHTML = '🔍 &nbsp;Analitzar amb nexlupa';
+  return true;
+}
+
+function updateCounter() {
+  var used = getUsageToday();
+  var el   = document.getElementById('usageText');
+  var dots = document.getElementById('usageBar');
+  if (!el || !dots) return;
+  el.textContent = used >= FREE_LIMIT
+    ? 'Límit assolit. Torna demà per 3 anàlisis més.'
+    : used + ' de ' + FREE_LIMIT + ' utilitzats avui';
+  var html = '<div class="usage-dots">';
+  for (var i = 0; i < FREE_LIMIT; i++) {
+    var cls = i < used
+      ? (used === FREE_LIMIT && i === FREE_LIMIT - 1 ? 'usage-dot last' : 'usage-dot used')
+      : 'usage-dot';
+    html += '<div class="' + cls + '"></div>';
+  }
+  html += '</div>';
+  dots.innerHTML = html;
+}
+
+/* ── ANALYZE ── */
+var _currentTab = 'text';
+var _imgBase64  = null;
+
+function switchTab(tab) {
+  _currentTab = tab;
+  var panelText = document.getElementById('panelText');
+  var panelImg  = document.getElementById('panelImg');
+  var tabText   = document.getElementById('tabText');
+  var tabImg    = document.getElementById('tabImg');
+  if (panelText) panelText.style.display = tab === 'text' ? 'block' : 'none';
+  if (panelImg)  panelImg.style.display  = tab === 'img'  ? 'block' : 'none';
+  if (tabText)   tabText.classList.toggle('active', tab === 'text');
+  if (tabImg)    tabImg.classList.toggle('active',  tab === 'img');
+}
+
+function handleImg(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (ev) {
+    _imgBase64 = ev.target.result;
+    var preview     = document.getElementById('imgPreview');
+    var dropContent = document.getElementById('imgDropContent');
+    var dropZone    = document.getElementById('imgDrop');
+    if (preview)     { preview.src = _imgBase64; preview.style.display = 'block'; }
+    if (dropContent) dropContent.style.display = 'none';
+    if (dropZone)    dropZone.classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyze() {
+  /* ── DEMO: mode demo activat ── */
+  if (_demoMode) {
+    var btnD  = document.getElementById('btnAnalyze');
+    var loadD = document.getElementById('loading');
+    var resD  = document.getElementById('results');
+    var errD  = document.getElementById('errMsg');
+    if (btnD)  btnD.disabled = true;
+    if (loadD) loadD.classList.add('on');
+    if (resD)  resD.classList.remove('on');
+    if (errD)  errD.style.display = 'none';
+    setTimeout(function () {
+      if (loadD) loadD.classList.remove('on');
+      if (btnD)  btnD.disabled = false;
+      render(DEMO_RESULTS);
+    }, 1200);
+    return;
+  }
+
+  if (!checkLimit()) { navTo('premium'); return; }
+
+  var isImg = _currentTab === 'img';
+  var text  = (document.getElementById('txt') || {}).value || '';
+  text = text.trim();
+
+  if (!isImg && !text) return;
+  if (isImg && !_imgBase64) return;
+
+  var btn  = document.getElementById('btnAnalyze');
+  var load = document.getElementById('loading');
+  var res  = document.getElementById('results');
+  var err  = document.getElementById('errMsg');
+
+  btn.disabled = true;
+  load.classList.add('on');
+  res.classList.remove('on');
+  err.classList.remove('on');
+
+  try {
+    var body = isImg ? { image: _imgBase64 } : { text: text };
+
+    var r = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    var d = await r.json();
+
+    if (!r.ok) {
+      throw new Error(d.error || 'Hi ha hagut un error. Torna-ho a intentar.');
+    }
+
+    incrementUsage();
+    checkLimit();
+    updateCounter();
+    render(d);
+  } catch (ex) {
+    showErr(ex.message || 'Hi ha hagut un error. Torna-ho a intentar.');
+  } finally {
+    btn.disabled = false;
+    load.classList.remove('on');
+  }
+}
+
+function showErr(msg) {
+  var err = document.getElementById('errMsg');
+  if (!err) return;
+  err.textContent = msg;
+  err.classList.add('on');
+}
+
+/* ── RENDER RESULTS ── */
+function render(d) {
+  if (!document.getElementById('resum')) return;
+  _lastData = d;
+
+  document.getElementById('resum').textContent = d.resum || '';
+
+  /* Urgency dots */
+  var dotsEl = document.getElementById('urgDots');
+  dotsEl.innerHTML = '';
+  for (var i = 1; i <= 5; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'u-dot' + (i <= d.urgencia ? (d.urgencia >= 4 ? ' hot' : ' on') : '');
+    dotsEl.appendChild(dot);
+  }
+  var urgTxt = document.getElementById('urgTxt');
+  if (urgTxt) urgTxt.textContent = d.urgencia_text || '';
+
+  /* Actions */
+  var actEl = document.getElementById('actions');
+  actEl.innerHTML = '';
+  (d.accions || []).forEach(function (a) {
+    var row = document.createElement('div');
+    row.className = 'act-item';
+    var box = document.createElement('div');
+    box.className = 'act-chk';
+    box.onclick = function () { chk(box, row); };
+    var txt = document.createElement('span');
+    txt.textContent = a;
+    row.appendChild(box);
+    row.appendChild(txt);
+    actEl.appendChild(row);
+  });
+
+  /* Dates */
+  var datesEl   = document.getElementById('dates');
+  var datesCard = document.getElementById('datesCard');
+  var btnCal    = document.getElementById('btnCalendar');
+  datesEl.innerHTML = '';
+  if (d.dates && d.dates.length > 0) {
+    datesCard.style.display = 'block';
+    if (btnCal) btnCal.style.display = 'flex';
+    d.dates.forEach(function (dt) {
+      var row   = document.createElement('div');
+      row.className = 'date-item';
+      var desc  = document.createElement('span');
+      desc.className = 'date-desc';
+      desc.textContent = dt.descripcio;
+      var right = document.createElement('div');
+      right.style.cssText = 'display:flex;gap:6px;align-items:center;flex-shrink:0;';
+      var badge = document.createElement('span');
+      badge.className = 'date-badge' + (dt.urgent ? ' hot' : '');
+      badge.textContent = dt.data;
+      var calBtn = document.createElement('button');
+      calBtn.textContent = '📅';
+      calBtn.title = 'Afegir al Google Calendar';
+      calBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:16px;padding:2px;';
+      calBtn.onclick = function () { addSingleToCalendar(dt); };
+      right.appendChild(badge);
+      right.appendChild(calBtn);
+      row.appendChild(desc);
+      row.appendChild(right);
+      datesEl.appendChild(row);
+    });
+  } else {
+    datesCard.style.display = 'none';
+    if (btnCal) btnCal.style.display = 'none';
+  }
+
+  var res = document.getElementById('results');
+  res.classList.add('on');
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  saveToHistorial(d);
+}
+
+function reset() {
+  var res = document.getElementById('results');
+  var txt = document.getElementById('txt');
+  var err = document.getElementById('errMsg');
+  if (res) res.classList.remove('on');
+  if (txt) txt.value = '';
+  if (err) err.classList.remove('on');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── CALENDAR EXPORT ── */
+var MONTHS = {
+  'gener':1,'febrer':2,'marc':3,'abril':4,'maig':5,'juny':6,
+  'juliol':7,'agost':8,'setembre':9,'octubre':10,'novembre':11,'desembre':12,
+  'enero':1,'febrero':2,'marzo':3,'mayo':5,'junio':6,'julio':7,
+  'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12,
+  'january':1,'february':2,'march':3,'april':4,'may':5,'june':6,
+  'july':7,'august':8,'september':9,'october':10,'november':11,'december':12
+};
+
+function parseDate(str) {
+  var now  = new Date();
+  var year = now.getFullYear();
+  var m1   = str.match(/(\d{1,2})\s+(?:de\s+)?([a-zç]+)/i);
+  if (m1) {
+    var day = parseInt(m1[1]);
+    var mon = MONTHS[m1[2].toLowerCase()];
+    if (mon) return new Date(year, mon - 1, day);
+  }
+  var m2 = str.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if (m2) {
+    var d2 = parseInt(m2[1]), mo = parseInt(m2[2]);
+    var y  = m2[3] ? parseInt(m2[3]) : year;
+    return new Date(y < 100 ? 2000 + y : y, mo - 1, d2);
+  }
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow;
+}
+
+function toGCalDate(date) {
+  var y = date.getFullYear();
+  var m = String(date.getMonth() + 1).padStart(2, '0');
+  var d = String(date.getDate()).padStart(2, '0');
+  return '' + y + m + d;
+}
+
+function addSingleToCalendar(dt) {
+  var date    = parseDate(dt.data);
+  var nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  var params = new URLSearchParams({
+    action:  'TEMPLATE',
+    text:    dt.descripcio,
+    dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
+    details: '📌 ' + ((_lastData && _lastData.resum) || '') + '\n\nGenerat per nexlupa'
+  });
+  window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
+}
+
+function exportCalendar() {
+  if (!_lastData || !_lastData.dates || _lastData.dates.length === 0) return;
+  var resum = _lastData.resum || 'nexlupa';
+  _lastData.dates.forEach(function (dt, i) {
+    var date    = parseDate(dt.data);
+    var nextDay = new Date(date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    var params = new URLSearchParams({
+      action:  'TEMPLATE',
+      text:    dt.descripcio,
+      dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
+      details: '📌 ' + resum + '\n\nGenerat per nexlupa'
+    });
+    setTimeout(function () {
+      window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
+    }, i * 400);
+  });
+}
+
+/* ── SHARE ── */
+function buildShareText(d) {
+  var txt = '🔍 *nexlupa* — Resum del missatge\n\n';
+  txt += '⭐ *Resum:* ' + d.resum + '\n\n';
+  if (d.accions && d.accions.length > 0) {
+    txt += '✅ *Accions:*\n';
+    d.accions.forEach(function (a) { txt += '  • ' + a + '\n'; });
+    txt += '\n';
+  }
+  if (d.dates && d.dates.length > 0) {
+    txt += '📅 *Dates:*\n';
+    d.dates.forEach(function (dt) { txt += '  • ' + dt.descripcio + ': ' + dt.data + '\n'; });
+    txt += '\n';
+  }
+  txt += '_Generat amb nexlupa · La lupa que treballa sola_';
+  return txt;
+}
+
+function buildShareURL(d) {
+  var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+  return window.location.href.split('?')[0] + '?r=' + encoded;
+}
+
+function shareWhatsApp() {
+  if (!_lastData) return;
+  window.open('https://wa.me/?text=' + encodeURIComponent(buildShareText(_lastData)), '_blank');
+}
+
+function copyLink() {
+  if (!_lastData) return;
+  var url = buildShareURL(_lastData);
+  navigator.clipboard.writeText(url).then(function () {
+    var btn = document.getElementById('btnCopy');
+    var ok  = document.getElementById('copyOk');
+    if (btn) { btn.classList.add('copied'); btn.innerHTML = '<span>✓</span> Copiat!'; }
+    if (ok)  ok.classList.add('on');
+    setTimeout(function () {
+      if (btn) { btn.classList.remove('copied'); btn.innerHTML = '<span>🔗</span> Copiar link'; }
+      if (ok)  ok.classList.remove('on');
+    }, 3000);
+  });
+}
+
+/* ── ONBOARDING ── */
+var OB_STEPS = [
+  { icon: '🔍', title: 'Benvingut a nexlupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
+  { icon: '✅', title: 'Resum + Accions + Dates', desc: 'nexlupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
+  { icon: '📅', title: 'Tot sincronitzat', desc: 'Afegeix les dates al Google Calendar, comparteix per WhatsApp i guarda historial de tots els missatges analitzats.' }
+];
+var _obStep = 0;
+
+function showOnboarding() {
+  if (localStorage.getItem('nxl_ob_done')) return;
+  var el = document.getElementById('onboarding');
+  if (el) el.style.display = 'flex';
+}
+
+function nextStep() {
+  _obStep++;
+  if (_obStep >= OB_STEPS.length) { closeOnboarding(); return; }
+  var s = OB_STEPS[_obStep];
+  document.getElementById('obIcon').textContent  = s.icon;
+  document.getElementById('obTitle').textContent = s.title;
+  document.getElementById('obDesc').textContent  = s.desc;
+  document.getElementById('obStep').textContent  = 'PAS ' + (_obStep + 1) + ' DE ' + OB_STEPS.length;
+  document.getElementById('obBtn').textContent   = _obStep === OB_STEPS.length - 1 ? 'Començar →' : 'Continua →';
+  for (var i = 0; i < OB_STEPS.length; i++) {
+    var dotEl = document.getElementById('obDot' + i);
+    if (dotEl) dotEl.classList.toggle('active', i === _obStep);
+  }
+}
+
+function closeOnboarding() {
+  localStorage.setItem('nxl_ob_done', '1');
+  var el = document.getElementById('onboarding');
+  if (el) el.style.display = 'none';
+}
+
+/* ── NAVIGATION ── */
+var _allTasques = JSON.parse(localStorage.getItem('nxl_tasks') || '[]');
+var _historial  = JSON.parse(localStorage.getItem('nxl_hist')  || '[]');
+
+function navTo(page) {
+  var pages = ['pageInici', 'pageHistorial', 'pageTasques', 'pageConfig', 'pagePremium'];
+  pages.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  /* Show/hide app hero */
+  var appHero = document.querySelector('#pageApp .app-hero');
+  if (appHero) appHero.style.display = page === 'inici' ? 'block' : 'none';
+
+  if      (page === 'inici')    { document.getElementById('pageInici').style.display = 'block'; }
+  else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistory(); }
+  else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); }
+  else if (page === 'config')    { document.getElementById('pageConfig').style.display = 'block'; }
+  else if (page === 'premium')   {
+    document.getElementById('pagePremium').style.display = 'block';
+    var appEl = document.getElementById('pageApp');
+    if (appEl) appEl.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* Nav active state */
+  var navMap = { inici: 'navInici', historial: 'navHistorial', tasques: 'navTasques', config: 'navConfig' };
+  ['navInici','navHistorial','navTasques','navConfig'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  if (navMap[page]) {
+    var activeNav = document.getElementById(navMap[page]);
+    if (activeNav) activeNav.classList.add('active');
+  }
+}
+
+/* ── HISTORIAL & TASQUES ── */
+
+/* Retorna una còpia de l'historial ordenada del més nou al més antic */
+function getHistory() {
+  return _historial.slice().reverse();
+}
+
+function saveToHistorial(d) {
+  var now     = new Date();
+  var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
+              + ' · '
+              + now.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+  var entry = {
+    id:            Date.now(),
+    timestamp:     now.toISOString(),
+    date:          dateStr,
+    resum:         d.resum         || '',
+    urgencia:      d.urgencia      || 1,
+    urgencia_text: d.urgencia_text || '',
+    accions:       d.accions       || [],
+    dates:         d.dates         || []
+  };
+  _historial.push(entry);
+  if (_historial.length > 30) _historial.shift();
+  localStorage.setItem('nxl_hist', JSON.stringify(_historial));
+
+  (d.accions || []).forEach(function (a) {
+    _allTasques.push({ text: a, src: d.resum.substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
+  });
+  localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
+  updateBadges();
+  renderHistory();
+}
+
+function renderHistory(query) {
+  var el = document.getElementById('historyList');
+  if (!el) return;
+
+  var all = getHistory(); // newest first
+
+  /* Filtre de cerca */
+  var q = (query || '').toLowerCase().trim();
+  var items = q ? all.filter(function (item) {
+    var text = [
+      item.resum || '',
+      (item.accions || []).join(' '),
+      (item.dates   || []).map(function (d) { return d.descripcio || ''; }).join(' ')
+    ].join(' ').toLowerCase();
+    return text.includes(q);
+  }) : all;
+
+  /* Sense resultats */
+  if (items.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">' +
+      (q ? 'No s\'ha trobat cap anàlisi.' : 'Encara no hi ha anàlisis guardades.') + '</p>';
+    return;
+  }
+
+  el.innerHTML = '';
+  items.forEach(function (item) {
+    var div = document.createElement('div');
+    div.className = 'hist-item';
+    div.innerHTML =
+      '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
+      '<div class="hist-meta">' +
+        escHtml(item.date) + ' &nbsp;·&nbsp; ' +
+        (item.accions ? item.accions.length : 0) + ' accions &nbsp;·&nbsp; ' +
+        (item.dates   ? item.dates.length   : 0) + ' dates' +
+      '</div>';
+    div.onclick = function () { render(item); navTo('inici'); };
+    el.appendChild(div);
+  });
+}
+
+function renderHistorial() {
+  var el = document.getElementById('historialList');
+  if (!el) return;
+  if (_historial.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha missatges analitzats.</p>';
+    return;
+  }
+  el.innerHTML = '';
+  var reversed = _historial.slice().reverse();
+  reversed.forEach(function (item) {
+    var div = document.createElement('div');
+    div.className = 'hist-item';
+    div.innerHTML =
+      '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
+      '<div class="hist-meta">' + escHtml(item.date) + ' · ' + (item.accions ? item.accions.length : 0) + ' accions · ' + (item.dates ? item.dates.length : 0) + ' dates</div>';
+    div.onclick = function () { render(item); navTo('inici'); };
+    el.appendChild(div);
+  });
+}
+
+function renderTasques() {
+  var el = document.getElementById('tasquesList');
+  if (!el) return;
+  if (_allTasques.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha tasques pendents.</p>';
+    return;
+  }
+  el.innerHTML = '';
+  _allTasques.forEach(function (t, i) {
+    var div = document.createElement('div');
+    div.className = 'tsk-item' + (t.done ? ' done' : '');
+
+    var chkEl = document.createElement('div');
+    chkEl.style.cssText = 'width:22px;height:22px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s;';
+    if (t.done) {
+      chkEl.style.background   = 'var(--green)';
+      chkEl.style.borderColor  = 'var(--green)';
+      chkEl.style.color        = 'white';
+      chkEl.innerHTML          = '✓';
+    }
+    (function (idx) {
+      chkEl.onclick = function () {
+        _allTasques[idx].done = !_allTasques[idx].done;
+        localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
+        updateBadges();
+        renderTasques();
+      };
+    }(i));
+
+    var info = document.createElement('div');
+    info.innerHTML = '<div style="font-size:14px;font-weight:500;">' + escHtml(t.text) + '</div><div class="tsk-src">' + escHtml(t.src) + '</div>';
+    div.appendChild(chkEl);
+    div.appendChild(info);
+    el.appendChild(div);
+  });
+}
+
+function updateBadges() {
+  var hBadge  = document.getElementById('badgeHistorial');
+  var tBadge  = document.getElementById('badgeTasques');
+  var pending = _allTasques.filter(function (t) { return !t.done; }).length;
+  if (hBadge) { hBadge.textContent = _historial.length; hBadge.style.display = _historial.length > 0 ? 'flex' : 'none'; }
+  if (tBadge) { tBadge.textContent = pending;            tBadge.style.display = pending > 0          ? 'flex' : 'none'; }
+}
+
+/* ── CONFIG ── */
+function loadConfig() {
+  var cfg = JSON.parse(localStorage.getItem('nxl_cfg') || '{}');
+  var nomEl = document.getElementById('cfgNom');
+  if (nomEl && cfg.nom) nomEl.value = cfg.nom;
+
+  var key   = getApiKey();
+  var keyEl = document.getElementById('cfgApiKey');
+  var stEl  = document.getElementById('apiKeyStatus');
+  if (key && keyEl) keyEl.value = key;
+  if (key && stEl)  { stEl.textContent = '✓ Clau configurada'; stEl.style.color = 'var(--green)'; }
+
+  if (cfg.dark) {
+    document.body.classList.add('dark');
+    var darkEl = document.getElementById('cfgDark');
+    if (darkEl) darkEl.checked = true;
+  }
+  var notifEl  = document.getElementById('cfgNotif');
+  var remindEl = document.getElementById('cfgRemind');
+  if (notifEl  && cfg.notif  === false) notifEl.checked  = false;
+  if (remindEl && cfg.remind === false) remindEl.checked = false;
+}
+
+function saveConfig() {
+  var nomEl    = document.getElementById('cfgNom');
+  var darkEl   = document.getElementById('cfgDark');
+  var notifEl  = document.getElementById('cfgNotif');
+  var remindEl = document.getElementById('cfgRemind');
+  var cfg = {
+    nom:    nomEl    ? nomEl.value    : '',
+    dark:   darkEl   ? darkEl.checked   : false,
+    notif:  notifEl  ? notifEl.checked  : true,
+    remind: remindEl ? remindEl.checked : true
+  };
+  localStorage.setItem('nxl_cfg', JSON.stringify(cfg));
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  saveConfig();
+}
+
+function clearHistorial() {
+  if (!confirm('Esborrar tot l\'historial?')) return;
+  _historial = [];
+  localStorage.removeItem('nxl_hist');
+  updateBadges();
+  renderHistorial();
+  alert('Historial esborrat!');
+}
+
+function clearTasques() {
+  if (!confirm('Esborrar totes les tasques completades?')) return;
+  _allTasques = _allTasques.filter(function (t) { return !t.done; });
+  localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
+  updateBadges();
+  alert('Tasques completades esborrades!');
+}
+
+/* ── UTILITY ── */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
