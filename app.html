@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>nexlupa — App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ============================================================
+     APP PAGE
+     ============================================================ -->
+<div id="pageApp">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#2e2e2e;">neX<span style="color:#F5C518;">lupa</span></span>
+    </div>
+    <div class="header-sub">La lupa que treballa sola</div>
+    <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
+  </header>
+
+  <!-- DEMO BANNER -->
+  <div class="demo-banner" id="demoBanner" style="display:none;">
+    🎬 MODE DEMO — Les respostes són simulades
+  </div>
+
+  <!-- ONBOARDING OVERLAY -->
+  <div class="onboarding-overlay" id="onboarding" style="display:none;">
+    <div class="onboarding-card">
+      <div class="ob-step" id="obStep">PAS 1 DE 3</div>
+      <div class="ob-icon" id="obIcon">🔍</div>
+      <div class="ob-title" id="obTitle">Benvingut a nexlupa</div>
+      <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
+      <div class="ob-dots">
+        <div class="ob-dot active" id="obDot0"></div>
+        <div class="ob-dot" id="obDot1"></div>
+        <div class="ob-dot" id="obDot2"></div>
+      </div>
+      <button class="ob-btn" id="obBtn" onclick="nextStep()">Continua →</button>
+      <div class="ob-skip" onclick="closeOnboarding()">Salta</div>
+    </div>
+  </div>
+
+  <!-- LIMIT BANNER -->
+  <div id="limitBanner" style="display:none; background:#fffbea; border-left:4px solid #F5C518; padding:12px 18px; font-size:13px; color:#1c1c1c; font-family:'Nunito',sans-serif;">
+    🔒 <strong>Has arribat al límit d'avui (<span id="limitCount">3</span>/3).</strong> Demà en tens 3 més. &nbsp;·&nbsp; <span style="color:#888;">L'historial segueix accessible.</span>
+  </div>
+
+  <!-- APP HERO -->
+  <div class="app-hero">
+    <span class="hero-lupa">🔍</span>
+    <h1>De la informació...<br><span>a la decisió</span></h1>
+    <p>No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- INICI -->
+    <div id="pageInici">
+
+      <div class="card">
+        <div class="card-head">
+          <div class="c-icon ci-gold">✉️</div>
+          <div class="c-label">Missatge original</div>
+        </div>
+
+        <div class="input-tabs">
+          <button class="tab-btn active" id="tabText" onclick="switchTab('text')">✏️ Text</button>
+          <button class="tab-btn" id="tabImg"  onclick="switchTab('img')">📷 Imatge</button>
+        </div>
+
+        <div id="panelText">
+          <textarea id="txt" placeholder="Enganxa aquí qualsevol missatge llarg: correu de l'escola, WhatsApp de l'AMPA, email de feina..."></textarea>
+          <div class="ex-row">
+            <span class="ex-lbl">Prova:</span>
+            <button class="ex-btn" onclick="loadEx('escola')">📚 Escola</button>
+            <button class="ex-btn" onclick="loadEx('ampa')">👨‍👩‍👧 AMPA</button>
+            <button class="ex-btn" onclick="loadEx('feina')">💼 Feina</button>
+          </div>
+        </div>
+
+        <div id="panelImg" style="display:none;">
+          <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgInput').click()">
+            <div id="imgDropContent">
+              <span style="font-size:36px;">📷</span>
+              <p style="font-size:14px;font-weight:700;margin:8px 0 4px;">Puja una imatge o pantallàs</p>
+              <p style="font-size:12px;color:var(--muted);">Clica aquí o arrossega la imatge</p>
+            </div>
+            <img id="imgPreview" style="display:none;max-width:100%;border-radius:10px;margin-top:10px;" alt="preview"/>
+          </div>
+          <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="handleImg(event)"/>
+        </div>
+
+        <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
+          🔍 &nbsp;Analitzar amb nexlupa
+        </button>
+
+        <div class="usage-counter" id="usageCounter">
+          <div style="font-size:11px;font-weight:800;color:var(--gold2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">Free · 3 anàlisis al dia</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="usageBar"></span>
+            <span id="usageText">0 de 3 utilitzats avui</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;">Els teus anàlisis es guarden i es poden buscar</div>
+        </div>
+
+        <div style="text-align:center;margin-top:10px;padding:10px 0 4px;border-top:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics? <em>Properament Premium</em></div>
+          <button onclick="alert('⭐ nexlupa Premium — en desenvolupament. Aviat disponible!')"
+            style="background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;"
+            onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold2)';"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
+            ⭐ Descobreix Premium
+          </button>
+        </div>
+
+        <div class="err" id="errMsg"></div>
+      </div>
+
+      <div class="loading" id="loading">
+        <span class="spin-lupa">🔍</span>
+        <p>Analitzant el missatge...</p>
+        <small>La lupa està treballant per tu</small>
+      </div>
+
+      <div class="results" id="results">
+
+        <div class="card">
+          <div class="card-head"><div class="c-icon ci-gold">⭐</div><div class="c-label">Resum</div></div>
+          <div class="resum-txt" id="resum"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="c-icon ci-red">⚡</div><div class="c-label">Urgència</div></div>
+          <div class="urg-row">
+            <div class="urg-dots" id="urgDots"></div>
+            <div class="urg-lbl"  id="urgTxt"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Accions</div></div>
+          <div id="actions"></div>
+        </div>
+
+        <div class="card" id="datesCard">
+          <div class="card-head"><div class="c-icon ci-blue">📅</div><div class="c-label">Dates i terminis</div></div>
+          <div id="dates"></div>
+          <button class="btn-calendar" id="btnCalendar" onclick="exportCalendar()" style="display:none;margin-top:14px;">
+            📅 Afegir totes les dates a Google Calendar
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="c-icon ci-green">⚡</div><div class="c-label">Accions ràpides</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <button class="btn-demo-action" onclick="alert('📅 Afegit al calendari!')">📅 Afegir al calendari</button>
+            <button class="btn-demo-action btn-demo-confirm" onclick="alert('✅ Confirmació enviada!')">✅ Confirmar assistència</button>
+          </div>
+        </div>
+
+        <div class="card" id="shareCard">
+          <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir</div></div>
+          <p style="font-size:13px;color:var(--soft);margin-bottom:12px;">Envia el resum i les tasques a algú de confiança.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-share-wa"   onclick="shareWhatsApp()"><span>💬</span> WhatsApp</button>
+            <button class="btn-share-copy" id="btnCopy" onclick="copyLink()"><span>🔗</span> Copiar link</button>
+          </div>
+          <div class="copy-ok" id="copyOk">✓ Link copiat al porta-retalls!</div>
+        </div>
+
+        <button class="btn-reset" onclick="reset()">← Analitzar un altre missatge</button>
+
+      </div>
+
+    </div><!-- fi pageInici -->
+
+    <!-- PREMIUM -->
+    <div id="pagePremium" style="display:none;">
+
+      <div class="premium-hero">
+        <div class="premium-badge">⭐ NEXLUPA PREMIUM</div>
+        <h1 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">La lupa sense límits</h1>
+        <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;">Mai més et perdràs res important.</p>
+
+        <div class="premium-checklist">
+          <div class="pchk-item yes">✔ Anàlisis il·limitades</div>
+          <div class="pchk-item yes">✔ Respostes suggerides</div>
+          <div class="pchk-item yes">✔ Carpetes i projectes</div>
+          <div class="pchk-item yes">✔ Anàlisi múltiple de missatges</div>
+          <div class="pchk-item yes">✔ Recordatoris push automàtics</div>
+          <div class="pchk-item yes">✔ Informe setmanal en PDF</div>
+          <div class="pchk-item no">✖ Versió gratuïta limitada a 3/dia</div>
+        </div>
+
+        <div class="plans-row">
+          <div class="plan-card">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">0€</div>
+            <div class="plan-desc">3 anàlisis/dia<br>Funcions bàsiques</div>
+          </div>
+          <div class="plan-card active">
+            <div class="plan-badge">⭐ RECOMANAT</div>
+            <div class="plan-name">Premium</div>
+            <div class="plan-price">X€<small>/mes</small></div>
+            <div class="plan-desc">Tot inclòs<br>Preu de llançament</div>
+          </div>
+        </div>
+
+        <button class="btn-buy-hero" onclick="alert('🚀 Pròximament! nexlupa Premium arribarà aviat.')">
+          ⭐ Vull Premium — Avisa'm quan llanci
+        </button>
+        <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:10px;">Sense compromís · Cancel·la quan vulguis</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">🆓</div><div class="c-label">Free vs Premium</div></div>
+        <div class="compare-row"><span>Anàlisi de text i imatges</span><span class="compare-yes">✓ Free</span></div>
+        <div class="compare-row"><span>Resum + accions + dates</span><span class="compare-yes">✓ Free</span></div>
+        <div class="compare-row"><span>Compartir per WhatsApp</span><span class="compare-yes">✓ Free</span></div>
+        <div class="compare-row"><span style="color:var(--red);">Límit diari</span><span style="color:var(--red);font-weight:700;">3 anàlisis/dia</span></div>
+        <div class="compare-row"><span>Anàlisis il·limitats</span><span class="compare-yes">⭐ Premium</span></div>
+        <div class="compare-row"><span>Respostes suggerides</span><span class="compare-yes">⭐ Premium</span></div>
+        <div class="compare-row"><span>Carpetes i projectes</span><span class="compare-yes">⭐ Premium</span></div>
+        <div class="compare-row"><span>Anàlisi múltiple</span><span class="compare-yes">⭐ Premium</span></div>
+        <div class="compare-row"><span>Recordatoris push</span><span class="compare-yes">⭐ Premium</span></div>
+        <div class="compare-row"><span>Informe setmanal PDF</span><span class="compare-yes">⭐ Premium</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">⭐</div><div class="c-label">Funcionalitats Premium</div></div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-blue">💬</div>
+          <div><div class="feat-ttl">Respostes suggerides</div><div class="feat-dsc">L'app et proposa com respondre el missatge directament.</div></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-green">📁</div>
+          <div><div class="feat-ttl">Carpetes i projectes</div><div class="feat-dsc">Organitza els missatges per temes, projectes o àmbits. Tot classificat automàticament.</div></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-purple">📊</div>
+          <div><div class="feat-ttl">Anàlisi múltiple</div><div class="feat-dsc">Analitza diversos missatges alhora i obté un resum del dia consolidat.</div></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-red">🔔</div>
+          <div><div class="feat-ttl">Recordatoris push</div><div class="feat-dsc">Avís al mòbil quan s'acosta una data detectada. Mai més oblides res.</div></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-gold">📄</div>
+          <div><div class="feat-ttl">Informe setmanal PDF</div><div class="feat-dsc">Totes les tasques i dates de la setmana en un PDF per compartir.</div></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-icon-sm fi-blue">♾️</div>
+          <div><div class="feat-ttl">Anàlisis il·limitats</div><div class="feat-dsc">Sense límit diari. Analitza tots els missatges que vulguis.</div></div>
+        </div>
+      </div>
+
+      <button class="btn-reset" onclick="navTo('inici')">← Tornar a l'app</button>
+
+    </div><!-- fi pagePremium -->
+
+    <!-- CONFIG -->
+    <div id="pageConfig" style="display:none;">
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">👤</div><div class="c-label">Perfil</div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:4px 0;">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;">😊</div>
+          <div>
+            <input id="cfgNom" type="text" placeholder="El teu nom"
+              style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;border:none;outline:none;background:transparent;color:var(--darker);width:180px;"
+              oninput="saveConfig()"/>
+            <div style="font-size:11px;color:var(--muted);">Usuari nexlupa</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">🔑</div><div class="c-label">Clau API (Anthropic)</div></div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+          Necessària per analitzar missatges. Obté-la a
+          <a href="https://console.anthropic.com" target="_blank" rel="noopener" style="color:var(--gold);">console.anthropic.com</a>
+        </p>
+        <div style="display:flex;gap:8px;">
+          <input id="cfgApiKey" type="password" placeholder="sk-ant-..."
+            style="flex:1;font-family:'Nunito',sans-serif;font-size:13px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--dark);outline:none;"
+            oninput="saveApiKey(this.value)"/>
+          <button onclick="var i=document.getElementById('cfgApiKey');i.type=i.type==='password'?'text':'password';"
+            style="padding:10px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);cursor:pointer;font-size:14px;">👁</button>
+        </div>
+        <div id="apiKeyStatus" style="font-size:11px;margin-top:6px;font-weight:700;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-blue">🎨</div><div class="c-label">Aparença</div></div>
+        <div class="cfg-row">
+          <span>Mode fosc</span>
+          <label class="toggle">
+            <input type="checkbox" id="cfgDark" onchange="toggleDark()"/>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-green">🔔</div><div class="c-label">Notificacions</div></div>
+        <div class="cfg-row">
+          <span>Avisos d'urgència</span>
+          <label class="toggle"><input type="checkbox" id="cfgNotif" checked onchange="saveConfig()"/><span class="slider"></span></label>
+        </div>
+        <div class="cfg-row" style="margin-top:10px;">
+          <span>Recordatoris de tasques</span>
+          <label class="toggle"><input type="checkbox" id="cfgRemind" checked onchange="saveConfig()"/><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-red">🗑️</div><div class="c-label">Dades</div></div>
+        <button class="cfg-danger-btn" onclick="clearHistorial()">🗑️ Esborrar historial</button>
+        <button class="cfg-danger-btn" onclick="clearTasques()" style="margin-top:8px;">✅ Esborrar tasques completades</button>
+        <button class="cfg-danger-btn" onclick="localStorage.removeItem('nxl_ob_done');alert('Onboarding reset. Torna a carregar l\'app.');" style="margin-top:8px;background:var(--blue-bg);color:var(--blue);border-color:#bfdbfe;">🎬 Veure onboarding de nou</button>
+        <button class="cfg-danger-btn" onclick="toggleDemo();navTo('inici');" style="margin-top:8px;background:#f3e8ff;color:#7c3aed;border-color:#ddd6fe;">🎬 Mode Demo (presentació)</button>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+        <div style="font-size:14px;font-weight:800;color:var(--darker);">nexlupa motor</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0 · built with Claude API</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>
+      </div>
+
+    </div><!-- fi pageConfig -->
+
+    <!-- HISTORIAL -->
+    <div id="pageHistorial" style="display:none;">
+      <input id="historySearch" type="text" placeholder="Buscar..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--dark);background:var(--bg);outline:none;margin-bottom:10px;box-sizing:border-box;"/>
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">🕐</div><div class="c-label">Historial</div></div>
+        <div id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- TASQUES -->
+    <div id="pageTasques" style="display:none;">
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Totes les tasques</div></div>
+        <div id="tasquesList">
+          <p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha tasques pendents.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="navInici"    onclick="navTo('inici')">
+      <span>🏠</span><small>Inici</small>
+    </button>
+    <button class="nav-btn" id="navTasques"  onclick="navTo('tasques')">
+      <span>✅</span><small>Tasques</small>
+      <div class="nav-badge" id="badgeTasques" style="display:none;">0</div>
+    </button>
+    <button class="nav-btn" id="navHistorial" onclick="navTo('historial')">
+      <span>🕐</span><small>Historial</small>
+      <div class="nav-badge" id="badgeHistorial" style="display:none;">0</div>
+    </button>
+    <button class="nav-btn" id="navConfig"   onclick="navTo('config')">
+      <span>⚙️</span><small>Config</small>
+    </button>
+  </nav>
+
+  <div class="bottom-spacer"></div>
+  <footer>powered by <b>nexlupa</b> motor · built with Claude API</footer>
+
+</div><!-- fi pageApp -->
+
+<script src="script.js"></script>
+</body>
+</html>
