@@ -252,10 +252,8 @@ function handleImg(e) {
 }
 
 async function analyze() {
-  var apiKey = getApiKey();
-
-  /* ── DEMO: sense API o mode demo activat ── */
-  if (_demoMode || !apiKey) {
+  /* ── DEMO: mode demo activat ── */
+  if (_demoMode) {
     var btnD  = document.getElementById('btnAnalyze');
     var loadD = document.getElementById('loading');
     var resD  = document.getElementById('results');
@@ -291,60 +289,27 @@ async function analyze() {
   res.classList.remove('on');
   err.classList.remove('on');
 
-  var sys = [
-    'Ets el motor d\'anàlisi de nexlupa. Retorna NOMÉS un JSON vàlid, sense markdown ni text addicional.',
-    'Estructura exacta:',
-    '{',
-    '  "resum": "frase curta i accionable, màxim 2 línies",',
-    '  "urgencia": 1-5,',
-    '  "urgencia_text": "text curt sobre la urgència",',
-    '  "accions": ["acció 1","acció 2","acció 3"],',
-    '  "dates": [{"descripcio":"text","data":"data clara","urgent":true/false}]',
-    '}',
-    'Regles: accions en infinitiu, màxim 5. Dates només les explícites. Si no n\'hi ha, dates=[].',
-    'Si reps una imatge, extreu primer el text visible i després analitza\'l.'
-  ].join('\n');
-
   try {
-    var userContent;
-    if (isImg) {
-      var mediaType = _imgBase64.split(';')[0].split(':')[1];
-      var b64data   = _imgBase64.split(',')[1];
-      userContent = [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64data } },
-        { type: 'text',  text: "Extreu el text d'aquesta imatge/pantallàs i analitza'l com un missatge." }
-      ];
-    } else {
-      userContent = 'Analitza:\n\n' + text;
-    }
+    var body = isImg ? { image: _imgBase64 } : { text: text };
 
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
+    var r = await fetch('/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: sys,
-        messages: [{ role: 'user', content: userContent }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
 
     var d = await r.json();
-    var rawText = d.content[0].text.replace(/```json|```/g, '').trim();
-    var parsed  = JSON.parse(rawText);
+
+    if (!r.ok) {
+      throw new Error(d.error || 'Hi ha hagut un error. Torna-ho a intentar.');
+    }
+
     incrementUsage();
     checkLimit();
     updateCounter();
-    render(parsed);
+    render(d);
   } catch (ex) {
-    showErr(apiKey
-      ? 'Hi ha hagut un error. Torna-ho a intentar.'
-      : '⚠️ Falta la clau API. Ves a Config → Clau API per configurar-la.');
+    showErr(ex.message || 'Hi ha hagut un error. Torna-ho a intentar.');
   } finally {
     btn.disabled = false;
     load.classList.remove('on');
