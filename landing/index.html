@@ -164,10 +164,31 @@
       text-shadow: 0 0 48px rgba(245,180,0,.14);
     }
     .stats-sources {
-      margin-top: 32px;
+      margin-top: 20px;
+      margin-bottom: 56px;
       font-size: 10px;
-      color: rgba(255,255,255,.16);
-      letter-spacing: .03em;
+      color: rgba(255,255,255,.38);
+      letter-spacing: .04em;
+    }
+
+    /* ── STATS CTA ── */
+    .stats-cta {
+      display: inline-block;
+      margin-top: 48px;
+      padding: 16px 44px;
+      background: linear-gradient(90deg, #f5b400, #ffcc33);
+      color: #0b0d0f;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: -.01em;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .stats-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(245,180,0,.38);
     }
 
     /* ── RESPONSIVE ── */
@@ -184,6 +205,7 @@
       .stats-grid strong { font-size: 40px; }
       .stats-grid span { max-width: 100%; }
       .stats-conclusion { font-size: 1rem; }
+      .stats-cta { width: 100%; max-width: 320px; padding: 15px 24px; }
     }
     @media (max-width: 560px) {
       .hero-top { padding: 88px 5% 32px; }
@@ -253,11 +275,15 @@
         </div>
       </div>
 
-      <p class="stats-transition reveal" style="transition-delay:.52s">I tot això… per acabar buscant què és important.</p>
+      <p class="stats-sources reveal" style="transition-delay:.44s">Fonts: McKinsey Global Institute · Asana Anatomy of Work Index · 2023–2024</p>
 
-      <p class="stats-conclusion reveal" style="transition-delay:.72s">Amb Nexlupa, només el que importa. Res més.</p>
+      <p class="stats-transition reveal" style="transition-delay:.60s">I tot això… per acabar buscant què és important.</p>
 
-      <p class="stats-sources">Fonts: McKinsey Global Institute · Asana Anatomy of Work Index · 2023–2024</p>
+      <p class="stats-conclusion reveal" style="transition-delay:.80s">Amb Nexlupa, només el que importa. Res més.</p>
+
+      <div class="reveal" style="transition-delay:.96s">
+        <button class="stats-cta" onclick="window.location.href='https://app.nexlupa.app'">Prova-ho gratis</button>
+      </div>
 
     </div>
 
