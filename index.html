@@ -93,16 +93,37 @@
       padding: 28px 24px;
     }
     .transform-col.before { border-color: rgba(229,57,53,.15); opacity: .82; }
-    .transform-col.after  { border-color: rgba(61,186,111,.2); }
+    .transform-col.after {
+      border: 1px solid rgba(245,180,0,.22);
+      border-left: 3px solid rgba(245,180,0,.55);
+      background: linear-gradient(150deg, rgba(245,180,0,.055) 0%, rgba(13,18,26,1) 58%);
+      box-shadow: 0 0 64px rgba(245,180,0,.09), 0 4px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(245,180,0,.12);
+      padding: 32px 28px;
+    }
     .transform-label {
       font-size: 10px;
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
     .transform-label.before-lbl { color: #e57373; }
-    .transform-label.after-lbl  { color: #4caf80; }
+    .transform-label.after-lbl {
+      color: #ffffff;
+      letter-spacing: 3px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .transform-label.after-lbl::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #f5b400;
+      box-shadow: 0 0 8px rgba(245,180,0,.8);
+      flex-shrink: 0;
+    }
     .transform-line {
       display: flex;
       align-items: center;
@@ -114,6 +135,22 @@
     }
     .transform-line:last-child { border-bottom: none; }
     .transform-line .tl-icon { font-size: 15px; flex-shrink: 0; }
+
+    /* ── TRANSFORM AFTER — línies ── */
+    .transform-col.after .transform-line {
+      border-bottom-color: rgba(245,180,0,.07);
+      padding: 9px 0;
+      transition: color .15s ease, padding-left .15s ease;
+    }
+    .transform-col.after .transform-line:hover {
+      color: #e8edf2;
+      padding-left: 5px;
+    }
+    .transform-col.after .transform-line:first-child {
+      font-size: 14px;
+      font-weight: 500;
+      color: #dde4ec;
+    }
     .transform-arrow {
       font-size: 32px;
       color: var(--gold);
@@ -208,6 +245,7 @@
       .stats-grid span { max-width: 100%; }
       .stats-conclusion { font-size: 1rem; }
       .stats-cta { width: 100%; max-width: 340px; padding: 17px 24px; font-size: 16px; margin-top: 48px; }
+      .transform-col.after { padding: 28px 20px; border-left-width: 3px; }
     }
     @media (max-width: 560px) {
       .hero-top { padding: 88px 5% 32px; }
