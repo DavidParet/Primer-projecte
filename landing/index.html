@@ -189,8 +189,8 @@
       font-weight: 700;
     }
     @keyframes arrowPulse {
-      0%, 100% { text-shadow: 0 0 14px rgba(245,180,0,.45), 0 0 32px rgba(245,160,0,.2); opacity: .85; }
-      50%       { text-shadow: 0 0 24px rgba(245,180,0,.75), 0 0 56px rgba(245,160,0,.38); opacity: 1; }
+      0%, 100% { text-shadow: 0 0 8px rgba(245,180,0,.3), 0 0 20px rgba(245,160,0,.12); filter: brightness(1); }
+      50%       { text-shadow: 0 0 22px rgba(245,180,0,.8), 0 0 48px rgba(245,160,0,.4); filter: brightness(1.25); }
     }
     .transform-arrow {
       font-size: 34px;
@@ -198,7 +198,6 @@
       text-align: center;
       flex-shrink: 0;
       align-self: center;
-      text-shadow: 0 0 14px rgba(245,180,0,.45), 0 0 32px rgba(245,160,0,.2);
       margin-top: 20px;
       animation: arrowPulse 2.8s ease-in-out infinite;
     }
