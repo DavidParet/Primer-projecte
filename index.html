@@ -189,14 +189,19 @@
       color: #ffb300;
       font-weight: 700;
     }
+    @keyframes arrowPulse {
+      0%, 100% { text-shadow: 0 0 14px rgba(245,180,0,.45), 0 0 32px rgba(245,160,0,.2); opacity: .85; }
+      50%       { text-shadow: 0 0 24px rgba(245,180,0,.75), 0 0 56px rgba(245,160,0,.38); opacity: 1; }
+    }
     .transform-arrow {
-      font-size: 28px;
+      font-size: 34px;
       color: #f5b400;
       text-align: center;
       flex-shrink: 0;
       align-self: center;
-      text-shadow: 0 0 20px rgba(245,180,0,.7), 0 0 40px rgba(245,160,0,.35);
+      text-shadow: 0 0 14px rgba(245,180,0,.45), 0 0 32px rgba(245,160,0,.2);
       margin-top: 20px;
+      animation: arrowPulse 2.8s ease-in-out infinite;
     }
 
     /* ── FEATURES ── */
