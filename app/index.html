@@ -383,5 +383,18 @@
 </div><!-- fi pageApp -->
 
 <script src="script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.body.classList.add('app-active');
+  var app = document.getElementById('pageApp');
+  if (app) app.style.display = 'flex';
+  try { navTo('inici'); }      catch(e) {}
+  try { checkLimit(); }        catch(e) {}
+  try { updateCounter(); }     catch(e) {}
+  try { showOnboarding(); }    catch(e) {}
+  try { loadConfig(); }        catch(e) {}
+  try { updateBadges(); }      catch(e) {}
+});
+</script>
 </body>
 </html>
