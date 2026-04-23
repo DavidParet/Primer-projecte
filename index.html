@@ -190,17 +190,27 @@
       font-weight: 700;
     }
     @keyframes arrowPulse {
-      0%, 100% { text-shadow: 0 0 8px rgba(245,180,0,.3), 0 0 20px rgba(245,160,0,.12); filter: brightness(1); }
-      50%       { text-shadow: 0 0 22px rgba(245,180,0,.8), 0 0 48px rgba(245,160,0,.4); filter: brightness(1.25); }
+      0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 8px rgba(245,180,0,.4), 0 0 24px rgba(245,160,0,.15);
+        color: #f5b400;
+      }
+      50% {
+        transform: scale(1.22);
+        text-shadow: 0 0 20px rgba(255,180,0,1), 0 0 48px rgba(255,150,0,.6), 0 0 80px rgba(255,130,0,.3);
+        color: #ffcc33;
+      }
     }
     .transform-arrow {
-      font-size: 34px;
-      color: #f5b400;
+      font-size: 40px;
       text-align: center;
       flex-shrink: 0;
       align-self: center;
       margin-top: 20px;
-      animation: arrowPulse 2.8s ease-in-out infinite;
+    }
+    .arrow-inner {
+      display: inline-block;
+      animation: arrowPulse 2.4s ease-in-out infinite;
     }
 
     /* ── FEATURES ── */
@@ -390,7 +400,7 @@
         <div class="transform-line"><span class="tl-icon">🔁</span> Rellegir per no oblidar</div>
       </div>
 
-      <div class="transform-arrow reveal" style="transition-delay:.18s">→</div>
+      <div class="transform-arrow reveal" style="transition-delay:.18s"><span class="arrow-inner">→</span></div>
 
       <div class="transform-col after reveal" style="transition-delay:.32s">
         <div class="transform-label after-lbl">Amb Nexlupa</div>
