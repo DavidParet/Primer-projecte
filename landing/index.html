@@ -98,16 +98,35 @@
       filter: saturate(.65);
     }
     .transform-col.after {
-      border: 1px solid rgba(245,180,0,.2);
-      border-left: 3px solid rgba(245,180,0,.52);
-      background: linear-gradient(155deg, rgba(245,180,0,.05) 0%, rgba(11,15,21,1) 56%);
-      box-shadow: 0 0 56px rgba(245,180,0,.08), 0 4px 28px rgba(0,0,0,.3), inset 0 1px 0 rgba(245,180,0,.1);
+      position: relative;
+      isolation: isolate;
+      border: 2px solid rgba(255,165,0,.88);
+      border-radius: 20px;
+      background: linear-gradient(155deg, rgba(255,140,0,.09) 0%, rgba(11,15,21,.98) 55%);
+      box-shadow:
+        0 0 0 4px rgba(255,150,0,.14),
+        0 0 28px rgba(255,150,0,.55),
+        0 0 70px rgba(255,120,0,.28),
+        0 6px 36px rgba(0,0,0,.55);
       padding: 30px 26px;
       transition: transform .25s ease, box-shadow .25s ease;
     }
+    .transform-col.after::before {
+      content: '';
+      position: absolute;
+      inset: -28px -36px;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255,140,0,.13) 0%, transparent 68%);
+      z-index: -1;
+      pointer-events: none;
+      border-radius: 50px;
+    }
     .transform-col.after:hover {
       transform: translateY(-4px);
-      box-shadow: 0 0 80px rgba(245,180,0,.16), 0 12px 40px rgba(0,0,0,.38), inset 0 1px 0 rgba(245,180,0,.14);
+      box-shadow:
+        0 0 0 4px rgba(255,155,0,.22),
+        0 0 42px rgba(255,150,0,.72),
+        0 0 100px rgba(255,120,0,.38),
+        0 14px 48px rgba(0,0,0,.6);
     }
     .transform-label {
       font-size: 11px;
@@ -117,18 +136,29 @@
     }
     .transform-label.before-lbl { color: #46525e; }
     .transform-label.after-lbl {
-      font-size: 13px;
+      font-size: 14px;
       color: #ffffff;
-      letter-spacing: .02em;
+      letter-spacing: .06em;
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-weight: 700;
+      gap: 10px;
+      font-weight: 800;
+      margin-bottom: 24px;
     }
     .transform-label.after-lbl::before {
       content: '⚡';
-      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,165,0,.15);
+      border: 1.5px solid rgba(255,165,0,.75);
+      font-size: 16px;
       line-height: 1;
+      box-shadow: 0 0 14px rgba(255,150,0,.45);
+      flex-shrink: 0;
     }
     .transform-line {
       display: flex;
@@ -142,27 +172,26 @@
     .transform-line:last-child { border-bottom: none; }
     .transform-line .tl-icon { font-size: 15px; flex-shrink: 0; }
     .transform-col.after .transform-line {
-      border-bottom-color: rgba(245,180,0,.07);
+      border-bottom-color: rgba(255,150,0,.08);
       padding: 9px 0;
+      color: #b8c2cc;
       transition: color .15s ease, padding-left .15s ease;
     }
     .transform-col.after .transform-line:hover {
-      color: #e8edf2;
+      color: #edf0f3;
       padding-left: 5px;
     }
-    .transform-col.after .transform-line:first-child {
-      font-size: 14px;
-      font-weight: 500;
-      color: #e0e6ed;
+    .tw-gold {
+      color: #ffb300;
+      font-weight: 700;
     }
-    .tw-gold { color: #f5b400; font-weight: 600; }
     .transform-arrow {
-      font-size: 26px;
+      font-size: 28px;
       color: #f5b400;
       text-align: center;
       flex-shrink: 0;
       align-self: center;
-      text-shadow: 0 0 18px rgba(245,180,0,.5);
+      text-shadow: 0 0 20px rgba(245,180,0,.7), 0 0 40px rgba(245,160,0,.35);
       margin-top: 20px;
     }
 
@@ -358,10 +387,10 @@
       <div class="transform-col after reveal" style="transition-delay:.32s">
         <div class="transform-label after-lbl">Amb Nexlupa</div>
         <div class="transform-line"><span class="tl-icon">⭐</span> <span class="tw-gold">Resum</span> en 2 línies clares</div>
-        <div class="transform-line"><span class="tl-icon">✅</span> <span class="tw-gold">Accions</span> numerades i prioritzades</div>
-        <div class="transform-line"><span class="tl-icon">📅</span> Dates detectades automàticament</div>
-        <div class="transform-line"><span class="tl-icon">🎯</span> Resultat clar i accionable</div>
-        <div class="transform-line"><span class="tl-icon">💬</span> Compartible directament</div>
+        <div class="transform-line"><span class="tl-icon">✅</span> Accions numerades i <span class="tw-gold">prioritzades</span></div>
+        <div class="transform-line"><span class="tl-icon">📅</span> Dates detectades <span class="tw-gold">automàticament</span></div>
+        <div class="transform-line"><span class="tl-icon">🎯</span> Resultat <span class="tw-gold">clar i accionable</span></div>
+        <div class="transform-line"><span class="tl-icon">💬</span> Compartible <span class="tw-gold">directament</span></div>
       </div>
     </div>
   </div>
