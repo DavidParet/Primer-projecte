@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <script>if(location.hostname==='app.nexlupa.app'){location.replace('/app/')}</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>nexlupa — El que importa, en 10 segons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- ── V2 LANDING OVERRIDES ─────────────────────────────────── -->
+  <style>
+
+    /* ── NAV ── */
+    nav {
+      background: rgba(11,15,20,0.82);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+    }
+    .logo-ne   { color: #ffffff; }
+    .logo-lupa { color: #ffffff; }
+    .logo-x    { color: var(--gold2); text-shadow: none; }
+    .logo-x::before { color: var(--gold2); opacity: .55; }
+    .logo-dot  { color: var(--gold2); text-shadow: none; }
+
+    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 120px 20px; }
+    .hero-title { font-size: 72px; line-height: 1.1; margin: 20px 0; }
+    .hero-title .white { color: #ffffff; }
+    .hero-title .gold { color: #f5b400; }
+    .hero-sub { font-size: 20px; color: #cfd6dc; }
+    .hero-sub2 { margin-top: 10px; color: #9aa3aa; }
+    .hero-cta button { margin-top: 30px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 16px 28px; border-radius: 40px; font-size: 18px; cursor: pointer; }
+    .hero-micro { margin-top: 10px; font-size: 14px; color: #aaa; }
+    .hero-visual { display: flex; justify-content: center; }
+    .hero-visual img { width: 100%; max-width: 1100px; margin: 0 auto; margin-top: 80px; display: block; }
+    .hero-stats { margin-top: 100px; }
+    .stats-title { font-size: 22px; margin-bottom: 40px; color: #dfe6ec; }
+    .stats-grid { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
+    .stats-grid strong { font-size: 48px; color: #f5b400; }
+    .stats-grid span { display: block; font-size: 14px; color: #aaa; margin-top: 6px; }
+
+    /* ── STEPS ── */
+    .steps { grid-template-columns: repeat(5, 1fr); }
+    .step { position: relative; }
+    .step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      top: 50%; right: -14px;
+      transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 16px;
+      opacity: .4;
+      z-index: 2;
+    }
+
+    /* ── TRANSFORMACIÓ ── */
+    .transform-section {
+      padding: 120px 5%;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .transform-section h2 {
+      font-size: clamp(2.8rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .transform-section h2 em {
+      font-size: clamp(1.7rem, 3vw, 2.1rem);
+      display: block;
+      margin-top: 6px;
+      color: #f5b400;
+    }
+    .transform-section .section-sub {
+      font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+      line-height: 1.7;
+      margin-bottom: 52px;
+    }
+    .transform-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-top: 48px;
+    }
+    .transform-col {
+      background: var(--navy2);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 20px;
+      padding: 28px 24px;
+    }
+    .transform-col.before { border-color: rgba(229,57,53,.15); opacity: .82; }
+    .transform-col.after  { border-color: rgba(61,186,111,.2); }
+    .transform-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .transform-label.before-lbl { color: #e57373; }
+    .transform-label.after-lbl  { color: #4caf80; }
+    .transform-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      font-size: 13px;
+      color: var(--gray);
+    }
+    .transform-line:last-child { border-bottom: none; }
+    .transform-line .tl-icon { font-size: 15px; flex-shrink: 0; }
+    .transform-arrow {
+      font-size: 32px;
+      color: var(--gold);
+      opacity: .7;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* ── FEATURES ── */
+    .features { border: 1px solid rgba(255,255,255,.05); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero-top { padding: 108px 6% 40px; }
+      .hero-img-wrap { width: 100%; }
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .step:not(:last-child)::after { display: none; }
+      .transform-grid { grid-template-columns: 1fr; }
+      .transform-arrow { transform: rotate(90deg); }
+    }
+    @media (max-width: 560px) {
+      .hero-top { padding: 88px 5% 32px; }
+      .steps { grid-template-columns: 1fr 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     LANDING PAGE
+     ============================================================ -->
+<div id="pageLanding">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <span class="logo-ne">ne</span><span class="logo-x">X</span><span class="logo-lupa">lupa<span class="logo-dot">●</span></span>
+    </div>
+    <button id="btnObrirApp3" class="nav-cta" onclick="window.location.href='https://app.nexlupa.app'">⚡ Prova gratis</button>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────────── -->
+  <section class="hero">
+
+    <div class="hero-badge">● Motor d'anàlisi de missatges</div>
+
+    <h1 class="hero-title">
+      <span class="white">Menys missatges.</span><br>
+      <span class="gold">Més decisions.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Reps massa informació.<br>
+      <strong>Nexlupa et diu què has de fer.</strong>
+    </p>
+
+    <p class="hero-sub2">
+      Sense llegir-ho tot. Sense perdre res important.
+    </p>
+
+    <div class="hero-cta">
+      <button id="btnObrirApp1" onclick="window.location.href='https://app.nexlupa.app'">⚡ Analitza el teu primer missatge — gratis</button>
+      <div class="hero-micro">
+        Gratis · 3 anàlisis/dia · Sense registre
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <img src="hero.png" alt="Nexlupa demo"/>
+    </div>
+
+    <div class="hero-stats">
+      <p class="stats-title">Cada setmana perdem temps entre canals, lectures i tasques que s'escapen.</p>
+      <div class="stats-grid">
+        <div><strong>68%</strong><span>obliden tasques importants</span></div>
+        <div><strong>6h</strong><span>setmanals perdudes en gestió</span></div>
+        <div><strong>10s</strong><span>per obtenir el que importa</span></div>
+        <div><strong>5+</strong><span>canals de missatgeria per persona</span></div>
+      </div>
+    </div>
+
+  </section><!-- fi hero -->
+
+
+  <!-- ── PROBLEMA / TRANSFORMACIÓ ──────────────────────────── -->
+  <div class="transform-section">
+    <div class="section-label">El problema</div>
+    <h2>Masses missatges.<br><em>Poc temps per llegir-los tots.</em></h2>
+    <p class="section-sub">Cada dia reps correus, grups i comunicats que et demanen temps. nexlupa fa la feina per tu.</p>
+
+    <div class="transform-grid reveal">
+      <div class="transform-col before">
+        <div class="transform-label before-lbl">Sense nexlupa</div>
+        <div class="transform-line"><span class="tl-icon">📩</span> Missatge llarg de 3 pàgines</div>
+        <div class="transform-line"><span class="tl-icon">⏱</span> 5–8 minuts llegint</div>
+        <div class="transform-line"><span class="tl-icon">🤔</span> "Haig de fer res urgentment?"</div>
+        <div class="transform-line"><span class="tl-icon">📆</span> Dates oblidades o perdudes</div>
+        <div class="transform-line"><span class="tl-icon">🔁</span> Rellegir per no oblidar</div>
+      </div>
+
+      <div class="transform-arrow">→</div>
+
+      <div class="transform-col after">
+        <div class="transform-label after-lbl">Amb nexlupa</div>
+        <div class="transform-line"><span class="tl-icon">⭐</span> Resum en 2 línies clares</div>
+        <div class="transform-line"><span class="tl-icon">✅</span> Accions numerades i prioritzades</div>
+        <div class="transform-line"><span class="tl-icon">📅</span> Dates detectades automàticament</div>
+        <div class="transform-line"><span class="tl-icon">⚡</span> Resultat en menys de 10 segons</div>
+        <div class="transform-line"><span class="tl-icon">💬</span> Compartible directament</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── COM FUNCIONA ───────────────────────────────────────── -->
+  <div id="com-funciona" class="section">
+    <div class="section-label">Com funciona</div>
+    <h2>5 passos.<br><em>Menys de 10 segons.</em></h2>
+    <p class="section-sub">Enganxa qualsevol missatge llarg i nexlupa extreu automàticament tot el que necessites.</p>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-n">01</div>
+        <div class="step-icon">✉️</div>
+        <div class="step-title">Entrada</div>
+        <div class="step-desc">Text, imatge o pantallàs de qualsevol canal</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">02</div>
+        <div class="step-icon">🔍</div>
+        <div class="step-title">Anàlisi IA</div>
+        <div class="step-desc">nexlupa processa amb Claude API en temps real</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">03</div>
+        <div class="step-icon">⭐</div>
+        <div class="step-title">Resum</div>
+        <div class="step-desc">El que importa en 2 línies</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">04</div>
+        <div class="step-icon">✅</div>
+        <div class="step-title">Accions</div>
+        <div class="step-desc">Què fer i quan, ordenat per urgència</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">05</div>
+        <div class="step-icon">📅</div>
+        <div class="step-title">Calendari</div>
+        <div class="step-desc">Dates sincronitzades a Google Calendar</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── FUNCIONALITATS ─────────────────────────────────────── -->
+  <div class="section" style="padding-top:0;">
+    <div class="features reveal">
+      <div class="section-label">Funcionalitats</div>
+      <h2>Tot el que necessites.<br><em>Res de més.</em></h2>
+      <div class="features-grid">
+        <div class="feat">
+          <div class="feat-icon">📝</div>
+          <div>
+            <div class="feat-title">Text i imatges</div>
+            <div class="feat-desc">Analitza missatges escrits o pantallassos directament</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">📅</div>
+          <div>
+            <div class="feat-title">Google Calendar</div>
+            <div class="feat-desc">Afegeix dates detectades amb un sol clic</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">💬</div>
+          <div>
+            <div class="feat-title">Compartir directe</div>
+            <div class="feat-desc">Envia el resum formatat per qualsevol canal</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">🕐</div>
+          <div>
+            <div class="feat-title">Historial amb cerca</div>
+            <div class="feat-desc">Tots els missatges analitzats, sempre accessibles</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">✅</div>
+          <div>
+            <div class="feat-title">Gestor de tasques</div>
+            <div class="feat-desc">Totes les accions en un sol lloc</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">🌙</div>
+          <div>
+            <div class="feat-title">Mode fosc</div>
+            <div class="feat-desc">Disseny adaptat a les teves preferències</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── CASOS D'ÚS ────────────────────────────────────────── -->
+  <div class="section" style="padding-top:0;">
+    <div class="section-label">Per a qui és</div>
+    <h2>Funciona per a tothom<br><em>que rep massa missatges.</em></h2>
+    <p class="section-sub">Siguis pare, freelancer o part d'una comunitat, nexlupa et diu exactament què has de fer.</p>
+
+    <div class="platform-grid reveal" style="grid-template-columns: repeat(3,1fr);">
+
+      <div class="platform-block" style="border-top: 3px solid #f5b400;">
+        <div class="pb-glyph">🏠</div>
+        <div class="pb-title">Famílies</div>
+        <div class="pb-desc" style="margin-bottom:14px;">
+          Missatges de l'escola, l'AMPA i les activitats.<br>
+          Excursions, pagaments, reunions… tot barrejat.
+        </div>
+        <div class="pb-desc">
+          <div style="margin-bottom:6px;">👉 nexlupa ho ordena i et diu exactament què has de fer.</div>
+          <div>👉 Sense rellegir. Sense oblidar res.</div>
+        </div>
+      </div>
+
+      <div class="platform-block" style="border-top: 3px solid #f5b400;">
+        <div class="pb-glyph">💼</div>
+        <div class="pb-title">Freelancers</div>
+        <div class="pb-desc" style="margin-bottom:14px;">
+          Correus de clients, pressupostos i seguiments.<br>
+          Informació important perduda entre fils infinits.
+        </div>
+        <div class="pb-desc">
+          <div style="margin-bottom:6px;">👉 nexlupa detecta accions, terminis i prioritats.</div>
+          <div>👉 Tot clar en segons.</div>
+        </div>
+      </div>
+
+      <div class="platform-block" style="border-top: 3px solid #3b82f6;">
+        <div class="pb-glyph">💬</div>
+        <div class="pb-title">Comunitats</div>
+        <div class="pb-desc" style="margin-bottom:14px;">
+          Grups de WhatsApp, comunicats i reunions.<br>
+          Missatges que no saps si són importants o no.
+        </div>
+        <div class="pb-desc">
+          <div style="margin-bottom:6px;">👉 nexlupa separa el soroll del que importa.</div>
+          <div>👉 Saps sempre què toca fer.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ── CTA FINAL ──────────────────────────────────────────── -->
+  <div class="cta-section reveal">
+    <h2>El motor que treballa<br>mentre tu no llegeixes.</h2>
+    <p>Prova nexlupa ara mateix. Gratuït, sense registre.</p>
+    <button id="btnObrirApp2" class="btn-primary" style="font-size:16px;padding:18px 40px;" onclick="window.location.href='https://app.nexlupa.app'">
+      ⚡ Analitza el teu primer missatge — gratis
+    </button>
+    <div class="cta-free">Free · <span>3 anàlisis/dia</span> · Sense targeta de crèdit</div>
+  </div>
+
+
+  <!-- FOOTER -->
+  <footer>
+    <div>© 2025 <strong>nexlupa</strong> · La lupa que treballa sola</div>
+    <div>hola@nexlupa.app</div>
+  </footer>
+
+</div><!-- fi pageLanding -->
+
+<script src="script.js"></script>
+</body>
+</html>
