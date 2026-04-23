@@ -148,21 +148,21 @@
       max-width: 120px;
     }
     .stats-transition {
-      margin-top: 60px;
+      margin-top: 80px;
       font-size: 15px;
       color: #5a6370;
       font-style: italic;
       letter-spacing: .01em;
     }
     .stats-conclusion {
-      margin-top: 36px;
-      padding-top: 36px;
+      margin-top: 52px;
+      padding-top: 44px;
       border-top: 1px solid rgba(255,255,255,.07);
-      font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+      font-size: clamp(1.15rem, 2.4vw, 1.4rem);
       font-weight: 700;
       color: #fff;
-      letter-spacing: -.015em;
-      text-shadow: 0 0 48px rgba(245,180,0,.14);
+      letter-spacing: -.018em;
+      text-shadow: 0 0 56px rgba(245,180,0,.18);
     }
     .stats-sources {
       margin-top: 20px;
@@ -175,21 +175,22 @@
     /* ── STATS CTA ── */
     .stats-cta {
       display: inline-block;
-      margin-top: 48px;
-      padding: 16px 44px;
+      margin-top: 64px;
+      padding: 18px 56px;
       background: linear-gradient(90deg, #f5b400, #ffcc33);
       color: #0b0d0f;
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       letter-spacing: -.01em;
-      transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 4px 24px rgba(245,180,0,.22);
+      transition: transform .2s ease, box-shadow .2s ease;
     }
     .stats-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(245,180,0,.38);
+      transform: translateY(-3px) scale(1.015);
+      box-shadow: 0 12px 40px rgba(245,180,0,.46);
     }
 
     /* ── RESPONSIVE ── */
@@ -206,7 +207,7 @@
       .stats-grid strong { font-size: 40px; }
       .stats-grid span { max-width: 100%; }
       .stats-conclusion { font-size: 1rem; }
-      .stats-cta { width: 100%; max-width: 320px; padding: 15px 24px; }
+      .stats-cta { width: 100%; max-width: 340px; padding: 17px 24px; font-size: 16px; margin-top: 48px; }
     }
     @media (max-width: 560px) {
       .hero-top { padding: 88px 5% 32px; }
