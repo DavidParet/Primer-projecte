@@ -1,5 +1,5 @@
 /* ============================================================
-   script.js — NexLupa unified JavaScript
+   script.js — nexlupa unified JavaScript
    ============================================================ */
 
 'use strict';
