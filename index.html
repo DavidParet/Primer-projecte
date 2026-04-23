@@ -83,7 +83,7 @@
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: 24px;
-      align-items: center;
+      align-items: start;
       margin-top: 48px;
     }
     .transform-col {
@@ -92,51 +92,56 @@
       border-radius: 20px;
       padding: 28px 24px;
     }
-    .transform-col.before { border-color: rgba(229,57,53,.15); opacity: .82; }
+    .transform-col.before {
+      background: rgba(8,11,16,.9);
+      border-color: rgba(255,255,255,.04);
+      opacity: .55;
+      filter: saturate(.65);
+    }
     .transform-col.after {
-      border: 1px solid rgba(245,180,0,.22);
-      border-left: 3px solid rgba(245,180,0,.55);
-      background: linear-gradient(150deg, rgba(245,180,0,.055) 0%, rgba(13,18,26,1) 58%);
-      box-shadow: 0 0 64px rgba(245,180,0,.09), 0 4px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(245,180,0,.12);
-      padding: 32px 28px;
+      border: 1px solid rgba(245,180,0,.2);
+      border-left: 3px solid rgba(245,180,0,.52);
+      background: linear-gradient(155deg, rgba(245,180,0,.05) 0%, rgba(11,15,21,1) 56%);
+      box-shadow: 0 0 56px rgba(245,180,0,.08), 0 4px 28px rgba(0,0,0,.3), inset 0 1px 0 rgba(245,180,0,.1);
+      padding: 30px 26px;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .transform-col.after:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 80px rgba(245,180,0,.16), 0 12px 40px rgba(0,0,0,.38), inset 0 1px 0 rgba(245,180,0,.14);
     }
     .transform-label {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
       margin-bottom: 20px;
     }
-    .transform-label.before-lbl { color: #e57373; }
+    .transform-label.before-lbl { color: #46525e; }
     .transform-label.after-lbl {
+      font-size: 13px;
       color: #ffffff;
-      letter-spacing: 3px;
+      letter-spacing: .02em;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
+      font-weight: 700;
     }
     .transform-label.after-lbl::before {
-      content: '';
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #f5b400;
-      box-shadow: 0 0 8px rgba(245,180,0,.8);
-      flex-shrink: 0;
+      content: '⚡';
+      font-size: 13px;
+      line-height: 1;
     }
     .transform-line {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 7px 0;
+      padding: 8px 0;
       border-bottom: 1px solid rgba(255,255,255,.05);
       font-size: 13px;
       color: var(--gray);
     }
     .transform-line:last-child { border-bottom: none; }
     .transform-line .tl-icon { font-size: 15px; flex-shrink: 0; }
-
-    /* ── TRANSFORM AFTER — línies ── */
     .transform-col.after .transform-line {
       border-bottom-color: rgba(245,180,0,.07);
       padding: 9px 0;
@@ -149,14 +154,17 @@
     .transform-col.after .transform-line:first-child {
       font-size: 14px;
       font-weight: 500;
-      color: #dde4ec;
+      color: #e0e6ed;
     }
+    .tw-gold { color: #f5b400; font-weight: 600; }
     .transform-arrow {
-      font-size: 32px;
-      color: var(--gold);
-      opacity: .7;
+      font-size: 26px;
+      color: #f5b400;
       text-align: center;
       flex-shrink: 0;
+      align-self: center;
+      text-shadow: 0 0 18px rgba(245,180,0,.5);
+      margin-top: 20px;
     }
 
     /* ── FEATURES ── */
@@ -336,9 +344,9 @@
     <h2>Masses missatges.<br><em>Poc temps per llegir-los tots.</em></h2>
     <p class="section-sub">Cada dia reps correus, grups i comunicats que et demanen temps. nexlupa fa la feina per tu.</p>
 
-    <div class="transform-grid reveal">
-      <div class="transform-col before">
-        <div class="transform-label before-lbl">Sense nexlupa</div>
+    <div class="transform-grid">
+      <div class="transform-col before reveal" style="transition-delay:0s">
+        <div class="transform-label before-lbl">Sense Nexlupa</div>
         <div class="transform-line"><span class="tl-icon">📩</span> Missatge llarg de 3 pàgines</div>
         <div class="transform-line"><span class="tl-icon">⏱</span> 5–8 minuts llegint</div>
         <div class="transform-line"><span class="tl-icon">🤔</span> "Haig de fer res urgentment?"</div>
@@ -346,14 +354,14 @@
         <div class="transform-line"><span class="tl-icon">🔁</span> Rellegir per no oblidar</div>
       </div>
 
-      <div class="transform-arrow">→</div>
+      <div class="transform-arrow reveal" style="transition-delay:.18s">→</div>
 
-      <div class="transform-col after">
-        <div class="transform-label after-lbl">Amb nexlupa</div>
-        <div class="transform-line"><span class="tl-icon">⭐</span> Resum en 2 línies clares</div>
-        <div class="transform-line"><span class="tl-icon">✅</span> Accions numerades i prioritzades</div>
+      <div class="transform-col after reveal" style="transition-delay:.32s">
+        <div class="transform-label after-lbl">Amb Nexlupa</div>
+        <div class="transform-line"><span class="tl-icon">⭐</span> <span class="tw-gold">Resum</span> en 2 línies clares</div>
+        <div class="transform-line"><span class="tl-icon">✅</span> <span class="tw-gold">Accions</span> numerades i prioritzades</div>
         <div class="transform-line"><span class="tl-icon">📅</span> Dates detectades automàticament</div>
-        <div class="transform-line"><span class="tl-icon">⚡</span> Resultat en menys de 10 segons</div>
+        <div class="transform-line"><span class="tl-icon">🎯</span> Resultat clar i accionable</div>
         <div class="transform-line"><span class="tl-icon">💬</span> Compartible directament</div>
       </div>
     </div>
