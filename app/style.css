@@ -988,6 +988,25 @@ body.dark {
 
   /* Promo oculta: no afegeix alçada */
   #premiumPromoCard { display: none; }
+
+  /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
+  .app-col-right .card-head { display: none; }
+
+  /* Eliminar padding superior: card toca quasi l'header */
+  .app-col-right { padding-top: 2px; }
+  .app-col-right .card { padding-top: 10px; }
+
+  /* Usage counter: fila compacta d'una sola línia, sense text secundari */
+  .app-col-right .usage-counter {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 2px 0;
+  }
+  /* Ocultar "Els teus anàlisis es guarden..." — soroll innecessari en mobile */
+  .app-col-right .usage-counter > div:last-child { display: none; }
 }
 
 /* ============================================================
