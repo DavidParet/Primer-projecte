@@ -1028,3 +1028,62 @@ body.dark {
   border-radius: 10px;
   border-left: 3px solid var(--gold);
 }
+
+/* ============================================================
+   DESKTOP REFINEMENTS — only affects min-width: 900px
+   Cap d'aquestes regles toca el layout mobile
+   ============================================================ */
+@media (min-width: 900px) {
+  /* Columna esquerra: més estreta per donar protagonisme a la dreta */
+  .app-col-left {
+    flex: 0 0 30%;
+    padding: 32px 28px;
+  }
+
+  .app-left-h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .app-left-p {
+    margin-bottom: 20px;
+  }
+
+  .app-feat-item {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  /* Columna dreta: menys padding, card més compacta */
+  .app-col-right {
+    padding: 14px 20px;
+  }
+
+  /* Card interior: reduir espais interns sense tocar mobile */
+  .app-col-right .card {
+    padding: 14px;
+    margin-bottom: 0;
+  }
+
+  .app-col-right .card-head {
+    margin-bottom: 8px;
+  }
+
+  .app-col-right .input-tabs {
+    margin-bottom: 10px;
+  }
+
+  /* Acostar botó al textarea */
+  .app-col-right .btn-analyze {
+    margin-top: 8px;
+  }
+
+  .app-col-right .ex-row {
+    margin-top: 6px;
+  }
+
+  /* Usage counter: compacte */
+  .app-col-right .usage-counter {
+    margin-top: 6px;
+  }
+}
