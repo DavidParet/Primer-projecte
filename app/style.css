@@ -1084,10 +1084,12 @@ body.dark {
   }
   .app-col-right::-webkit-scrollbar { display: none; }
 
-  /* ── TEXTAREA: encaixa en portàtil 768px ────────────────────── */
-  .app-col-right textarea {
-    min-height: 160px;
-    max-height: 200px;
+  /* ── TEXTAREA: selector específic per sobreescriure #pageApp textarea ── */
+  /* #pageApp textarea té especificitat (1,0,0,1)=101                      */
+  /* #pageApp .app-col-right textarea té (1,1,0,1)=111 → guanya            */
+  #pageApp .app-col-right textarea {
+    min-height: 120px;
+    max-height: 160px;
   }
 
   /* ── SECCIÓ PREMIUM: oculta en desktop (estalvia ~76px) ──────── */
@@ -1100,10 +1102,10 @@ body.dark {
   .app-feat-item      { padding: 6px 10px; font-size: 12px; }
 
   /* ── CARD INTERIOR: espais verticals mínims ─────────────────── */
-  .app-col-right .card          { padding: 12px 14px; margin-bottom: 0; }
-  .app-col-right .card-head     { margin-bottom: 6px; }
-  .app-col-right .input-tabs    { margin-bottom: 8px; }
-  .app-col-right .ex-row        { margin-top: 4px; }
-  .app-col-right .btn-analyze   { margin-top: 8px; padding: 12px; }
-  .app-col-right .usage-counter { margin-top: 4px; flex-direction: row; flex-wrap: wrap; }
+  .app-col-right .card          { padding: 10px 14px; margin-bottom: 0; }
+  .app-col-right .card-head     { margin-bottom: 4px; }
+  .app-col-right .input-tabs    { margin-bottom: 6px; }
+  .app-col-right .ex-row        { margin-top: 2px; }
+  .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
+  .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; }
 }
