@@ -994,7 +994,10 @@ body.dark {
 
   /* Eliminar padding superior: card toca quasi l'header */
   .app-col-right { padding-top: 2px; }
-  .app-col-right .card { padding-top: 10px; }
+  .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
+
+  /* Botó analitzar: menys marge superior — guanya espai al textarea */
+  .app-col-right .btn-analyze { margin-top: 8px; }
 
   /* Usage counter: fila compacta d'una sola línia, sense text secundari */
   .app-col-right .usage-counter {
@@ -1004,6 +1007,7 @@ body.dark {
     justify-content: flex-start;
     gap: 8px;
     padding: 2px 0;
+    margin-top: 6px;
   }
   /* Ocultar "Els teus anàlisis es guarden..." — soroll innecessari en mobile */
   .app-col-right .usage-counter > div:last-child { display: none; }
