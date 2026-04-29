@@ -1007,6 +1007,26 @@ body.dark {
   }
   /* Ocultar "Els teus anàlisis es guarden..." — soroll innecessari en mobile */
   .app-col-right .usage-counter > div:last-child { display: none; }
+
+  /* ── Qualitat comercial mobile ─────────────────────────────── */
+
+  /* Footer "powered by..." ocult — missatge amateur en producte comercial */
+  #pageApp footer { display: none; }
+
+  /* Header més compacte — guanya alçada per al contingut */
+  #pageApp header { padding: 8px 16px; }
+
+  /* Card amb més definició — shadow i border lleugers */
+  .app-col-right .card {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    border: 1px solid rgba(0,0,0,0.07);
+  }
+
+  /* Textarea fons blanc — contrasta amb el fons gris de la pàgina */
+  #pageApp .app-col-right textarea { background: #ffffff; }
+
+  /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
+  .ex-lbl { display: none; }
 }
 
 /* ============================================================
