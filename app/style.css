@@ -927,6 +927,70 @@ body.dark {
 .bottom-spacer { display: none; }
 
 /* ============================================================
+   MOBILE FIXES (max-width: 899px) — no toca landing ni desktop
+   ============================================================ */
+@media (max-width: 899px) {
+  /* ── Propaga l'alçada de main fins a la card ─────────────────
+     Objectiu: card omple tota la pantalla → cap espai mort.
+     Cadena: main(overflow:hidden) > pageInici(h:100%) >
+             app-2col(h:100%) > app-col-right(flex col, h:100%) >
+             card(flex:1) > #panelText(flex:1) > textarea(flex:1) */
+
+  #pageApp main {
+    padding: 0;
+    overflow: hidden;
+  }
+  #pageInici  { height: 100%; }
+  .app-2col   { height: 100%; }
+
+  .app-col-right {
+    height: 100%;
+    padding: 8px 8px 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-col-right .card {
+    flex: 1;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* panelText (tab actiu) omple l'espai de la card */
+  #panelText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* panelImg quan és actiu */
+  #panelImg { flex: 1; min-height: 0; }
+
+  /* Textarea creix per omplir tot l'espai disponible */
+  #pageApp .app-col-right textarea {
+    flex: 1;
+    min-height: 80px;
+    max-height: none;
+    resize: none;
+  }
+
+  /* Tots els altres elements de la card no s'estiren */
+  .app-col-right .card-head,
+  .app-col-right .input-tabs,
+  .app-col-right .ex-row,
+  .app-col-right .btn-analyze,
+  .app-col-right .usage-counter { flex-shrink: 0; }
+
+  /* Promo oculta: no afegeix alçada */
+  #premiumPromoCard { display: none; }
+}
+
+/* ============================================================
    2-COLUMN DESKTOP LAYOUT
    ============================================================ */
 
