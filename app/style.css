@@ -1031,59 +1031,103 @@ body.dark {
 
 /* ============================================================
    DESKTOP REFINEMENTS — only affects min-width: 900px
-   Cap d'aquestes regles toca el layout mobile
+   Cap d'aquestes regles toca el layout mobile.
+   ============================================================
+
+   Cadena d'alçades (1366x768 exemple):
+     #pageApp (fixed, 768px)
+       header (~55px)
+       main (flex:1 → ~657px, overflow:hidden)
+         #pageInici (height:100% → 657px)
+           .app-2col (height:100% → 657px, display:flex)
+             .app-col-left (flex-stretch → 657px, contingut centrat)
+             .app-col-right (flex:1, overflow-y:auto)
+       .bottom-nav (~56px)
+       footer (display:none)
    ============================================================ */
 @media (min-width: 900px) {
-  /* Columna esquerra: més estreta per donar protagonisme a la dreta */
-  .app-col-left {
-    flex: 0 0 30%;
-    padding: 32px 28px;
+
+  /* 1. main no genera scroll — l'alçada és exactament la resta del viewport */
+  #pageApp main {
+    overflow: hidden;
   }
 
+  /* 2. Footer ocult: estalvia ~38px i simplifica el càlcul */
+  #pageApp footer {
+    display: none;
+  }
+
+  /* 3. Propaguem l'alçada: main → pageInici → app-2col */
+  #pageInici {
+    height: 100%;
+  }
+
+  .app-2col {
+    height: 100%;
+  }
+
+  /* 4. Columna esquerra: 28%, alçada completa (flex stretch per defecte) */
+  .app-col-left {
+    flex: 0 0 28%;
+    padding: 28px 22px;
+  }
+
+  /* 5. Columna dreta: scroll intern si cal, padding compacte */
+  .app-col-right {
+    padding: 12px 18px;
+    overflow-y: auto;
+  }
+
+  /* 6. Textarea: altura reduïda per encaixar en portàtil 768px */
+  .app-col-right textarea {
+    min-height: 155px;
+    max-height: 220px;
+  }
+
+  /* 7. Tipografia columna esquerra: compacta */
   .app-left-h1 {
-    font-size: 26px;
-    margin-bottom: 10px;
+    font-size: 23px;
+    margin-bottom: 8px;
   }
 
   .app-left-p {
-    margin-bottom: 20px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .app-left-feats {
+    gap: 7px;
   }
 
   .app-feat-item {
-    padding: 7px 12px;
+    padding: 6px 10px;
     font-size: 12px;
   }
 
-  /* Columna dreta: menys padding, card més compacta */
-  .app-col-right {
-    padding: 14px 20px;
-  }
-
-  /* Card interior: reduir espais interns sense tocar mobile */
+  /* 8. Card interior: espais verticals reduïts */
   .app-col-right .card {
-    padding: 14px;
+    padding: 12px 14px;
     margin-bottom: 0;
   }
 
   .app-col-right .card-head {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .app-col-right .input-tabs {
-    margin-bottom: 10px;
-  }
-
-  /* Acostar botó al textarea */
-  .app-col-right .btn-analyze {
-    margin-top: 8px;
+    margin-bottom: 8px;
   }
 
   .app-col-right .ex-row {
-    margin-top: 6px;
+    margin-top: 4px;
   }
 
-  /* Usage counter: compacte */
+  .app-col-right .btn-analyze {
+    margin-top: 8px;
+    padding: 13px;
+  }
+
   .app-col-right .usage-counter {
-    margin-top: 6px;
+    margin-top: 4px;
   }
 }
