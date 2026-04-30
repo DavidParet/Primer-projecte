@@ -1238,14 +1238,14 @@ body.dark {
 }
 
 /* ============================================================
-   SIGNATURE LEFT COLUMN v2 — nexlupa visual identity
+   SIGNATURE LEFT COLUMN sig-v4 — Premium Minimal
    Animacions: transform+opacity únics → GPU, sense layout reflow.
    ============================================================ */
 @media (min-width: 768px) {
 
   /* ── Base override ───────────────────────────────────────── */
   .app-col-left {
-    background: linear-gradient(158deg, #090d14 0%, #0d1420 45%, #121926 100%);
+    background: linear-gradient(160deg, #030407 0%, #080a10 100%);
     overflow: hidden;
     position: relative;
     isolation: isolate;
@@ -1253,14 +1253,15 @@ body.dark {
     flex-direction: column;
     justify-content: flex-start;
     padding: 28px 22px 22px;
+    border-right: 1px solid rgba(245,197,24,0.08);
   }
   .app-col-left::before { display: none !important; }
 
   /* ── Dot grid ───────────────────────────────────────────── */
   .acl-grid {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.033) 1px, transparent 1px);
-    background-size: 22px 22px;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   /* ── Zone 1: Title (top) ─────────────────────────────────── */
@@ -1273,7 +1274,7 @@ body.dark {
     display: flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 800;
     letter-spacing: 2px; text-transform: uppercase;
-    color: rgba(245,197,24,.5);
+    color: rgba(245,197,24,0.55);
     margin: 0 0 13px;
   }
   .acl-dot-live {
@@ -1310,45 +1311,45 @@ body.dark {
     padding-bottom: 12px;
   }
 
-  /* Halo ambient molt subtil (la llum pròpia ve del SVG) */
+  /* Halo ambient quasi invisible */
   .acl-glow {
     position: absolute;
-    width: 220px; height: 220px; border-radius: 50%;
+    width: 160px; height: 160px; border-radius: 50%;
     background: radial-gradient(circle at center,
-      rgba(200,140,0,0.07) 0%,
+      rgba(245,197,24,0.06) 0%,
       transparent 65%
     );
     z-index: 0; pointer-events: none;
   }
 
-  /* Anells de pols — GPU only (transform + opacity) */
+  /* Anells de pols — GPU only */
   .acl-ring {
     position: absolute;
-    width: 144px; height: 144px;
+    width: 120px; height: 120px;
     border-radius: 50%;
-    border: 1px solid rgba(245,197,24,0.45);
+    border: 1px solid rgba(245,197,24,0.22);
     z-index: 1; pointer-events: none;
-    animation: aclRingPulse 4.5s ease-out infinite;
+    animation: aclRingPulse 5s ease-out infinite;
     will-change: transform, opacity;
   }
   .r1 { animation-delay: 0s; }
-  .r2 { animation-delay: 1.50s; }
-  .r3 { animation-delay: 3.00s; }
+  .r2 { animation-delay: 1.67s; }
+  .r3 { animation-delay: 3.33s; }
   @keyframes aclRingPulse {
-    0%   { transform: scale(1);    opacity: .50; }
-    100% { transform: scale(2.10); opacity: 0; }
+    0%   { transform: scale(1);   opacity: .22; }
+    100% { transform: scale(2.0); opacity: 0; }
   }
 
   /* Lupa SVG principal */
   .acl-lupa {
     position: relative; z-index: 2; pointer-events: none;
-    width: 200px; height: 200px;
-    animation: aclLupaFloat 8s ease-in-out infinite;
+    width: 160px; height: 160px;
+    animation: aclLupaFloat 10s ease-in-out infinite;
     will-change: transform;
   }
   @keyframes aclLupaFloat {
     0%,100% { transform: translateY(0px); }
-    50%     { transform: translateY(-6px); }
+    50%     { transform: translateY(-5px); }
   }
   .acl-lupa svg { width: 100%; height: 100%; overflow: visible; }
 
@@ -1360,16 +1361,16 @@ body.dark {
   }
   .acl-ben-item {
     font-family: 'DM Sans', sans-serif;
-    font-size: 13.5px; font-weight: 500;
-    color: rgba(255,255,255,0.70);
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.65);
     padding: 7px 12px;
-    border-left: 2.5px solid rgba(245,197,24,.28);
+    border-left: 2px solid rgba(245,197,24,0.30);
     border-radius: 0 8px 8px 0;
     transition: border-color .22s ease, background .22s ease, transform .18s ease;
   }
   .acl-ben-item:hover {
-    background: rgba(245,197,24,.065);
-    border-color: rgba(245,197,24,.7);
+    background: rgba(245,197,24,0.05);
+    border-color: rgba(245,197,24,0.60);
     transform: translateX(3px);
   }
 }
@@ -1377,9 +1378,9 @@ body.dark {
 /* ── Pantalles grans: col 24%, lupa ajustada ─────────────── */
 @media (min-width: 900px) {
   .acl-title   { font-size: clamp(18px, 2.0vw, 23px); }
-  .acl-lupa    { width: 172px; height: 172px; }
-  .acl-ring    { width: 124px; height: 124px; }
-  .acl-glow    { width: 190px; height: 190px; }
+  .acl-lupa    { width: 140px; height: 140px; }
+  .acl-ring    { width: 104px; height: 104px; }
+  .acl-glow    { width: 140px; height: 140px; }
   .acl-eyebrow { font-size: 9px; margin-bottom: 10px; }
 }
 
