@@ -1238,44 +1238,44 @@ body.dark {
 }
 
 /* ============================================================
-   SIGNATURE LEFT COLUMN sig-v4 — Premium Minimal
+   SIGNATURE LEFT COLUMN sig-v5 — Lupa dramàtica cinètica
    Animacions: transform+opacity únics → GPU, sense layout reflow.
    ============================================================ */
 @media (min-width: 768px) {
 
   /* ── Base override ───────────────────────────────────────── */
   .app-col-left {
-    background: linear-gradient(160deg, #030407 0%, #080a10 100%);
+    background: linear-gradient(160deg, #060400 0%, #0a0703 50%, #0d0a05 100%);
     overflow: hidden;
     position: relative;
     isolation: isolate;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 28px 22px 22px;
-    border-right: 1px solid rgba(245,197,24,0.08);
+    padding: 24px 20px 18px;
+    border-right: 1px solid rgba(200,120,10,0.15);
   }
   .app-col-left::before { display: none !important; }
 
   /* ── Dot grid ───────────────────────────────────────────── */
   .acl-grid {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(circle, rgba(255,200,80,0.022) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 
   /* ── Zone 1: Title (top) ─────────────────────────────────── */
   .acl-top {
     position: relative; z-index: 10;
     flex-shrink: 0;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .acl-eyebrow {
     display: flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 800;
     letter-spacing: 2px; text-transform: uppercase;
-    color: rgba(245,197,24,0.55);
-    margin: 0 0 13px;
+    color: rgba(245,185,40,0.60);
+    margin: 0 0 11px;
   }
   .acl-dot-live {
     width: 6px; height: 6px; border-radius: 50%;
@@ -1292,14 +1292,25 @@ body.dark {
     font-family: 'Syne', sans-serif;
     font-size: clamp(20px, 2.6vw, 28px);
     font-weight: 800;
-    color: rgba(255,255,255,0.88);
-    line-height: 1.18;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.15;
     margin: 0;
     letter-spacing: -0.02em;
   }
   .acl-title-gold {
     color: #F5C518;
     display: block;
+  }
+  .acl-subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px; font-weight: 300;
+    color: rgba(255,255,255,0.42);
+    margin: 9px 0 0;
+    line-height: 1.5;
+  }
+  .acl-subtitle em {
+    color: rgba(245,185,40,0.72);
+    font-style: normal; font-weight: 500;
   }
 
   /* ── Zone 2: Central lupa (protagonist) ─────────────────── */
@@ -1308,26 +1319,28 @@ body.dark {
     flex: 1;
     display: flex; align-items: center; justify-content: center;
     min-height: 0;
-    padding-bottom: 12px;
+    padding-bottom: 8px;
   }
 
-  /* Halo ambient quasi invisible */
+  /* Glow ambre dramàtic darrere la lupa */
   .acl-glow {
     position: absolute;
-    width: 160px; height: 160px; border-radius: 50%;
+    width: 320px; height: 320px; border-radius: 50%;
     background: radial-gradient(circle at center,
-      rgba(245,197,24,0.06) 0%,
-      transparent 65%
+      rgba(220,140,10,0.30) 0%,
+      rgba(180,90,5,0.16) 28%,
+      rgba(100,50,0,0.07) 55%,
+      transparent 72%
     );
     z-index: 0; pointer-events: none;
   }
 
-  /* Anells de pols — GPU only */
+  /* Anells de pols subtils */
   .acl-ring {
     position: absolute;
-    width: 120px; height: 120px;
+    width: 180px; height: 180px;
     border-radius: 50%;
-    border: 1px solid rgba(245,197,24,0.22);
+    border: 1px solid rgba(200,130,15,0.25);
     z-index: 1; pointer-events: none;
     animation: aclRingPulse 5s ease-out infinite;
     will-change: transform, opacity;
@@ -1336,20 +1349,20 @@ body.dark {
   .r2 { animation-delay: 1.67s; }
   .r3 { animation-delay: 3.33s; }
   @keyframes aclRingPulse {
-    0%   { transform: scale(1);   opacity: .22; }
-    100% { transform: scale(2.0); opacity: 0; }
+    0%   { transform: scale(1);   opacity: .28; }
+    100% { transform: scale(1.85); opacity: 0; }
   }
 
   /* Lupa SVG principal */
   .acl-lupa {
     position: relative; z-index: 2; pointer-events: none;
-    width: 160px; height: 160px;
-    animation: aclLupaFloat 10s ease-in-out infinite;
+    width: 250px; height: 250px;
+    animation: aclLupaFloat 9s ease-in-out infinite;
     will-change: transform;
   }
   @keyframes aclLupaFloat {
-    0%,100% { transform: translateY(0px); }
-    50%     { transform: translateY(-5px); }
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    50%     { transform: translateY(-6px) rotate(0.4deg); }
   }
   .acl-lupa svg { width: 100%; height: 100%; overflow: visible; }
 
@@ -1357,31 +1370,43 @@ body.dark {
   .acl-benefits {
     position: relative; z-index: 10;
     flex-shrink: 0;
-    display: flex; flex-direction: column; gap: 7px;
+    display: flex; flex-direction: column; gap: 0;
   }
   .acl-ben-item {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500;
-    color: rgba(255,255,255,0.65);
-    padding: 7px 12px;
-    border-left: 2px solid rgba(245,197,24,0.30);
-    border-radius: 0 8px 8px 0;
-    transition: border-color .22s ease, background .22s ease, transform .18s ease;
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(200,130,10,0.10);
+    transition: background .2s ease;
   }
-  .acl-ben-item:hover {
-    background: rgba(245,197,24,0.05);
-    border-color: rgba(245,197,24,0.60);
-    transform: translateX(3px);
+  .acl-ben-item:last-child { border-bottom: none; }
+  .acl-ben-item:hover { background: rgba(200,130,10,0.06); border-radius: 8px; }
+  .acl-ben-ico {
+    font-size: 14px; flex-shrink: 0; margin-top: 1px;
+  }
+  .acl-ben-ttl {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px; font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    margin-bottom: 1px;
+  }
+  .acl-ben-dsc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px; font-weight: 400;
+    color: rgba(255,255,255,0.36);
+    line-height: 1.35;
   }
 }
 
 /* ── Pantalles grans: col 24%, lupa ajustada ─────────────── */
 @media (min-width: 900px) {
-  .acl-title   { font-size: clamp(18px, 2.0vw, 23px); }
-  .acl-lupa    { width: 140px; height: 140px; }
-  .acl-ring    { width: 104px; height: 104px; }
-  .acl-glow    { width: 140px; height: 140px; }
-  .acl-eyebrow { font-size: 9px; margin-bottom: 10px; }
+  .acl-title    { font-size: clamp(18px, 2.0vw, 23px); }
+  .acl-subtitle { font-size: 11.5px; }
+  .acl-lupa     { width: 210px; height: 210px; }
+  .acl-ring     { width: 150px; height: 150px; }
+  .acl-glow     { width: 270px; height: 270px; }
+  .acl-eyebrow  { font-size: 9px; margin-bottom: 9px; }
+  .acl-ben-ttl  { font-size: 11.5px; }
+  .acl-ben-dsc  { font-size: 10px; }
 }
 
 /* ── Reduced motion ──────────────────────────────────────── */

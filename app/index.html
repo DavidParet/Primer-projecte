@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=sig-v4"/>
+  <link rel="stylesheet" href="style.css?v=sig-v5"/>
 </head>
 <body>
 
@@ -68,6 +68,7 @@
         <div class="acl-top">
           <p class="acl-eyebrow"><span class="acl-dot-live"></span>Motor actiu</p>
           <h2 class="acl-title">De la informació<br><span class="acl-title-gold">a la decisió</span></h2>
+          <p class="acl-subtitle">No cal llegir-ho tot.<br><em>nexlupa</em> ho fa per tu.</p>
         </div>
 
         <!-- Zone 2: Central lupa (protagonist) -->
@@ -77,40 +78,88 @@
           <span class="acl-ring r2" aria-hidden="true"></span>
           <span class="acl-ring r3" aria-hidden="true"></span>
           <div class="acl-lupa" aria-hidden="true">
-            <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <radialGradient id="glassFill" cx="38%" cy="32%" r="60%">
-                  <stop offset="0%"   stop-color="#181e2a"/>
-                  <stop offset="100%" stop-color="#09090e"/>
+                <radialGradient id="glassInt" cx="42%" cy="38%" r="68%">
+                  <stop offset="0%"   stop-color="rgba(255,185,40,0.55)"/>
+                  <stop offset="28%"  stop-color="rgba(210,120,10,0.24)"/>
+                  <stop offset="65%"  stop-color="rgba(30,18,6,0.72)"/>
+                  <stop offset="100%" stop-color="rgba(6,4,2,0.98)"/>
                 </radialGradient>
-                <radialGradient id="glassRefl" cx="30%" cy="24%" r="42%">
-                  <stop offset="0%"   stop-color="rgba(255,255,255,0.055)"/>
+                <linearGradient id="frameG" x1="18%" y1="12%" x2="82%" y2="88%">
+                  <stop offset="0%"   stop-color="#e8b84b"/>
+                  <stop offset="35%"  stop-color="#c07818"/>
+                  <stop offset="65%"  stop-color="#8c5210"/>
+                  <stop offset="100%" stop-color="#4a2805"/>
+                </linearGradient>
+                <linearGradient id="frameHL" x1="10%" y1="8%" x2="55%" y2="55%">
+                  <stop offset="0%"   stop-color="rgba(255,220,120,0.55)"/>
+                  <stop offset="100%" stop-color="transparent"/>
+                </linearGradient>
+                <linearGradient id="handleG" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#d4922a"/>
+                  <stop offset="55%"  stop-color="#7a4410"/>
+                  <stop offset="100%" stop-color="#3c1e04"/>
+                </linearGradient>
+                <radialGradient id="flareG" cx="30%" cy="24%" r="38%">
+                  <stop offset="0%"   stop-color="rgba(255,245,200,0.75)"/>
+                  <stop offset="55%"  stop-color="rgba(255,200,80,0.18)"/>
                   <stop offset="100%" stop-color="transparent"/>
                 </radialGradient>
-                <linearGradient id="frameGrad" x1="18%" y1="12%" x2="82%" y2="88%">
-                  <stop offset="0%"   stop-color="#a0a0a0"/>
-                  <stop offset="45%"  stop-color="#626262"/>
-                  <stop offset="100%" stop-color="#383838"/>
-                </linearGradient>
-                <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%"   stop-color="#909090"/>
-                  <stop offset="100%" stop-color="#363636"/>
-                </linearGradient>
+                <clipPath id="glassClip">
+                  <circle cx="90" cy="90" r="68"/>
+                </clipPath>
               </defs>
-              <circle cx="44" cy="44" r="33" fill="url(#glassFill)"/>
-              <circle cx="44" cy="44" r="33" fill="url(#glassRefl)"/>
-              <circle cx="44" cy="44" r="34" stroke="url(#frameGrad)" stroke-width="2" fill="none"/>
-              <text x="44" y="44" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="#F5C518" font-family="Georgia,serif" opacity="0.88">✦</text>
-              <path d="M 69 69 L 96 96" stroke="url(#handleGrad)" stroke-width="2" stroke-linecap="round"/>
+
+              <!-- Vidre base -->
+              <circle cx="90" cy="90" r="68" fill="#070402"/>
+              <!-- Glow càlid interior -->
+              <circle cx="90" cy="90" r="68" fill="url(#glassInt)"/>
+
+              <!-- Línies d'escaneig dins el vidre -->
+              <g clip-path="url(#glassClip)">
+                <line x1="22" y1="68"  x2="158" y2="68"  stroke="rgba(255,150,20,0.09)" stroke-width="1.5"/>
+                <line x1="22" y1="78"  x2="158" y2="78"  stroke="rgba(255,160,30,0.15)" stroke-width="2"/>
+                <line x1="22" y1="88"  x2="158" y2="88"  stroke="rgba(255,178,42,0.24)" stroke-width="2.5"/>
+                <line x1="22" y1="98"  x2="158" y2="98"  stroke="rgba(255,160,30,0.17)" stroke-width="2"/>
+                <line x1="22" y1="108" x2="158" y2="108" stroke="rgba(255,140,20,0.10)" stroke-width="1.5"/>
+                <line x1="22" y1="118" x2="158" y2="118" stroke="rgba(255,120,15,0.06)" stroke-width="1"/>
+              </g>
+
+              <!-- Marc ombra exterior -->
+              <circle cx="90" cy="90" r="74" stroke="rgba(30,15,3,0.85)" stroke-width="1" fill="none"/>
+              <!-- Marc principal -->
+              <circle cx="90" cy="90" r="72" stroke="url(#frameG)" stroke-width="8" fill="none"/>
+              <!-- Marc vora interior highlight -->
+              <circle cx="90" cy="90" r="68" stroke="url(#frameHL)" stroke-width="2" fill="none"/>
+
+              <!-- Reflexió lent superior esquerra -->
+              <circle cx="90" cy="90" r="68" fill="url(#flareG)"/>
+
+              <!-- Mànec ombra -->
+              <path d="M 151 151 L 197 197" stroke="rgba(15,8,2,0.85)" stroke-width="11" stroke-linecap="round"/>
+              <!-- Mànec principal -->
+              <path d="M 150 150 L 196 196" stroke="url(#handleG)" stroke-width="9" stroke-linecap="round"/>
+              <!-- Mànec highlight -->
+              <path d="M 151 150 L 193 192" stroke="rgba(230,170,70,0.22)" stroke-width="4" stroke-linecap="round"/>
             </svg>
           </div>
         </div>
 
         <!-- Zone 3: Benefits block (bottom) -->
         <div class="acl-benefits">
-          <div class="acl-ben-item">⚡ Resum en 10 segons</div>
-          <div class="acl-ben-item">✅ Accions detectades automàticament</div>
-          <div class="acl-ben-item">📅 Dates i terminis identificats</div>
+          <div class="acl-ben-item">
+            <span class="acl-ben-ico">⚡</span>
+            <div><div class="acl-ben-ttl">Resum en 10 segons</div><div class="acl-ben-dsc">Entén el que importa sense perdre temps</div></div>
+          </div>
+          <div class="acl-ben-item">
+            <span class="acl-ben-ico">✅</span>
+            <div><div class="acl-ben-ttl">Accions detectades</div><div class="acl-ben-dsc">Veu les coses clares i les que no pots ajornar</div></div>
+          </div>
+          <div class="acl-ben-item">
+            <span class="acl-ben-ico">📅</span>
+            <div><div class="acl-ben-ttl">Dates i terminis</div><div class="acl-ben-dsc">Totes les dates importants, clarament identificades</div></div>
+          </div>
         </div>
 
       </div>
@@ -408,7 +457,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=sig-v4"></script>
+<script src="script.js?v=sig-v5"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
