@@ -1238,109 +1238,128 @@ body.dark {
 }
 
 /* ============================================================
-   SIGNATURE LEFT COLUMN sig-v7 — nxl-signature minimal
+   SIGNATURE LEFT COLUMN sig-v8 — lupa-blast image + layout
    ============================================================ */
 
 .app-col-left::before { display: none !important; }
 
 .nxl-signature {
-  background: linear-gradient(180deg, #141416, #0b0b0d);
+  background: #09090b;
   color: #f4f4f1;
-  padding: 26px 20px;
+  padding: 28px 22px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 0;
+  overflow: hidden;
 }
 
 /* TOP */
 
-.nxl-status {
-  font-size: 11px;
-  letter-spacing: .18em;
-  color: rgba(245,197,24,.7);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.nxl-status span {
-  width: 6px;
-  height: 6px;
-  background: #2fd66f;
-  border-radius: 50%;
+.nxl-top {
+  flex-shrink: 0;
 }
 
 .nxl-top h1 {
   font-family: Syne, sans-serif;
-  font-size: 34px;
+  font-size: clamp(30px, 3.2vw, 46px);
+  font-weight: 800;
   line-height: 1;
-  margin: 0;
+  letter-spacing: -.03em;
+  margin: 0 0 10px;
+  color: #fff;
 }
 
-.nxl-top strong {
+.nxl-top h1 span {
   color: #F5C518;
 }
 
 .nxl-sub {
-  margin-top: 10px;
-  font-size: 14px;
-  color: rgba(255,255,255,.6);
+  font-size: 13px;
+  color: rgba(255,255,255,.62);
+  margin: 0;
+  line-height: 1.5;
 }
 
-.nxl-sub span {
+.nxl-sub em {
   color: #F5C518;
+  font-style: normal;
 }
 
 /* VISUAL */
 
 .nxl-visual {
-  position: relative;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  margin: 0 -22px;
+  overflow: hidden;
 }
 
-.nxl-glow {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, rgba(245,197,24,.18), transparent 70%);
-}
-
-.nxl-lupa {
-  width: 120px;
-  z-index: 1;
-}
-
-.lens {
-  fill: #0f1114;
-}
-
-.ring {
-  fill: none;
-  stroke: #6c7077;
-  stroke-width: 6;
-}
-
-.handle {
-  stroke: #4a4d52;
-  stroke-width: 10;
-  stroke-linecap: round;
-}
-
-.star {
-  fill: #F5C518;
+.nxl-lupa-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
 }
 
 /* BENEFITS */
 
 .nxl-benefits {
-  font-size: 13px;
-  color: rgba(255,255,255,.7);
-  display: grid;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
+  padding-top: 14px;
+}
+
+.nxl-ben {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.nxl-ben-ico {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 1px solid rgba(245,197,24,.38);
+  border-radius: 10px;
+  background: rgba(245,197,24,.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.nxl-ben strong {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.nxl-ben p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,.48);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* FOOTER */
+
+.nxl-footer {
+  flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,.38);
+  margin: 12px 0 0;
+}
+
+.nxl-footer span {
+  color: #F5C518;
 }
 
