@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=sig-v1"/>
+  <link rel="stylesheet" href="style.css?v=sig-v2"/>
 </head>
 <body>
 
@@ -19,7 +19,7 @@
   <!-- HEADER -->
   <header>
     <div class="logo">
-      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#2e2e2e;">nex<span style="color:#F5C518;">lupa</span></span>
+      <span class="logo-text"><span class="hdr-ne">ne</span><span class="hdr-x">x<span class="hdr-star" aria-hidden="true">✦</span></span><span class="hdr-lupa">lupa</span></span>
     </div>
     <div class="header-sub">La lupa que treballa sola</div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
@@ -61,55 +61,68 @@
 
       <div class="app-col-left">
 
-        <!-- Layer 0: dot grid -->
+        <!-- Dot grid background -->
         <div class="acl-grid" aria-hidden="true"></div>
 
-        <!-- Layer 1: ambient glow -->
-        <div class="acl-glow" aria-hidden="true"></div>
-
-        <!-- Layer 2: lupa SVG icònica -->
-        <div class="acl-lupa" aria-hidden="true">
-          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Outer ring -->
-            <circle cx="120" cy="120" r="108" stroke="rgba(245,197,24,0.13)" stroke-width="1.5"/>
-            <!-- Mid ring -->
-            <circle cx="120" cy="120" r="80" stroke="rgba(245,197,24,0.07)" stroke-width="1"/>
-            <!-- Inner ring -->
-            <circle cx="120" cy="120" r="52" stroke="rgba(245,197,24,0.045)" stroke-width="1"/>
-            <!-- Scanning dashed ring (rotates) -->
-            <circle class="lupa-scan" cx="120" cy="120" r="94" stroke="rgba(245,197,24,0.10)" stroke-width="1" stroke-dasharray="5 11"/>
-            <!-- Crosshair -->
-            <line x1="106" y1="120" x2="134" y2="120" stroke="rgba(245,197,24,0.22)" stroke-width="0.75"/>
-            <line x1="120" y1="106" x2="120" y2="134" stroke="rgba(245,197,24,0.22)" stroke-width="0.75"/>
-            <!-- Center dot -->
-            <circle cx="120" cy="120" r="6" fill="rgba(245,197,24,0.09)"/>
-            <circle cx="120" cy="120" r="2.5" fill="rgba(245,197,24,0.75)"/>
-            <!-- Handle -->
-            <line x1="207" y1="207" x2="276" y2="276" stroke="rgba(245,197,24,0.13)" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="207" cy="207" r="4.5" fill="none" stroke="rgba(245,197,24,0.18)" stroke-width="1.5"/>
-          </svg>
+        <!-- Zone 1: Title block (top) -->
+        <div class="acl-top">
+          <p class="acl-eyebrow"><span class="acl-dot-live"></span>Motor actiu</p>
+          <h2 class="acl-title">De la informació<br><span class="acl-title-gold">a la decisió</span></h2>
         </div>
 
-        <!-- Layer 3: particles (data points flotants) -->
-        <div class="acl-particles" aria-hidden="true">
-          <span class="acl-p p1"></span><span class="acl-p p2"></span>
-          <span class="acl-p p3"></span><span class="acl-p p4"></span>
-          <span class="acl-p p5"></span><span class="acl-p p6"></span>
-          <span class="acl-p p7"></span><span class="acl-p p8"></span>
+        <!-- Zone 2: Central lupa (protagonist) -->
+        <div class="acl-center">
+          <div class="acl-glow" aria-hidden="true"></div>
+          <span class="acl-ring r1" aria-hidden="true"></span>
+          <span class="acl-ring r2" aria-hidden="true"></span>
+          <span class="acl-ring r3" aria-hidden="true"></span>
+          <div class="acl-lupa" aria-hidden="true">
+            <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="lensGlowGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%"   stop-color="rgba(245,197,24,0.24)"/>
+                  <stop offset="55%"  stop-color="rgba(245,140,0,0.09)"/>
+                  <stop offset="100%" stop-color="transparent"/>
+                </radialGradient>
+                <radialGradient id="glassSheen" cx="38%" cy="32%" r="52%">
+                  <stop offset="0%"   stop-color="rgba(255,255,255,0.11)"/>
+                  <stop offset="100%" stop-color="transparent"/>
+                </radialGradient>
+                <linearGradient id="frameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#585858"/>
+                  <stop offset="50%"  stop-color="#3c3c3c"/>
+                  <stop offset="100%" stop-color="#2a2a2a"/>
+                </linearGradient>
+                <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#4e4e4e"/>
+                  <stop offset="100%" stop-color="#2a2a2a"/>
+                </linearGradient>
+              </defs>
+              <!-- Focused energy halo (behind lens, not diffuse) -->
+              <circle cx="90" cy="90" r="76" fill="url(#lensGlowGrad)"/>
+              <!-- Lens frame — metallic grey ring -->
+              <circle cx="90" cy="90" r="68" stroke="url(#frameGrad)" stroke-width="10" fill="none"/>
+              <!-- Gold rim accent -->
+              <circle cx="90" cy="90" r="73.5" stroke="rgba(245,197,24,0.20)" stroke-width="1.5" fill="none"/>
+              <!-- Lens glass (dark interior) -->
+              <circle cx="90" cy="90" r="63" fill="#0e1520"/>
+              <!-- Glass sheen highlight -->
+              <circle cx="90" cy="90" r="63" fill="url(#glassSheen)"/>
+              <!-- Gold starburst ✦ centered in lens -->
+              <text x="90" y="99" text-anchor="middle" font-size="40" fill="#F5C518" font-family="Georgia,serif" opacity="0.90">✦</text>
+              <!-- Handle -->
+              <path d="M 136 136 L 186 186" stroke="url(#handleGrad)" stroke-width="11" stroke-linecap="round"/>
+              <!-- Handle shine -->
+              <path d="M 138 138 L 184 184" stroke="rgba(255,255,255,0.08)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
         </div>
 
-        <!-- Contingut (z-index elevat) -->
-        <div class="acl-content">
-          <div class="acl-eyebrow">
-            <span class="acl-dot-live"></span>Motor actiu
-          </div>
-          <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
-          <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
-          <div class="app-left-feats">
-            <div class="app-feat-item">⚡ Resum en 10 segons</div>
-            <div class="app-feat-item">✅ Accions detectades automàticament</div>
-            <div class="app-feat-item">📅 Dates i terminis identificats</div>
-          </div>
+        <!-- Zone 3: Benefits block (bottom) -->
+        <div class="acl-benefits">
+          <div class="acl-ben-item">⚡ Resum en 10 segons</div>
+          <div class="acl-ben-item">✅ Accions detectades automàticament</div>
+          <div class="acl-ben-item">📅 Dates i terminis identificats</div>
         </div>
 
       </div>
@@ -407,7 +420,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=sig-v1"></script>
+<script src="script.js?v=sig-v2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
