@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=sig-v6"/>
+  <link rel="stylesheet" href="style.css?v=sig-v7"/>
 </head>
 <body>
 
@@ -68,50 +68,26 @@
             De la informació<br>
             <strong>a la decisió</strong>
           </h1>
+          <p class="nxl-sub">
+            No cal llegir-ho tot.<br>
+            <span>nexlupa</span> ho fa per tu.
+          </p>
         </div>
 
-        <div class="nxl-lupa-wrap">
-          <div class="nxl-pulse pulse-1"></div>
-          <div class="nxl-pulse pulse-2"></div>
-
+        <div class="nxl-visual">
+          <div class="nxl-glow"></div>
           <svg class="nxl-lupa" viewBox="0 0 260 260" aria-hidden="true">
-            <defs>
-              <radialGradient id="glass" cx="42%" cy="35%" r="65%">
-                <stop offset="0%" stop-color="#2f3238"/>
-                <stop offset="55%" stop-color="#15171b"/>
-                <stop offset="100%" stop-color="#090a0d"/>
-              </radialGradient>
-
-              <linearGradient id="metal" x1="30%" y1="10%" x2="80%" y2="90%">
-                <stop offset="0%" stop-color="#d7d7d2"/>
-                <stop offset="35%" stop-color="#777a7f"/>
-                <stop offset="70%" stop-color="#2c2f35"/>
-                <stop offset="100%" stop-color="#a9a9a4"/>
-              </linearGradient>
-
-              <linearGradient id="handle" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#7b7d82"/>
-                <stop offset="55%" stop-color="#24272d"/>
-                <stop offset="100%" stop-color="#f5c518"/>
-              </linearGradient>
-            </defs>
-
-            <circle cx="108" cy="108" r="58" fill="url(#glass)" stroke="url(#metal)" stroke-width="9"/>
-            <circle cx="108" cy="108" r="45" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
-
-            <path d="M148 148 L205 205" stroke="url(#handle)" stroke-width="15" stroke-linecap="round"/>
-            <path d="M153 153 L198 198" stroke="rgba(255,255,255,.18)" stroke-width="3" stroke-linecap="round"/>
-
-            <path class="nxl-star" d="M108 76 L116 100 L140 108 L116 116 L108 140 L100 116 L76 108 L100 100 Z" fill="#F5C518"/>
-
-            <path d="M78 74 C92 60 118 55 139 66" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="108" cy="108" r="58" class="lens"/>
+            <circle cx="108" cy="108" r="58" class="ring"/>
+            <path d="M148 148 L205 205" class="handle"/>
+            <circle cx="108" cy="108" r="6" class="star"/>
           </svg>
         </div>
 
         <div class="nxl-benefits">
           <div>⚡ Resum en 10 segons</div>
-          <div>✅ Accions detectades automàticament</div>
-          <div>🗓️ Dates i terminis identificats</div>
+          <div>✅ Accions detectades</div>
+          <div>🗓️ Dates identificades</div>
         </div>
       </aside>
 
