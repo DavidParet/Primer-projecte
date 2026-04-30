@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=commercial-v1"/>
+  <link rel="stylesheet" href="style.css?v=sig-v1"/>
 </head>
 <body>
 
@@ -60,13 +60,58 @@
       <div class="app-2col">
 
       <div class="app-col-left">
-        <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
-        <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
-        <div class="app-left-feats">
-          <div class="app-feat-item">⚡ Resum en 10 segons</div>
-          <div class="app-feat-item">✅ Accions detectades automàticament</div>
-          <div class="app-feat-item">📅 Dates i terminis identificats</div>
+
+        <!-- Layer 0: dot grid -->
+        <div class="acl-grid" aria-hidden="true"></div>
+
+        <!-- Layer 1: ambient glow -->
+        <div class="acl-glow" aria-hidden="true"></div>
+
+        <!-- Layer 2: lupa SVG icònica -->
+        <div class="acl-lupa" aria-hidden="true">
+          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer ring -->
+            <circle cx="120" cy="120" r="108" stroke="rgba(245,197,24,0.13)" stroke-width="1.5"/>
+            <!-- Mid ring -->
+            <circle cx="120" cy="120" r="80" stroke="rgba(245,197,24,0.07)" stroke-width="1"/>
+            <!-- Inner ring -->
+            <circle cx="120" cy="120" r="52" stroke="rgba(245,197,24,0.045)" stroke-width="1"/>
+            <!-- Scanning dashed ring (rotates) -->
+            <circle class="lupa-scan" cx="120" cy="120" r="94" stroke="rgba(245,197,24,0.10)" stroke-width="1" stroke-dasharray="5 11"/>
+            <!-- Crosshair -->
+            <line x1="106" y1="120" x2="134" y2="120" stroke="rgba(245,197,24,0.22)" stroke-width="0.75"/>
+            <line x1="120" y1="106" x2="120" y2="134" stroke="rgba(245,197,24,0.22)" stroke-width="0.75"/>
+            <!-- Center dot -->
+            <circle cx="120" cy="120" r="6" fill="rgba(245,197,24,0.09)"/>
+            <circle cx="120" cy="120" r="2.5" fill="rgba(245,197,24,0.75)"/>
+            <!-- Handle -->
+            <line x1="207" y1="207" x2="276" y2="276" stroke="rgba(245,197,24,0.13)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="207" cy="207" r="4.5" fill="none" stroke="rgba(245,197,24,0.18)" stroke-width="1.5"/>
+          </svg>
         </div>
+
+        <!-- Layer 3: particles (data points flotants) -->
+        <div class="acl-particles" aria-hidden="true">
+          <span class="acl-p p1"></span><span class="acl-p p2"></span>
+          <span class="acl-p p3"></span><span class="acl-p p4"></span>
+          <span class="acl-p p5"></span><span class="acl-p p6"></span>
+          <span class="acl-p p7"></span><span class="acl-p p8"></span>
+        </div>
+
+        <!-- Contingut (z-index elevat) -->
+        <div class="acl-content">
+          <div class="acl-eyebrow">
+            <span class="acl-dot-live"></span>Motor actiu
+          </div>
+          <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
+          <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
+          <div class="app-left-feats">
+            <div class="app-feat-item">⚡ Resum en 10 segons</div>
+            <div class="app-feat-item">✅ Accions detectades automàticament</div>
+            <div class="app-feat-item">📅 Dates i terminis identificats</div>
+          </div>
+        </div>
+
       </div>
 
       <div class="app-col-right">
@@ -362,7 +407,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=commercial-v1"></script>
+<script src="script.js?v=sig-v1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');

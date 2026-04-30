@@ -1216,3 +1216,153 @@ body.dark {
   .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; }
 }
+
+/* ============================================================
+   SIGNATURE LEFT COLUMN — nexlupa visual identity
+   Totes les regles confinades a min-width:768px (desktop only).
+   Animacions usant únicament transform+opacity → GPU, no layout.
+   ============================================================ */
+@media (min-width: 768px) {
+
+  /* ── Base override ───────────────────────────────────────── */
+  .app-col-left {
+    background: linear-gradient(158deg, #090d14 0%, #0d1420 45%, #121926 100%);
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+  .app-col-left::before { display: none !important; }
+
+  /* ── Dot grid ───────────────────────────────────────────── */
+  .acl-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.033) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* ── Ambient glow (respira suaument) ─────────────────────── */
+  .acl-glow {
+    position: absolute;
+    top: 44%; right: -18%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+      rgba(245,180,0,0.14) 0%,
+      rgba(240,145,0,0.05) 40%,
+      transparent 68%
+    );
+    z-index: 1; pointer-events: none;
+    animation: aclGlowBreath 5s ease-in-out infinite;
+    will-change: opacity, transform;
+  }
+  @keyframes aclGlowBreath {
+    0%,100% { opacity: .72; transform: scale(1); }
+    50%     { opacity: 1;   transform: scale(1.20); }
+  }
+
+  /* ── Lupa SVG ───────────────────────────────────────────── */
+  .acl-lupa {
+    position: absolute;
+    right: -68px; top: 50%;
+    transform: translateY(-50%);
+    width: 280px; height: 280px;
+    z-index: 2; pointer-events: none;
+    animation: aclLupaFloat 9s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes aclLupaFloat {
+    0%,100% { transform: translateY(-50%) rotate(0deg); }
+    50%     { transform: translateY(calc(-50% - 7px)) rotate(1.6deg); }
+  }
+  .acl-lupa svg { width: 100%; height: 100%; overflow: visible; }
+
+  .lupa-scan {
+    animation: aclScanRotate 14s linear infinite;
+    transform-origin: 120px 120px;
+    will-change: transform;
+  }
+  @keyframes aclScanRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ── Particles (data points flotants) ───────────────────── */
+  .acl-particles {
+    position: absolute; inset: 0; z-index: 3;
+    pointer-events: none; overflow: hidden;
+  }
+  .acl-p {
+    position: absolute; border-radius: 50%;
+    background: rgba(245,197,24,.6);
+    bottom: -6px;
+    animation: aclPRise linear infinite;
+    will-change: transform, opacity;
+  }
+  .p1 { width:2px; height:2px; left:11%; animation-duration:9s;  animation-delay:0s;   opacity:.50; }
+  .p2 { width:3px; height:3px; left:27%; animation-duration:12s; animation-delay:2.5s; opacity:.35; }
+  .p3 { width:2px; height:2px; left:43%; animation-duration:8s;  animation-delay:1s;   opacity:.55; }
+  .p4 { width:2px; height:2px; left:59%; animation-duration:15s; animation-delay:4s;   opacity:.28; }
+  .p5 { width:3px; height:3px; left:73%; animation-duration:10s; animation-delay:3s;   opacity:.40; }
+  .p6 { width:2px; height:2px; left:19%; animation-duration:11s; animation-delay:6s;   opacity:.45; }
+  .p7 { width:2px; height:2px; left:85%; animation-duration:7s;  animation-delay:1.5s; opacity:.30; }
+  .p8 { width:3px; height:3px; left:37%; animation-duration:13s; animation-delay:7s;   opacity:.38; }
+  @keyframes aclPRise {
+    0%  { transform: translateY(0) translateX(0);    opacity: 0; }
+    8%  { opacity: 1; }
+    88% { opacity: .65; }
+    100%{ transform: translateY(-108vh) translateX(16px); opacity: 0; }
+  }
+
+  /* ── Content wrapper ────────────────────────────────────── */
+  .acl-content {
+    position: relative; z-index: 10;
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  /* ── Eyebrow ────────────────────────────────────────────── */
+  .acl-eyebrow {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(245,197,24,.5);
+    margin-bottom: 16px;
+  }
+  .acl-eyebrow::before {
+    content: '';
+    display: inline-block; width: 18px; height: 1.5px;
+    background: rgba(245,197,24,.35); flex-shrink: 0;
+  }
+
+  /* ── Live status dot ─────────────────────────────────────── */
+  .acl-dot-live {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(61,186,111,.9);
+    display: inline-block; flex-shrink: 0;
+    animation: aclDotPulse 2.4s ease-in-out infinite;
+    will-change: box-shadow, opacity;
+  }
+  @keyframes aclDotPulse {
+    0%,100% { box-shadow: 0 0 0 0   rgba(61,186,111,.5); opacity: 1; }
+    50%     { box-shadow: 0 0 0 5px rgba(61,186,111,0);  opacity: .65; }
+  }
+
+  /* ── Feat items — hover amb micro-animació ──────────────── */
+  .app-feat-item {
+    border-left: 2.5px solid rgba(245,197,24,.28);
+    border-radius: 0 10px 10px 0;
+    transition: border-color .22s ease, background .22s ease, transform .18s ease;
+  }
+  .app-feat-item:hover {
+    background: rgba(245,197,24,.065);
+    border-color: rgba(245,197,24,.7);
+    transform: translateX(3px);
+  }
+}
+
+/* ── Ajustos específics 900px (col és 28%, més estreta) ───── */
+@media (min-width: 900px) {
+  .acl-lupa    { width: 240px; height: 240px; right: -55px; }
+  .acl-glow    { width: 300px; height: 300px; }
+  .acl-eyebrow { margin-bottom: 10px; font-size: 9px; }
+}
