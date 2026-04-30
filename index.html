@@ -27,17 +27,6 @@
 
     .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 180px 20px 140px; }
     .hero-title { font-size: clamp(68px, 8.5vw, 100px); line-height: 1.12; letter-spacing: -0.025em; margin: 40px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; }
-
-    @media (min-width: 1024px) {
-      .hero { padding: 90px 40px 32px; }
-      .hero-badge { margin-bottom: 16px; }
-      .hero-title { font-size: clamp(36px, 3.6vw, 52px); margin: 16px 0 0; line-height: 1.1; }
-      .hero-sub { font-size: 17px; margin-top: 20px; line-height: 1.6; }
-      .hero-sub2 { margin-top: 10px; font-size: 15px; }
-      .hero-cta button { margin-top: 24px; padding: 16px 40px; font-size: 16px; }
-      .hero-micro { margin-top: 10px; font-size: 13px; }
-      .hero-visual { display: none; }
-    }
     .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
     .hero-title .gold { color: #f5b400; display: block; }
     .hero-sub { font-size: clamp(18px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; }
@@ -318,6 +307,18 @@
     @media (max-width: 560px) {
       .hero-top { padding: 88px 5% 32px; }
       .steps { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── DESKTOP HERO: tot en una sola vista ── */
+    @media (min-width: 1024px) {
+      .hero { padding: 90px 40px 32px; }
+      .hero-badge { margin-bottom: 14px; }
+      .hero-title { font-size: clamp(28px, 3vw, 42px); margin: 14px 0 0; line-height: 1.1; }
+      .hero-sub { font-size: 16px; margin-top: 18px; line-height: 1.55; }
+      .hero-sub2 { margin-top: 8px; font-size: 14px; }
+      .hero-cta button { margin-top: 20px; padding: 15px 38px; font-size: 15px; }
+      .hero-micro { margin-top: 8px; font-size: 12px; }
+      .hero-visual { display: none; }
     }
 
   </style>
