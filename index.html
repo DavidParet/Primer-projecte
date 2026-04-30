@@ -27,6 +27,14 @@
 
     .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 180px 20px 140px; }
     .hero-title { font-size: clamp(68px, 8.5vw, 100px); line-height: 1.12; letter-spacing: -0.025em; margin: 40px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; }
+
+    @media (min-width: 1024px) {
+      .hero { padding: 120px 40px 80px; }
+      .hero-title { font-size: clamp(40px, 4vw, 58px); margin: 28px 0 0; }
+      .hero-sub { margin-top: 28px; }
+      .hero-cta button { margin-top: 36px; padding: 18px 44px; font-size: 17px; }
+      .hero-visual img { margin-top: 56px; }
+    }
     .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
     .hero-title .gold { color: #f5b400; display: block; }
     .hero-sub { font-size: clamp(18px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; }
