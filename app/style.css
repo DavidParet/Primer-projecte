@@ -450,26 +450,6 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 .logo svg  { height: 32px; width: auto; }
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
-.logo-text {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 26px;
-  color: #2a2a2a;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  display: inline-flex;
-  align-items: baseline;
-}
-.hdr-x { position: relative; display: inline-block; }
-.hdr-star {
-  position: absolute;
-  top: -6px; right: -7px;
-  font-size: 9px;
-  color: #F5C518;
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-}
 
 /* App hero */
 #pageApp .app-hero {
@@ -1095,8 +1075,8 @@ body.dark {
   .app-col-left {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    flex: 0 0 34%;
+    justify-content: center;
+    flex: 0 0 40%;
     background: linear-gradient(160deg, #1c1c1c 0%, #2a2a2a 100%);
     padding: 40px 40px;
     position: relative;
@@ -1197,9 +1177,9 @@ body.dark {
   .nav-btn span  { font-size: 17px; }
   .nav-btn small { font-size: 9px; }
 
-  /* ── COLUMNA ESQUERRA: 24%, contingut 3-zones ───────────────── */
+  /* ── COLUMNA ESQUERRA: 28%, centrada verticalment ───────────── */
   .app-col-left {
-    flex: 0 0 24%;
+    flex: 0 0 28%;
     padding: 24px 22px;
   }
 
@@ -1236,111 +1216,3 @@ body.dark {
   .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; }
 }
-
-/* ============================================================
-   SIGNATURE LEFT COLUMN sig-v7 — nxl-signature minimal
-   ============================================================ */
-
-.app-col-left::before { display: none !important; }
-
-.nxl-signature {
-  background: linear-gradient(180deg, #141416, #0b0b0d);
-  color: #f4f4f1;
-  padding: 26px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* TOP */
-
-.nxl-status {
-  font-size: 11px;
-  letter-spacing: .18em;
-  color: rgba(245,197,24,.7);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.nxl-status span {
-  width: 6px;
-  height: 6px;
-  background: #2fd66f;
-  border-radius: 50%;
-}
-
-.nxl-top h1 {
-  font-family: Syne, sans-serif;
-  font-size: 34px;
-  line-height: 1;
-  margin: 0;
-}
-
-.nxl-top strong {
-  color: #F5C518;
-}
-
-.nxl-sub {
-  margin-top: 10px;
-  font-size: 14px;
-  color: rgba(255,255,255,.6);
-}
-
-.nxl-sub span {
-  color: #F5C518;
-}
-
-/* VISUAL */
-
-.nxl-visual {
-  position: relative;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nxl-glow {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, rgba(245,197,24,.18), transparent 70%);
-}
-
-.nxl-lupa {
-  width: 120px;
-  z-index: 1;
-}
-
-.lens {
-  fill: #0f1114;
-}
-
-.ring {
-  fill: none;
-  stroke: #6c7077;
-  stroke-width: 6;
-}
-
-.handle {
-  stroke: #4a4d52;
-  stroke-width: 10;
-  stroke-linecap: round;
-}
-
-.star {
-  fill: #F5C518;
-}
-
-/* BENEFITS */
-
-.nxl-benefits {
-  font-size: 13px;
-  color: rgba(255,255,255,.7);
-  display: grid;
-  gap: 10px;
-  margin-top: 10px;
-}
-

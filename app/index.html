@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=sig-v7"/>
+  <link rel="stylesheet" href="style.css?v=commercial-v1"/>
 </head>
 <body>
 
@@ -19,7 +19,7 @@
   <!-- HEADER -->
   <header>
     <div class="logo">
-      <span class="logo-text"><span class="hdr-ne">ne</span><span class="hdr-x">x<span class="hdr-star" aria-hidden="true">✦</span></span><span class="hdr-lupa">lupa</span></span>
+      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#2e2e2e;">nex<span style="color:#F5C518;">lupa</span></span>
     </div>
     <div class="header-sub">La lupa que treballa sola</div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
@@ -59,37 +59,15 @@
     <div id="pageInici">
       <div class="app-2col">
 
-      <aside class="app-col-left nxl-signature">
-        <div class="nxl-top">
-          <div class="nxl-status">
-            <span></span> MOTOR ACTIU
-          </div>
-          <h1>
-            De la informació<br>
-            <strong>a la decisió</strong>
-          </h1>
-          <p class="nxl-sub">
-            No cal llegir-ho tot.<br>
-            <span>nexlupa</span> ho fa per tu.
-          </p>
+      <div class="app-col-left">
+        <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
+        <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
+        <div class="app-left-feats">
+          <div class="app-feat-item">⚡ Resum en 10 segons</div>
+          <div class="app-feat-item">✅ Accions detectades automàticament</div>
+          <div class="app-feat-item">📅 Dates i terminis identificats</div>
         </div>
-
-        <div class="nxl-visual">
-          <div class="nxl-glow"></div>
-          <svg class="nxl-lupa" viewBox="0 0 260 260" aria-hidden="true">
-            <circle cx="108" cy="108" r="58" class="lens"/>
-            <circle cx="108" cy="108" r="58" class="ring"/>
-            <path d="M148 148 L205 205" class="handle"/>
-            <circle cx="108" cy="108" r="6" class="star"/>
-          </svg>
-        </div>
-
-        <div class="nxl-benefits">
-          <div>⚡ Resum en 10 segons</div>
-          <div>✅ Accions detectades</div>
-          <div>🗓️ Dates identificades</div>
-        </div>
-      </aside>
+      </div>
 
       <div class="app-col-right">
 
@@ -384,7 +362,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=sig-v5"></script>
+<script src="script.js?v=commercial-v1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
