@@ -113,8 +113,8 @@
         </div>
 
         <div id="premiumPromoCard" style="text-align:center;margin-top:10px;padding:10px 0 4px;border-top:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics? <em>Properament Premium</em></div>
-          <button onclick="alert('⭐ nexlupa Premium — en desenvolupament. Aviat disponible!')"
+          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics?</div>
+          <button onclick="navTo('premium')"
             style="background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;"
             onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold2)';"
             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
@@ -159,13 +159,6 @@
           </button>
         </div>
 
-        <div class="card">
-          <div class="card-head"><div class="c-icon ci-green">⚡</div><div class="c-label">Accions ràpides</div></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-            <button class="btn-demo-action" onclick="alert('📅 Afegit al calendari!')">📅 Afegir al calendari</button>
-            <button class="btn-demo-action btn-demo-confirm" onclick="alert('✅ Confirmació enviada!')">✅ Confirmar assistència</button>
-          </div>
-        </div>
 
         <div class="card" id="shareCard">
           <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir</div></div>
@@ -213,14 +206,14 @@
           <div class="plan-card active">
             <div class="plan-badge">⭐ RECOMANAT</div>
             <div class="plan-name">Premium</div>
-            <div class="plan-price">X€<small>/mes</small></div>
+            <div class="plan-price" style="font-size:16px;padding-top:6px;letter-spacing:.01em;">Properament</div>
             <div class="plan-desc">Tot inclòs<br>Preu de llançament</div>
           </div>
         </div>
 
-        <button class="btn-buy-hero" onclick="alert('🚀 Pròximament! nexlupa Premium arribarà aviat.')">
+        <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20nexlupa%20%E2%80%94%20Avisa%27m" style="display:block;text-decoration:none;text-align:center;">
           ⭐ Vull Premium — Avisa'm quan llanci
-        </button>
+        </a>
         <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:10px;">Sense compromís · Cancel·la quan vulguis</div>
       </div>
 
@@ -286,21 +279,6 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">🔑</div><div class="c-label">Clau API (Anthropic)</div></div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">
-          Necessària per analitzar missatges. Obté-la a
-          <a href="https://console.anthropic.com" target="_blank" rel="noopener" style="color:var(--gold);">console.anthropic.com</a>
-        </p>
-        <div style="display:flex;gap:8px;">
-          <input id="cfgApiKey" type="password" placeholder="sk-ant-..."
-            style="flex:1;font-family:'Nunito',sans-serif;font-size:13px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--dark);outline:none;"
-            oninput="saveApiKey(this.value)"/>
-          <button onclick="var i=document.getElementById('cfgApiKey');i.type=i.type==='password'?'text':'password';"
-            style="padding:10px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);cursor:pointer;font-size:14px;">👁</button>
-        </div>
-        <div id="apiKeyStatus" style="font-size:11px;margin-top:6px;font-weight:700;"></div>
-      </div>
 
       <div class="card">
         <div class="card-head"><div class="c-icon ci-blue">🎨</div><div class="c-label">Aparença</div></div>
@@ -329,14 +307,12 @@
         <div class="card-head"><div class="c-icon ci-red">🗑️</div><div class="c-label">Dades</div></div>
         <button class="cfg-danger-btn" onclick="clearHistorial()">🗑️ Esborrar historial</button>
         <button class="cfg-danger-btn" onclick="clearTasques()" style="margin-top:8px;">✅ Esborrar tasques completades</button>
-        <button class="cfg-danger-btn" onclick="localStorage.removeItem('nxl_ob_done');alert('Onboarding reset. Torna a carregar l\'app.');" style="margin-top:8px;background:var(--blue-bg);color:var(--blue);border-color:#bfdbfe;">🎬 Veure onboarding de nou</button>
-        <button class="cfg-danger-btn" onclick="toggleDemo();navTo('inici');" style="margin-top:8px;background:#f3e8ff;color:#7c3aed;border-color:#ddd6fe;">🎬 Mode Demo (presentació)</button>
       </div>
 
       <div class="card" style="text-align:center;">
         <div style="font-size:28px;margin-bottom:8px;">🔍</div>
         <div style="font-size:14px;font-weight:800;color:var(--darker);">nexlupa motor</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0 · built with Claude API</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>
       </div>
 
@@ -382,7 +358,7 @@
   </nav>
 
   <div class="bottom-spacer"></div>
-  <footer>powered by <b>nexlupa</b> motor · built with Claude API</footer>
+  <footer>La lupa que treballa sola · <b>nexlupa</b></footer>
 
 </div><!-- fi pageApp -->
 

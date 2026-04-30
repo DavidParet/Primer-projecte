@@ -90,22 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-/* ── API KEY ── */
-function getApiKey() {
-  return localStorage.getItem('nxl_apikey') || '';
-}
-function saveApiKey(key) {
-  localStorage.setItem('nxl_apikey', key.trim());
-  var st = document.getElementById('apiKeyStatus');
-  if (st) {
-    if (key.trim()) {
-      st.textContent = '✓ Clau configurada';
-      st.style.color = 'var(--green)';
-    } else {
-      st.textContent = '';
-    }
-  }
-}
 
 /* ── EXAMPLE TEXTS ── */
 var DEFAULT_TEXT = "Hola famílies,\n\nEsperem que estigueu tots bé! 😊\n\nUs escrivim per recordar-vos algunes coses de cara als propers dies. Sabem que hi ha moltes comunicacions i pot ser difícil estar al dia de tot.\n\nAquest divendres 11 d'abril celebrarem la jornada esportiva a l'escola. L'activitat començarà a les 17:00 i està previst que duri aproximadament fins a les 19:30, tot i que pot variar una mica segons com evolucioni la tarda.\n\nÉs important que els alumnes portin roba esportiva adequada i còmoda. També recomanem portar una ampolla d'aigua.\n\nRecordeu que és imprescindible portar l'autorització signada. Sense aquesta autorització no podran participar a l'activitat.\n\nEn cas que algun alumne tingui intoleràncies alimentàries o necessitats especials, si us plau, feu-nos-ho saber amb antelació responent a aquest mateix correu.\n\nA més, la setmana vinent començarem els preparatius per la sortida de final de curs, de la qual us enviarem informació més detallada pròximament.\n\nMoltes gràcies per la vostra col·laboració i confiança!\n\nSalutacions,\nEquip docent";
@@ -738,12 +722,6 @@ function loadConfig() {
   var nomEl = document.getElementById('cfgNom');
   if (nomEl && cfg.nom) nomEl.value = cfg.nom;
 
-  var key   = getApiKey();
-  var keyEl = document.getElementById('cfgApiKey');
-  var stEl  = document.getElementById('apiKeyStatus');
-  if (key && keyEl) keyEl.value = key;
-  if (key && stEl)  { stEl.textContent = '✓ Clau configurada'; stEl.style.color = 'var(--green)'; }
-
   if (cfg.dark) {
     document.body.classList.add('dark');
     var darkEl = document.getElementById('cfgDark');
@@ -779,8 +757,7 @@ function clearHistorial() {
   _historial = [];
   localStorage.removeItem('nxl_hist');
   updateBadges();
-  renderHistorial();
-  alert('Historial esborrat!');
+  renderHistory();
 }
 
 function clearTasques() {
@@ -788,7 +765,7 @@ function clearTasques() {
   _allTasques = _allTasques.filter(function (t) { return !t.done; });
   localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
   updateBadges();
-  alert('Tasques completades esborrades!');
+  renderTasques();
 }
 
 /* ── UTILITY ── */
