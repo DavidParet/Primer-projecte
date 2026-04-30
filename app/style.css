@@ -1307,54 +1307,48 @@ body.dark {
     flex: 1;
     display: flex; align-items: center; justify-content: center;
     min-height: 0;
+    padding-bottom: 12px;
   }
 
-  /* Focused energy glow (behind lens, no diffuse smoke) */
+  /* Halo ambient molt subtil (la llum pròpia ve del SVG) */
   .acl-glow {
     position: absolute;
-    width: 170px; height: 170px; border-radius: 50%;
+    width: 220px; height: 220px; border-radius: 50%;
     background: radial-gradient(circle at center,
-      rgba(245,180,0,0.32) 0%,
-      rgba(240,140,0,0.11) 48%,
-      transparent 70%
+      rgba(200,140,0,0.07) 0%,
+      transparent 65%
     );
     z-index: 0; pointer-events: none;
-    animation: aclGlowPulse 3.5s ease-in-out infinite;
-    will-change: opacity, transform;
-  }
-  @keyframes aclGlowPulse {
-    0%,100% { opacity: .78; transform: scale(1); }
-    50%     { opacity: 1;   transform: scale(1.14); }
   }
 
-  /* Pulse rings — GPU only (transform + opacity) */
+  /* Anells de pols — GPU only (transform + opacity) */
   .acl-ring {
     position: absolute;
-    width: 148px; height: 148px;
+    width: 144px; height: 144px;
     border-radius: 50%;
-    border: 1.5px solid rgba(245,197,24,0.50);
+    border: 1px solid rgba(245,197,24,0.45);
     z-index: 1; pointer-events: none;
-    animation: aclRingPulse 4s ease-out infinite;
+    animation: aclRingPulse 4.5s ease-out infinite;
     will-change: transform, opacity;
   }
   .r1 { animation-delay: 0s; }
-  .r2 { animation-delay: 1.33s; }
-  .r3 { animation-delay: 2.66s; }
+  .r2 { animation-delay: 1.50s; }
+  .r3 { animation-delay: 3.00s; }
   @keyframes aclRingPulse {
-    0%   { transform: scale(1);    opacity: .55; }
-    100% { transform: scale(1.90); opacity: 0; }
+    0%   { transform: scale(1);    opacity: .50; }
+    100% { transform: scale(2.10); opacity: 0; }
   }
 
-  /* Brand lupa SVG */
+  /* Lupa SVG principal */
   .acl-lupa {
     position: relative; z-index: 2; pointer-events: none;
-    width: 180px; height: 180px;
+    width: 200px; height: 200px;
     animation: aclLupaFloat 8s ease-in-out infinite;
     will-change: transform;
   }
   @keyframes aclLupaFloat {
     0%,100% { transform: translateY(0px); }
-    50%     { transform: translateY(-7px); }
+    50%     { transform: translateY(-6px); }
   }
   .acl-lupa svg { width: 100%; height: 100%; overflow: visible; }
 
@@ -1380,12 +1374,12 @@ body.dark {
   }
 }
 
-/* ── Larger screens: col 24% ─────────────────────────────── */
+/* ── Pantalles grans: col 24%, lupa ajustada ─────────────── */
 @media (min-width: 900px) {
   .acl-title   { font-size: clamp(18px, 2.0vw, 23px); }
-  .acl-lupa    { width: 158px; height: 158px; }
-  .acl-ring    { width: 128px; height: 128px; }
-  .acl-glow    { width: 148px; height: 148px; }
+  .acl-lupa    { width: 172px; height: 172px; }
+  .acl-ring    { width: 124px; height: 124px; }
+  .acl-glow    { width: 190px; height: 190px; }
   .acl-eyebrow { font-size: 9px; margin-bottom: 10px; }
 }
 
