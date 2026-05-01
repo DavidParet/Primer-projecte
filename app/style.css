@@ -1014,13 +1014,11 @@ body.dark .usage-label { color: var(--gold); }
   /* Botó analitzar: menys marge superior — guanya espai al textarea */
   .app-col-right .btn-analyze { margin-top: 8px; }
 
-  /* Usage counter: fila compacta d'una sola línia */
+  /* Usage counter: columna centrada — evita trencament de text */
   .app-col-right .usage-counter {
-    flex-direction: row;
-    flex-wrap: nowrap;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
+    gap: 4px;
     padding: 2px 0;
     margin-top: 6px;
   }
