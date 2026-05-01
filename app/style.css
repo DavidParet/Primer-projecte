@@ -543,12 +543,31 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* App headline (mobile only) */
 .app-main-headline {
-  font-family: 'Nunito', sans-serif;
-  font-size: 22px; font-weight: 800; line-height: 1.2;
-  color: var(--darker);
-  margin-bottom: 12px;
+  text-align: center;
+  max-width: 300px;
+  margin: 0 auto 10px;
 }
-.app-main-headline span { color: var(--gold2); }
+.hl-line1 {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(20px, 6vw, 24px); font-weight: 800; line-height: 1.2;
+  color: var(--darker);
+}
+.hl-line2 {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(18px, 5vw, 21px); font-weight: 700; line-height: 1.3;
+  color: var(--darker); margin-top: 2px;
+}
+.hl-line2 em { font-style: normal; color: var(--gold); }
+
+/* Micro-copy sota CTA */
+.btn-micro-copy {
+  text-align: center;
+  font-size: 11px; font-weight: 600;
+  color: var(--muted);
+  margin-top: 5px; letter-spacing: .1px;
+}
 
 /* Analyze button */
 .btn-analyze {
@@ -1010,6 +1029,7 @@ body.dark .usage-label { color: var(--gold); }
   .app-col-right .input-tabs,
   .app-col-right .ex-row,
   .app-col-right .btn-analyze,
+  .app-col-right .btn-micro-copy,
   .app-col-right .usage-counter { flex-shrink: 0; }
 
   /* Promo oculta: no afegeix alçada */
@@ -1022,8 +1042,13 @@ body.dark .usage-label { color: var(--gold); }
   .app-col-right { padding-top: 2px; }
   .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
 
-  /* Botó analitzar: enganxat al textarea */
+  /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
+  .app-col-right .btn-micro-copy { margin-top: 4px; }
+
+  /* Tabs: més compactes per donar espai a la textarea */
+  .app-col-right .tab-btn { padding: 7px; font-size: 12px; }
+  .app-col-right .input-tabs { margin-bottom: 6px; }
 
   /* Usage counter: mínim, discret */
   .app-col-right .usage-counter {
@@ -1032,12 +1057,6 @@ body.dark .usage-label { color: var(--gold); }
     gap: 2px;
     padding: 0;
     margin-top: 4px;
-  }
-
-  /* Headline: mida adaptada a mobile petit */
-  .app-col-right .app-main-headline {
-    font-size: clamp(18px, 5vw, 22px);
-    margin-bottom: 8px;
   }
 
   /* ── Qualitat comercial mobile ─────────────────────────────── */

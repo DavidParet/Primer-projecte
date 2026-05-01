@@ -77,7 +77,10 @@
           <div class="c-label">Missatge original</div>
         </div>
 
-        <h2 class="app-main-headline">Enganxa el missatge.<br><span>La resta ho fa nexlupa.</span></h2>
+        <h2 class="app-main-headline">
+          <span class="hl-line1">Enganxa el missatge.</span>
+          <span class="hl-line2">La resta ho fa <em>nexlupa.</em></span>
+        </h2>
 
         <div class="input-tabs">
           <button class="tab-btn active" id="tabText" onclick="switchTab('text')">✏️ Text</button>
@@ -85,7 +88,7 @@
         </div>
 
         <div id="panelText">
-          <textarea id="txt" placeholder="Enganxa un missatge aquí"></textarea>
+          <textarea id="txt" placeholder="Ex: correu, WhatsApp o comunicat…"></textarea>
 
         </div>
 
@@ -104,6 +107,7 @@
         <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
           🔍 Analitzar amb nexlupa
         </button>
+        <p class="btn-micro-copy">Resum i accions en 10 segons</p>
 
         <div class="usage-counter" id="usageCounter">
           <div class="usage-label">FREE · 3 ANÀLISIS AL DIA</div>
