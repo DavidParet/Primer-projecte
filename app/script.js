@@ -315,33 +315,43 @@ function render(d) {
   /* Resum hero */
   document.getElementById('resum').textContent = d.resum || '';
 
+  /* Urgency level — suporta format nou (urgent:"low|medium|high") i antic (urgencia:1-5) */
+  var urgLevel;
+  if (d.urgent) {
+    urgLevel = d.urgent; /* nou format */
+  } else if (d.urgencia) {
+    urgLevel = d.urgencia >= 4 ? 'high' : d.urgencia >= 3 ? 'medium' : 'low'; /* backward compat */
+  } else {
+    urgLevel = 'low';
+  }
+  var urgText = d.urgencia_text ||
+    (urgLevel === 'high'   ? 'Urgent — cal actuar avui' :
+     urgLevel === 'medium' ? 'Termini proper — actua aviat' : 'Informatiu');
+
   /* Urgency dots (hidden, kept for history compatibility) */
   var dotsEl = document.getElementById('urgDots');
   if (dotsEl) {
+    var urgNum = d.urgencia || (urgLevel === 'high' ? 5 : urgLevel === 'medium' ? 3 : 1);
     dotsEl.innerHTML = '';
     for (var i = 1; i <= 5; i++) {
       var dot = document.createElement('div');
-      dot.className = 'u-dot' + (i <= d.urgencia ? (d.urgencia >= 4 ? ' hot' : ' on') : '');
+      dot.className = 'u-dot' + (i <= urgNum ? (urgNum >= 4 ? ' hot' : ' on') : '');
       dotsEl.appendChild(dot);
     }
   }
   var urgTxtEl = document.getElementById('urgTxt');
-  if (urgTxtEl) urgTxtEl.textContent = d.urgencia_text || '';
+  if (urgTxtEl) urgTxtEl.textContent = urgText;
 
   /* Urgency badge in summary card */
   var urgBadge = document.getElementById('urgBadge');
   if (urgBadge) {
-    if (d.urgencia_text) {
-      var isCrit = d.urgencia >= 4;
-      var isMod  = d.urgencia >= 3;
-      var icon   = isCrit ? '⚡' : isMod ? '⏰' : '✅';
-      var bgCol  = isCrit ? 'rgba(229,57,53,.12)'  : isMod ? 'rgba(245,197,24,.12)' : 'rgba(61,186,111,.12)';
-      var txCol  = isCrit ? 'var(--red)'            : isMod ? 'var(--gold2)'          : 'var(--green)';
-      var brCol  = isCrit ? 'rgba(229,57,53,.3)'   : isMod ? 'rgba(245,197,24,.3)'  : 'rgba(61,186,111,.3)';
-      urgBadge.innerHTML = '<span class="urg-pill" style="background:' + bgCol + ';color:' + txCol + ';border:1px solid ' + brCol + ';">' + icon + ' ' + escHtml(d.urgencia_text) + '</span>';
-    } else {
-      urgBadge.innerHTML = '';
-    }
+    var isCrit = urgLevel === 'high';
+    var isMod  = urgLevel === 'medium';
+    var icon   = isCrit ? '⚡' : isMod ? '⏰' : '✅';
+    var bgCol  = isCrit ? 'rgba(229,57,53,.12)'  : isMod ? 'rgba(245,197,24,.12)' : 'rgba(61,186,111,.12)';
+    var txCol  = isCrit ? 'var(--red)'            : isMod ? 'var(--gold2)'          : 'var(--green)';
+    var brCol  = isCrit ? 'rgba(229,57,53,.3)'   : isMod ? 'rgba(245,197,24,.3)'  : 'rgba(61,186,111,.3)';
+    urgBadge.innerHTML = '<span class="urg-pill" style="background:' + bgCol + ';color:' + txCol + ';border:1px solid ' + brCol + ';">' + icon + ' ' + escHtml(urgText) + '</span>';
   }
 
   /* Actions */
@@ -627,7 +637,8 @@ function saveToHistorial(d) {
     timestamp:     now.toISOString(),
     date:          dateStr,
     resum:         d.resum         || '',
-    urgencia:      d.urgencia      || 1,
+    urgent:        d.urgent        || '',
+    urgencia:      d.urgencia      || 0,
     urgencia_text: d.urgencia_text || '',
     accions:       d.accions       || [],
     dates:         d.dates         || []
