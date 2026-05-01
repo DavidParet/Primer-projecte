@@ -25,8 +25,8 @@
     .logo-x::before { color: var(--gold2); opacity: .55; }
     .logo-dot  { color: var(--gold2); text-shadow: none; }
 
-    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 180px 20px 140px; }
-    .hero-title { font-size: clamp(68px, 8.5vw, 100px); line-height: 1.12; letter-spacing: -0.025em; margin: 40px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; }
+    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 100px 20px 80px; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-wrap: break-word; }
+    .hero-title { font-size: clamp(2.2rem, 8vw, 4.5rem); line-height: 1.05; letter-spacing: -0.025em; margin: 24px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
     .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
     .hero-title .gold { color: #f5b400; display: block; }
     .hero-sub { font-size: clamp(18px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; }
@@ -309,9 +309,37 @@
       .steps { grid-template-columns: 1fr 1fr; }
     }
 
+    /* ── MOBILE HERO: llegible i centrat en smartphones ── */
+    @media (max-width: 480px) {
+      .hero {
+        padding-top: 80px;
+        padding-bottom: 60px;
+        gap: 0;
+      }
+      .hero-title {
+        font-size: clamp(2rem, 9vw, 3rem);
+        line-height: 1.05;
+        margin-top: 16px;
+      }
+      .hero-sub {
+        font-size: clamp(1rem, 4vw, 1.1rem);
+        margin-top: 20px;
+        padding: 0 4px;
+      }
+      .hero-sub2 { margin-top: 10px; }
+      .hero-cta button {
+        margin-top: 28px;
+        padding: 18px 28px;
+        font-size: 16px;
+        width: 100%;
+        max-width: 340px;
+      }
+      .hero-visual img { margin-top: 48px; padding: 0 8px; }
+    }
+
     /* ── DESKTOP HERO: ampli, immersiu, una sola vista ── */
     @media (min-width: 1024px) {
-      .hero { padding: 80px 20px 28px; }
+      .hero { padding: 80px 20px 28px; display: block; min-height: unset; }
       .hero-badge { margin-bottom: 18px; }
       .hero-title { font-size: clamp(38px, 5.2vw, 72px); margin: 18px 0 0; line-height: 1.04; letter-spacing: -0.03em; }
       .hero-title .white { white-space: nowrap; margin-bottom: 0; }
