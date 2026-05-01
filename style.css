@@ -36,7 +36,17 @@
   padding: 0;
 }
 
-html { scroll-behavior: smooth; }
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 /* ── LANDING BODY ── */
 body {
@@ -44,6 +54,8 @@ body {
   background: var(--navy);
   color: var(--white);
   overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* ── APP BODY override (applied via .app-active) ── */
@@ -923,3 +935,18 @@ body.dark {
 
 /* Spacer above bottom nav */
 .bottom-spacer { display: none; }
+
+/* ── LANDING MOBILE OVERFLOW FIXES ── */
+@media (max-width: 640px) {
+  .platform-grid { grid-template-columns: 1fr !important; }
+  .features { padding: 30px 20px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .cta-section { margin: 0 12px 60px; padding: 40px 20px; }
+  .cta-section .btn-primary {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 20px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+  }
+}
