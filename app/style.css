@@ -518,15 +518,18 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* Textarea */
 #pageApp textarea {
   width: 100%;
-  border: 1.5px solid var(--border); border-radius: 12px;
-  padding: 13px 14px;
-  font-family: 'Nunito', sans-serif; font-size: 14px; line-height: 1.65;
+  border: 2px solid var(--border); border-radius: 14px;
+  padding: 14px 16px;
+  font-family: 'Nunito', sans-serif; font-size: 15px; line-height: 1.7;
   color: var(--dark); background: var(--bg);
-  resize: vertical; min-height: 260px; outline: none;
-  transition: border-color .2s;
+  resize: vertical; min-height: 240px; outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-#pageApp textarea:focus { border-color: var(--gold); }
-#pageApp textarea::placeholder { color: #c8c8c8; font-weight: 400; }
+#pageApp textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+}
+#pageApp textarea::placeholder { color: #b0b0b0; font-weight: 400; font-size: 14px; }
 
 /* Examples */
 .ex-row  { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
@@ -748,6 +751,7 @@ body.dark {
   --border: #333; --muted: #666; --soft: #999;
   --gold-bg: #2a2200; --green-bg: #0a2a15; --red-bg: #2a0a0a; --blue-bg: #0a1a2a;
 }
+body.dark .usage-label { color: var(--gold); }
 
 /* Premium header button */
 .btn-premium-header {
@@ -839,8 +843,19 @@ body.dark {
 
 /* Usage counter */
 .usage-counter {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 10px; font-size: 12px; color: var(--muted); font-weight: 600;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+}
+.usage-label {
+  font-size: 12px; font-weight: 800;
+  color: #8c6c00;
+  letter-spacing: .6px; text-transform: uppercase;
+}
+.usage-info {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--soft); font-weight: 700;
 }
 .usage-dots { display: flex; gap: 4px; }
 .usage-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background .3s; }
@@ -999,7 +1014,7 @@ body.dark {
   /* Botó analitzar: menys marge superior — guanya espai al textarea */
   .app-col-right .btn-analyze { margin-top: 8px; }
 
-  /* Usage counter: fila compacta d'una sola línia, sense text secundari */
+  /* Usage counter: fila compacta d'una sola línia */
   .app-col-right .usage-counter {
     flex-direction: row;
     flex-wrap: nowrap;
@@ -1009,8 +1024,6 @@ body.dark {
     padding: 2px 0;
     margin-top: 6px;
   }
-  /* Ocultar "Els teus anàlisis es guarden..." — soroll innecessari en mobile */
-  .app-col-right .usage-counter > div:last-child { display: none; }
 
   /* ── Qualitat comercial mobile ─────────────────────────────── */
 
@@ -1195,8 +1208,8 @@ body.dark {
   /* #pageApp textarea té especificitat (1,0,0,1)=101                      */
   /* #pageApp .app-col-right textarea té (1,1,0,1)=111 → guanya            */
   #pageApp .app-col-right textarea {
-    min-height: 120px;
-    max-height: 160px;
+    min-height: 130px;
+    max-height: 180px;
   }
 
   /* ── SECCIÓ PREMIUM: oculta en desktop (estalvia ~76px) ──────── */
@@ -1214,5 +1227,5 @@ body.dark {
   .app-col-right .input-tabs    { margin-bottom: 6px; }
   .app-col-right .ex-row        { margin-top: 2px; }
   .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
-  .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; }
+  .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
 }
