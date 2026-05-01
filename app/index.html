@@ -138,36 +138,33 @@
 
       <div class="results" id="results">
 
-        <div class="card">
-          <div class="card-head"><div class="c-icon ci-gold">⭐</div><div class="c-label">Resum</div></div>
+        <!-- BLOC 1: RESUM + URGÈNCIA -->
+        <div class="card result-hero-card">
+          <div class="result-label">📋 Resum</div>
           <div class="resum-txt" id="resum"></div>
+          <div id="urgBadge"></div>
+          <div style="display:none;"><div id="urgDots"></div><div id="urgTxt"></div></div>
         </div>
 
+        <!-- BLOC 2: ACCIONS -->
         <div class="card">
-          <div class="card-head"><div class="c-icon ci-red">⚡</div><div class="c-label">Urgència</div></div>
-          <div class="urg-row">
-            <div class="urg-dots" id="urgDots"></div>
-            <div class="urg-lbl"  id="urgTxt"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Accions</div></div>
+          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Fes això</div></div>
           <div id="actions"></div>
         </div>
 
+        <!-- BLOC 3: DATES / EVENTS -->
         <div class="card" id="datesCard">
-          <div class="card-head"><div class="c-icon ci-blue">📅</div><div class="c-label">Dates i terminis</div></div>
+          <div class="card-head"><div class="c-icon ci-blue">📅</div><div class="c-label">Quan i on</div></div>
           <div id="dates"></div>
           <button class="btn-calendar" id="btnCalendar" onclick="exportCalendar()" style="display:none;margin-top:14px;">
             📅 Afegir totes les dates a Google Calendar
           </button>
         </div>
 
-
+        <!-- BLOC 4: COMPARTIR -->
         <div class="card" id="shareCard">
           <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir</div></div>
-          <p style="font-size:13px;color:var(--soft);margin-bottom:12px;">Envia el resum i les tasques a algú de confiança.</p>
+          <p class="share-context">Envia això a algú de confiança</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn-share-wa"   onclick="shareWhatsApp()"><span>💬</span> WhatsApp</button>
             <button class="btn-share-copy" id="btnCopy" onclick="copyLink()"><span>🔗</span> Copiar link</button>

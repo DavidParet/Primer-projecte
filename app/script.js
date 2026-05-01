@@ -312,18 +312,37 @@ function render(d) {
   if (!document.getElementById('resum')) return;
   _lastData = d;
 
+  /* Resum hero */
   document.getElementById('resum').textContent = d.resum || '';
 
-  /* Urgency dots */
+  /* Urgency dots (hidden, kept for history compatibility) */
   var dotsEl = document.getElementById('urgDots');
-  dotsEl.innerHTML = '';
-  for (var i = 1; i <= 5; i++) {
-    var dot = document.createElement('div');
-    dot.className = 'u-dot' + (i <= d.urgencia ? (d.urgencia >= 4 ? ' hot' : ' on') : '');
-    dotsEl.appendChild(dot);
+  if (dotsEl) {
+    dotsEl.innerHTML = '';
+    for (var i = 1; i <= 5; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'u-dot' + (i <= d.urgencia ? (d.urgencia >= 4 ? ' hot' : ' on') : '');
+      dotsEl.appendChild(dot);
+    }
   }
-  var urgTxt = document.getElementById('urgTxt');
-  if (urgTxt) urgTxt.textContent = d.urgencia_text || '';
+  var urgTxtEl = document.getElementById('urgTxt');
+  if (urgTxtEl) urgTxtEl.textContent = d.urgencia_text || '';
+
+  /* Urgency badge in summary card */
+  var urgBadge = document.getElementById('urgBadge');
+  if (urgBadge) {
+    if (d.urgencia_text) {
+      var isCrit = d.urgencia >= 4;
+      var isMod  = d.urgencia >= 3;
+      var icon   = isCrit ? '⚡' : isMod ? '⏰' : '✅';
+      var bgCol  = isCrit ? 'rgba(229,57,53,.12)'  : isMod ? 'rgba(245,197,24,.12)' : 'rgba(61,186,111,.12)';
+      var txCol  = isCrit ? 'var(--red)'            : isMod ? 'var(--gold2)'          : 'var(--green)';
+      var brCol  = isCrit ? 'rgba(229,57,53,.3)'   : isMod ? 'rgba(245,197,24,.3)'  : 'rgba(61,186,111,.3)';
+      urgBadge.innerHTML = '<span class="urg-pill" style="background:' + bgCol + ';color:' + txCol + ';border:1px solid ' + brCol + ';">' + icon + ' ' + escHtml(d.urgencia_text) + '</span>';
+    } else {
+      urgBadge.innerHTML = '';
+    }
+  }
 
   /* Actions */
   var actEl = document.getElementById('actions');
@@ -335,13 +354,14 @@ function render(d) {
     box.className = 'act-chk';
     box.onclick = function () { chk(box, row); };
     var txt = document.createElement('span');
+    txt.className = 'act-txt';
     txt.textContent = a;
     row.appendChild(box);
     row.appendChild(txt);
     actEl.appendChild(row);
   });
 
-  /* Dates */
+  /* Dates — event cards with Maps + Calendar */
   var datesEl   = document.getElementById('dates');
   var datesCard = document.getElementById('datesCard');
   var btnCal    = document.getElementById('btnCalendar');
@@ -350,26 +370,38 @@ function render(d) {
     datesCard.style.display = 'block';
     if (btnCal) btnCal.style.display = 'flex';
     d.dates.forEach(function (dt) {
-      var row   = document.createElement('div');
-      row.className = 'date-item';
-      var desc  = document.createElement('span');
-      desc.className = 'date-desc';
-      desc.textContent = dt.descripcio;
-      var right = document.createElement('div');
-      right.style.cssText = 'display:flex;gap:6px;align-items:center;flex-shrink:0;';
-      var badge = document.createElement('span');
-      badge.className = 'date-badge' + (dt.urgent ? ' hot' : '');
-      badge.textContent = dt.data;
+      var card = document.createElement('div');
+      card.className = 'event-card';
+
+      var timeEl = document.createElement('div');
+      timeEl.className = 'event-time' + (dt.urgent ? ' event-time-hot' : '');
+      timeEl.textContent = dt.data || '';
+      card.appendChild(timeEl);
+
+      var titleEl = document.createElement('div');
+      titleEl.className = 'event-title';
+      titleEl.textContent = dt.descripcio;
+      card.appendChild(titleEl);
+
+      var actRow = document.createElement('div');
+      actRow.className = 'event-actions';
+
+      var mapsLink = document.createElement('a');
+      mapsLink.href = 'https://www.google.com/maps/search/' + encodeURIComponent(dt.descripcio);
+      mapsLink.target = '_blank';
+      mapsLink.rel = 'noopener noreferrer';
+      mapsLink.className = 'btn-maps';
+      mapsLink.textContent = '📍 Google Maps';
+      actRow.appendChild(mapsLink);
+
       var calBtn = document.createElement('button');
-      calBtn.textContent = '📅';
-      calBtn.title = 'Afegir al Google Calendar';
-      calBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:16px;padding:2px;';
+      calBtn.className = 'btn-cal-sm';
+      calBtn.textContent = '📅 Calendari';
       calBtn.onclick = function () { addSingleToCalendar(dt); };
-      right.appendChild(badge);
-      right.appendChild(calBtn);
-      row.appendChild(desc);
-      row.appendChild(right);
-      datesEl.appendChild(row);
+      actRow.appendChild(calBtn);
+
+      card.appendChild(actRow);
+      datesEl.appendChild(card);
     });
   } else {
     datesCard.style.display = 'none';
