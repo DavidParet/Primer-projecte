@@ -541,20 +541,30 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 .ex-btn:hover { border-color: var(--gold); color: var(--darker); background: var(--gold-bg); }
 
+/* App headline (mobile only) */
+.app-main-headline {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px; font-weight: 800; line-height: 1.2;
+  color: var(--darker);
+  margin-bottom: 12px;
+}
+.app-main-headline span { color: var(--gold2); }
+
 /* Analyze button */
 .btn-analyze {
-  width: 100%; padding: 15px;
+  width: 100%; padding: 17px;
   background: var(--gold); color: var(--darker);
   border: none; border-radius: 50px;
-  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .2s; margin-top: 14px; letter-spacing: .2px;
+  transition: all .2s; margin-top: 10px; letter-spacing: .2px;
+  box-shadow: 0 6px 20px rgba(245,197,24,.4);
 }
 .btn-analyze:hover:not(:disabled) {
   background: var(--gold2); transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(245,197,24,.35);
+  box-shadow: 0 10px 28px rgba(245,197,24,.5);
 }
-.btn-analyze:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-analyze:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* Loading */
 .loading { display: none; text-align: center; padding: 44px 20px; }
@@ -849,17 +859,17 @@ body.dark .usage-label { color: var(--gold); }
   margin-top: 10px;
 }
 .usage-label {
-  font-size: 12px; font-weight: 800;
-  color: #8c6c00;
-  letter-spacing: .6px; text-transform: uppercase;
+  font-size: 10px; font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .4px; text-transform: uppercase;
 }
 .usage-info {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; color: var(--soft); font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--muted); font-weight: 600;
 }
-.usage-dots { display: flex; gap: 4px; }
-.usage-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background .3s; }
-.usage-dot.used { background: var(--gold); }
+.usage-dots { display: flex; gap: 3px; }
+.usage-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .3s; }
+.usage-dot.used { background: var(--gold); opacity: .7; }
 .usage-dot.last { background: var(--red); }
 
 /* Onboarding */
@@ -995,6 +1005,7 @@ body.dark .usage-label { color: var(--gold); }
   }
 
   /* Tots els altres elements de la card no s'estiren */
+  .app-col-right .app-main-headline,
   .app-col-right .card-head,
   .app-col-right .input-tabs,
   .app-col-right .ex-row,
@@ -1011,16 +1022,22 @@ body.dark .usage-label { color: var(--gold); }
   .app-col-right { padding-top: 2px; }
   .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
 
-  /* Botó analitzar: menys marge superior — guanya espai al textarea */
-  .app-col-right .btn-analyze { margin-top: 8px; }
+  /* Botó analitzar: enganxat al textarea */
+  .app-col-right .btn-analyze { margin-top: 6px; }
 
-  /* Usage counter: columna centrada — evita trencament de text */
+  /* Usage counter: mínim, discret */
   .app-col-right .usage-counter {
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 2px 0;
-    margin-top: 6px;
+    gap: 2px;
+    padding: 0;
+    margin-top: 4px;
+  }
+
+  /* Headline: mida adaptada a mobile petit */
+  .app-col-right .app-main-headline {
+    font-size: clamp(18px, 5vw, 22px);
+    margin-bottom: 8px;
   }
 
   /* ── Qualitat comercial mobile ─────────────────────────────── */
@@ -1053,6 +1070,9 @@ body.dark .usage-label { color: var(--gold); }
   display: none;
 }
 
+/* Headline visible only on mobile — desktop has left column */
+.app-main-headline { display: block; }
+
 /* Right column: full width on mobile */
 .app-col-right {
   width: 100%;
@@ -1063,6 +1083,8 @@ body.dark .usage-label { color: var(--gold); }
 
 /* Desktop 2-col */
 @media (min-width: 768px) {
+  .app-main-headline { display: none; }
+
   #pageApp main {
     max-width: none;
     padding: 0;
