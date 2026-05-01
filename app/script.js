@@ -173,7 +173,7 @@ function checkLimit() {
   if (used >= FREE_LIMIT) {
     banner.style.display = 'block';
     btn.disabled = true;
-    btn.innerHTML = '🔒 Límit assolit — Activa Premium';
+    btn.innerHTML = 'Límit diari assolit';
     var lc = document.getElementById('limitCount');
     if (lc) lc.textContent = used;
     return false;
@@ -368,7 +368,7 @@ function render(d) {
   datesEl.innerHTML = '';
   if (d.dates && d.dates.length > 0) {
     datesCard.style.display = 'block';
-    if (btnCal) btnCal.style.display = 'flex';
+    if (btnCal) btnCal.style.display = d.dates.length > 1 ? 'flex' : 'none';
     d.dates.forEach(function (dt) {
       var card = document.createElement('div');
       card.className = 'event-card';
@@ -387,7 +387,7 @@ function render(d) {
       actRow.className = 'event-actions';
 
       var mapsLink = document.createElement('a');
-      mapsLink.href = 'https://www.google.com/maps/search/' + encodeURIComponent(dt.descripcio);
+      mapsLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dt.descripcio);
       mapsLink.target = '_blank';
       mapsLink.rel = 'noopener noreferrer';
       mapsLink.className = 'btn-maps';
