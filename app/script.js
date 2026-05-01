@@ -387,7 +387,8 @@ function render(d) {
       actRow.className = 'event-actions';
 
       var mapsLink = document.createElement('a');
-      mapsLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dt.descripcio);
+      var mapsQuery = (dt.lloc && dt.lloc.trim()) ? dt.lloc.trim() : dt.descripcio;
+      mapsLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mapsQuery);
       mapsLink.target = '_blank';
       mapsLink.rel = 'noopener noreferrer';
       mapsLink.className = 'btn-maps';

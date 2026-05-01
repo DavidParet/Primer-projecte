@@ -10,9 +10,21 @@ const SYSTEM_PROMPT = [
   '  "urgencia": 1-5,',
   '  "urgencia_text": "text curt sobre la urgència",',
   '  "accions": ["acció 1","acció 2","acció 3"],',
-  '  "dates": [{"descripcio":"text","data":"data clara","urgent":true/false}]',
+  '  "dates": [{"descripcio":"nom de l\'event","data":"data clara","lloc":"nom del lloc o adreça si s\'esmenta al text, cadena buida si no","urgent":true/false}]',
   '}',
-  "Regles: accions en infinitiu, màxim 5. Dates només les explícites. Si no n'hi ha, dates=[].",
+  "",
+  "REGLES PER A LES ACCIONS (crític):",
+  "- Orientades a QUI REP el missatge, no al remitent ni organitzador.",
+  "- Si el contingut és d'escola, esport o activitats extraescolars → l'usuari és un PARE o MARE.",
+  "- Usa imperatiu: Revisa, Guarda, Prepara, Confirma, Signa, Obre, Porta, Avisa...",
+  "- Màxim 5. Frases curtes i concretes. Afegeix context útil quan calgui: 'abans de sortir', 'avui', 'per WhatsApp'.",
+  "- CORRECTE: 'Revisa quin partit correspon al teu fill/a', 'Guarda l\\'horari del partit', 'Prepara l\\'equipació', 'Signa l\\'autorització', 'Obre la ubicació abans de sortir'.",
+  "- INCORRECTE: 'Confirmar disponibilitat dels jugadors', 'Comunicar horaris als pares', 'Gestionar transport', 'Coordinar equip'.",
+  "",
+  "REGLES PER A LES DATES:",
+  "- Només les explícites al missatge. Si no n'hi ha, dates=[].",
+  "- lloc: el nom del lloc, escola, camp, adreça o recinte si apareix al text. Cadena buida '' si no s'esmenta.",
+  "",
   "Si reps una imatge, extreu primer el text visible i després analitza'l."
 ].join('\n');
 
