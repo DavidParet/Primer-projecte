@@ -24,20 +24,22 @@
     .logo-x    { color: var(--gold2); text-shadow: none; }
     .logo-x::before { color: var(--gold2); opacity: .55; }
     .logo-dot  { color: var(--gold2); text-shadow: none; }
+    /* hero-badge: auto-centrat sense forçar amplada total */
+    .hero-badge { align-self: center; max-width: calc(100% - 0px); }
 
-    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 100px 20px 80px; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-wrap: break-word; }
-    .hero-title { font-size: clamp(2.2rem, 8vw, 4.5rem); line-height: 1.05; letter-spacing: -0.025em; margin: 24px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+    /* hero: stretch = tots els fills prenen amplada total del contenidor */
+    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 100px 20px 80px; min-height: 100dvh; display: flex; flex-direction: column; align-items: stretch; overflow-wrap: break-word; width: 100%; box-sizing: border-box; }
+    .hero-title { font-size: clamp(32px, 8vw, 64px); line-height: 1.05; letter-spacing: -0.025em; margin: 24px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; word-break: break-word; overflow-wrap: break-word; text-align: center; }
     .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
     .hero-title .gold { color: #f5b400; display: block; }
-    .hero-sub { font-size: clamp(18px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
-    .hero-sub2 { margin-top: 18px; color: #9aa3aa; font-size: 16px; width: 100%; box-sizing: border-box; }
-    .hero-cta { width: 100%; max-width: 100%; box-sizing: border-box; text-align: center; }
-    .hero-cta button { margin-top: 56px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 22px 52px; border-radius: 50px; font-size: 19px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; max-width: 100%; box-sizing: border-box; }
+    .hero-sub { font-size: clamp(16px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; text-align: center; }
+    .hero-sub2 { margin-top: 18px; color: #9aa3aa; font-size: 16px; text-align: center; }
+    .hero-cta { display: flex; flex-direction: column; align-items: center; margin-top: 0; box-sizing: border-box; }
+    .hero-cta button { margin-top: 56px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 22px 52px; border-radius: 50px; font-size: 19px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; box-sizing: border-box; max-width: 100%; }
     .hero-cta button:hover { transform: translateY(-4px); box-shadow: 0 18px 56px rgba(245,180,0,.58); }
-    .hero-micro { margin-top: 18px; font-size: 14px; color: #888; letter-spacing: 0.01em; }
-    .hero-visual { display: flex; justify-content: center; width: 100%; max-width: 100%; box-sizing: border-box; }
-    .hero-visual img { width: 100%; max-width: 1200px; margin: 80px auto 0; padding: 0 24px; display: block; }
-    .hero-stats { margin-top: 100px; }
+    .hero-micro { margin-top: 18px; font-size: 14px; color: #888; letter-spacing: 0.01em; text-align: center; }
+    .hero-visual { display: flex; justify-content: center; overflow: hidden; }
+    .hero-visual img { width: 100%; max-width: 100%; margin: 80px auto 0; padding: 0 16px; display: block; box-sizing: border-box; }
     .stats-title { font-size: 22px; margin-bottom: 40px; color: #dfe6ec; }
     .stats-grid { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
     .stats-grid strong { font-size: 48px; color: #f5b400; }
@@ -335,7 +337,7 @@
         padding: 0 4px;
       }
       .hero-sub2 { margin-top: 10px; }
-      .hero-cta { padding: 0; }
+      .hero-cta { padding: 0; margin-top: 24px; }
       .hero-cta button {
         margin-top: 28px;
         padding: 18px 20px;
