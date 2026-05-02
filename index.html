@@ -327,7 +327,8 @@
     @media (max-width: 480px) {
       .hero {
         padding-top: 64px;
-        padding-bottom: 32px;
+        padding-bottom: 0;
+        min-height: unset;
       }
       .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; margin-bottom: 12px; }
       .hero-title {
@@ -354,7 +355,8 @@
         box-sizing: border-box;
       }
       .hero-micro { margin-top: 10px; font-size: 12px; }
-      .hero-visual img { margin-top: 32px; padding: 0 8px; }
+      .hero-visual { margin: 0 -20px; width: calc(100% + 40px); }
+      .hero-visual img { margin-top: 20px; padding: 0; border-radius: 16px 16px 0 0; }
       .stats-grid { gap: 20px; }
     }
 
