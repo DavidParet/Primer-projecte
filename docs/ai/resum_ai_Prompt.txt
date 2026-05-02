@@ -1,0 +1,9 @@
+HISTORIAL DE VERSIONS — NEXLUPA CORE AI PROMPT
+===============================================
+
+| Fitxer                            | Contingut                                      |
+|-----------------------------------|------------------------------------------------|
+| nexlupa-core-ai-prompt-v1.txt     | Prompt original (context família/escola)       |
+| nexlupa-core-ai-prompt-v2.txt     | Prompt genèric sense context assumit           |
+| nexlupa-core-ai-prompt.txt        | Actiu v3 — amb decisio, accions tipades,       |
+|                                   | prioritats i dates estructurades               |
