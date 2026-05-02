@@ -1,0 +1,177 @@
+NEXLUPA — UI RESULT RENDER PROMPT (v1)
+Data: 2026-05-02
+Estat: implementat (commit 70342a5)
+
+======================================================
+
+Actua com un expert en UI/UX i frontend amb criteri de producte premium.
+
+OBJECTIU:
+Millorar la visualització del resultat de NexLupa perquè:
+- l'usuari entengui en menys de 2 segons què ha de fer
+- sembli un producte real (no prototip)
+- sigui usable en mòbil (prioritat)
+
+---
+
+CONTEXT:
+
+L'API retorna:
+
+{
+  "resum": "string",
+  "decisio": "string",
+  "accions": [
+    {
+      "accio": "string",
+      "tipus": "calendari | tasca | informatiu",
+      "data": "YYYY-MM-DD HH:MM o null",
+      "prioritat": "alta | mitja | baixa"
+    }
+  ]
+}
+
+---
+
+OBJECTIU VISUAL (CRÍTIC):
+
+Això NO és un resum.
+
+És:
+👉 una eina que et diu què fer
+
+---
+
+ESTRUCTURA OBLIGATÒRIA:
+
+1. DECISIÓ (ELEMENT PRINCIPAL)
+
+- Mostrar la "decisio" com headline gran
+- Ha de ser el primer que es veu
+- Tipografia gran, bold
+- Espai al voltant (no apretat)
+
+Exemple:
+ASSISTIR A LA REUNIÓ AMPA
+
+---
+
+2. ACCIONS (TARGETES)
+
+Per cada acció:
+
+- Targeta visual clara
+- Contingut:
+  - Icona:
+    📅 calendari
+    ✅ tasca
+    ℹ️ informatiu
+
+  - Text acció
+  - Data (format llegible: "Dimecres · 18:00")
+  - Prioritat amb color:
+    alta → vermell
+    mitja → taronja
+    baixa → gris
+
+- Disseny:
+  - border-radius 14px
+  - padding generós
+  - separació entre targetes
+
+---
+
+3. CAS ESPECIAL
+
+Si:
+"decisio": "cap acció necessària"
+
+Mostrar només:
+
+✔ No has de fer res
+
+- gran
+- positiu
+- sense accions
+
+---
+
+4. RESUM (SECUNDARI)
+
+- Mostrar a sota de tot
+- mida petita
+- color gris
+- no competir amb la decisió
+
+---
+
+5. ESTIL NEXLUPA
+
+- fons fosc (#0f0f0f)
+- text blanc
+- accent groc/taronja
+- sensació premium
+
+---
+
+6. MOBILE FIRST (CRÍTIC)
+
+- Tot ha de ser clar sense fer scroll
+- Decisió visible immediatament
+- Accions fàcils de llegir
+- Evitar espais buits grans
+- Evitar zones decoratives que ocupin massa
+
+---
+
+7. REDUIR SOROLL
+
+Eliminar:
+- línies decoratives (────)
+- textos redundants
+- elements que no aporten decisió
+
+---
+
+ENTREGABLE:
+
+- HTML complet
+- CSS clar i net
+- Funció JS:
+
+renderResult(data)
+
+que:
+- rep el JSON
+- pinta la UI correctament
+
+---
+
+IMPORTANT:
+
+No fer una UI genèrica.
+
+Fer:
+- estil tipus producte premium (Linear / Notion)
+- minimal però molt clar
+- pensat per conversió (no només estètica)
+
+======================================================
+
+IMPLEMENTACIÓ RESULTANT:
+
+Fitxers modificats:
+- app/index.html  → resultats section amb nx-* elements
+- app/script.js   → renderResult(), formatActionDate()
+- app/style.css   → .results.on dark, .nx-decisio-*, .nx-action-*, .nx-share-*
+
+Estructura visual:
+  [fons #111, border-radius 20px]
+  👉 DECISIÓ         ← Syne 26px/900, blanc
+  ┌──────────────┐
+  │ 📅 Acció     │   ← card #1c1c1c, border-radius 14px
+  │ data llegible│   ← format catalan
+  │         Alta │   ← pill prioritat
+  └──────────────┘
+  resum petit gris   ← italic, #4a4a4a
+  [💬 Compartir] [📋 Copiar]
