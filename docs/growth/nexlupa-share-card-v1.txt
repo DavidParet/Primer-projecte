@@ -1,0 +1,151 @@
+NEXLUPA — SHARE CARD PROMPT (v1)
+Data: 2026-05-02
+Estat: implementat (commit c00ae22)
+
+======================================================
+
+Actua com un expert en UI, branding i product growth.
+
+OBJECTIU:
+Convertir cada resultat de NexLupa en una peça compartible (WhatsApp, etc.) que:
+1. Tingui impacte visual
+2. Transmeti valor immediat
+3. Generi curiositat
+4. Inciti a provar NexLupa
+
+---
+
+CONTINGUT A MOSTRAR (basat en JSON):
+
+- decisio (principal)
+- accions (si n'hi ha)
+- resum (opcional, petit)
+
+---
+
+REQUISITS DE DISSENY (CRÍTIC):
+
+1. FORMAT "SHARE CARD"
+
+Crear una targeta visual optimitzada per compartir:
+- format vertical (tipus WhatsApp)
+- padding generós
+- fons fosc premium
+- disseny net i potent
+
+---
+
+2. MARCA NEXLUPA (OBLIGATORI)
+
+Afegir branding visible però elegant:
+
+- Logo textual: "NexLupa ✦"
+- Posició:
+  - part superior o inferior
+- Estil:
+  - discret però premium
+  - color accent (groc/taronja)
+
+NO fer-ho cutre ni intrusiu.
+
+---
+
+3. DECISIÓ = IMPACTE
+
+Exemple:
+
+ASSISTIR A LA REUNIÓ AMPA
+
+- gran
+- centrada
+- protagonista total
+
+---
+
+4. ACCIONS (SI N'HI HA)
+
+En format simple:
+
+📅 Afegir al calendari — Dimecres 18:00
+✅ Preparar documentació
+
+---
+
+5. CTA (CLAU DE CREIXEMENT)
+
+A baix de tot:
+
+---
+Generat amb NexLupa
+De la informació a la decisió
+Prova-ho a: nexlupa.app
+---
+
+👉 estil:
+- petit però llegible
+- elegant
+- no spammy
+
+---
+
+6. CAS "NO CAL FER RES"
+
+Mostrar:
+
+✔ No has de fer res
+
++ branding NexLupa igual
+
+---
+
+7. EXPORTACIÓ
+
+Preparar per:
+- copiar com a text formatat
+- o generar imatge (canvas / html to image)
+
+---
+
+OBJECTIU FINAL:
+
+Quan algú rebi això per WhatsApp:
+- ho entengui en 2 segons
+- li sembli útil
+- li generi curiositat
+- vulgui provar NexLupa
+
+---
+
+NO fer:
+- blocs de text llargs
+- disseny tipus informe
+- branding pobre
+
+Fer:
+- estil producte premium (tipus Linear / Notion)
+
+======================================================
+
+IMPLEMENTACIÓ RESULTANT:
+
+Fitxers modificats:
+- app/index.html  → share card preview block (#sharePreview)
+- app/script.js   → buildShareText(), buildSharePreviewHTML(), tipusIcon(), copyCardText()
+- app/style.css   → .share-card-preview, .sc-* components
+
+Format WhatsApp generat:
+  ✦ *NexLupa*
+  ─────────────────────
+
+  👉 *ASSISTIR A LA REUNIÓ AMPA*
+
+  📅 Afegir reunió al calendari
+       _2026-05-06 18:00_
+  ✅ Preparar documentació
+
+  ─────────────────────
+  _Reunió AMPA dimecres a les 18h_
+
+  _Generat amb NexLupa_
+  _De la informació a la decisió_
+  _nexlupa.app_
