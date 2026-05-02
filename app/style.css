@@ -601,7 +601,14 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Results */
 .results { display: none; }
-.results.on { display: block; animation: appFadeUp .4s ease; }
+.results.on {
+  display: block;
+  animation: appFadeUp .4s ease;
+  background: #111;
+  border-radius: 20px;
+  padding: 22px 18px 18px;
+  margin-top: 12px;
+}
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1436,3 +1443,114 @@ body.dark .usage-label { color: var(--gold); }
   font-weight: 600; letter-spacing: .3px;
   margin-top: 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   NX RESULT SYSTEM — dark premium UI
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── DECISIÓ ── */
+.nx-decisio-block { margin-bottom: 20px; }
+.nx-decisio-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 10px;
+}
+.nx-decisio-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 900;
+  color: #ffffff; line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.nx-decisio-text.nx-no-action {
+  font-size: 22px; color: #3dba6f;
+  display: flex; align-items: center; gap: 10px;
+}
+.nx-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(61,186,111,.15); border: 1.5px solid rgba(61,186,111,.4);
+  font-size: 16px; flex-shrink: 0;
+}
+
+/* ── ACCIONS ── */
+.nx-actions-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+
+.nx-action-card {
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  transition: background .15s;
+}
+.nx-action-card:active { background: #222; }
+
+.nx-prior-alta  { border-left: 3px solid #ef4444; padding-left: 13px; }
+.nx-prior-mitja { border-left: 3px solid #f5b400; padding-left: 13px; }
+
+.nx-action-top {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.nx-action-icon { font-size: 18px; flex-shrink: 0; line-height: 1.3; }
+.nx-action-text {
+  flex: 1;
+  font-size: 15px; font-weight: 600;
+  color: #f0f0f0; line-height: 1.35;
+}
+.nx-prior-pill {
+  flex-shrink: 0; align-self: flex-start;
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .6px;
+  padding: 3px 9px; border-radius: 20px;
+}
+.nx-prior-pill-alta  { background: rgba(239,68,68,.15);  color: #f87171; }
+.nx-prior-pill-mitja { background: rgba(245,180,0,.15);  color: #f5b400; }
+
+.nx-action-date {
+  margin-top: 5px; padding-left: 28px;
+  font-size: 12px; color: #555; font-weight: 500;
+}
+
+/* ── RESUM ── */
+.nx-resum-block {
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid #1e1e1e;
+}
+.nx-resum-text {
+  font-size: 12px; color: #4a4a4a;
+  line-height: 1.55; font-style: italic;
+}
+
+/* ── SHARE ── */
+.nx-share-block {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 16px; position: relative;
+}
+.nx-btn-wa {
+  flex: 1; padding: 13px 12px;
+  background: #1db954; color: #fff;
+  border: none; border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: background .2s;
+}
+.nx-btn-wa:active { background: #17a348; }
+.nx-btn-copy {
+  flex: 1; padding: 13px 12px;
+  background: #1c1c1c; color: #888;
+  border: 1px solid #2a2a2a; border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all .2s;
+}
+.nx-btn-copy:active { background: #222; }
+.nx-btn-copy.copied { background: #14532d; color: #4ade80; border-color: #166534; }
+
+/* ── RESET ── */
+.nx-btn-reset {
+  display: block; width: 100%; margin-top: 10px;
+  background: transparent; border: none;
+  color: #3a3a3a; font-size: 13px; font-weight: 600;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; padding: 8px; border-radius: 8px;
+  transition: color .2s;
+}
+.nx-btn-reset:active { color: #666; }

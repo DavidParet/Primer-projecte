@@ -308,174 +308,118 @@ function showErr(msg) {
 }
 
 /* ── RENDER RESULTS ── */
-function render(d) {
-  if (!document.getElementById('resum')) return;
+/* ── FORMAT DATA LLEGIBLE ── */
+function formatActionDate(str) {
+  if (!str || str === 'null') return null;
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+  if (!m) return str;
+  var DAYS   = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
+  var MONTHS = ['gen','feb','març','abr','maig','juny','jul','ago','set','oct','nov','des'];
+  var dt = new Date(+m[1], +m[2]-1, +m[3]);
+  var out = DAYS[dt.getDay()] + ' ' + dt.getDate() + ' ' + MONTHS[dt.getMonth()];
+  if (m[4] && !(m[4] === '00' && m[5] === '00')) out += ' · ' + m[4] + ':' + m[5];
+  return out;
+}
+
+/* ── RENDER PRINCIPAL ── */
+function renderResult(d) {
   _lastData = d;
 
-  /* Resum hero */
-  document.getElementById('resum').textContent = d.resum || '';
-
-  /* Urgency level — suporta format nou (urgent:"low|medium|high") i antic (urgencia:1-5) */
-  var urgLevel;
-  if (d.urgent) {
-    urgLevel = d.urgent; /* nou format */
-  } else if (d.urgencia) {
-    urgLevel = d.urgencia >= 4 ? 'high' : d.urgencia >= 3 ? 'medium' : 'low'; /* backward compat */
-  } else {
-    urgLevel = 'low';
-  }
-  var urgText = d.urgencia_text ||
-    (urgLevel === 'high'   ? 'Urgent — cal actuar avui' :
-     urgLevel === 'medium' ? 'Termini proper — actua aviat' : 'Informatiu');
-
-  /* Urgency dots (hidden, kept for history compatibility) */
-  var dotsEl = document.getElementById('urgDots');
-  if (dotsEl) {
-    var urgNum = d.urgencia || (urgLevel === 'high' ? 5 : urgLevel === 'medium' ? 3 : 1);
-    dotsEl.innerHTML = '';
-    for (var i = 1; i <= 5; i++) {
-      var dot = document.createElement('div');
-      dot.className = 'u-dot' + (i <= urgNum ? (urgNum >= 4 ? ' hot' : ' on') : '');
-      dotsEl.appendChild(dot);
-    }
-  }
-  var urgTxtEl = document.getElementById('urgTxt');
-  if (urgTxtEl) urgTxtEl.textContent = urgText;
-
-  /* Urgency badge in summary card */
-  var urgBadge = document.getElementById('urgBadge');
-  if (urgBadge) {
-    var isCrit = urgLevel === 'high';
-    var isMod  = urgLevel === 'medium';
-    var icon   = isCrit ? '⚡' : isMod ? '⏰' : '✅';
-    var bgCol  = isCrit ? 'rgba(229,57,53,.12)'  : isMod ? 'rgba(245,197,24,.12)' : 'rgba(61,186,111,.12)';
-    var txCol  = isCrit ? 'var(--red)'            : isMod ? 'var(--gold2)'          : 'var(--green)';
-    var brCol  = isCrit ? 'rgba(229,57,53,.3)'   : isMod ? 'rgba(245,197,24,.3)'  : 'rgba(61,186,111,.3)';
-    urgBadge.innerHTML = '<span class="urg-pill" style="background:' + bgCol + ';color:' + txCol + ';border:1px solid ' + brCol + ';">' + icon + ' ' + escHtml(urgText) + '</span>';
-  }
-
-  /* Decisio */
-  var decisioEl  = document.getElementById('decisio');
-  var decisioCard = document.getElementById('decisioCard');
-  var noAction = d.decisio === 'cap acció necessària' || (!d.decisio && (!d.accions || d.accions.length === 0));
-  if (decisioEl) {
-    if (noAction && !d.decisio) {
-      decisioEl.textContent = 'Cap acció necessària';
-    } else {
-      decisioEl.textContent = d.decisio || '';
-    }
-  }
-  if (decisioCard) decisioCard.classList.toggle('decisio-no-action', noAction);
-
-  /* Actions */
-  var actEl = document.getElementById('actions');
-  var actionsCard = document.getElementById('actionsCard');
-  actEl.innerHTML = '';
-  var accions = d.accions || [];
-  if (actionsCard) actionsCard.style.display = accions.length > 0 ? 'block' : 'none';
-  accions.forEach(function (a) {
-    var isObj  = typeof a === 'object' && a !== null;
-    var text   = isObj ? a.accio     : a;
-    var tipus  = isObj ? (a.tipus || 'tasca') : 'tasca';
-    var data   = isObj ? a.data      : null;
-    var prior  = isObj ? (a.prioritat || 'baixa') : 'baixa';
-
-    var row = document.createElement('div');
-    row.className = 'act-item act-item-typed prior-' + prior;
-
-    var icon = document.createElement('span');
-    icon.className = 'act-tipus-icon';
-    icon.textContent = tipus === 'calendari' ? '📅' : tipus === 'informatiu' ? 'ℹ️' : '✅';
-
-    var body = document.createElement('div');
-    body.className = 'act-body';
-
-    var box = document.createElement('div');
-    box.className = 'act-chk';
-    box.onclick = function () { chk(box, row); };
-
-    var txt = document.createElement('span');
-    txt.className = 'act-txt';
-    txt.textContent = text;
-    body.appendChild(txt);
-
-    if (data) {
-      var dateTxt = document.createElement('span');
-      dateTxt.className = 'act-date';
-      dateTxt.textContent = data;
-      body.appendChild(dateTxt);
-    }
-
-    if (prior === 'alta') {
-      var pill = document.createElement('span');
-      pill.className = 'act-prior-pill';
-      pill.textContent = 'Alta';
-      body.appendChild(pill);
-    }
-
-    row.appendChild(icon);
-    row.appendChild(body);
-    row.appendChild(box);
-    actEl.appendChild(row);
+  var decisio  = (d.decisio || '').trim();
+  var noAction = decisio.toLowerCase() === 'cap acció necessària';
+  var accions  = (d.accions || []).map(function(a) {
+    return typeof a === 'string'
+      ? { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa' }
+      : a;
   });
 
-  /* Dates — event cards with Maps + Calendar */
-  var datesEl   = document.getElementById('dates');
-  var datesCard = document.getElementById('datesCard');
-  var btnCal    = document.getElementById('btnCalendar');
-  datesEl.innerHTML = '';
-  if (d.dates && d.dates.length > 0) {
-    datesCard.style.display = 'block';
-    if (btnCal) btnCal.style.display = d.dates.length > 1 ? 'flex' : 'none';
-    d.dates.forEach(function (dt) {
-      var card = document.createElement('div');
-      card.className = 'event-card';
-
-      var timeEl = document.createElement('div');
-      timeEl.className = 'event-time' + (dt.urgent ? ' event-time-hot' : '');
-      timeEl.textContent = dt.data || '';
-      card.appendChild(timeEl);
-
-      var titleEl = document.createElement('div');
-      titleEl.className = 'event-title';
-      titleEl.textContent = dt.descripcio;
-      card.appendChild(titleEl);
-
-      var actRow = document.createElement('div');
-      actRow.className = 'event-actions';
-
-      var mapsLink = document.createElement('a');
-      var mapsQuery = (dt.lloc && dt.lloc.trim()) ? dt.lloc.trim() : dt.descripcio;
-      mapsLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mapsQuery);
-      mapsLink.target = '_blank';
-      mapsLink.rel = 'noopener noreferrer';
-      mapsLink.className = 'btn-maps';
-      mapsLink.textContent = '📍 Google Maps';
-      actRow.appendChild(mapsLink);
-
-      var calBtn = document.createElement('button');
-      calBtn.className = 'btn-cal-sm';
-      calBtn.textContent = '📅 Calendari';
-      calBtn.onclick = function () { addSingleToCalendar(dt); };
-      actRow.appendChild(calBtn);
-
-      card.appendChild(actRow);
-      datesEl.appendChild(card);
-    });
-  } else {
-    datesCard.style.display = 'none';
-    if (btnCal) btnCal.style.display = 'none';
+  /* DECISIÓ */
+  var decisioEl    = document.getElementById('nx-decisio');
+  var decisioLabel = document.getElementById('nx-decisio-label');
+  if (decisioEl) {
+    if (noAction) {
+      decisioEl.innerHTML = '<span class="nx-check">✔</span> No has de fer res';
+      decisioEl.className = 'nx-decisio-text nx-no-action';
+      if (decisioLabel) decisioLabel.style.display = 'none';
+    } else {
+      decisioEl.textContent = decisio || d.resum || '';
+      decisioEl.className   = 'nx-decisio-text';
+      if (decisioLabel) decisioLabel.style.display = '';
+    }
   }
 
-  /* Share card preview */
-  var preview = document.getElementById('sharePreview');
-  if (preview) preview.innerHTML = buildSharePreviewHTML(d);
+  /* ACCIONS */
+  var actionsEl = document.getElementById('nx-actions');
+  if (actionsEl) {
+    actionsEl.innerHTML = '';
+    if (!noAction && accions.length > 0) {
+      accions.forEach(function(a) {
+        var icon    = a.tipus === 'calendari' ? '📅' : a.tipus === 'informatiu' ? 'ℹ️' : '✅';
+        var fmtDate = formatActionDate(a.data);
+        var prior   = a.prioritat || 'baixa';
 
+        var card = document.createElement('div');
+        card.className = 'nx-action-card nx-prior-' + prior;
+
+        var top = document.createElement('div');
+        top.className = 'nx-action-top';
+
+        var iconEl = document.createElement('span');
+        iconEl.className = 'nx-action-icon';
+        iconEl.textContent = icon;
+
+        var textEl = document.createElement('span');
+        textEl.className = 'nx-action-text';
+        textEl.textContent = a.accio;
+
+        top.appendChild(iconEl);
+        top.appendChild(textEl);
+
+        if (prior === 'alta' || prior === 'mitja') {
+          var pill = document.createElement('span');
+          pill.className = 'nx-prior-pill nx-prior-pill-' + prior;
+          pill.textContent = prior === 'alta' ? 'Alta' : 'Mitja';
+          top.appendChild(pill);
+        }
+
+        card.appendChild(top);
+
+        if (fmtDate) {
+          var dateEl = document.createElement('div');
+          dateEl.className = 'nx-action-date';
+          dateEl.textContent = fmtDate;
+          card.appendChild(dateEl);
+        }
+
+        actionsEl.appendChild(card);
+      });
+    }
+  }
+
+  /* RESUM */
+  var resumEl    = document.getElementById('nx-resum');
+  var resumBlock = document.getElementById('nx-resum-block');
+  if (resumEl) resumEl.textContent = d.resum || '';
+  if (resumBlock) resumBlock.style.display = d.resum ? 'block' : 'none';
+
+  /* legacy hidden els (calendar export, history) */
+  var legResum = document.getElementById('resum');
+  if (legResum) legResum.textContent = d.resum || '';
+  var legDates = document.getElementById('dates');
+  if (legDates) legDates.innerHTML = '';
+  var legDatesCard = document.getElementById('datesCard');
+  if (legDatesCard) legDatesCard.style.display = 'none';
+
+  /* SHOW */
   var res = document.getElementById('results');
   res.classList.add('on');
   res.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   saveToHistorial(d);
+}
+
+function render(d) {
+  renderResult(d);
 }
 
 function reset() {
@@ -645,7 +589,7 @@ function copyCardText() {
     if (btn) { btn.classList.add('copied'); btn.innerHTML = '<span>✓</span> Copiat!'; }
     if (ok)  ok.classList.add('on');
     setTimeout(function () {
-      if (btn) { btn.classList.remove('copied'); btn.innerHTML = '<span>📋</span> Copiar'; }
+      if (btn) { btn.classList.remove('copied'); btn.textContent = '📋 Copiar'; }
       if (ok)  ok.classList.remove('on');
     }, 3000);
   });

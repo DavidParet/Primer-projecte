@@ -138,47 +138,38 @@
 
       <div class="results" id="results">
 
-        <!-- BLOC 0: DECISIÓ (protagonista) -->
-        <div class="card decisio-card" id="decisioCard">
-          <div class="decisio-label">👉 Decisió</div>
-          <div class="decisio-txt" id="decisio"></div>
+        <!-- DECISIÓ — element protagonista -->
+        <div class="nx-decisio-block">
+          <div class="nx-decisio-label" id="nx-decisio-label">👉 Decisió</div>
+          <div class="nx-decisio-text" id="nx-decisio"></div>
         </div>
 
-        <!-- BLOC 1: RESUM -->
-        <div class="card result-hero-card">
-          <div class="result-label">📋 Resum</div>
-          <div class="resum-txt" id="resum"></div>
-          <div id="urgBadge"></div>
-          <div style="display:none;"><div id="urgDots"></div><div id="urgTxt"></div></div>
+        <!-- ACCIONS — targetes tipades -->
+        <div class="nx-actions-block" id="nx-actions"></div>
+
+        <!-- RESUM — secundari, a baix -->
+        <div class="nx-resum-block" id="nx-resum-block">
+          <div class="nx-resum-text" id="nx-resum"></div>
         </div>
 
-        <!-- BLOC 2: ACCIONS -->
-        <div class="card" id="actionsCard">
-          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Accions</div></div>
-          <div id="actions"></div>
+        <!-- COMPARTIR -->
+        <div class="nx-share-block">
+          <button class="nx-btn-wa" onclick="shareWhatsApp()">💬 Compartir</button>
+          <button class="nx-btn-copy" id="btnCopy" onclick="copyCardText()">📋 Copiar</button>
+          <div class="copy-ok" id="copyOk">✓ Copiat!</div>
         </div>
 
-        <!-- BLOC 3: DATES / EVENTS -->
-        <div class="card" id="datesCard">
-          <div class="card-head"><div class="c-icon ci-blue">📅</div><div class="c-label">Quan i on</div></div>
-          <div id="dates"></div>
-          <button class="btn-calendar" id="btnCalendar" onclick="exportCalendar()" style="display:none;margin-top:14px;">
-            📅 Afegir totes les dates a Google Calendar
-          </button>
-        </div>
+        <button class="nx-btn-reset" onclick="reset()">← Nou missatge</button>
 
-        <!-- BLOC 4: COMPARTIR TARGETA -->
-        <div class="card" id="shareCard">
-          <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir targeta</div></div>
-          <div class="share-card-preview" id="sharePreview"></div>
-          <div class="share-btns">
-            <button class="btn-share-wa"   onclick="shareWhatsApp()"><span>💬</span> WhatsApp</button>
-            <button class="btn-share-copy" id="btnCopy" onclick="copyCardText()"><span>📋</span> Copiar</button>
-          </div>
-          <div class="copy-ok" id="copyOk">✓ Copiat al porta-retalls!</div>
+        <!-- hidden compat: history + calendar legacy -->
+        <div style="display:none;">
+          <div id="resum"></div><div id="decisio"></div>
+          <div id="actions"></div><div id="urgBadge"></div>
+          <div id="urgDots"></div><div id="urgTxt"></div>
+          <div id="dates"></div><div id="sharePreview"></div>
+          <div id="datesCard"></div>
+          <button id="btnCalendar"></button>
         </div>
-
-        <button class="btn-reset" onclick="reset()">← Analitzar un altre missatge</button>
 
       </div>
 
