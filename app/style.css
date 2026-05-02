@@ -1332,3 +1332,107 @@ body.dark .usage-label { color: var(--gold); }
   .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
 }
+
+/* ─────────────────────────────────────────────────────────
+   DECISIÓ CARD — protagonista principal del resultat
+   ───────────────────────────────────────────────────────── */
+.decisio-card {
+  border-left: 4px solid #f5b400;
+  background: linear-gradient(135deg, #fffbea 0%, #fff 100%);
+}
+.decisio-card.decisio-no-action {
+  border-left-color: var(--green);
+  background: linear-gradient(135deg, #edfaf3 0%, #fff 100%);
+}
+.decisio-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px;
+}
+.decisio-txt {
+  font-size: 22px; font-weight: 900; line-height: 1.25;
+  color: #0b0d0f; letter-spacing: -0.02em;
+}
+.decisio-card.decisio-no-action .decisio-txt {
+  color: var(--green); font-size: 18px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ACCIONS TIPADES
+   ───────────────────────────────────────────────────────── */
+.act-item-typed {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  transition: opacity .2s;
+}
+.act-item-typed:last-child { border-bottom: none; }
+.act-item-typed.done { opacity: .3; }
+.act-item-typed.done .act-txt { text-decoration: line-through; }
+
+.act-tipus-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; line-height: 1; }
+
+.act-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.act-body .act-txt { font-size: 15px; font-weight: 600; color: var(--darker); line-height: 1.35; }
+.act-date { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .2px; }
+.act-prior-pill {
+  display: inline-block; font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--red-bg); color: var(--red);
+  width: fit-content;
+}
+.act-item-typed.prior-alta  { border-left: 2px solid var(--red);   padding-left: 8px; }
+.act-item-typed.prior-mitja { border-left: 2px solid var(--gold2); padding-left: 8px; }
+
+/* ─────────────────────────────────────────────────────────
+   SHARE CARD — preview + botons
+   ───────────────────────────────────────────────────────── */
+.share-btns {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+}
+
+/* Preview visual de la targeta */
+.share-card-preview {
+  background: #0b0e14;
+  border-radius: 16px;
+  padding: 20px 18px;
+  margin-top: 4px;
+  border: 1px solid rgba(245,180,0,.18);
+}
+.sc-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 800;
+  color: #f5b400; letter-spacing: .04em;
+  margin-bottom: 12px;
+}
+.sc-sep {
+  height: 1px; background: rgba(255,255,255,.08);
+  margin: 10px 0;
+}
+.sc-decisio {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 900;
+  color: #ffffff; line-height: 1.2;
+  letter-spacing: -0.01em;
+  padding: 6px 0;
+}
+.sc-decisio.sc-no-action {
+  color: #3dba6f; font-size: 15px; font-weight: 700;
+}
+.sc-actions { display: flex; flex-direction: column; gap: 6px; }
+.sc-act-row {
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.sc-act-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.sc-act-text {
+  font-size: 13px; font-weight: 500; color: #c8d0d8; line-height: 1.4;
+}
+.sc-act-date { color: #6b7784; font-size: 11px; }
+.sc-resum {
+  font-size: 11px; color: #5a6370; line-height: 1.5;
+  font-style: italic; margin-bottom: 6px;
+}
+.sc-footer {
+  font-size: 10px; color: #3d4550;
+  font-weight: 600; letter-spacing: .3px;
+  margin-top: 4px;
+}

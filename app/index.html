@@ -138,7 +138,13 @@
 
       <div class="results" id="results">
 
-        <!-- BLOC 1: RESUM + URGÈNCIA -->
+        <!-- BLOC 0: DECISIÓ (protagonista) -->
+        <div class="card decisio-card" id="decisioCard">
+          <div class="decisio-label">👉 Decisió</div>
+          <div class="decisio-txt" id="decisio"></div>
+        </div>
+
+        <!-- BLOC 1: RESUM -->
         <div class="card result-hero-card">
           <div class="result-label">📋 Resum</div>
           <div class="resum-txt" id="resum"></div>
@@ -147,8 +153,8 @@
         </div>
 
         <!-- BLOC 2: ACCIONS -->
-        <div class="card">
-          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Fes això</div></div>
+        <div class="card" id="actionsCard">
+          <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Accions</div></div>
           <div id="actions"></div>
         </div>
 
@@ -161,15 +167,15 @@
           </button>
         </div>
 
-        <!-- BLOC 4: COMPARTIR -->
+        <!-- BLOC 4: COMPARTIR TARGETA -->
         <div class="card" id="shareCard">
-          <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir</div></div>
-          <p class="share-context">Envia això a algú de confiança</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div class="card-head"><div class="c-icon ci-gold">📤</div><div class="c-label">Compartir targeta</div></div>
+          <div class="share-card-preview" id="sharePreview"></div>
+          <div class="share-btns">
             <button class="btn-share-wa"   onclick="shareWhatsApp()"><span>💬</span> WhatsApp</button>
-            <button class="btn-share-copy" id="btnCopy" onclick="copyLink()"><span>🔗</span> Copiar link</button>
+            <button class="btn-share-copy" id="btnCopy" onclick="copyCardText()"><span>📋</span> Copiar</button>
           </div>
-          <div class="copy-ok" id="copyOk">✓ Link copiat al porta-retalls!</div>
+          <div class="copy-ok" id="copyOk">✓ Copiat al porta-retalls!</div>
         </div>
 
         <button class="btn-reset" onclick="reset()">← Analitzar un altre missatge</button>

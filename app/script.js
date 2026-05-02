@@ -119,12 +119,12 @@ var _lastData = null;
 var _demoMode = false;
 var DEMO_RESULTS = {
   resum: "Jornada esportiva divendres 11 d'abril a les 17:00. Cal portar roba esportiva i autorització signada.",
-  urgencia: 4,
-  urgencia_text: "Termini proper — cal actuar avui",
+  decisio: "Preparar i assistir a la jornada esportiva",
+  urgent: "medium",
   accions: [
-    "Preparar roba esportiva",
-    "Signar l'autorització",
-    "Avisar intoleràncies alimentàries"
+    { accio: "Preparar roba esportiva", tipus: "tasca", data: null, prioritat: "alta" },
+    { accio: "Signar l'autorització", tipus: "tasca", data: null, prioritat: "alta" },
+    { accio: "Afegir la jornada al calendari", tipus: "calendari", data: "2025-04-11 17:00", prioritat: "mitja" }
   ],
   dates: [
     { descripcio: "Jornada esportiva", data: "Div. 17:00", urgent: false }
@@ -354,20 +354,68 @@ function render(d) {
     urgBadge.innerHTML = '<span class="urg-pill" style="background:' + bgCol + ';color:' + txCol + ';border:1px solid ' + brCol + ';">' + icon + ' ' + escHtml(urgText) + '</span>';
   }
 
+  /* Decisio */
+  var decisioEl  = document.getElementById('decisio');
+  var decisioCard = document.getElementById('decisioCard');
+  var noAction = d.decisio === 'cap acció necessària' || (!d.decisio && (!d.accions || d.accions.length === 0));
+  if (decisioEl) {
+    if (noAction && !d.decisio) {
+      decisioEl.textContent = 'Cap acció necessària';
+    } else {
+      decisioEl.textContent = d.decisio || '';
+    }
+  }
+  if (decisioCard) decisioCard.classList.toggle('decisio-no-action', noAction);
+
   /* Actions */
   var actEl = document.getElementById('actions');
+  var actionsCard = document.getElementById('actionsCard');
   actEl.innerHTML = '';
-  (d.accions || []).forEach(function (a) {
+  var accions = d.accions || [];
+  if (actionsCard) actionsCard.style.display = accions.length > 0 ? 'block' : 'none';
+  accions.forEach(function (a) {
+    var isObj  = typeof a === 'object' && a !== null;
+    var text   = isObj ? a.accio     : a;
+    var tipus  = isObj ? (a.tipus || 'tasca') : 'tasca';
+    var data   = isObj ? a.data      : null;
+    var prior  = isObj ? (a.prioritat || 'baixa') : 'baixa';
+
     var row = document.createElement('div');
-    row.className = 'act-item';
+    row.className = 'act-item act-item-typed prior-' + prior;
+
+    var icon = document.createElement('span');
+    icon.className = 'act-tipus-icon';
+    icon.textContent = tipus === 'calendari' ? '📅' : tipus === 'informatiu' ? 'ℹ️' : '✅';
+
+    var body = document.createElement('div');
+    body.className = 'act-body';
+
     var box = document.createElement('div');
     box.className = 'act-chk';
     box.onclick = function () { chk(box, row); };
+
     var txt = document.createElement('span');
     txt.className = 'act-txt';
-    txt.textContent = a;
+    txt.textContent = text;
+    body.appendChild(txt);
+
+    if (data) {
+      var dateTxt = document.createElement('span');
+      dateTxt.className = 'act-date';
+      dateTxt.textContent = data;
+      body.appendChild(dateTxt);
+    }
+
+    if (prior === 'alta') {
+      var pill = document.createElement('span');
+      pill.className = 'act-prior-pill';
+      pill.textContent = 'Alta';
+      body.appendChild(pill);
+    }
+
+    row.appendChild(icon);
+    row.appendChild(body);
     row.appendChild(box);
-    row.appendChild(txt);
     actEl.appendChild(row);
   });
 
@@ -418,6 +466,10 @@ function render(d) {
     datesCard.style.display = 'none';
     if (btnCal) btnCal.style.display = 'none';
   }
+
+  /* Share card preview */
+  var preview = document.getElementById('sharePreview');
+  if (preview) preview.innerHTML = buildSharePreviewHTML(d);
 
   var res = document.getElementById('results');
   res.classList.add('on');
@@ -506,21 +558,72 @@ function exportCalendar() {
 }
 
 /* ── SHARE ── */
+function tipusIcon(tipus) {
+  return tipus === 'calendari' ? '📅' : tipus === 'informatiu' ? 'ℹ️' : '✅';
+}
+
 function buildShareText(d) {
-  var txt = '🔍 *nexlupa* — Resum del missatge\n\n';
-  txt += '⭐ *Resum:* ' + d.resum + '\n\n';
+  var SEP = '─────────────────────';
+  var txt = '✦ *NexLupa*\n' + SEP + '\n\n';
+
+  var decisio = d.decisio || '';
+  if (!decisio || decisio === 'cap acció necessària') {
+    txt += '✔ *Cap acció necessària*\n\n';
+  } else {
+    txt += '👉 *' + decisio.toUpperCase() + '*\n\n';
+  }
+
   if (d.accions && d.accions.length > 0) {
-    txt += '✅ *Accions:*\n';
-    d.accions.forEach(function (a) { txt += '  • ' + a + '\n'; });
+    d.accions.forEach(function (a) {
+      var isObj = typeof a === 'object' && a !== null;
+      var text  = isObj ? a.accio : a;
+      var tipus = isObj ? (a.tipus || 'tasca') : 'tasca';
+      var data  = isObj ? a.data : null;
+      txt += tipusIcon(tipus) + ' ' + text;
+      if (data) txt += '\n     _' + data + '_';
+      txt += '\n';
+    });
     txt += '\n';
   }
-  if (d.dates && d.dates.length > 0) {
-    txt += '📅 *Dates:*\n';
-    d.dates.forEach(function (dt) { txt += '  • ' + dt.descripcio + ': ' + dt.data + '\n'; });
-    txt += '\n';
-  }
-  txt += '_Generat amb nexlupa · La lupa que treballa sola_';
+
+  txt += SEP + '\n';
+  if (d.resum) txt += '_' + d.resum + '_\n\n';
+  txt += '_Generat amb NexLupa_\n_De la informació a la decisió_\n_nexlupa.app_';
   return txt;
+}
+
+function buildSharePreviewHTML(d) {
+  var decisio = d.decisio || '';
+  var noAction = decisio === 'cap acció necessària' || (!decisio && (!d.accions || d.accions.length === 0));
+  var html = '<div class="sc-brand">NexLupa ✦</div>';
+  html += '<div class="sc-sep"></div>';
+
+  if (noAction) {
+    html += '<div class="sc-decisio sc-no-action">✔ Cap acció necessària</div>';
+  } else {
+    html += '<div class="sc-decisio">' + escHtml(decisio.toUpperCase()) + '</div>';
+  }
+
+  if (d.accions && d.accions.length > 0) {
+    html += '<div class="sc-sep"></div><div class="sc-actions">';
+    d.accions.forEach(function (a) {
+      var isObj = typeof a === 'object' && a !== null;
+      var text  = isObj ? a.accio : a;
+      var tipus = isObj ? (a.tipus || 'tasca') : 'tasca';
+      var data  = isObj ? a.data : null;
+      html += '<div class="sc-act-row">';
+      html += '<span class="sc-act-icon">' + tipusIcon(tipus) + '</span>';
+      html += '<span class="sc-act-text">' + escHtml(text);
+      if (data) html += '<span class="sc-act-date"> · ' + escHtml(data) + '</span>';
+      html += '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="sc-sep"></div>';
+  if (d.resum) html += '<div class="sc-resum">' + escHtml(d.resum) + '</div>';
+  html += '<div class="sc-footer">Generat amb NexLupa · nexlupa.app</div>';
+  return html;
 }
 
 function buildShareURL(d) {
@@ -533,16 +636,16 @@ function shareWhatsApp() {
   window.open('https://wa.me/?text=' + encodeURIComponent(buildShareText(_lastData)), '_blank');
 }
 
-function copyLink() {
+function copyCardText() {
   if (!_lastData) return;
-  var url = buildShareURL(_lastData);
-  navigator.clipboard.writeText(url).then(function () {
+  var text = buildShareText(_lastData);
+  navigator.clipboard.writeText(text).then(function () {
     var btn = document.getElementById('btnCopy');
     var ok  = document.getElementById('copyOk');
     if (btn) { btn.classList.add('copied'); btn.innerHTML = '<span>✓</span> Copiat!'; }
     if (ok)  ok.classList.add('on');
     setTimeout(function () {
-      if (btn) { btn.classList.remove('copied'); btn.innerHTML = '<span>🔗</span> Copiar link'; }
+      if (btn) { btn.classList.remove('copied'); btn.innerHTML = '<span>📋</span> Copiar'; }
       if (ok)  ok.classList.remove('on');
     }, 3000);
   });
