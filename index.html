@@ -325,40 +325,33 @@
 
     /* ── MOBILE HERO ≤480px ── */
     @media (max-width: 480px) {
+      /* Hero container: padding 0 lateralment perquè la imatge vagi de vora a vora */
       .hero {
-        padding-top: 64px;
-        padding-bottom: 0;
-        min-height: unset;
-        overflow-x: visible;
+        padding: 64px 0 0;
+        min-height: 0;
+        overflow-x: hidden;
       }
-      .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; margin-bottom: 12px; }
+      /* Elements de text: padding propi de 20px */
+      .hero-badge { padding: 0 20px; white-space: normal; text-align: center; margin-bottom: 12px; max-width: 100%; box-sizing: border-box; }
       .hero-title {
+        padding: 0 20px;
         font-size: clamp(24px, 6.5vw, 30px);
         line-height: 1.1;
-        max-width: 100%;
         text-align: center;
         margin-top: 8px;
         letter-spacing: -0.02em;
-      }
-      .hero-sub {
-        font-size: 14px;
-        margin-top: 14px;
-        line-height: 1.55;
-      }
-      .hero-sub2 { margin-top: 6px; font-size: 13px; }
-      .hero-cta { padding: 0; margin-top: 16px; }
-      .hero-cta button {
-        margin-top: 0;
-        padding: 14px 20px;
-        font-size: 14px;
-        width: 100%;
-        max-width: calc(100vw - 40px);
         box-sizing: border-box;
       }
-      .hero-micro { margin-top: 10px; font-size: 12px; }
-      .hero-visual { margin: 16px -20px 0; width: calc(100% + 40px); overflow: hidden; }
-      .hero-visual img { margin-top: 0; padding: 0; border-radius: 0; display: block; }
-      .hero-stats { margin-top: 28px; padding: 0 20px; }
+      .hero-sub { padding: 0 20px; font-size: 14px; margin-top: 14px; line-height: 1.55; box-sizing: border-box; }
+      .hero-sub2 { padding: 0 20px; margin-top: 6px; font-size: 13px; box-sizing: border-box; }
+      .hero-cta { padding: 0 20px; margin-top: 16px; box-sizing: border-box; }
+      .hero-cta button { margin-top: 0; padding: 14px 20px; font-size: 14px; width: 100%; max-width: 100%; box-sizing: border-box; }
+      .hero-micro { padding: 0 20px; margin-top: 10px; font-size: 12px; }
+      /* Imatge: ample complet, object-fit:cover talla l'espai fosc intern del PNG */
+      .hero-visual { width: 100%; margin-top: 20px; overflow: hidden; }
+      .hero-visual img { width: 100%; height: 220px; object-fit: cover; object-position: center 30%; margin: 0; padding: 0; display: block; }
+      /* Stats: just sota la imatge, sense marge excessiu */
+      .hero-stats { margin-top: 0; padding: 20px 20px 0; }
       .stats-title { font-size: 15px; margin-bottom: 20px; line-height: 1.5; }
       .stats-grid { gap: 20px; }
       .stats-transition { margin-top: 32px; }
