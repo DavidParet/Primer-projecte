@@ -329,6 +329,7 @@
         padding-top: 64px;
         padding-bottom: 0;
         min-height: unset;
+        overflow-x: visible;
       }
       .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; margin-bottom: 12px; }
       .hero-title {
@@ -355,9 +356,15 @@
         box-sizing: border-box;
       }
       .hero-micro { margin-top: 10px; font-size: 12px; }
-      .hero-visual { margin: 0 -20px; width: calc(100% + 40px); }
-      .hero-visual img { margin-top: 20px; padding: 0; border-radius: 16px 16px 0 0; }
+      .hero-visual { margin: 16px -20px 0; width: calc(100% + 40px); overflow: hidden; }
+      .hero-visual img { margin-top: 0; padding: 0; border-radius: 0; display: block; }
+      .hero-stats { margin-top: 28px; padding: 0 20px; }
+      .stats-title { font-size: 15px; margin-bottom: 20px; line-height: 1.5; }
       .stats-grid { gap: 20px; }
+      .stats-transition { margin-top: 32px; }
+      .stats-conclusion { margin-top: 24px; padding-top: 18px; }
+      .stats-sources { margin-bottom: 24px; }
+      .stats-cta { margin-top: 28px; }
     }
 
     /* ── DESKTOP HERO ≥1024px ── */
