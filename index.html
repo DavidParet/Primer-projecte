@@ -24,18 +24,20 @@
     .logo-x    { color: var(--gold2); text-shadow: none; }
     .logo-x::before { color: var(--gold2); opacity: .55; }
     .logo-dot  { color: var(--gold2); text-shadow: none; }
-    /* hero-badge: auto-centrat sense forçar amplada total */
-    .hero-badge { align-self: center; max-width: calc(100% - 0px); }
+    /* hero-badge */
+    .hero-badge { align-self: center; max-width: 100%; margin-bottom: 20px; }
+    /* hero-title br és redundant: .white i .gold ja son display:block */
+    .hero-title br { display: none; }
 
-    /* hero: stretch = tots els fills prenen amplada total del contenidor */
-    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 100px 20px 80px; min-height: 100dvh; display: flex; flex-direction: column; align-items: stretch; overflow-wrap: break-word; width: 100%; box-sizing: border-box; }
-    .hero-title { font-size: clamp(28px, 7vw, 64px); line-height: 1.05; letter-spacing: -0.025em; margin: 24px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; word-break: break-word; overflow-wrap: break-word; text-align: center; }
-    .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
+    /* hero */
+    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 90px 20px 60px; min-height: 100dvh; display: flex; flex-direction: column; align-items: stretch; width: 100%; box-sizing: border-box; }
+    .hero-title { font-size: clamp(38px, 11vw, 52px); line-height: 1; letter-spacing: -0.025em; margin: 16px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; word-break: normal; overflow-wrap: normal; text-align: center; }
+    .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.15em; }
     .hero-title .gold { color: #f5b400; display: block; }
-    .hero-sub { font-size: clamp(16px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; text-align: center; }
-    .hero-sub2 { margin-top: 18px; color: #9aa3aa; font-size: 16px; text-align: center; }
+    .hero-sub { font-size: clamp(15px, 2vw, 20px); color: #cfd6dc; margin-top: 32px; line-height: 1.65; max-width: 600px; margin-left: auto; margin-right: auto; text-align: center; }
+    .hero-sub2 { margin-top: 12px; color: #9aa3aa; font-size: 15px; text-align: center; }
     .hero-cta { display: flex; flex-direction: column; align-items: center; margin-top: 0; box-sizing: border-box; }
-    .hero-cta button { margin-top: 56px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 22px 52px; border-radius: 50px; font-size: 19px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; box-sizing: border-box; max-width: 100%; white-space: normal; text-align: center; }
+    .hero-cta button { margin-top: 36px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 20px 48px; border-radius: 50px; font-size: 18px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; box-sizing: border-box; max-width: 100%; white-space: normal; text-align: center; }
     .hero-cta button:hover { transform: translateY(-4px); box-shadow: 0 18px 56px rgba(245,180,0,.58); }
     .hero-micro { margin-top: 18px; font-size: 14px; color: #888; letter-spacing: 0.01em; text-align: center; }
     .hero-visual { display: flex; justify-content: center; overflow: hidden; }
@@ -318,46 +320,47 @@
       .steps { grid-template-columns: 1fr 1fr; }
     }
 
-    /* ── MOBILE HERO: llegible i centrat en smartphones ── */
+    /* ── MOBILE HERO ≤480px ── */
     @media (max-width: 480px) {
       .hero {
-        padding-top: 80px;
-        padding-bottom: 60px;
-        gap: 0;
+        padding-top: 72px;
+        padding-bottom: 40px;
       }
-      .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; }
+      .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; margin-bottom: 16px; }
       .hero-title {
-        font-size: clamp(22px, 6vw, 28px);
-        line-height: 1.1;
-        margin-top: 16px;
+        font-size: clamp(34px, 10vw, 44px);
+        line-height: 1;
+        margin-top: 10px;
+        letter-spacing: -0.03em;
       }
       .hero-sub {
-        font-size: clamp(1rem, 4vw, 1.1rem);
-        margin-top: 20px;
-        padding: 0 4px;
+        font-size: 14px;
+        margin-top: 18px;
+        line-height: 1.6;
       }
-      .hero-sub2 { margin-top: 10px; }
-      .hero-cta { padding: 0; margin-top: 24px; }
+      .hero-sub2 { margin-top: 8px; font-size: 13px; }
+      .hero-cta { padding: 0; margin-top: 20px; }
       .hero-cta button {
-        margin-top: 28px;
-        padding: 18px 20px;
+        margin-top: 0;
+        padding: 16px 20px;
         font-size: 15px;
         width: 100%;
         max-width: calc(100vw - 40px);
         box-sizing: border-box;
       }
-      .hero-visual img { margin-top: 48px; padding: 0 8px; }
+      .hero-micro { margin-top: 12px; font-size: 13px; }
+      .hero-visual img { margin-top: 40px; padding: 0 8px; }
       .stats-grid { gap: 20px; }
     }
 
-    /* ── DESKTOP HERO: ampli, immersiu, una sola vista ── */
+    /* ── DESKTOP HERO ≥1024px ── */
     @media (min-width: 1024px) {
       .hero { padding: 80px 20px 28px; display: block; min-height: unset; }
       .hero-badge { margin-bottom: 18px; }
-      .hero-title { font-size: clamp(38px, 5.2vw, 72px); margin: 18px 0 0; line-height: 1.04; letter-spacing: -0.03em; }
-      .hero-title .white { white-space: nowrap; margin-bottom: 0; }
+      .hero-title { font-size: clamp(40px, 5.2vw, 72px); margin: 18px 0 0; line-height: 1.02; letter-spacing: -0.03em; }
+      .hero-title .white { white-space: nowrap; margin-bottom: 0.12em; }
       .hero-title .gold  { white-space: nowrap; }
-      .hero-sub { font-size: 17px; margin-top: 32px; line-height: 1.6; max-width: 700px; }
+      .hero-sub { font-size: 17px; margin-top: 28px; line-height: 1.6; max-width: 700px; }
       .hero-sub2 { margin-top: 6px; font-size: 15px; }
       .hero-cta button { margin-top: 20px; padding: 16px 44px; font-size: 16px; }
       .hero-micro { margin-top: 10px; font-size: 13px; }
