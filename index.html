@@ -13,6 +13,9 @@
   <!-- ── V2 LANDING OVERRIDES ─────────────────────────────────── -->
   <style>
 
+    /* ── GLOBAL OVERFLOW GUARD ── */
+    html, body { max-width: 100%; overflow-x: hidden; }
+
     /* ── NAV ── */
     nav {
       background: rgba(11,15,20,0.82);
@@ -24,19 +27,24 @@
     .logo-x    { color: var(--gold2); text-shadow: none; }
     .logo-x::before { color: var(--gold2); opacity: .55; }
     .logo-dot  { color: var(--gold2); text-shadow: none; }
+    /* hero-badge */
+    .hero-badge { align-self: center; max-width: 100%; margin-bottom: 20px; }
+    /* hero-title br és redundant: .white i .gold ja son display:block */
+    .hero-title br { display: none; }
 
-    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 180px 20px 140px; }
-    .hero-title { font-size: clamp(68px, 8.5vw, 100px); line-height: 1.12; letter-spacing: -0.025em; margin: 40px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; }
-    .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.18em; }
+    /* hero */
+    .hero { background: radial-gradient(circle at center, #0b1620 0%, #06090f 100%); color: white; text-align: center; padding: 90px 20px 60px; min-height: 100dvh; display: flex; flex-direction: column; align-items: stretch; width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+    .hero-title { font-size: clamp(38px, 11vw, 52px); line-height: 1; letter-spacing: -0.025em; margin: 16px 0 0; font-family: 'Syne', sans-serif; font-weight: 800; word-break: normal; overflow-wrap: normal; text-align: center; max-width: 100%; min-width: 0; }
+    .hero-title .white { color: #ffffff; display: block; margin-bottom: 0.15em; }
     .hero-title .gold { color: #f5b400; display: block; }
-    .hero-sub { font-size: clamp(18px, 2.2vw, 22px); color: #cfd6dc; margin-top: 48px; line-height: 1.75; max-width: 600px; margin-left: auto; margin-right: auto; }
-    .hero-sub2 { margin-top: 18px; color: #9aa3aa; font-size: 16px; }
-    .hero-cta button { margin-top: 56px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 22px 52px; border-radius: 50px; font-size: 19px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; }
+    .hero-sub { font-size: clamp(15px, 2vw, 20px); color: #cfd6dc; margin-top: 32px; line-height: 1.65; max-width: 600px; margin-left: auto; margin-right: auto; text-align: center; }
+    .hero-sub2 { margin-top: 12px; color: #9aa3aa; font-size: 15px; text-align: center; }
+    .hero-cta { display: flex; flex-direction: column; align-items: center; margin-top: 0; box-sizing: border-box; }
+    .hero-cta button { margin-top: 36px; background: linear-gradient(90deg,#f5b400,#ffcc33); border: none; padding: 20px 48px; border-radius: 50px; font-size: 18px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; box-shadow: 0 8px 36px rgba(245,180,0,.38); transition: transform .22s ease, box-shadow .22s ease; color: #0b0d0f; letter-spacing: -0.01em; box-sizing: border-box; max-width: 100%; white-space: normal; text-align: center; }
     .hero-cta button:hover { transform: translateY(-4px); box-shadow: 0 18px 56px rgba(245,180,0,.58); }
-    .hero-micro { margin-top: 18px; font-size: 14px; color: #888; letter-spacing: 0.01em; }
-    .hero-visual { display: flex; justify-content: center; }
-    .hero-visual img { width: 100%; max-width: 1200px; margin: 80px auto 0; padding: 0 24px; display: block; }
-    .hero-stats { margin-top: 100px; }
+    .hero-micro { margin-top: 18px; font-size: 14px; color: #888; letter-spacing: 0.01em; text-align: center; }
+    .hero-visual { display: flex; justify-content: center; overflow: hidden; width: 100%; max-width: 100%; }
+    .hero-visual img { width: 100%; max-width: 100%; margin: 80px auto 0; padding: 0 16px; display: block; box-sizing: border-box; }
     .stats-title { font-size: 22px; margin-bottom: 40px; color: #dfe6ec; }
     .stats-grid { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
     .stats-grid strong { font-size: 48px; color: #f5b400; }
@@ -63,6 +71,7 @@
       margin: 0 auto;
       position: relative;
       z-index: 1;
+      overflow-x: clip;
     }
     .transform-section h2 {
       font-size: clamp(2.8rem, 5vw, 3.5rem);
@@ -220,7 +229,7 @@
     .features { border: 1px solid rgba(255,255,255,.05); }
 
     /* ── STATS NARRATIVA ── */
-    .hero-stats { margin-top: 100px; padding: 0 20px; }
+    .hero-stats { margin-top: 100px; padding: 0 20px; width: 100%; max-width: 100%; box-sizing: border-box; }
     .stats-title {
       font-size: clamp(1rem, 2vw, 1.2rem);
       margin-bottom: 56px;
@@ -296,27 +305,67 @@
       .transform-grid { grid-template-columns: 1fr; }
       .transform-arrow { transform: rotate(90deg); }
     }
+    @media (max-width: 768px) {
+      .transform-col.after::before { inset: -20px 0; }
+      .transform-section h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); }
+    }
     @media (max-width: 600px) {
-      .stats-grid { gap: 40px; }
+      .stats-grid { gap: 24px; flex-wrap: wrap; }
       .stats-grid strong { font-size: 40px; }
       .stats-grid span { max-width: 100%; }
       .stats-conclusion { font-size: 1rem; }
-      .stats-cta { width: 100%; max-width: 340px; padding: 17px 24px; font-size: 16px; margin-top: 48px; }
+      .stats-cta { width: 100%; max-width: calc(100vw - 40px); padding: 17px 24px; font-size: 16px; margin-top: 48px; box-sizing: border-box; }
       .transform-col.after { padding: 28px 20px; border-left-width: 3px; }
+      .hero-cta button { padding: 18px 28px; font-size: 16px; width: 100%; max-width: 100%; }
     }
     @media (max-width: 560px) {
       .hero-top { padding: 88px 5% 32px; }
       .steps { grid-template-columns: 1fr 1fr; }
     }
 
-    /* ── DESKTOP HERO: ampli, immersiu, una sola vista ── */
+    /* ── MOBILE HERO ≤480px ── */
+    @media (max-width: 480px) {
+      .hero {
+        padding-top: 72px;
+        padding-bottom: 40px;
+      }
+      .hero-badge { max-width: calc(100vw - 40px); white-space: normal; text-align: center; margin-bottom: 16px; }
+      .hero-title {
+        font-size: clamp(32px, 9vw, 40px);
+        line-height: 1.05;
+        max-width: 100%;
+        text-align: left;
+        margin-top: 10px;
+        letter-spacing: -0.03em;
+      }
+      .hero-sub {
+        font-size: 14px;
+        margin-top: 18px;
+        line-height: 1.6;
+      }
+      .hero-sub2 { margin-top: 8px; font-size: 13px; }
+      .hero-cta { padding: 0; margin-top: 20px; }
+      .hero-cta button {
+        margin-top: 0;
+        padding: 16px 20px;
+        font-size: 15px;
+        width: 100%;
+        max-width: calc(100vw - 40px);
+        box-sizing: border-box;
+      }
+      .hero-micro { margin-top: 12px; font-size: 13px; }
+      .hero-visual img { margin-top: 40px; padding: 0 8px; }
+      .stats-grid { gap: 20px; }
+    }
+
+    /* ── DESKTOP HERO ≥1024px ── */
     @media (min-width: 1024px) {
-      .hero { padding: 80px 20px 28px; }
+      .hero { padding: 80px 20px 28px; display: block; min-height: unset; }
       .hero-badge { margin-bottom: 18px; }
-      .hero-title { font-size: clamp(38px, 5.2vw, 72px); margin: 18px 0 0; line-height: 1.04; letter-spacing: -0.03em; }
-      .hero-title .white { white-space: nowrap; margin-bottom: 0; }
+      .hero-title { font-size: clamp(40px, 5.2vw, 72px); margin: 18px 0 0; line-height: 1.02; letter-spacing: -0.03em; }
+      .hero-title .white { white-space: nowrap; margin-bottom: 0.12em; }
       .hero-title .gold  { white-space: nowrap; }
-      .hero-sub { font-size: 17px; margin-top: 32px; line-height: 1.6; max-width: 700px; }
+      .hero-sub { font-size: 17px; margin-top: 28px; line-height: 1.6; max-width: 700px; }
       .hero-sub2 { margin-top: 6px; font-size: 15px; }
       .hero-cta button { margin-top: 20px; padding: 16px 44px; font-size: 16px; }
       .hero-micro { margin-top: 10px; font-size: 13px; }
@@ -530,7 +579,7 @@
     <h2>Funciona per a tothom<br><em>que rep massa missatges.</em></h2>
     <p class="section-sub">Siguis pare, freelancer o part d'una comunitat, nexlupa et diu exactament què has de fer.</p>
 
-    <div class="platform-grid reveal" style="grid-template-columns: repeat(3,1fr);">
+    <div class="platform-grid reveal">
 
       <div class="platform-block" style="border-top: 3px solid #f5b400;">
         <div class="pb-glyph">🏠</div>
