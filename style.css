@@ -942,6 +942,8 @@ body.dark {
 }
 
 @media (max-width: 640px) {
+  nav { padding: 10px 4%; }
+  .nav-cta { white-space: nowrap; font-size: 11px; padding: 8px 12px; }
   .platform-grid { grid-template-columns: 1fr !important; }
   .features { padding: 30px 20px; }
   .features-grid { grid-template-columns: 1fr; }
