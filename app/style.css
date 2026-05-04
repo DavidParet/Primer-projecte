@@ -587,7 +587,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Loading */
 .loading { display: none; text-align: center; padding: 44px 20px; }
-.loading.on { display: block; }
+.loading.on {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 220px;
+}
 .spin-lupa {
   font-size: 42px; display: block; margin-bottom: 14px;
   animation: swingLupa 1s ease-in-out infinite;
@@ -607,7 +611,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   background: #111;
   border-radius: 20px;
   padding: 22px 18px 18px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -1060,7 +1064,7 @@ body.dark .usage-label { color: var(--gold); }
 
   .app-col-right {
     height: 100%;
-    padding: 8px 8px 0;
+    padding: 10px 10px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1560,11 +1564,11 @@ body.dark .usage-label { color: var(--gold); }
 
 /* ── RESET ── */
 .nx-btn-reset {
-  display: block; width: 100%; margin-top: 10px;
-  background: transparent; border: none;
-  color: #3a3a3a; font-size: 13px; font-weight: 600;
+  display: block; width: 100%; margin-top: 14px;
+  background: transparent; border: 1px solid #2e2e2e;
+  color: #666; font-size: 13px; font-weight: 700;
   font-family: 'Nunito', sans-serif;
-  cursor: pointer; padding: 8px; border-radius: 8px;
-  transition: color .2s;
+  cursor: pointer; padding: 12px; border-radius: 50px;
+  transition: all .2s; letter-spacing: .1px;
 }
-.nx-btn-reset:active { color: #666; }
+.nx-btn-reset:active { color: #999; border-color: #444; }

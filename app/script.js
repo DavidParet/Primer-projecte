@@ -403,18 +403,16 @@ function formatActionDate(str) {
 }
 
 /* ── PRIORITY HEURISTICS ── */
-function applyPriorityHeuristics(accions, decisioText) {
-  var allText = ((decisioText || '') + ' ' + accions.map(function(a) { return String(a.accio || ''); }).join(' ')).toLowerCase();
-  var forceAllAlta = /important assistir a tot/i.test(allText);
-  var altaKw = ['important', 'obligatori', 'imprescindible', 'autoritz', 'signada', 'termini', 'deadline'];
+function applyPriorityHeuristics(accions) {
   return accions.map(function(a) {
-    if (forceAllAlta) return Object.assign({}, a, { prioritat: 'alta' });
-    var txt = String(a.accio || '').toLowerCase();
-    var hasAlta = altaKw.some(function(k) { return txt.includes(k); });
-    if (hasAlta) return Object.assign({}, a, { prioritat: 'alta' });
-    if (a.tipus === 'informatiu') return Object.assign({}, a, { prioritat: a.prioritat || 'baixa' });
-    if (a.data && a.data !== 'null') return Object.assign({}, a, { prioritat: a.prioritat || 'mitja' });
-    return a;
+    var txt     = String(a.accio || '').toLowerCase();
+    var rawDate = String(a.data || '');
+    var hasDate = rawDate && rawDate !== 'null';
+    var hasTime = hasDate && /\d{2}:\d{2}/.test(rawDate);
+    var isUrgent = /import|urgent/.test(txt);
+    if (hasTime || isUrgent) return Object.assign({}, a, { prioritat: 'alta' });
+    if (hasDate)             return Object.assign({}, a, { prioritat: 'mitja' });
+    return a.prioritat ? a : Object.assign({}, a, { prioritat: 'baixa' });
   });
 }
 
@@ -470,7 +468,7 @@ function renderResult(d) {
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
     return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: a.prioritat || 'baixa' };
   }).filter(function(a) { return a && a.accio.length > 0; });
-  accions = applyPriorityHeuristics(accions, decisio);
+  accions = applyPriorityHeuristics(accions);
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -530,7 +528,7 @@ function renderResult(d) {
           card.appendChild(dateEl);
         }
 
-        if (a.tipus === 'calendari' && a.data && a.data !== 'null') {
+        if (a.data && a.data !== 'null') {
           var calBtn = document.createElement('button');
           calBtn.className = 'nx-btn-cal';
           calBtn.textContent = '📅 Afegir al calendari';
@@ -565,7 +563,7 @@ function renderResult(d) {
   setTimeout(function() {
     if (colEl)  colEl.scrollTop  = 0;
     if (mainEl) mainEl.scrollTop = 0;
-  }, 30);
+  }, 100);
 
   saveToHistorial(d);
 }

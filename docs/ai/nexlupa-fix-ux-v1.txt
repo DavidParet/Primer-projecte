@@ -1,0 +1,50 @@
+Títol: FIX regressions UX + restaurar funcionalitats clau NexLupa
+
+OBJECTIU:
+Corregir regressions de producte i UX sense trencar la lògica actual.
+
+IMPORTANT (OBLIGATORI):
+- No eliminar cap funcionalitat existent
+- No empitjorar experiències que abans funcionaven
+- Si un canvi empitjora UX → revertir-lo
+
+FASE 1 — RESTAURAR FUNCIONALITATS
+
+1. Botó "Afegir al calendari"
+- Ha de tornar a aparèixer a cada acció amb data
+- Visible sempre
+- No dependre de heurístiques ocultes
+
+2. WhatsApp
+- Recuperar format anterior
+- Incloure resum
+- Incloure "Generat amb NexLupa"
+- Mantenir dates en format humà
+
+FASE 2 — FIX UI MÒBIL (CRÍTIC)
+
+1. Header no pot solapar contingut
+2. Loader: no pot tapar contingut, centrat i net
+3. Scroll: resultat comença a dalt
+4. "Nou missatge": botó clar, sempre visible
+
+FASE 3 — PRIORITATS (SIMPLIFICAR)
+
+- Si té hora → ALTA
+- Si conté "important" o "urgent" → ALTA
+- Si té data → MITJA
+- Si no té res → BAIXA (o mantenir valor API)
+
+FASE 4 — UX FLOW
+
+Quan es genera resultat:
+- Scroll automàtic al resultat
+- Decisió i Accions visibles
+- Botons: Compartir / Copiar / Nou missatge
+
+FASE 5 — VALIDACIÓ
+
+✔ no solapaments
+✔ scroll correcte
+✔ navegació clara
+✔ funcionalitats intactes
