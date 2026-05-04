@@ -9,7 +9,6 @@ const SYSTEM_PROMPT = fs.readFileSync(
   'utf8'
 );
 
-
 module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 

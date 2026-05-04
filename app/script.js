@@ -115,6 +115,75 @@ function chk(el, row) {
 /* ── LAST RESULT ── */
 var _lastData = null;
 
+/* ── NORMALIZE RESULT ── */
+function normalizeResult(raw) {
+  var d = raw || {};
+
+  var resum = d.resum;
+  if (typeof resum !== 'string') resum = String(resum || '');
+
+  var accions = d.accions;
+  if (!Array.isArray(accions)) accions = [];
+  accions = accions.slice(0, 3).map(function (a) {
+    if (typeof a === 'string') return a.trim();
+    if (a && typeof a === 'object') return String(a.accio || a.text || a.descripcio || a.action || '').trim();
+    return String(a || '').trim();
+  }).filter(function (a) { return a.length > 0; });
+
+  var dates = d.dates;
+  if (!Array.isArray(dates)) dates = [];
+  dates = dates.map(function (dt) {
+    if (!dt) return null;
+    if (typeof dt === 'string') return { descripcio: dt, data: '', urgent: false };
+    if (typeof dt !== 'object') return null;
+    var desc = String(dt.descripcio || dt.text || dt.description || '').trim();
+    var data = String(dt.data || dt.date || dt.fecha || '').trim();
+    if (!desc) return null;
+    return { descripcio: desc, data: data, urgent: !!dt.urgent };
+  }).filter(function (dt) { return dt !== null; });
+
+  return {
+    resum:         resum,
+    urgencia:      Math.min(5, Math.max(1, parseInt(d.urgencia) || 1)),
+    urgencia_text: typeof d.urgencia_text === 'string' ? d.urgencia_text : String(d.urgencia_text || ''),
+    accions:       accions,
+    dates:         dates
+  };
+}
+
+/* ── FORMAT DATE ── */
+var _DIES  = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
+var _MESOS = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+
+function formatDate(str) {
+  if (!str || typeof str !== 'string') return '';
+  var now  = new Date();
+  var year = now.getFullYear();
+  var d    = null;
+
+  var timeMatch = str.match(/(\d{1,2}):(\d{2})/);
+  var timeSuffix = timeMatch ? ' · ' + timeMatch[0] : '';
+
+  var m1 = str.match(/(\d{1,2})\s+(?:de\s+)?([a-zç]+)/i);
+  if (m1) {
+    var day = parseInt(m1[1]);
+    var mon = MONTHS[m1[2].toLowerCase()];
+    if (mon) d = new Date(year, mon - 1, day);
+  }
+
+  if (!d) {
+    var m2 = str.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+    if (m2) {
+      var d2 = parseInt(m2[1]), mo = parseInt(m2[2]);
+      var y2 = m2[3] ? parseInt(m2[3]) : year;
+      d = new Date(y2 < 100 ? 2000 + y2 : y2, mo - 1, d2);
+    }
+  }
+
+  if (!d || isNaN(d.getTime())) return str;
+  return _DIES[d.getDay()] + ' · ' + d.getDate() + ' ' + _MESOS[d.getMonth()] + timeSuffix;
+}
+
 /* ── DEMO MODE ── */
 var _demoMode = false;
 var DEMO_RESULTS = {
@@ -308,7 +377,8 @@ function showErr(msg) {
 }
 
 /* ── RENDER RESULTS ── */
-/* ── FORMAT DATA LLEGIBLE ── */
+
+/* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM) ── */
 function formatActionDate(str) {
   if (!str || str === 'null') return null;
   var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
@@ -331,7 +401,7 @@ function renderResult(d) {
     return typeof a === 'string'
       ? { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa' }
       : a;
-  });
+  }).filter(function(a) { return a && String(a.accio || '').trim(); });
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -370,7 +440,7 @@ function renderResult(d) {
 
         var textEl = document.createElement('span');
         textEl.className = 'nx-action-text';
-        textEl.textContent = a.accio;
+        textEl.textContent = String(a.accio);
 
         top.appendChild(iconEl);
         top.appendChild(textEl);
@@ -507,33 +577,36 @@ function tipusIcon(tipus) {
 }
 
 function buildShareText(d) {
-  var SEP = '─────────────────────';
-  var txt = '✦ *NexLupa*\n' + SEP + '\n\n';
+  var lines = [];
+  lines.push('✦ NexLupa');
+  lines.push('');
 
-  var decisio = d.decisio || '';
+  var decisio = d.decisio || d.resum || '';
   if (!decisio || decisio === 'cap acció necessària') {
-    txt += '✔ *Cap acció necessària*\n\n';
+    lines.push('No cal fer cap acció.');
   } else {
-    txt += '👉 *' + decisio.toUpperCase() + '*\n\n';
+    lines.push(decisio);
   }
 
   if (d.accions && d.accions.length > 0) {
+    lines.push('');
     d.accions.forEach(function (a) {
-      var isObj = typeof a === 'object' && a !== null;
-      var text  = isObj ? a.accio : a;
-      var tipus = isObj ? (a.tipus || 'tasca') : 'tasca';
-      var data  = isObj ? a.data : null;
-      txt += tipusIcon(tipus) + ' ' + text;
-      if (data) txt += '\n     _' + data + '_';
-      txt += '\n';
+      var isObj   = typeof a === 'object' && a !== null;
+      var text    = isObj ? String(a.accio || '') : String(a);
+      var tipus   = isObj ? (a.tipus || 'tasca') : 'tasca';
+      var data    = isObj ? a.data : null;
+      var fmtDate = data ? formatActionDate(data) : null;
+      lines.push(tipusIcon(tipus) + ' ' + text);
+      if (fmtDate) lines.push('   ' + fmtDate);
     });
-    txt += '\n';
   }
 
-  txt += SEP + '\n';
-  if (d.resum) txt += '_' + d.resum + '_\n\n';
-  txt += '_Generat amb NexLupa_\n_De la informació a la decisió_\n_nexlupa.app_';
-  return txt;
+  lines.push('');
+  lines.push('—');
+  lines.push('');
+  lines.push('nexlupa.app');
+
+  return lines.join('\n');
 }
 
 function buildSharePreviewHTML(d) {
@@ -674,6 +747,12 @@ function getHistory() {
   return _historial.slice().reverse();
 }
 
+function _accionText(a) {
+  if (typeof a === 'string') return a;
+  if (a && typeof a === 'object') return String(a.accio || a.text || '');
+  return String(a || '');
+}
+
 function saveToHistorial(d) {
   var now     = new Date();
   var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
@@ -695,7 +774,8 @@ function saveToHistorial(d) {
   localStorage.setItem('nxl_hist', JSON.stringify(_historial));
 
   (d.accions || []).forEach(function (a) {
-    _allTasques.push({ text: a, src: d.resum.substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
+    var txt = _accionText(a);
+    if (txt) _allTasques.push({ text: txt, src: (d.resum || '').substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
   });
   localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
   updateBadges();
@@ -713,7 +793,7 @@ function renderHistory(query) {
   var items = q ? all.filter(function (item) {
     var text = [
       item.resum || '',
-      (item.accions || []).join(' '),
+      (item.accions || []).map(_accionText).join(' '),
       (item.dates   || []).map(function (d) { return d.descripcio || ''; }).join(' ')
     ].join(' ').toLowerCase();
     return text.includes(q);
@@ -730,13 +810,14 @@ function renderHistory(query) {
   items.forEach(function (item) {
     var div = document.createElement('div');
     div.className = 'hist-item';
+    var numAccions = item.accions ? item.accions.length : 0;
+    var numDates   = item.dates   ? item.dates.length   : 0;
+    var metaParts  = [escHtml(item.date)];
+    if (numAccions > 0) metaParts.push(numAccions + ' accions');
+    if (numDates   > 0) metaParts.push(numDates   + ' dates');
     div.innerHTML =
       '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
-      '<div class="hist-meta">' +
-        escHtml(item.date) + ' &nbsp;·&nbsp; ' +
-        (item.accions ? item.accions.length : 0) + ' accions &nbsp;·&nbsp; ' +
-        (item.dates   ? item.dates.length   : 0) + ' dates' +
-      '</div>';
+      '<div class="hist-meta">' + metaParts.join(' &nbsp;·&nbsp; ') + '</div>';
     div.onclick = function () { render(item); navTo('inici'); };
     el.appendChild(div);
   });
@@ -754,9 +835,14 @@ function renderHistorial() {
   reversed.forEach(function (item) {
     var div = document.createElement('div');
     div.className = 'hist-item';
+    var numAccions = item.accions ? item.accions.length : 0;
+    var numDates   = item.dates   ? item.dates.length   : 0;
+    var metaParts  = [escHtml(item.date)];
+    if (numAccions > 0) metaParts.push(numAccions + ' accions');
+    if (numDates   > 0) metaParts.push(numDates   + ' dates');
     div.innerHTML =
       '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
-      '<div class="hist-meta">' + escHtml(item.date) + ' · ' + (item.accions ? item.accions.length : 0) + ' accions · ' + (item.dates ? item.dates.length : 0) + ' dates</div>';
+      '<div class="hist-meta">' + metaParts.join(' · ') + '</div>';
     div.onclick = function () { render(item); navTo('inici'); };
     el.appendChild(div);
   });

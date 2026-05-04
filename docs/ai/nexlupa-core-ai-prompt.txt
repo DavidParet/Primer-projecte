@@ -47,9 +47,10 @@ Retorna:
 ---
 
 3. ACCIONS
-- Màxim 4 accions.
+- Màxim 3 accions.
 - Només accions útils i reals (no redundants).
 - Cada acció ha d'aportar valor.
+- NO inventis accions que no existeixin explícitament al missatge.
 
 ---
 
@@ -79,6 +80,13 @@ Retorna:
 - 1 sola frase
 - Sense adorns
 - Ha de reflectir el context real del missatge
+
+---
+
+8. CONSISTÈNCIA (CRÍTIC)
+- PROHIBIT: si decisio="cap acció necessària" → accions HA de ser [].
+- PROHIBIT: si accions té elements → decisio NO pot ser "cap acció necessària".
+- La decisio i el resum han de ser coherents entre ells.
 
 ---
 

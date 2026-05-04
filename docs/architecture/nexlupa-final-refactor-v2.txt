@@ -1,0 +1,108 @@
+nexlupa — Full System Refactor v2
+==================================
+Data: 2026-05-04
+Autor: David Paret / nexlupa motor
+
+OBJECTIU
+--------
+Refactoritzar nexlupa de prototip a producte usable.
+Correcció de bugs crítics detectats en proves reals: motor IA,
+normalització de dades, scroll mòbil, format dates, WhatsApp.
+
+========================================
+FASE 1 — BUGS CRÍTICS UI
+========================================
+
+1. SCROLL MÒBIL
+   Problema: .app-col-right no tenia overflow-y:auto en mobile,
+   els resultats quedaven fora de la pantalla sense poder fer scroll.
+   Solució: afegit overflow-y:auto + -webkit-overflow-scrolling:touch
+   a .app-col-right dins @media (max-width: 899px).
+
+2. BUG [object Object]
+   Problema: si la IA retornava accions com a objectes {accio:"...",...}
+   en lloc de strings, es mostrava "[object Object]".
+   Solució: normalizeResult() garanteix que totes les accions
+   es converteixen a strings (a.accio || a.text || a.descripcio).
+
+3. SOLAPAMENT BOTÓ ANALITZAR
+   El botó NO té position:absolute. Confirmat en el flux flex de la card.
+   Eliminat qualsevol risc de z-index conflictiu.
+
+4. FORMAT DATA
+   Afegida funció formatDate(str) que converteix dates tipus
+   "11 d'abril" o "11/04" a format "Dijous · 11 abril · 17:30".
+   Si la data no és parsejable → retorna la string original.
+
+5. COMPTADOR DATES
+   Corregit renderHistory(): si dates.length === 0 no mostra "0 dates".
+   Només mostra el comptador si hi ha dates reals.
+
+========================================
+FASE 2 — NORMALITZACIÓ
+========================================
+
+normalizeResult(rawData):
+  - Garanteix resum com a string
+  - Garanteix accions com a array de strings (màxim 3)
+  - Converteix accions-objecte a strings
+  - Valida i neteja dates (elimina nuls, garanteix descripcio+data)
+  - Evita "[object Object]" en totes les capes
+
+========================================
+FASE 3 — MOTOR IA (SYSTEM_PROMPT)
+========================================
+
+Canvis al SYSTEM_PROMPT de api/analyze.js:
+  - resum: UNA sola decisió, clara i curta
+  - accions: màxim 3 (era 5)
+  - dates: OBLIGATORI extreure totes les dates explícites
+  - PROHIBIT: "cap acció necessària" + accions (contradicció)
+  - PROHIBIT: contradicció entre resum i accions
+
+========================================
+FASE 4 — UI FINAL
+========================================
+
+render(d):
+  - Crida normalizeResult(d) al principi → dades sempre netes
+  - Dates mostren formatDate() → format llegible
+  - Accions sempre strings → no [object Object]
+  - Eliminats elements ASCII i debug visual
+
+========================================
+FASE 5 — WHATSAPP
+========================================
+
+buildShareText(d) nou format:
+
+  ✦ NexLupa
+
+  [DECISIÓ]
+
+  📅 Acció 1
+  📅 Acció 2
+
+  [Data 1 · format llegible]
+  [Data 2 · format llegible]
+
+  —
+
+  nexlupa.app
+
+Prohibit: formats tècnics, textos llargs, markdown *.
+
+========================================
+FITXERS MODIFICATS
+========================================
+
+  app/script.js   — normalizeResult, formatDate, render, buildShareText,
+                    renderHistory (comptador dates)
+  app/style.css   — .app-col-right mobile: overflow-y:auto
+  api/analyze.js  — SYSTEM_PROMPT actualitzat
+
+========================================
+COMMIT
+========================================
+
+feat: full system refactor (UI + AI + normalization + UX)
