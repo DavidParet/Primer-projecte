@@ -218,9 +218,11 @@ function toggleDemo() {
 }
 
 /* ── USAGE LIMIT ── */
+var DEV_MODE = true; // bypass limits for development — set to false for production behaviour
 var FREE_LIMIT = 3;
 
 function getUsageToday() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var stored = JSON.parse(localStorage.getItem('nxl_usage') || '{}');
   if (stored.date !== today) return 0;
@@ -228,6 +230,7 @@ function getUsageToday() {
 }
 
 function incrementUsage() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var count = getUsageToday() + 1;
   localStorage.setItem('nxl_usage', JSON.stringify({ date: today, count: count }));
@@ -235,6 +238,7 @@ function incrementUsage() {
 }
 
 function checkLimit() {
+  if (DEV_MODE) return true;
   var used = getUsageToday();
   var banner = document.getElementById('limitBanner');
   var btn = document.getElementById('btnAnalyze');
