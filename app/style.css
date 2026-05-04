@@ -1546,6 +1546,18 @@ body.dark .usage-label { color: var(--gold); }
 .nx-btn-copy:active { background: #222; }
 .nx-btn-copy.copied { background: #14532d; color: #4ade80; border-color: #166534; }
 
+/* ── CALENDAR PER ACTION ── */
+.nx-btn-cal {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; margin-left: 28px;
+  padding: 5px 12px;
+  background: rgba(61,186,111,.12); color: #3dba6f;
+  border: 1px solid rgba(61,186,111,.25); border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+}
+.nx-btn-cal:active { background: rgba(61,186,111,.22); }
+
 /* ── RESET ── */
 .nx-btn-reset {
   display: block; width: 100%; margin-top: 10px;

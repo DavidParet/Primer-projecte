@@ -1,0 +1,117 @@
+Actua com a desenvolupador frontend + UX + responsable tècnic de NexLupa.
+
+OBJECTIU:
+Polir la pantalla de resultat perquè sigui usable, coherent i premium, sense perdre cap funcionalitat ja implementada.
+
+========================================
+REGLA CRÍTICA — NO REGRESSIONS
+========================================
+
+NO pots eliminar ni empitjorar funcionalitats existents.
+
+HAS DE MANTENIR SEMPRE:
+
+1. Botó "📅 Afegir al calendari"
+2. Format WhatsApp amb branding complet
+3. Decisió com a element principal
+4. Accions tipades (calendari / tasca / informatiu)
+5. Prioritats (alta / mitja / baixa)
+6. normalizeResult()
+7. Scroll mòbil funcional
+8. Botó "+ Analitzar un nou missatge"
+
+Si un canvi pot eliminar alguna cosa → NO el facis.
+
+========================================
+FASE 1 — UI / VISUAL
+========================================
+
+1. Evitar solapaments
+- La targeta resultat NO pot tapar contingut anterior
+- Afegir marge superior
+- Ocultar input quan es mostra resultat
+
+2. Scroll
+- Historial, Tasques i Resultat amb scroll correcte
+
+3. Botó nou missatge
+Text: "+ Analitzar un nou missatge"
+- visible, clicable, neteja resultat
+
+========================================
+FASE 2 — LÒGICA
+========================================
+
+4. Prioritats
+
+ALTA:
+- té data/hora
+- és obligatori
+- deadlines
+- frases com "important assistir"
+
+MITJA:
+- preparació
+
+BAIXA:
+- informatiu
+
+IMPORTANT:
+Si diu "important assistir a totes"
+→ totes ALTA
+
+5. Calendari
+Si tipus = calendari i té data
+Mostrar botó: 📅 Afegir al calendari
+- link Google Calendar
+- amb data correcta
+- amb ubicació si existeix
+
+========================================
+FASE 3 — WHATSAPP
+========================================
+
+FORMAT OBLIGATORI:
+
+✦ NexLupa
+
+DECISIÓ
+
+📅 Accions amb data (format humà)
+
+—
+
+Resum curt
+
+Generat amb NexLupa
+De la informació a la decisió
+nexlupa.app
+
+PROHIBIT:
+- dates tècniques
+- perdre branding
+- textos llargs
+
+========================================
+FASE 4 — BUGS
+========================================
+
+- eliminar [object Object]
+- no mostrar "0 dates" incorrecte
+- loader sense solapament
+
+========================================
+VALIDACIÓ FINAL
+========================================
+
+Comprovar que:
+✔ calendari funciona
+✔ WhatsApp té branding
+✔ decisió clara
+✔ accions correctes
+✔ prioritats coherents
+✔ scroll funciona
+✔ nou missatge funciona
+
+COMMIT:
+feat: unified product polish with no-regression enforcement
