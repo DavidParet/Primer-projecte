@@ -1,0 +1,40 @@
+Títol: Millora UX final NexLupa (decisió → acció clara)
+
+OBJECTIU:
+Transformar la pantalla de resultat en una experiència clara, guiada i accionable.
+
+IMPORTANT:
+- No tocar lògica IA ni backend
+- Només UX / visual / flow
+- No eliminar funcionalitats
+
+FASE 1 — CTA CLAR
+- Botó "Analitzar un altre missatge" integrat al bloc share (sota Compartir/Copiar)
+- Estil solid visible, coherent amb els altres botons
+
+FASE 2 — ESTRUCTURA VISUAL
+1. DECISIÓ (gran)
+2. ACCIONS (cards compactes)
+3. BOTONS: Compartir / Copiar / Analitzar un altre
+4. RESUM (context secundari, a sota)
+
+FASE 3 — PRIORITATS
+- té hora o "assistir/obligatori/urgent/important" → ALTA
+- té data o "preparar/recollir/portar/dur/comprar" → MITJA
+- res → BAIXA (o mantenir API)
+
+FASE 4 — RITME VISUAL
+- Decisió: font 22px (era 26px), margin-bottom 14px
+- Accions: gap 6px, padding 10px 14px, border-radius 12px
+- Resum: font 11px, marge reduït
+
+FASE 5 — FINAL DE FLUX
+Quan l'usuari arriba al final:
+✔ veu la decisió clara
+✔ veu les accions compactes
+✔ 3 botons clars: Compartir / Copiar / Analitzar un altre
+
+VALIDACIÓ:
+✔ en 3 segons s'entén tot
+✔ en 1 clic pot repetir
+✔ no hi ha dubtes

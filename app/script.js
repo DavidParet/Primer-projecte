@@ -409,9 +409,10 @@ function applyPriorityHeuristics(accions) {
     var rawDate = String(a.data || '');
     var hasDate = rawDate && rawDate !== 'null';
     var hasTime = hasDate && /\d{2}:\d{2}/.test(rawDate);
-    var isUrgent = /import|urgent/.test(txt);
-    if (hasTime || isUrgent) return Object.assign({}, a, { prioritat: 'alta' });
-    if (hasDate)             return Object.assign({}, a, { prioritat: 'mitja' });
+    var isAlta  = hasTime || /import|urgent|obligatori|assistir|assistència/.test(txt);
+    var isMitja = hasDate || /preparar|recollir|portar|dur|comprar/.test(txt);
+    if (isAlta)  return Object.assign({}, a, { prioritat: 'alta' });
+    if (isMitja) return Object.assign({}, a, { prioritat: 'mitja' });
     return a.prioritat ? a : Object.assign({}, a, { prioritat: 'baixa' });
   });
 }

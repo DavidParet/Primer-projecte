@@ -1455,16 +1455,16 @@ body.dark .usage-label { color: var(--gold); }
    ═══════════════════════════════════════════════════════════ */
 
 /* ── DECISIÓ ── */
-.nx-decisio-block { margin-bottom: 20px; }
+.nx-decisio-block { margin-bottom: 14px; }
 .nx-decisio-label {
   font-size: 10px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 10px;
+  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 8px;
 }
 .nx-decisio-text {
   font-family: 'Syne', sans-serif;
-  font-size: 26px; font-weight: 900;
+  font-size: 22px; font-weight: 900;
   color: #ffffff; line-height: 1.2;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 .nx-decisio-text.nx-no-action {
   font-size: 22px; color: #3dba6f;
@@ -1478,13 +1478,13 @@ body.dark .usage-label { color: var(--gold); }
 }
 
 /* ── ACCIONS ── */
-.nx-actions-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.nx-actions-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 
 .nx-action-card {
   background: #1c1c1c;
   border: 1px solid #2a2a2a;
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 10px 14px;
   transition: background .15s;
 }
 .nx-action-card:active { background: #222; }
@@ -1517,18 +1517,21 @@ body.dark .usage-label { color: var(--gold); }
 
 /* ── RESUM ── */
 .nx-resum-block {
-  margin-top: 14px; padding-top: 14px;
-  border-top: 1px solid #1e1e1e;
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid #1a1a1a;
 }
 .nx-resum-text {
-  font-size: 12px; color: #4a4a4a;
-  line-height: 1.55; font-style: italic;
+  font-size: 11px; color: #3d3d3d;
+  line-height: 1.5; font-style: italic;
 }
 
 /* ── SHARE ── */
 .nx-share-block {
-  display: flex; gap: 8px; flex-wrap: wrap;
-  margin-top: 16px; position: relative;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 14px;
+}
+.nx-share-row {
+  display: flex; gap: 8px;
 }
 .nx-btn-wa {
   flex: 1; padding: 13px 12px;
@@ -1564,11 +1567,11 @@ body.dark .usage-label { color: var(--gold); }
 
 /* ── RESET ── */
 .nx-btn-reset {
-  display: block; width: 100%; margin-top: 14px;
-  background: transparent; border: 1px solid #2e2e2e;
-  color: #666; font-size: 13px; font-weight: 700;
+  display: block; width: 100%;
+  background: #252525; border: 1px solid #333;
+  color: #ccc; font-size: 14px; font-weight: 700;
   font-family: 'Nunito', sans-serif;
-  cursor: pointer; padding: 12px; border-radius: 50px;
+  cursor: pointer; padding: 13px; border-radius: 50px;
   transition: all .2s; letter-spacing: .1px;
 }
-.nx-btn-reset:active { color: #999; border-color: #444; }
+.nx-btn-reset:active { background: #2e2e2e; color: #fff; border-color: #444; }
