@@ -609,7 +609,7 @@ function renderResult(d) {
     if (res) res.scrollIntoView({ block: 'start', behavior: 'instant' });
   }, 80);
 
-  saveToHistorial(d);
+  saveToHistorial(Object.assign({}, d, { accions: accions }));
 }
 
 function render(d) {
@@ -950,9 +950,20 @@ function saveToHistorial(d) {
   (d.accions || []).forEach(function (a) {
     var txt = _accionText(a);
     if (!txt) return;
-    var dup = _allTasques.some(function(t) { return t.text.trim().toLowerCase() === txt.trim().toLowerCase(); });
-    if (!dup) {
-      var prior = (a && typeof a === 'object') ? (a.prioritat || 'baixa') : 'baixa';
+    var prior = (a && typeof a === 'object') ? (a.prioritat || 'baixa') : 'baixa';
+    var existingIdx = -1;
+    for (var ei = 0; ei < _allTasques.length; ei++) {
+      if (_allTasques[ei].text.trim().toLowerCase() === txt.trim().toLowerCase()) {
+        existingIdx = ei; break;
+      }
+    }
+    if (existingIdx >= 0) {
+      if (!_allTasques[existingIdx].done) {
+        _allTasques[existingIdx].isNew    = true;
+        _allTasques[existingIdx].prioritat = prior;
+        _allTasques[existingIdx].src      = src;
+      }
+    } else {
       _allTasques.push({ text: txt, src: src, done: false, id: Date.now() + Math.random(), isNew: true, prioritat: prior });
     }
   });

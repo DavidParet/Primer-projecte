@@ -1,0 +1,65 @@
+Fix immediat — Tasques noves a dalt + neteja de text brut
+
+COMMIT: fix: force new tasks to top and clean broken text into actionable tasks
+
+---
+
+1. TASQUES NOVES (CRÍTIC)
+
+REGLA ABSOLUTA:
+TOTA acció generada → ha de crear una TASCA visible amb NOU badge.
+
+VISUAL:
+- Badge: "NOU"
+- Negreta obligatòria
+- Lleuger highlight (fons groc tènue)
+
+ORDRE:
+1. 🔴 NOVES ALTA
+2. 🟠 NOVES MITJA
+3. 🟡 NOVES BAIXA
+4. Antigues
+5. Completades
+
+CANVIS DE CODI:
+
+A) renderResult() passa les accions amb heurístiques a saveToHistorial:
+   saveToHistorial(Object.assign({}, d, { accions: accions }))
+   → d'aquesta manera les prioritats ajustades per heurística
+     es guarden a les tasques
+
+B) saveToHistorial() ara RE-MARCA duplicats com a nous:
+   - Si la tasca ja existeix i NO està completada → isNew = true,
+     actualitza prioritat i src
+   - Si no existeix → afegeix amb isNew: true
+   → Resultat: cada anàlisi fa pujar les tasques rellevants al capdamunt
+
+---
+
+2. NETEJA DE TEXT (CRÍTIC)
+
+PROBLEMA:
+Fragments com "cables i les treries" o frases tallades apareixien
+com a accions vàlides.
+
+SOLUCIÓ (prompt AI):
+Regla 10 afegida a nexlupa-core-ai-prompt.txt:
+- Cada acció = frase completa (VERB + OBJECTE mínim)
+- Text fragmentat → interpretar i convertir en acció neta
+- PROHIBIT: accions genèriques sense concreció
+- EXEMPLE: "cables i les treries" → "Preparar els cables i el material tècnic necessari"
+
+---
+
+3. VALIDACIÓ
+
+Si una tasca nova:
+- no està a dalt
+- no té NOU badge
+- no és en negreta
+→ el sistema està fallant
+
+Si una acció és:
+- un fragment sense verb
+- una llista de coses sense context
+→ el prompt no funciona correctament

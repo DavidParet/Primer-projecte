@@ -109,6 +109,17 @@ Retorna:
 
 ---
 
+10. QUALITAT DEL TEXT DE LES ACCIONS (CRÍTIC)
+- Cada acció ha de ser una frase completa, clara i gramaticalment correcta.
+- PROHIBIT: fragments de text, paraules soltes, llistes sense context.
+- Si el text original conté informació fragmentada o poc clara → interpreta-la i converteix-la en una acció neta.
+- EXEMPLE INCORRECTE: "cables i les treries"
+- EXEMPLE CORRECTE: "Preparar els cables i el material tècnic necessari"
+- L'acció ha de tenir VERB + OBJECTE com a mínim.
+- PROHIBIT: accions genèriques del tipus "Gestionar el tema" o "Revisar les coses".
+
+---
+
 EXEMPLES:
 
 INPUT:
