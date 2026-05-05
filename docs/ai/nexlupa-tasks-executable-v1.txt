@@ -1,0 +1,81 @@
+TÍTOL: Tasques executables i ordenació intel·ligent
+
+OBJECTIU:
+Eliminar tasques genèriques i fer-les accionables i útils.
+
+========================================================
+PROHIBIT
+========================================================
+
+No generar mai:
+
+- "Coordinar logística"
+- "Preparar material"
+- "Comunicar horaris"
+- "Informar assistents"
+
+Això és soroll.
+
+========================================================
+1. NOMÉS TASQUES REALS
+========================================================
+
+Només crear tasques si:
+- tenen acció clara
+- l'usuari pot fer-la
+
+Exemples vàlids:
+
+✔ Confirmar assistència
+✔ Comprar entrades
+✔ Afegir partit al calendari
+✔ Recollir entrades
+✔ Anar a entrenament
+
+========================================================
+2. RELACIÓ AMB EVENTS
+========================================================
+
+Cada tasca ha d'estar vinculada a:
+- una data
+- o una decisió
+
+========================================================
+3. ORDENACIÓ
+========================================================
+
+Sempre:
+
+1. NOVES + ALTA
+2. NOVES + MITJA
+3. NOVES + BAIXA
+4. ANTIGUES
+
+========================================================
+4. DESTACAT VISUAL
+========================================================
+
+Tasques noves:
+- en negreta
+- badge "NOU"
+- posició superior
+
+Quan es completen:
+- gris
+- sense negreta
+- baixen
+
+========================================================
+5. NO DUPLICAR
+========================================================
+
+Una acció = una tasca
+
+========================================================
+VALIDACIÓ
+========================================================
+
+- No hi ha frases abstractes
+- Tot és executable
+- No hi ha duplicats
+- Ordre correcte
