@@ -673,29 +673,54 @@ function buildShareText(d) {
     lines.push(decisio);
   }
 
-  if (d.accions && d.accions.length > 0) {
+  /* Normalitzar i aplicar heurístiques de prioritat */
+  var accions = (d.accions || []).map(function(a) {
+    var isObj = typeof a === 'object' && a !== null;
+    var text  = isObj
+      ? (typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || ''))
+      : String(a);
+    text = text.trim();
+    var data  = isObj ? (a.data || null) : null;
+    var prior = isObj ? (a.prioritat || 'baixa') : 'baixa';
+    return text ? { text: text, data: data, prior: prior } : null;
+  }).filter(Boolean);
+  accions = applyPriorityHeuristics(accions.map(function(a) {
+    return { accio: a.text, data: a.data, prioritat: a.prior };
+  })).map(function(a) {
+    return { text: a.accio, data: a.data, prior: a.prioritat };
+  });
+
+  /* Ordenar: primer les que tenen data */
+  accions.sort(function(a, b) {
+    if (a.data && !b.data) return -1;
+    if (!a.data && b.data) return  1;
+    return 0;
+  });
+
+  if (accions.length > 0) {
     lines.push('');
-    d.accions.forEach(function (a) {
-      var isObj   = typeof a === 'object' && a !== null;
-      var text    = isObj
-        ? (typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || ''))
-        : String(a);
-      if (!text.trim()) return;
-      var tipus   = isObj ? (a.tipus || 'tasca') : 'tasca';
-      var data    = isObj ? a.data : null;
-      var fmtDate = (data && data !== 'null') ? formatActionDate(data) : null;
-      lines.push(tipusIcon(tipus) + ' ' + text);
-      if (fmtDate) lines.push('   📅 ' + fmtDate);
+    accions.forEach(function(a) {
+      lines.push('👉 ' + a.text);
+      if (a.data && a.data !== 'null') {
+        var fmtDate = formatActionDate(a.data);
+        if (fmtDate) lines.push(fmtDate);
+      }
     });
+  }
+
+  /* Secció Important: accions ALTA */
+  var altes = accions.filter(function(a) { return a.prior === 'alta'; });
+  if (altes.length > 0) {
+    lines.push('');
+    lines.push('📌 Important: ' + altes.map(function(a) { return a.text; }).join(' · '));
   }
 
   lines.push('');
   lines.push('—');
-  lines.push('');
-  if (d.resum && d.resum !== decisio) lines.push(d.resum);
-  lines.push('');
+  if (d.resum && d.resum !== decisio) {
+    lines.push(d.resum);
+  }
   lines.push('Generat amb NexLupa');
-  lines.push('De la informació a la decisió');
   lines.push('nexlupa.app');
 
   return lines.join('\n');

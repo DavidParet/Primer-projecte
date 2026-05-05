@@ -1155,6 +1155,20 @@ body.dark .usage-label { color: var(--gold); }
 
   /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
   .ex-lbl { display: none; }
+
+  /* ── Scroll per pàgines dins main (overflow:hidden) ─────────────
+     main té overflow:hidden → les pàgines internes necessiten
+     height:100% + overflow-y:auto per poder fer scroll amb el dit. */
+  #pageHistorial,
+  #pageTasques,
+  #pageConfig,
+  #pagePremium {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 20px;
+    box-sizing: border-box;
+  }
 }
 
 /* ============================================================
