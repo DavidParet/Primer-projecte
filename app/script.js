@@ -408,16 +408,28 @@ function formatActionDate(str) {
 
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
+  var _eventRe = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió\s+import/i;
+  var _limitRe = /pagar|confirmar|entregar|lliurar|signar|inscri[ub]|termini|data\s+l[ií]mit|plaç/i;
+  var _prepRe  = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans/i;
+
+  var hasMainEvent = accions.some(function(a) {
+    return _eventRe.test(String(a.accio || ''));
+  });
+
   return accions.map(function(a) {
-    var txt     = String(a.accio || '').toLowerCase();
-    var rawDate = String(a.data || '');
-    var hasDate = rawDate && rawDate !== 'null';
-    var hasTime = hasDate && /\d{2}:\d{2}/.test(rawDate);
-    var isAlta  = hasTime || /import|urgent|obligatori|assistir|assistència/.test(txt);
-    var isMitja = hasDate || /preparar|recollir|portar|dur|comprar/.test(txt);
-    if (isAlta)  return Object.assign({}, a, { prioritat: 'alta' });
-    if (isMitja) return Object.assign({}, a, { prioritat: 'mitja' });
-    return a.prioritat ? a : Object.assign({}, a, { prioritat: 'baixa' });
+    var txt = String(a.accio || '');
+    var isEvent = _eventRe.test(txt);
+    var isLimit = _limitRe.test(txt);
+    var isPrep  = _prepRe.test(txt);
+    var hasDate = !!(a.data && String(a.data) !== 'null');
+
+    var prioritat;
+    if (isEvent || isLimit)      prioritat = 'alta';
+    else if (hasMainEvent)       prioritat = 'mitja';
+    else if (isPrep || hasDate)  prioritat = 'mitja';
+    else                         prioritat = a.prioritat || 'baixa';
+
+    return Object.assign({}, a, { prioritat: prioritat });
   });
 }
 

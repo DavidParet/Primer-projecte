@@ -1545,11 +1545,11 @@ body.dark .usage-label { color: var(--gold); }
 
 /* ── RESUM ── */
 .nx-resum-block {
-  margin-top: 10px; padding-top: 10px;
-  border-top: 1px solid #1a1a1a;
+  margin-top: 14px;
+  text-align: center;
 }
 .nx-resum-text {
-  font-size: 11px; color: #3d3d3d;
+  font-size: 12px; color: #666;
   line-height: 1.5; font-style: italic;
 }
 
