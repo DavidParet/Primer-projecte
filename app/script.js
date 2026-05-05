@@ -567,7 +567,9 @@ function renderResult(d) {
   var legDatesCard = document.getElementById('datesCard');
   if (legDatesCard) legDatesCard.style.display = 'none';
 
-  /* SHOW */
+  /* SHOW — amagar loader aquí evita el frame on coexisteixen */
+  var loadEl = document.getElementById('loading');
+  if (loadEl) loadEl.classList.remove('on');
   var res = document.getElementById('results');
   res.classList.add('on');
   var colEl = document.querySelector('#pageInici .app-col-right');
