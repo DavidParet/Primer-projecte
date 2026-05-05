@@ -1,0 +1,26 @@
+Títol: Afegir feedback final d'usuari (tancament emocional)
+
+OBJECTIU:
+Afegir una sensació de tancament i control després de mostrar les accions.
+
+IMPLEMENTACIÓ:
+Afegir sota el bloc de botons (Compartir / Copiar / Analitzar un altre):
+un text petit, discret però visible.
+
+Text escollit: "Accions clares. Endavant."
+
+ESTIL:
+- font-size: 12px, font-weight: 600
+- color: #555 (gris discret sobre fons fosc)
+- text-align: center
+- margin-top: 14px
+
+IMPORTANT:
+- no interferir amb CTA
+- no fer-lo protagonista
+- sensació, no informació
+
+RESULTAT ESPERAT:
+- tancament de flux
+- sensació de control
+- millor percepció de valor

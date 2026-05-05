@@ -218,9 +218,11 @@ function toggleDemo() {
 }
 
 /* ── USAGE LIMIT ── */
-var FREE_LIMIT = 999; /* proves il·limitades */
+var DEV_MODE = true; /* proves il·limitades — canviar a false per activar límit */
+var FREE_LIMIT = 3;
 
 function getUsageToday() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var stored = JSON.parse(localStorage.getItem('nxl_usage') || '{}');
   if (stored.date !== today) return 0;
@@ -228,6 +230,7 @@ function getUsageToday() {
 }
 
 function incrementUsage() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var count = getUsageToday() + 1;
   localStorage.setItem('nxl_usage', JSON.stringify({ date: today, count: count }));
@@ -235,6 +238,7 @@ function incrementUsage() {
 }
 
 function checkLimit() {
+  if (DEV_MODE) return true;
   var used = getUsageToday();
   var banner = document.getElementById('limitBanner');
   var btn = document.getElementById('btnAnalyze');
@@ -273,6 +277,10 @@ function updateCounter() {
 }
 
 /* ── ANALYZE ── */
+function _inputCard() { return document.querySelector('#pageInici .app-col-right .card'); }
+function hideInputCard() { var c = _inputCard(); if (c) c.style.display = 'none'; }
+function showInputCard() { var c = _inputCard(); if (c) c.style.display = ''; }
+
 var _currentTab = 'text';
 var _imgBase64  = null;
 
@@ -311,6 +319,9 @@ async function analyze() {
     var loadD = document.getElementById('loading');
     var resD  = document.getElementById('results');
     var errD  = document.getElementById('errMsg');
+    hideInputCard();
+    var _colD = document.querySelector('#pageInici .app-col-right');
+    if (_colD) _colD.scrollTop = 0;
     if (btnD)  btnD.disabled = true;
     if (loadD) loadD.classList.add('on');
     if (resD)  resD.classList.remove('on');
@@ -337,6 +348,9 @@ async function analyze() {
   var res  = document.getElementById('results');
   var err  = document.getElementById('errMsg');
 
+  hideInputCard();
+  var _colR = document.querySelector('#pageInici .app-col-right');
+  if (_colR) _colR.scrollTop = 0;
   btn.disabled = true;
   load.classList.add('on');
   res.classList.remove('on');
@@ -362,6 +376,7 @@ async function analyze() {
     updateCounter();
     render(d);
   } catch (ex) {
+    showInputCard();
     showErr(ex.message || 'Hi ha hagut un error. Torna-ho a intentar.');
   } finally {
     btn.disabled = false;
@@ -378,10 +393,10 @@ function showErr(msg) {
 
 /* ── RENDER RESULTS ── */
 
-/* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM) ── */
+/* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM o YYYY-MM-DDTHH:MM) ── */
 function formatActionDate(str) {
   if (!str || str === 'null') return null;
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
   if (!m) return str;
   var DAYS   = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
   var MONTHS = ['gen','feb','març','abr','maig','juny','jul','ago','set','oct','nov','des'];
@@ -391,17 +406,81 @@ function formatActionDate(str) {
   return out;
 }
 
+/* ── PRIORITY HEURISTICS ── */
+function applyPriorityHeuristics(accions) {
+  return accions.map(function(a) {
+    var txt     = String(a.accio || '').toLowerCase();
+    var rawDate = String(a.data || '');
+    var hasDate = rawDate && rawDate !== 'null';
+    var hasTime = hasDate && /\d{2}:\d{2}/.test(rawDate);
+    var isAlta  = hasTime || /import|urgent|obligatori|assistir|assistència/.test(txt);
+    var isMitja = hasDate || /preparar|recollir|portar|dur|comprar/.test(txt);
+    if (isAlta)  return Object.assign({}, a, { prioritat: 'alta' });
+    if (isMitja) return Object.assign({}, a, { prioritat: 'mitja' });
+    return a.prioritat ? a : Object.assign({}, a, { prioritat: 'baixa' });
+  });
+}
+
+/* ── CALENDAR PER ACTION ── */
+function formatGCalDateTime(d) {
+  var y  = d.getFullYear();
+  var mo = String(d.getMonth() + 1).padStart(2, '0');
+  var dy = String(d.getDate()).padStart(2, '0');
+  var h  = String(d.getHours()).padStart(2, '0');
+  var mi = String(d.getMinutes()).padStart(2, '0');
+  return '' + y + mo + dy + 'T' + h + mi + '00';
+}
+
+function addActionToCalendar(a) {
+  var rawDate = String(a.data || '');
+  if (!rawDate || rawDate === 'null') return;
+  /* Suporta YYYY-MM-DD HH:MM i YYYY-MM-DDTHH:MM */
+  var m = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+  var startStr, endStr;
+  if (m) {
+    var hasTime = m[4] && !(m[4] === '00' && m[5] === '00');
+    if (hasTime) {
+      var dt  = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+      var dt2 = new Date(dt.getTime() + 60 * 60 * 1000);
+      startStr = formatGCalDateTime(dt);
+      endStr   = formatGCalDateTime(dt2);
+    } else {
+      var d0 = new Date(+m[1], +m[2]-1, +m[3]);
+      var d1 = new Date(d0); d1.setDate(d1.getDate() + 1);
+      startStr = toGCalDate(d0);
+      endStr   = toGCalDate(d1);
+    }
+  } else {
+    var pd  = parseDate(rawDate);
+    var pd2 = new Date(pd); pd2.setDate(pd2.getDate() + 1);
+    startStr = toGCalDate(pd);
+    endStr   = toGCalDate(pd2);
+  }
+  var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
+  var params  = new URLSearchParams({ action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details });
+  /* Anchor click evita que el popup blocker talli l'obertura */
+  var url  = 'https://calendar.google.com/calendar/render?' + params.toString();
+  var link = document.createElement('a');
+  link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 /* ── RENDER PRINCIPAL ── */
 function renderResult(d) {
+  hideInputCard();
   _lastData = d;
 
   var decisio  = (d.decisio || '').trim();
   var noAction = decisio.toLowerCase() === 'cap acció necessària';
   var accions  = (d.accions || []).map(function(a) {
-    return typeof a === 'string'
-      ? { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa' }
-      : a;
-  }).filter(function(a) { return a && String(a.accio || '').trim(); });
+    if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa' };
+    if (!a || typeof a !== 'object') return null;
+    var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: a.prioritat || 'baixa' };
+  }).filter(function(a) { return a && a.accio.length > 0; });
+  accions = applyPriorityHeuristics(accions);
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -461,6 +540,14 @@ function renderResult(d) {
           card.appendChild(dateEl);
         }
 
+        if (a.data && a.data !== 'null') {
+          var calBtn = document.createElement('button');
+          calBtn.className = 'nx-btn-cal';
+          calBtn.textContent = '📅 Afegir al calendari';
+          (function(action) { calBtn.onclick = function() { addActionToCalendar(action); }; }(a));
+          card.appendChild(calBtn);
+        }
+
         actionsEl.appendChild(card);
       });
     }
@@ -480,10 +567,14 @@ function renderResult(d) {
   var legDatesCard = document.getElementById('datesCard');
   if (legDatesCard) legDatesCard.style.display = 'none';
 
-  /* SHOW */
+  /* SHOW — amagar loader aquí evita el frame on coexisteixen */
+  var loadEl = document.getElementById('loading');
+  if (loadEl) loadEl.classList.remove('on');
   var res = document.getElementById('results');
   res.classList.add('on');
-  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var colEl = document.querySelector('#pageInici .app-col-right');
+  if (colEl) colEl.scrollTop = 0;
+  setTimeout(function() { if (colEl) colEl.scrollTop = 0; }, 80);
 
   saveToHistorial(d);
 }
@@ -493,13 +584,17 @@ function render(d) {
 }
 
 function reset() {
+  showInputCard();
   var res = document.getElementById('results');
   var txt = document.getElementById('txt');
   var err = document.getElementById('errMsg');
   if (res) res.classList.remove('on');
   if (txt) txt.value = '';
   if (err) err.classList.remove('on');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  var colEl  = document.querySelector('#pageInici .app-col-right');
+  var mainEl = document.querySelector('#pageApp main');
+  if (colEl)  colEl.scrollTop  = 0;
+  if (mainEl) mainEl.scrollTop = 0;
 }
 
 /* ── CALENDAR EXPORT ── */
@@ -578,32 +673,63 @@ function tipusIcon(tipus) {
 
 function buildShareText(d) {
   var lines = [];
+
   lines.push('✦ NexLupa');
   lines.push('');
 
-  var decisio = d.decisio || d.resum || '';
-  if (!decisio || decisio === 'cap acció necessària') {
+  var decisio = (d.decisio || d.resum || '').trim();
+  if (!decisio || decisio.toLowerCase() === 'cap acció necessària') {
     lines.push('No cal fer cap acció.');
   } else {
     lines.push(decisio);
   }
 
-  if (d.accions && d.accions.length > 0) {
+  /* Normalitzar accions i aplicar heurístiques */
+  var rawAccions = (d.accions || []).map(function(a) {
+    var isObj = typeof a === 'object' && a !== null;
+    var text  = isObj
+      ? (typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || ''))
+      : String(a);
+    text = text.trim();
+    var data  = isObj ? (a.data || null) : null;
+    var prior = isObj ? (a.prioritat || 'baixa') : 'baixa';
+    return text ? { accio: text, data: data, prioritat: prior } : null;
+  }).filter(Boolean);
+
+  var accions = applyPriorityHeuristics(rawAccions).map(function(a) {
+    return { text: a.accio, data: a.data };
+  });
+
+  /* Ordenar: primer les que tenen data */
+  accions.sort(function(a, b) {
+    if (a.data && !b.data) return -1;
+    if (!a.data && b.data) return  1;
+    return 0;
+  });
+
+  if (accions.length > 0) {
     lines.push('');
-    d.accions.forEach(function (a) {
-      var isObj   = typeof a === 'object' && a !== null;
-      var text    = isObj ? String(a.accio || '') : String(a);
-      var tipus   = isObj ? (a.tipus || 'tasca') : 'tasca';
-      var data    = isObj ? a.data : null;
-      var fmtDate = data ? formatActionDate(data) : null;
-      lines.push(tipusIcon(tipus) + ' ' + text);
-      if (fmtDate) lines.push('   ' + fmtDate);
+    lines.push('📌 Què cal fer:');
+    accions.forEach(function(a, i) {
+      if (i > 0) lines.push('');
+      lines.push('→ ' + a.text);
+      if (a.data && a.data !== 'null') {
+        var fmtDate = formatActionDate(a.data);
+        if (fmtDate) lines.push(fmtDate);
+      }
     });
+  }
+
+  if (d.resum && d.resum !== decisio) {
+    lines.push('');
+    lines.push('Resum:');
+    lines.push(d.resum);
   }
 
   lines.push('');
   lines.push('—');
-  lines.push('');
+  lines.push('Generat amb NexLupa');
+  lines.push('De la informació a la decisió');
   lines.push('nexlupa.app');
 
   return lines.join('\n');
@@ -758,6 +884,9 @@ function saveToHistorial(d) {
   var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
               + ' · '
               + now.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+  var cleanAccions = (d.accions || []).filter(function(a) { return !!_accionText(a); });
+  var cleanDates   = (d.dates   || []).filter(function(dt) { return dt && String(dt.descripcio || dt.text || '').trim(); });
+
   var entry = {
     id:            Date.now(),
     timestamp:     now.toISOString(),
@@ -766,8 +895,8 @@ function saveToHistorial(d) {
     urgent:        d.urgent        || '',
     urgencia:      d.urgencia      || 0,
     urgencia_text: d.urgencia_text || '',
-    accions:       d.accions       || [],
-    dates:         d.dates         || []
+    accions:       cleanAccions,
+    dates:         cleanDates
   };
   _historial.push(entry);
   if (_historial.length > 30) _historial.shift();

@@ -1,0 +1,79 @@
+Actua com a desenvolupador expert del projecte NexLupa.
+
+OBJECTIU:
+Permetre que jo pugui fer proves il·limitades ara mateix, sense el límit de 3 anàlisis/dia, només a nivell d'usuari de prova/desenvolupador.
+
+IMPORTANT:
+No canviïs cap text visible de la UI.
+No canviïs copy comercial.
+No canviïs el model free/premium.
+No eliminis el sistema de límits per a usuaris reals.
+Només afegeix un bypass temporal de desenvolupament.
+
+---
+
+ARXIU OBLIGATORI
+
+Abans o després d'implementar-ho, guarda aquest prompt a:
+
+docs/dev/
+
+Nom del fitxer:
+
+nexlupa-dev-unlimited-tests-v1.txt
+
+Si ja existeix, crea:
+
+nexlupa-dev-unlimited-tests-v2.txt
+
+No sobreescriguis versions anteriors.
+
+---
+
+TASCA TÈCNICA:
+
+1. Localitza on es controla el límit de 3 anàlisis/dia.
+
+2. Afegeix un mode desenvolupador simple.
+
+Opció preferent:
+
+const DEV_MODE = true;
+
+3. Modifica la lògica del límit perquè sigui així:
+
+- Si DEV_MODE === true:
+  - no bloquejar anàlisis
+  - no comptar límit diari
+  - no mostrar missatge de límit assolit
+
+- Si DEV_MODE === false:
+  - mantenir exactament el comportament actual
+  - límit de 3 anàlisis/dia
+  - missatges actuals iguals
+
+4. No facis cap canvi visual.
+
+5. No canviïs cap text.
+
+6. No toquis altres funcionalitats.
+
+---
+
+VALIDACIÓ:
+
+Comprova que amb DEV_MODE = true:
+
+- puc fer més de 3 anàlisis seguides
+- no surt "límit diari assolit"
+- la resta de l'app funciona igual
+
+Comprova que amb DEV_MODE = false:
+
+- torna a funcionar el límit normal de 3 anàlisis/dia
+
+---
+
+COMMIT:
+
+dev: allow unlimited analyses in development mode

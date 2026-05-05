@@ -1,0 +1,99 @@
+Títol: Fix crític UX mòbil — Loader, Resultat, Calendari, WhatsApp
+
+OBJECTIU:
+Corregir 4 bugs crítics detectats en mòbil sense tocar la lògica de producte.
+
+REGLA: NO eliminar funcionalitats. NO redissenyar. Fixes quirúrgics únicament.
+
+---
+
+BUG 1 — LOADER SOLAPADA
+
+PROBLEMA:
+Quan s'analitza, la lupa queda solapat o l'scroll no estava al top.
+
+FIX:
+- Afegit reset de scrollTop = 0 a .app-col-right immediatament al clic "Analitzar"
+- Tant al flux normal com al flux demo
+- Assegura que el loader apareix sempre net, sense contingut anterior visible
+
+---
+
+BUG 2 — RESULT CARD TALLADA
+
+PROBLEMA:
+La card negra del resultat apareixia amb l'scroll en posició anterior.
+
+FIX:
+- scrollTop = 0 en renderResult() tant al moment de mostra com en timeout(80ms)
+- Eliminat el reset redundant sobre mainEl (overflow:hidden, no fa res)
+- Resultat sempre visible des de dalt
+
+---
+
+BUG 3 — BOTÓ "AFEGIR AL CALENDARI"
+
+PROBLEMA:
+window.open() pot ser bloquejat per popup blocker en alguns mòbils/browsers.
+El regex de data no suportava el format ISO 8601 amb T (YYYY-MM-DDTHH:MM).
+
+FIX:
+- addActionToCalendar(): substituït window.open() per anchor element + click()
+  → Evita popup blocker perquè és disparat per un event d'usuari real
+- Regex actualitzat: /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/
+  → Suporta tant YYYY-MM-DD HH:MM com YYYY-MM-DDTHH:MM
+- formatActionDate(): mateix fix de regex aplicat
+
+---
+
+BUG 4 — WHATSAPP SENSE GANXO
+
+PROBLEMA:
+Format anterior era sec i poc llegible. Mancava estructura, etiquetes, resum.
+
+FIX — Format nou buildShareText():
+
+✦ NexLupa
+
+[DECISIÓ]
+
+📌 Què cal fer:
+👉 [Acció 1]
+[Dia N mes · HH:MM]
+
+👉 [Acció 2]
+[Dia N mes · HH:MM]
+
+Resum:
+[resum curt]
+
+—
+Generat amb NexLupa
+De la informació a la decisió
+nexlupa.app
+
+Canvis:
+- Capçalera "📌 Què cal fer:" per totes les accions
+- Línia en blanc entre accions
+- Label "Resum:" explícit
+- Footer amb "De la informació a la decisió" i nexlupa.app
+- Eliminat bloc "📌 Important" inline (confusió amb capçalera)
+
+---
+
+TEST VALIDACIÓ (text de prova):
+"Recordeu que dissabte tenim l'actuació final al Centre Cultural a les 19:30.
+Cal estar-hi 30 minuts abans. Dimecres hi ha assaig general a les 17:00.
+També s'ha de recollir el vestuari dissabte al matí a les 10:00.
+És important assistir a tot."
+
+CHECKLIST:
+✔ loader sense solapament (scroll a 0 en clicar analitzar)
+✔ resultat no tallat (scroll a 0 en mostrar resultat)
+✔ botó Google Calendar funcional (anchor click, regex ISO fix)
+✔ WhatsApp amb ganxo i marca (format nou)
+✔ scroll mòbil correcte (fixes anteriors sessions Task 6)
+✔ cap regressió visual
+
+COMMIT:
+fix: resolve critical mobile regressions for loader calendar share and result layout

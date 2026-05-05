@@ -147,19 +147,23 @@
         <!-- ACCIONS — targetes tipades -->
         <div class="nx-actions-block" id="nx-actions"></div>
 
-        <!-- RESUM — secundari, a baix -->
+        <!-- BOTONS: Compartir / Copiar / Analitzar -->
+        <div class="nx-share-block">
+          <div class="nx-share-row">
+            <button class="nx-btn-wa" onclick="shareWhatsApp()">💬 Compartir</button>
+            <button class="nx-btn-copy" id="btnCopy" onclick="copyCardText()">📋 Copiar</button>
+          </div>
+          <div class="copy-ok" id="copyOk">✓ Copiat!</div>
+          <button class="nx-btn-reset" onclick="reset()">Analitzar un altre missatge</button>
+        </div>
+
+        <!-- TANCAMENT EMOCIONAL -->
+        <div class="nx-closure">Accions clares. Endavant.</div>
+
+        <!-- RESUM — context secundari -->
         <div class="nx-resum-block" id="nx-resum-block">
           <div class="nx-resum-text" id="nx-resum"></div>
         </div>
-
-        <!-- COMPARTIR -->
-        <div class="nx-share-block">
-          <button class="nx-btn-wa" onclick="shareWhatsApp()">💬 Compartir</button>
-          <button class="nx-btn-copy" id="btnCopy" onclick="copyCardText()">📋 Copiar</button>
-          <div class="copy-ok" id="copyOk">✓ Copiat!</div>
-        </div>
-
-        <button class="nx-btn-reset" onclick="reset()">← Nou missatge</button>
 
         <!-- hidden compat: history + calendar legacy -->
         <div style="display:none;">

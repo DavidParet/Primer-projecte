@@ -149,9 +149,11 @@ function toggleDemo() {
 }
 
 /* ── USAGE LIMIT ── */
+var DEV_MODE = true; // bypass limits for development — set to false for production behaviour
 var FREE_LIMIT = 3;
 
 function getUsageToday() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var stored = JSON.parse(localStorage.getItem('nxl_usage') || '{}');
   if (stored.date !== today) return 0;
@@ -159,6 +161,7 @@ function getUsageToday() {
 }
 
 function incrementUsage() {
+  if (DEV_MODE) return 0;
   var today = new Date().toDateString();
   var count = getUsageToday() + 1;
   localStorage.setItem('nxl_usage', JSON.stringify({ date: today, count: count }));
@@ -166,6 +169,7 @@ function incrementUsage() {
 }
 
 function checkLimit() {
+  if (DEV_MODE) return true;
   var used = getUsageToday();
   var banner = document.getElementById('limitBanner');
   var btn = document.getElementById('btnAnalyze');
@@ -464,20 +468,32 @@ function exportCalendar() {
 
 /* ── SHARE ── */
 function buildShareText(d) {
-  var txt = '🔍 *nexlupa* — Resum del missatge\n\n';
-  txt += '⭐ *Resum:* ' + d.resum + '\n\n';
+  var lines = [];
+  lines.push('✦ NexLupa');
+  lines.push('');
+  var decisio = (d.decisio || d.resum || '').trim();
+  lines.push(decisio || 'No cal fer cap acció.');
   if (d.accions && d.accions.length > 0) {
-    txt += '✅ *Accions:*\n';
-    d.accions.forEach(function (a) { txt += '  • ' + a + '\n'; });
-    txt += '\n';
+    lines.push('');
+    d.accions.forEach(function (a) {
+      var text = typeof a === 'string' ? a : String(a.accio || a.text || '');
+      if (text.trim()) lines.push('✅ ' + text);
+    });
   }
   if (d.dates && d.dates.length > 0) {
-    txt += '📅 *Dates:*\n';
-    d.dates.forEach(function (dt) { txt += '  • ' + dt.descripcio + ': ' + dt.data + '\n'; });
-    txt += '\n';
+    d.dates.forEach(function (dt) {
+      if (dt && dt.descripcio) lines.push('📅 ' + dt.descripcio + (dt.data ? ' · ' + dt.data : ''));
+    });
   }
-  txt += '_Generat amb nexlupa · La lupa que treballa sola_';
-  return txt;
+  lines.push('');
+  lines.push('—');
+  lines.push('');
+  if (d.resum && d.resum !== decisio) lines.push(d.resum);
+  lines.push('');
+  lines.push('Generat amb NexLupa');
+  lines.push('De la informació a la decisió');
+  lines.push('nexlupa.app');
+  return lines.join('\n');
 }
 
 function buildShareURL(d) {
@@ -604,7 +620,8 @@ function saveToHistorial(d) {
   localStorage.setItem('nxl_hist', JSON.stringify(_historial));
 
   (d.accions || []).forEach(function (a) {
-    _allTasques.push({ text: a, src: d.resum.substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
+    var txt = typeof a === 'string' ? a : String(a.accio || a.text || '');
+    if (txt.trim()) _allTasques.push({ text: txt, src: (d.resum || '').substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
   });
   localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
   updateBadges();
@@ -639,13 +656,14 @@ function renderHistory(query) {
   items.forEach(function (item) {
     var div = document.createElement('div');
     div.className = 'hist-item';
+    var numAcc = item.accions ? item.accions.length : 0;
+    var numDts = item.dates   ? item.dates.length   : 0;
+    var meta   = [escHtml(item.date)];
+    if (numAcc > 0) meta.push(numAcc + ' accions');
+    if (numDts > 0) meta.push(numDts + ' dates');
     div.innerHTML =
       '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
-      '<div class="hist-meta">' +
-        escHtml(item.date) + ' &nbsp;·&nbsp; ' +
-        (item.accions ? item.accions.length : 0) + ' accions &nbsp;·&nbsp; ' +
-        (item.dates   ? item.dates.length   : 0) + ' dates' +
-      '</div>';
+      '<div class="hist-meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>';
     div.onclick = function () { render(item); navTo('inici'); };
     el.appendChild(div);
   });

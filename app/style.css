@@ -587,7 +587,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Loading */
 .loading { display: none; text-align: center; padding: 44px 20px; }
-.loading.on { display: block; }
+.loading.on {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 220px;
+}
 .spin-lupa {
   font-size: 42px; display: block; margin-bottom: 14px;
   animation: swingLupa 1s ease-in-out infinite;
@@ -607,7 +611,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   background: #111;
   border-radius: 20px;
   padding: 22px 18px 18px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -1060,7 +1064,7 @@ body.dark .usage-label { color: var(--gold); }
 
   .app-col-right {
     height: 100%;
-    padding: 8px 8px 0;
+    padding: 10px 10px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1151,6 +1155,26 @@ body.dark .usage-label { color: var(--gold); }
 
   /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
   .ex-lbl { display: none; }
+
+  /* Loader: flex:1 per omplir l'espai de la card oculta → quedarà centrat */
+  .loading.on { flex: 1; }
+
+  /* Resultats: marge superior per no quedar enganxats al header */
+  .results.on { margin-top: 8px; }
+
+  /* ── Scroll per pàgines dins main (overflow:hidden) ─────────────
+     main té overflow:hidden → les pàgines internes necessiten
+     height:100% + overflow-y:auto per poder fer scroll amb el dit. */
+  #pageHistorial,
+  #pageTasques,
+  #pageConfig,
+  #pagePremium {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 20px;
+    box-sizing: border-box;
+  }
 }
 
 /* ============================================================
@@ -1451,16 +1475,16 @@ body.dark .usage-label { color: var(--gold); }
    ═══════════════════════════════════════════════════════════ */
 
 /* ── DECISIÓ ── */
-.nx-decisio-block { margin-bottom: 20px; }
+.nx-decisio-block { margin-bottom: 14px; }
 .nx-decisio-label {
   font-size: 10px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 10px;
+  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 8px;
 }
 .nx-decisio-text {
   font-family: 'Syne', sans-serif;
-  font-size: 26px; font-weight: 900;
+  font-size: 22px; font-weight: 900;
   color: #ffffff; line-height: 1.2;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 .nx-decisio-text.nx-no-action {
   font-size: 22px; color: #3dba6f;
@@ -1474,13 +1498,13 @@ body.dark .usage-label { color: var(--gold); }
 }
 
 /* ── ACCIONS ── */
-.nx-actions-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.nx-actions-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 
 .nx-action-card {
   background: #1c1c1c;
   border: 1px solid #2a2a2a;
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 10px 14px;
   transition: background .15s;
 }
 .nx-action-card:active { background: #222; }
@@ -1511,20 +1535,31 @@ body.dark .usage-label { color: var(--gold); }
   font-size: 12px; color: #555; font-weight: 500;
 }
 
+/* ── TANCAMENT EMOCIONAL ── */
+.nx-closure {
+  margin-top: 14px;
+  font-size: 12px; font-weight: 600;
+  color: #555; text-align: center;
+  letter-spacing: .2px;
+}
+
 /* ── RESUM ── */
 .nx-resum-block {
-  margin-top: 14px; padding-top: 14px;
-  border-top: 1px solid #1e1e1e;
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid #1a1a1a;
 }
 .nx-resum-text {
-  font-size: 12px; color: #4a4a4a;
-  line-height: 1.55; font-style: italic;
+  font-size: 11px; color: #3d3d3d;
+  line-height: 1.5; font-style: italic;
 }
 
 /* ── SHARE ── */
 .nx-share-block {
-  display: flex; gap: 8px; flex-wrap: wrap;
-  margin-top: 16px; position: relative;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 14px;
+}
+.nx-share-row {
+  display: flex; gap: 8px;
 }
 .nx-btn-wa {
   flex: 1; padding: 13px 12px;
@@ -1546,13 +1581,25 @@ body.dark .usage-label { color: var(--gold); }
 .nx-btn-copy:active { background: #222; }
 .nx-btn-copy.copied { background: #14532d; color: #4ade80; border-color: #166534; }
 
+/* ── CALENDAR PER ACTION ── */
+.nx-btn-cal {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; margin-left: 28px;
+  padding: 5px 12px;
+  background: rgba(61,186,111,.12); color: #3dba6f;
+  border: 1px solid rgba(61,186,111,.25); border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+}
+.nx-btn-cal:active { background: rgba(61,186,111,.22); }
+
 /* ── RESET ── */
 .nx-btn-reset {
-  display: block; width: 100%; margin-top: 10px;
-  background: transparent; border: none;
-  color: #3a3a3a; font-size: 13px; font-weight: 600;
+  display: block; width: 100%;
+  background: #252525; border: 1px solid #333;
+  color: #ccc; font-size: 14px; font-weight: 700;
   font-family: 'Nunito', sans-serif;
-  cursor: pointer; padding: 8px; border-radius: 8px;
-  transition: color .2s;
+  cursor: pointer; padding: 13px; border-radius: 50px;
+  transition: all .2s; letter-spacing: .1px;
 }
-.nx-btn-reset:active { color: #666; }
+.nx-btn-reset:active { background: #2e2e2e; color: #fff; border-color: #444; }
