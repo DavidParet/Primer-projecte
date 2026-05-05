@@ -320,6 +320,8 @@ async function analyze() {
     var resD  = document.getElementById('results');
     var errD  = document.getElementById('errMsg');
     hideInputCard();
+    var _colD = document.querySelector('#pageInici .app-col-right');
+    if (_colD) _colD.scrollTop = 0;
     if (btnD)  btnD.disabled = true;
     if (loadD) loadD.classList.add('on');
     if (resD)  resD.classList.remove('on');
@@ -347,6 +349,8 @@ async function analyze() {
   var err  = document.getElementById('errMsg');
 
   hideInputCard();
+  var _colR = document.querySelector('#pageInici .app-col-right');
+  if (_colR) _colR.scrollTop = 0;
   btn.disabled = true;
   load.classList.add('on');
   res.classList.remove('on');
@@ -389,10 +393,10 @@ function showErr(msg) {
 
 /* ── RENDER RESULTS ── */
 
-/* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM) ── */
+/* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM o YYYY-MM-DDTHH:MM) ── */
 function formatActionDate(str) {
   if (!str || str === 'null') return null;
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
   if (!m) return str;
   var DAYS   = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
   var MONTHS = ['gen','feb','març','abr','maig','juny','jul','ago','set','oct','nov','des'];
@@ -430,7 +434,8 @@ function formatGCalDateTime(d) {
 function addActionToCalendar(a) {
   var rawDate = String(a.data || '');
   if (!rawDate || rawDate === 'null') return;
-  var m = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+  /* Suporta YYYY-MM-DD HH:MM i YYYY-MM-DDTHH:MM */
+  var m = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
   var startStr, endStr;
   if (m) {
     var hasTime = m[4] && !(m[4] === '00' && m[5] === '00');
@@ -453,7 +458,13 @@ function addActionToCalendar(a) {
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
   var params  = new URLSearchParams({ action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details });
-  window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
+  /* Anchor click evita que el popup blocker talli l'obertura */
+  var url  = 'https://calendar.google.com/calendar/render?' + params.toString();
+  var link = document.createElement('a');
+  link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 /* ── RENDER PRINCIPAL ── */
@@ -559,12 +570,9 @@ function renderResult(d) {
   /* SHOW */
   var res = document.getElementById('results');
   res.classList.add('on');
-  var colEl  = document.querySelector('#pageInici .app-col-right');
-  var mainEl = document.querySelector('#pageApp main');
-  setTimeout(function() {
-    if (colEl)  colEl.scrollTop  = 0;
-    if (mainEl) mainEl.scrollTop = 0;
-  }, 100);
+  var colEl = document.querySelector('#pageInici .app-col-right');
+  if (colEl) colEl.scrollTop = 0;
+  setTimeout(function() { if (colEl) colEl.scrollTop = 0; }, 80);
 
   saveToHistorial(d);
 }
@@ -663,6 +671,7 @@ function tipusIcon(tipus) {
 
 function buildShareText(d) {
   var lines = [];
+
   lines.push('✦ NexLupa');
   lines.push('');
 
@@ -673,8 +682,8 @@ function buildShareText(d) {
     lines.push(decisio);
   }
 
-  /* Normalitzar i aplicar heurístiques de prioritat */
-  var accions = (d.accions || []).map(function(a) {
+  /* Normalitzar accions i aplicar heurístiques */
+  var rawAccions = (d.accions || []).map(function(a) {
     var isObj = typeof a === 'object' && a !== null;
     var text  = isObj
       ? (typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || ''))
@@ -682,12 +691,11 @@ function buildShareText(d) {
     text = text.trim();
     var data  = isObj ? (a.data || null) : null;
     var prior = isObj ? (a.prioritat || 'baixa') : 'baixa';
-    return text ? { text: text, data: data, prior: prior } : null;
+    return text ? { accio: text, data: data, prioritat: prior } : null;
   }).filter(Boolean);
-  accions = applyPriorityHeuristics(accions.map(function(a) {
-    return { accio: a.text, data: a.data, prioritat: a.prior };
-  })).map(function(a) {
-    return { text: a.accio, data: a.data, prior: a.prioritat };
+
+  var accions = applyPriorityHeuristics(rawAccions).map(function(a) {
+    return { text: a.accio, data: a.data };
   });
 
   /* Ordenar: primer les que tenen data */
@@ -699,7 +707,9 @@ function buildShareText(d) {
 
   if (accions.length > 0) {
     lines.push('');
-    accions.forEach(function(a) {
+    lines.push('📌 Què cal fer:');
+    accions.forEach(function(a, i) {
+      if (i > 0) lines.push('');
       lines.push('👉 ' + a.text);
       if (a.data && a.data !== 'null') {
         var fmtDate = formatActionDate(a.data);
@@ -708,19 +718,16 @@ function buildShareText(d) {
     });
   }
 
-  /* Secció Important: accions ALTA */
-  var altes = accions.filter(function(a) { return a.prior === 'alta'; });
-  if (altes.length > 0) {
+  if (d.resum && d.resum !== decisio) {
     lines.push('');
-    lines.push('📌 Important: ' + altes.map(function(a) { return a.text; }).join(' · '));
+    lines.push('Resum:');
+    lines.push(d.resum);
   }
 
   lines.push('');
   lines.push('—');
-  if (d.resum && d.resum !== decisio) {
-    lines.push(d.resum);
-  }
   lines.push('Generat amb NexLupa');
+  lines.push('De la informació a la decisió');
   lines.push('nexlupa.app');
 
   return lines.join('\n');
