@@ -1,0 +1,101 @@
+Títol: Criteri de prioritat intel·ligent (event principal vs preparació)
+
+========================================================
+OBJECTIU
+========================================================
+
+Assignar la PRIORITAT de cada acció de forma humana,
+no només basada en data o hora.
+
+La prioritat ha de reflectir l'impacte real per a l'usuari
+(especialment pare/mare).
+
+No utilitzis regles simples com "té hora = alta".
+
+
+========================================================
+CRITERI DE PRIORITAT
+========================================================
+
+🔴 ALTA (P1)
+Només si és:
+- Event principal (actuació, concert, partit, reunió important,
+  visita mèdica, excursió)
+- Data límit real (pagar, confirmar, entregar abans de X)
+- Acció que, si no es fa, trenca tot
+
+🟠 MITJA (P2)
+- Preparació o logística prèvia:
+  · assaig
+  · recollir vestuari
+  · portar material
+  · arribar abans
+  · preparar coses
+- Accions necessàries però no centrals
+
+⚪ BAIXA (P3)
+- Informació
+- Context
+- Recordatoris sense acció clara
+
+
+========================================================
+REGLA CLAU (CRÍTICA)
+========================================================
+
+👉 Si hi ha un EVENT PRINCIPAL:
+- Només aquest pot ser ALTA
+- Totes les altres accions passen automàticament a MITJA
+
+
+========================================================
+EXEMPLE
+========================================================
+
+Input:
+"Dimecres hi ha assaig general a les 17:00.
+Dissabte actuació final a les 19:30.
+Recollir vestuari dissabte a les 10:00."
+
+Output:
+- Actuació final       → ALTA
+- Assaig general       → MITJA
+- Recollir el vestuari → MITJA
+
+
+========================================================
+EXCEPCIONS
+========================================================
+
+- Si una acció logística inclou una data límit crítica → ALTA
+- "Arribar 30 minuts abans" → part de l'event (no ALTA)
+
+
+========================================================
+NO FER MAI
+========================================================
+
+❌ No marcar tot com ALTA perquè té hora
+❌ No duplicar ALTA en accions relacionades
+❌ No prioritzar per ordre del text
+❌ No usar només paraules com "important"
+
+
+========================================================
+FORMAT DE SORTIDA
+========================================================
+
+Cada acció ha de tenir:
+- títol curt
+- data/hora (si existeix)
+- prioritat (ALTA / MITJA / BAIXA)
+
+
+========================================================
+OBJECTIU FINAL
+========================================================
+
+Que l'usuari entengui en 2 segons:
+👉 què és realment crític
+👉 què és preparació
+👉 sense saturació de "ALTA"
