@@ -218,7 +218,7 @@ function toggleDemo() {
 }
 
 /* ── USAGE LIMIT ── */
-var FREE_LIMIT = 3;
+var FREE_LIMIT = 999; /* proves il·limitades */
 
 function getUsageToday() {
   var today = new Date().toDateString();
