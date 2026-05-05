@@ -1,0 +1,98 @@
+TÍTOL: Fix ubicacions, fitxes calendari i tasques noves a dalt
+
+OBJECTIU:
+Corregir regressions detectades en NexLupa sense tocar el que ja funciona.
+
+PROBLEMES DETECTATS:
+1. Les ubicacions han desaparegut o no es mostren.
+2. Falten fitxes / accions de calendari per alguns esdeveniments.
+3. Les tasques noves no apareixen a dalt.
+4. Les tasques noves no destaquen visualment.
+5. Hi ha duplicats o tasques massa genèriques.
+
+========================================================
+REGLA CRÍTICA — NO REGRESSIONS
+========================================================
+
+NO es pot perdre:
+- botó "Afegir al calendari"
+- dates correctes
+- prioritat ALTA / MITJA / BAIXA
+- WhatsApp amb marca NexLupa
+- scroll mòbil
+- accions actuals correctes
+
+Només corregir aquests punts.
+
+========================================================
+1. UBICACIONS
+========================================================
+
+Si el text conté una ubicació, s'ha de conservar i mostrar.
+
+Exemples:
+- "Palau Blaugrana (Carrer d'Arístides Maillol, 12, Barcelona)"
+- "punt oficial del club (Carrer de Joan XXIII, 64, Barcelona)"
+- "Centre Esportiu Municipal de Gavà (Carrer de la Concòrdia, 1, Gavà)"
+- "Zoom"
+
+Cada acció amb lloc ha de mostrar:
+📍 [ubicació completa]
+
+També s'ha d'incloure la ubicació al link de Google Calendar.
+
+Si no hi ha ubicació:
+- no inventar-la
+- no mostrar res
+
+========================================================
+2. FITXES DE CALENDARI
+========================================================
+
+Cada event amb data/hora ha de tenir la seva fitxa i botó.
+No perdre cap acció amb data.
+Màxim 6 accions (actualitzat des de 3).
+
+========================================================
+3. TASQUES NOVES A DALT
+========================================================
+
+Les tasques generades per l'últim anàlisi han de:
+- aparèixer al principi de la pestanya Tasques
+- estar en negreta
+- tenir badge "NOU"
+- tenir un ressalt visual suau (fons daurar tènue)
+
+Ordenar:
+1. Tasques noves ALTA
+2. Tasques noves MITJA
+3. Tasques noves BAIXA
+4. Tasques antigues pendents
+5. Tasques completades
+
+Quan l'usuari marca una tasca com feta:
+- treure badge "NOU"
+- treure negreta
+- passar a gris
+- moure-la al final
+
+========================================================
+4. EVITAR DUPLICATS
+========================================================
+
+- Comparar per text (lowercase trim) abans d'afegir
+- Una acció = una fitxa màxim
+
+========================================================
+SOLUCIONS IMPLEMENTADES
+========================================================
+
+- Prompt IA: afegit camp "lloc" a l'estructura accions
+- Prompt IA: màxim 6 accions (era 3)
+- Prompt IA: regles prioritat event principal vs preparació
+- script.js: mostrar 📍 lloc a les targetes d'acció
+- script.js: incloure lloc al link Google Calendar
+- script.js: deduplicació de tasques per text
+- script.js: tasques noves marcades amb isNew:true i prioritat
+- script.js: renderTasques amb ordre i badge NOU
+- style.css: .tsk-new, .tsk-badge-nou, .tsk-prior-*, .nx-action-lloc
