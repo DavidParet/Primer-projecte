@@ -1,0 +1,75 @@
+TÍTOL: Ubicacions accionables (Maps + Calendar + resum)
+
+OBJECTIU:
+Convertir les ubicacions en elements útils (clicables, visibles i reutilitzables).
+
+========================================================
+REGLA BASE
+========================================================
+
+Si existeix una ubicació en el text:
+→ S'ha de mostrar
+→ S'ha de poder utilitzar (Maps / Calendar)
+
+========================================================
+1. MOSTRAR UBICACIÓ
+========================================================
+
+Cada acció amb lloc ha d'incloure:
+
+📍 Nom lloc (adreça completa)
+
+Exemple:
+📍 Palau Blaugrana (Carrer d'Arístides Maillol, 12, Barcelona)
+
+========================================================
+2. UBICACIÓ CLICABLE
+========================================================
+
+Cada ubicació ha de generar un link Google Maps:
+
+https://www.google.com/maps/search/?api=1&query=[adreça codificada]
+
+Exemple:
+https://www.google.com/maps/search/?api=1&query=Palau+Blaugrana+Barcelona
+
+========================================================
+3. CALENDARI (CRÍTIC)
+========================================================
+
+Quan es crea un event:
+- Afegir ubicació al camp LOCATION del calendari
+- No només al text visible
+
+========================================================
+4. RESUM D'UBICACIONS
+========================================================
+
+Afegir bloc al final si hi ha ≥2 ubicacions:
+
+📍 UBICACIONS CLAU
+
+• Palau Blaugrana
+• Punt oficial del club
+• Centre Esportiu Gavà
+
+Objectiu:
+→ Visió ràpida
+→ No repetir duplicats
+
+========================================================
+5. NO INVENTAR
+========================================================
+
+Si no hi ha ubicació:
+→ no inventar
+→ no forçar
+
+========================================================
+VALIDACIÓ
+========================================================
+
+- Totes les fitxes amb lloc tenen 📍
+- Cada 📍 té link Maps
+- El calendari inclou ubicació
+- Existeix resum si hi ha múltiples llocs
