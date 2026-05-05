@@ -1,0 +1,51 @@
+Fix complet — Tasques noves + Ubicacions + Header tallat
+
+COMMIT: fix: restore header visibility, enforce new task priority, and make locations actionable
+
+---
+
+FIX 1 — HEADER VISIBLE SOBRE EL RESULTAT (CRÍTIC)
+
+PROBLEMA:
+Quan s'analitza un missatge, el text "Enganxa el missatge." apareix parcialment visible per sobre del bloc de resultat (DECISIÓ).
+
+CAUSA:
+El h2.app-main-headline dins de .card no s'amaga correctament quan la card és display:none, o el scroll no reseteja bé la posició.
+
+SOLUCIÓ JS:
+- A hideInputCard(): amagar explícitament el .app-main-headline via style.display = 'none'
+- A showInputCard(): restaurar style.display = ''
+- A renderResult(), usar scrollIntoView({ block: 'start', behavior: 'instant' }) sobre #results per assegurar que el resultat és el primer visible
+
+---
+
+FIX 2 — TASQUES: NOU BADGE NO FUNCIONA EN USUARIS EXISTENTS
+
+PROBLEMA:
+Les tasques antigues de localStorage no tenen isNew ni prioritat. El badge NOU no apareix i les tasques apareixen desordenades.
+
+SOLUCIÓ JS:
+En carregar _allTasques des de localStorage:
+- Eliminar duplicats (text.trim().toLowerCase())
+- Assignar prioritat = 'baixa' si no en té
+- Mantenir isNew com estava (undefined = no és nova)
+
+---
+
+FIX 3 — UBICACIONS NO SÓN CLICABLES (CRÍTIC)
+
+PROBLEMA:
+Les ubicacions (📍 Lloc) apareixen com a text pla. No obren Google Maps.
+
+SOLUCIÓ JS:
+A renderResult(), canviar el div de lloc per un <a> amb:
+  href = 'https://www.google.com/maps/search/?api=1&query=[encoded]'
+  target = '_blank'
+  rel = 'noopener noreferrer'
+
+SOLUCIÓ CSS:
+.nx-action-lloc:
+  - display: block
+  - color neutre (#888)
+  - text-decoration: none
+  - :hover { color: var(--gold); text-decoration: underline; }

@@ -278,8 +278,14 @@ function updateCounter() {
 
 /* ── ANALYZE ── */
 function _inputCard() { return document.querySelector('#pageInici .app-col-right .card'); }
-function hideInputCard() { var c = _inputCard(); if (c) c.style.display = 'none'; }
-function showInputCard() { var c = _inputCard(); if (c) c.style.display = ''; }
+function hideInputCard() {
+  var c = _inputCard(); if (c) c.style.display = 'none';
+  var h = document.querySelector('.app-main-headline'); if (h) h.style.display = 'none';
+}
+function showInputCard() {
+  var c = _inputCard(); if (c) c.style.display = '';
+  var h = document.querySelector('.app-main-headline'); if (h) h.style.display = '';
+}
 
 var _currentTab = 'text';
 var _imgBase64  = null;
@@ -555,8 +561,11 @@ function renderResult(d) {
         }
 
         if (a.lloc) {
-          var llocEl = document.createElement('div');
+          var llocEl = document.createElement('a');
           llocEl.className = 'nx-action-lloc';
+          llocEl.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.lloc);
+          llocEl.target = '_blank';
+          llocEl.rel = 'noopener noreferrer';
           llocEl.textContent = '📍 ' + a.lloc;
           card.appendChild(llocEl);
         }
@@ -595,7 +604,10 @@ function renderResult(d) {
   res.classList.add('on');
   var colEl = document.querySelector('#pageInici .app-col-right');
   if (colEl) colEl.scrollTop = 0;
-  setTimeout(function() { if (colEl) colEl.scrollTop = 0; }, 80);
+  setTimeout(function() {
+    if (colEl) colEl.scrollTop = 0;
+    if (res) res.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, 80);
 
   saveToHistorial(d);
 }
@@ -851,7 +863,18 @@ function closeOnboarding() {
 }
 
 /* ── NAVIGATION ── */
-var _allTasques = JSON.parse(localStorage.getItem('nxl_tasks') || '[]');
+var _allTasques = (function() {
+  var raw = JSON.parse(localStorage.getItem('nxl_tasks') || '[]');
+  /* Dedup legacy tasks and ensure isNew/prioritat fields */
+  var seen = {};
+  return raw.filter(function(t) {
+    var key = String(t.text || '').trim().toLowerCase();
+    if (!key || seen[key]) return false;
+    seen[key] = true;
+    if (!t.prioritat) t.prioritat = 'baixa';
+    return true;
+  });
+}());
 var _historial  = JSON.parse(localStorage.getItem('nxl_hist')  || '[]');
 
 function navTo(page) {
