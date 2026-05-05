@@ -1,0 +1,70 @@
+Títol: Separació d'accions (una acció = una intenció)
+
+========================================================
+OBJECTIU
+========================================================
+
+Evitar accions compostes.
+Cada acció ha de representar una única intenció clara.
+
+
+========================================================
+REGLA PRINCIPAL
+========================================================
+
+❌ No combinar accions:
+- "afegir al calendari i confirmar"
+- "assistir i portar"
+- "anar i recollir"
+
+✅ Separar sempre:
+- 1 acció = 1 verb principal
+
+
+========================================================
+CAS ESPECÍFIC
+========================================================
+
+Si un text conté:
+- un EVENT (actuació, reunió…)
+- i una ACCIÓ DE DEADLINE (confirmar, pagar…)
+
+👉 generar 2 accions separades
+
+
+========================================================
+EXEMPLE
+========================================================
+
+Input:
+"Actuació dissabte 19:30. Cal confirmar abans dijous."
+
+Output:
+- Actuació final        → ALTA
+- Confirmar assistència → ALTA
+
+
+========================================================
+IMPORTANT
+========================================================
+
+- "Afegir al calendari" és una capa UI, no l'acció conceptual
+- L'acció ha de ser humana, no tècnica
+
+
+========================================================
+NO FER
+========================================================
+
+❌ Accions llargues amb "i"
+❌ Més d'un verb principal
+❌ Barrejar event + logística + deadline
+
+
+========================================================
+OBJECTIU FINAL
+========================================================
+
+Accions curtes, clares i clicables.
+Cada targeta ha de respondre a:
+👉 "Què he de fer exactament?"
