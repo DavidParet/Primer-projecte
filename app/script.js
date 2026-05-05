@@ -712,7 +712,7 @@ function buildShareText(d) {
     lines.push('📌 Què cal fer:');
     accions.forEach(function(a, i) {
       if (i > 0) lines.push('');
-      lines.push('👉 ' + a.text);
+      lines.push('→ ' + a.text);
       if (a.data && a.data !== 'null') {
         var fmtDate = formatActionDate(a.data);
         if (fmtDate) lines.push(fmtDate);
