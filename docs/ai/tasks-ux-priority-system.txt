@@ -1,0 +1,78 @@
+OBJECTIU:
+Millorar el sistema de tasques de NexLupa perquè sigui clar, accionable i visualment útil.
+
+========================================================
+1. DETECCIÓ DE TASQUES NOVES
+========================================================
+
+- Qualsevol tasca generada en l'últim anàlisi ha de marcar-se com a "nova"
+- Les tasques noves han d'aparèixer:
+  → en negreta
+  → amb un indicador visual (badge "NOU" o glow suau)
+
+
+========================================================
+2. ORDRE DE TASQUES
+========================================================
+
+Ordenar sempre així:
+
+1. Tasques noves (per prioritat: ALTA → MITJA → BAIXA)
+2. Tasques pendents antigues
+3. Tasques completades
+
+Mai barrejar.
+
+
+========================================================
+3. COMPORTAMENT EN CLIC
+========================================================
+
+Quan una tasca es marca com feta:
+
+- Treure negreta
+- Canviar color a gris
+- Treure indicador "nova"
+- Opcional: moure-la al final
+
+
+========================================================
+4. PRIORITAT VISUAL
+========================================================
+
+- ALTA → color vermell + destacat
+- MITJA → taronja
+- BAIXA → gris
+
+No només etiqueta, també impacte visual.
+
+
+========================================================
+5. UBICACIONS
+========================================================
+
+- Si el text conté ubicació → mostrar-la
+- Si no:
+  → no inventar
+  → mostrar: "Ubicació no especificada" o ocultar el camp
+
+
+========================================================
+6. EVITAR DUPLICATS
+========================================================
+
+- No generar tasques repetides
+- Una acció = una tasca
+
+
+========================================================
+7. OBJECTIU FINAL UX
+========================================================
+
+L'usuari ha de poder:
+
+- veure què és nou en 1 segon
+- entendre què és important
+- actuar sense pensar
+
+Si no es compleix això, el sistema falla.
