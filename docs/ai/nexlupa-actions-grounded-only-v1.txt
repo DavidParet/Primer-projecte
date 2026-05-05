@@ -1,0 +1,86 @@
+REGLA CRÍTICA — ACCIONS BASADES EN EL MISSATGE (NO INVENTAR)
+
+========================================================
+OBJECTIU
+========================================================
+
+Cada acció ha de sortir DIRECTAMENT del text original.
+NexLupa no crea tasques genèriques.
+
+
+========================================================
+1) PROHIBIT INVENTAR
+========================================================
+
+NO crear accions com:
+- "coordinar logística"
+- "comunicar horaris"
+- "informar assistents"
+- qualsevol acció que no estigui explícita al missatge
+
+
+========================================================
+2) NOMÉS ACCIONS REALS
+========================================================
+
+Només generar accions si hi ha:
+- verb clar (assistir, recollir, confirmar, anar…)
+- o acció evident derivada directa
+
+Exemples vàlids:
+- Assistir a l'assaig
+- Recollir el vestuari
+- Confirmar assistència
+- Afegir [event real] al calendari
+
+
+========================================================
+3) UNA ACCIÓ = UN EVENT
+========================================================
+
+Per cada event:
+✔️ màxim 1 acció principal
+✔️ opcional: 1 acció secundària (ex: afegir al calendari)
+
+PROHIBIT:
+- duplicar accions
+- repetir "afegir al calendari" per la mateixa cosa múltiples vegades
+
+
+========================================================
+4) MANTENIR UBICACIÓ
+========================================================
+
+Si el missatge conté lloc:
+- S'ha d'incloure SEMPRE a l'acció
+
+Exemple:
+"reunió online (Zoom)"
+→ "Afegir reunió online (Zoom) al calendari"
+
+"Teatre Municipal de Gavà"
+→ mantenir literal
+
+PROHIBIT:
+- eliminar ubicació
+- simplificar-la
+
+
+========================================================
+5) REDUIR A L'ESSENCIAL
+========================================================
+
+Objectiu:
+3–5 accions màxim
+
+Si hi ha més:
+→ agrupar o eliminar soroll
+
+
+========================================================
+RESUM INTERN
+========================================================
+
+Menys accions = més valor
+Només el que importa
+Cap invenció
