@@ -21,7 +21,8 @@ SORTIDA (estructura obligatòria):
       "accio": "string",
       "tipus": "calendari | tasca | informatiu",
       "data": "YYYY-MM-DD HH:MM (si aplica, sinó null)",
-      "prioritat": "alta | mitja | baixa"
+      "prioritat": "alta | mitja | baixa",
+      "lloc": "ubicació literal del missatge o null"
     }
   ]
 }
@@ -47,10 +48,13 @@ Retorna:
 ---
 
 3. ACCIONS
-- Màxim 3 accions.
+- Màxim 6 accions.
+- 1 acció = 1 intenció. Mai combinar 2 verbs en una acció.
 - Només accions útils i reals (no redundants).
 - Cada acció ha d'aportar valor.
 - NO inventis accions que no existeixin explícitament al missatge.
+- NO barregis event + logística + deadline en una sola acció.
+- Ignora conversa social (salutacions, "com esteu?", etc.)
 
 ---
 
@@ -66,24 +70,39 @@ Retorna:
 - Convertir a format: YYYY-MM-DD HH:MM
 - Si no hi ha hora → posar 00:00
 - Si no aplica → null
+- NO recalculis ni corregeixis el calendari. Mantén fidelitat al text.
+- Si el text diu "Dijous 16 maig", no canviïs el dia de la setmana.
 
 ---
 
-6. PRIORITAT
-- "alta" → té data propera o impacte directe
-- "mitja" → important però no urgent
-- "baixa" → informatiu o opcional
+6. PRIORITAT (CRÍTIC)
+- Si hi ha un EVENT PRINCIPAL (actuació, concert, partit, excursió, reunió, jornada):
+  → NOMÉS l'event principal pot ser "alta"
+  → Totes les altres accions (assaig, recollir, confirmar, preparar) → "mitja"
+- Si hi ha una DATA LÍMIT REAL (pagar, confirmar, lliurar, signar) → "alta"
+- Preparació i logística (assaig, recollir material, portar coses) → sempre "mitja"
+- Context o recordatori sense acció clara → "baixa"
+- NO marcar tot com "alta" perquè té hora.
 
 ---
 
-7. RESUM
+7. UBICACIÓ (CRÍTIC)
+- Si el missatge conté una ubicació per a una acció → incloure-la literalment al camp "lloc".
+- Mantenir la ubicació completa tal com apareix al text.
+- Exemples: "Palau Blaugrana (Carrer d'Arístides Maillol, 12, Barcelona)", "Zoom", "saló d'actes"
+- Si no hi ha ubicació per aquella acció específica → null.
+- NO inventis ubicacions.
+
+---
+
+8. RESUM
 - 1 sola frase
 - Sense adorns
 - Ha de reflectir el context real del missatge
 
 ---
 
-8. CONSISTÈNCIA (CRÍTIC)
+9. CONSISTÈNCIA (CRÍTIC)
 - PROHIBIT: si decisio="cap acció necessària" → accions HA de ser [].
 - PROHIBIT: si accions té elements → decisio NO pot ser "cap acció necessària".
 - La decisio i el resum han de ser coherents entre ells.
@@ -101,10 +120,11 @@ OUTPUT:
   "decisio": "Assistir a la reunió AMPA",
   "accions": [
     {
-      "accio": "Afegir reunió al calendari",
+      "accio": "Assistir a la reunió AMPA",
       "tipus": "calendari",
-      "data": "2026-05-06 18:00",
-      "prioritat": "alta"
+      "data": "2026-05-07 18:00",
+      "prioritat": "alta",
+      "lloc": "escola"
     }
   ]
 }

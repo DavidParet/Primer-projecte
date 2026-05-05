@@ -218,7 +218,7 @@ function toggleDemo() {
 }
 
 /* ── USAGE LIMIT ── */
-var DEV_MODE = true; // bypass limits for development — set to false for production behaviour
+var DEV_MODE = true; /* proves il·limitades — canviar a false per activar límit */
 var FREE_LIMIT = 3;
 
 function getUsageToday() {
@@ -408,16 +408,28 @@ function formatActionDate(str) {
 
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
+  var _eventRe = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió\s+import/i;
+  var _limitRe = /pagar|confirmar|entregar|lliurar|signar|inscri[ub]|termini|data\s+l[ií]mit|plaç/i;
+  var _prepRe  = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans/i;
+
+  var hasMainEvent = accions.some(function(a) {
+    return _eventRe.test(String(a.accio || ''));
+  });
+
   return accions.map(function(a) {
-    var txt     = String(a.accio || '').toLowerCase();
-    var rawDate = String(a.data || '');
-    var hasDate = rawDate && rawDate !== 'null';
-    var hasTime = hasDate && /\d{2}:\d{2}/.test(rawDate);
-    var isAlta  = hasTime || /import|urgent|obligatori|assistir|assistència/.test(txt);
-    var isMitja = hasDate || /preparar|recollir|portar|dur|comprar/.test(txt);
-    if (isAlta)  return Object.assign({}, a, { prioritat: 'alta' });
-    if (isMitja) return Object.assign({}, a, { prioritat: 'mitja' });
-    return a.prioritat ? a : Object.assign({}, a, { prioritat: 'baixa' });
+    var txt = String(a.accio || '');
+    var isEvent = _eventRe.test(txt);
+    var isLimit = _limitRe.test(txt);
+    var isPrep  = _prepRe.test(txt);
+    var hasDate = !!(a.data && String(a.data) !== 'null');
+
+    var prioritat;
+    if (isEvent || isLimit)      prioritat = 'alta';
+    else if (hasMainEvent)       prioritat = 'mitja';
+    else if (isPrep || hasDate)  prioritat = 'mitja';
+    else                         prioritat = a.prioritat || 'baixa';
+
+    return Object.assign({}, a, { prioritat: prioritat });
   });
 }
 
@@ -457,7 +469,9 @@ function addActionToCalendar(a) {
     endStr   = toGCalDate(pd2);
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
-  var params  = new URLSearchParams({ action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details });
+  var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details };
+  if (a.lloc) calParams.location = a.lloc;
+  var params  = new URLSearchParams(calParams);
   /* Anchor click evita que el popup blocker talli l'obertura */
   var url  = 'https://calendar.google.com/calendar/render?' + params.toString();
   var link = document.createElement('a');
@@ -475,10 +489,10 @@ function renderResult(d) {
   var decisio  = (d.decisio || '').trim();
   var noAction = decisio.toLowerCase() === 'cap acció necessària';
   var accions  = (d.accions || []).map(function(a) {
-    if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa' };
+    if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
     if (!a || typeof a !== 'object') return null;
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
-    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: a.prioritat || 'baixa' };
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: a.prioritat || 'baixa', lloc: a.lloc || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
@@ -538,6 +552,13 @@ function renderResult(d) {
           dateEl.className = 'nx-action-date';
           dateEl.textContent = fmtDate;
           card.appendChild(dateEl);
+        }
+
+        if (a.lloc) {
+          var llocEl = document.createElement('div');
+          llocEl.className = 'nx-action-lloc';
+          llocEl.textContent = '📍 ' + a.lloc;
+          card.appendChild(llocEl);
         }
 
         if (a.data && a.data !== 'null') {
@@ -902,9 +923,15 @@ function saveToHistorial(d) {
   if (_historial.length > 30) _historial.shift();
   localStorage.setItem('nxl_hist', JSON.stringify(_historial));
 
+  var src = (d.resum || '').substring(0, 40) + '...';
   (d.accions || []).forEach(function (a) {
     var txt = _accionText(a);
-    if (txt) _allTasques.push({ text: txt, src: (d.resum || '').substring(0, 40) + '...', done: false, id: Date.now() + Math.random() });
+    if (!txt) return;
+    var dup = _allTasques.some(function(t) { return t.text.trim().toLowerCase() === txt.trim().toLowerCase(); });
+    if (!dup) {
+      var prior = (a && typeof a === 'object') ? (a.prioritat || 'baixa') : 'baixa';
+      _allTasques.push({ text: txt, src: src, done: false, id: Date.now() + Math.random(), isNew: true, prioritat: prior });
+    }
   });
   localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
   updateBadges();
@@ -984,30 +1011,49 @@ function renderTasques() {
     el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha tasques pendents.</p>';
     return;
   }
+
+  var priorOrder = { alta: 0, mitja: 1, baixa: 2 };
+  var sorted = _allTasques.slice().sort(function(a, b) {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (!a.done && !b.done) {
+      if (!!a.isNew !== !!b.isNew) return a.isNew ? -1 : 1;
+      var pa = priorOrder[a.prioritat] !== undefined ? priorOrder[a.prioritat] : 2;
+      var pb = priorOrder[b.prioritat] !== undefined ? priorOrder[b.prioritat] : 2;
+      return pa - pb;
+    }
+    return 0;
+  });
+
   el.innerHTML = '';
-  _allTasques.forEach(function (t, i) {
+  sorted.forEach(function (t) {
+    var realIdx = _allTasques.indexOf(t);
     var div = document.createElement('div');
-    div.className = 'tsk-item' + (t.done ? ' done' : '');
+    div.className = 'tsk-item' + (t.done ? ' done' : '') + (t.isNew && !t.done ? ' tsk-new' : '');
 
     var chkEl = document.createElement('div');
-    chkEl.style.cssText = 'width:22px;height:22px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s;';
-    if (t.done) {
-      chkEl.style.background   = 'var(--green)';
-      chkEl.style.borderColor  = 'var(--green)';
-      chkEl.style.color        = 'white';
-      chkEl.innerHTML          = '✓';
-    }
+    chkEl.className = 'tsk-chk';
+    if (t.done) chkEl.classList.add('tsk-chk-done');
+    if (t.done) chkEl.innerHTML = '✓';
+
     (function (idx) {
       chkEl.onclick = function () {
-        _allTasques[idx].done = !_allTasques[idx].done;
+        _allTasques[idx].done  = !_allTasques[idx].done;
+        _allTasques[idx].isNew = false;
         localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
         updateBadges();
         renderTasques();
       };
-    }(i));
+    }(realIdx));
 
     var info = document.createElement('div');
-    info.innerHTML = '<div style="font-size:14px;font-weight:500;">' + escHtml(t.text) + '</div><div class="tsk-src">' + escHtml(t.src) + '</div>';
+    info.style.cssText = 'flex:1;min-width:0;';
+    var prior = t.prioritat || 'baixa';
+    var priorClass = t.done ? '' : 'tsk-prior-' + prior;
+    var nouBadge = (t.isNew && !t.done) ? '<span class="tsk-badge-nou">NOU</span>' : '';
+    info.innerHTML =
+      '<div class="tsk-title ' + priorClass + '">' + nouBadge + escHtml(t.text) + '</div>' +
+      '<div class="tsk-src">' + escHtml(t.src) + '</div>';
+
     div.appendChild(chkEl);
     div.appendChild(info);
     el.appendChild(div);
