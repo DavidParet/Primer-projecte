@@ -234,42 +234,63 @@ nav {
 
 .hero-lupa-frame {
   position: relative;
-  width: min(500px, 96%);
-  /* Ambient glow CSS — subtil, NO depèn de la imatge */
-}
-.hero-lupa-frame::before {
-  content: '';
-  position: absolute;
-  top: 50%; left: 46%; transform: translate(-50%, -50%);
-  width: 55%; height: 55%;
-  background: radial-gradient(circle, rgba(245,180,0,.07) 0%, transparent 68%);
-  pointer-events: none; z-index: 0;
+  width: min(480px, 94%);
+  display: flex; align-items: center; justify-content: center;
 }
 
+/* Glow ambient darrere la lupa */
+.lupa-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 52%; height: 52%;
+  background: radial-gradient(circle, rgba(245,180,0,.18) 0%, rgba(245,180,0,.06) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none; z-index: 0;
+  animation: glowPulse 3.5s ease-in-out infinite;
+}
+
+/* Anells de pulse — expanding rings premium */
+.lupa-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(245,180,0,.25);
+  pointer-events: none; z-index: 0;
+}
+.lupa-ring-1 { width: 52%; height: 52%; animation: ringPulse 3.5s 0s   ease-out infinite; }
+.lupa-ring-2 { width: 52%; height: 52%; animation: ringPulse 3.5s .9s  ease-out infinite; }
+.lupa-ring-3 { width: 52%; height: 52%; animation: ringPulse 3.5s 1.8s ease-out infinite; }
+
+@keyframes ringPulse {
+  0%   { transform: translate(-50%,-50%) scale(1);    opacity: .5; }
+  100% { transform: translate(-50%,-50%) scale(2.4);  opacity: 0;  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: .7; transform: translate(-50%,-50%) scale(1); }
+  50%       { opacity: 1;  transform: translate(-50%,-50%) scale(1.12); }
+}
+
+/* Imatge: sense float — estàtica i neta */
 .hero-lupa-img {
   width: 100%; height: auto;
   display: block; position: relative; z-index: 1;
-  /* Reducció glow ~40%: desaturació + lleuger dim + contrast soft */
-  filter: saturate(0.48) brightness(0.78) contrast(0.93);
-  /* Float suau estil Apple */
-  animation: lupaFloat 7s ease-in-out infinite;
+  /* Reducció glow gaming ~40% */
+  filter: saturate(0.5) brightness(0.82) contrast(0.92);
 }
 
-/* Vinyeta: fa desaparèixer l'explosió als marges → integra la imatge al fons fosc */
+/* Vinyeta perimetral: integra els marges de l'explosió al fons */
 .hero-lupa-vignette {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: radial-gradient(
-    circle at 46% 44%,
-    transparent 26%,
-    rgba(6,9,15,.38) 52%,
-    rgba(6,9,15,.85) 74%,
-    rgba(6,9,15,.97) 88%
+    circle at 48% 46%,
+    transparent 28%,
+    rgba(6,9,15,.25) 48%,
+    rgba(6,9,15,.75) 68%,
+    rgba(6,9,15,.97) 84%
   );
-}
-
-@keyframes lupaFloat {
-  0%, 100% { transform: translateY(0)    rotate(-0.4deg); }
-  50%       { transform: translateY(-9px) rotate(0.4deg); }
 }
 
 /* ============================================================
