@@ -225,72 +225,31 @@ nav {
   animation: fadeUp .5s .28s ease both;
 }
 
-/* ── HERO LUPA ── */
+/* ── HERO LUPA (SVG inline) ── */
 .hero-lupa-wrap {
   position: relative; z-index: 1;
   display: flex; justify-content: center; align-items: center;
-  animation: fadeUp .7s .12s ease both;
+  animation: fadeUp .8s .15s ease both;
 }
 
-.hero-lupa-frame {
-  position: relative;
-  width: min(480px, 94%);
-  display: flex; align-items: center; justify-content: center;
+.lupa-svg {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 4px 48px rgba(245,180,0,0.12));
 }
 
-/* Glow ambient darrere la lupa */
-.lupa-glow {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 52%; height: 52%;
-  background: radial-gradient(circle, rgba(245,180,0,.18) 0%, rgba(245,180,0,.06) 45%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none; z-index: 0;
-  animation: glowPulse 3.5s ease-in-out infinite;
+.lsv-scan {
+  animation: scanDown 4s 1s linear infinite;
+  transform-origin: 0 0;
 }
 
-/* Anells de pulse — expanding rings premium */
-.lupa-ring {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid rgba(245,180,0,.25);
-  pointer-events: none; z-index: 0;
-}
-.lupa-ring-1 { width: 52%; height: 52%; animation: ringPulse 3.5s 0s   ease-out infinite; }
-.lupa-ring-2 { width: 52%; height: 52%; animation: ringPulse 3.5s .9s  ease-out infinite; }
-.lupa-ring-3 { width: 52%; height: 52%; animation: ringPulse 3.5s 1.8s ease-out infinite; }
-
-@keyframes ringPulse {
-  0%   { transform: translate(-50%,-50%) scale(1);    opacity: .5; }
-  100% { transform: translate(-50%,-50%) scale(2.4);  opacity: 0;  }
-}
-
-@keyframes glowPulse {
-  0%, 100% { opacity: .7; transform: translate(-50%,-50%) scale(1); }
-  50%       { opacity: 1;  transform: translate(-50%,-50%) scale(1.12); }
-}
-
-/* Imatge: sense float — estàtica i neta */
-.hero-lupa-img {
-  width: 100%; height: auto;
-  display: block; position: relative; z-index: 1;
-  /* Reducció glow gaming ~40% */
-  filter: saturate(0.5) brightness(0.82) contrast(0.92);
-}
-
-/* Vinyeta perimetral: integra els marges de l'explosió al fons */
-.hero-lupa-vignette {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(
-    circle at 48% 46%,
-    transparent 28%,
-    rgba(6,9,15,.25) 48%,
-    rgba(6,9,15,.75) 68%,
-    rgba(6,9,15,.97) 84%
-  );
+@keyframes scanDown {
+  0%   { transform: translateY(0); }
+  78%  { transform: translateY(425px); }
+  100% { transform: translateY(425px); }
 }
 
 /* ============================================================
@@ -662,7 +621,7 @@ footer {
   .hero-content { align-items: center; }
   .hero-ctas    { justify-content: center; }
   .hero-sub     { margin-left: auto; margin-right: auto; }
-  .hero-lupa-frame { width: min(360px, 80vw); }
+  .lupa-svg { max-width: 360px; }
   .benefit-pillars { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -707,7 +666,7 @@ footer {
   .btn-secondary{ padding: 14px 24px; font-size: 14px; }
   .hero-micro   { font-size: 12px; }
 
-  .hero-lupa-frame { width: min(270px, 78vw); }
+  .lupa-svg { max-width: 280px; }
 
   /* Demo */
   .demo { padding: 64px 5% 56px; }
@@ -756,6 +715,7 @@ footer {
 @media (max-width: 380px) {
   .hero-title { font-size: 1.8rem; }
   .uc-grid    { grid-template-columns: 1fr; }
+  .lupa-svg   { max-width: 250px; }
   .hero-phone { width: 90vw; }
   .dr-day     { min-width: 90px; }
 }
