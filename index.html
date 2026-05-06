@@ -6,7 +6,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>nexlupa — De missatges confusos a accions clares</title>
-  <meta name="description" content="Notes de l'escola, extraescolars, grups de pares o WhatsApp. NexLupa et diu què has de fer, quines dates són importants i com respondre."/>
+  <meta name="description" content="Notes de l'escola, extraescolars, grups de pares o WhatsApp. NexLupa et diu què has de fer, quines dates són importants i la informació que no et pots perdre."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
@@ -54,7 +54,7 @@
 
   </div>
 
-  <!-- Mockup visual -->
+  <!-- Mockup visual — mostra la sortida real del motor -->
   <div class="hero-mockup-wrap">
     <div class="hero-phone">
 
@@ -64,9 +64,9 @@
       </div>
 
       <div class="phone-input-block">
-        <div class="pib-label">💬 Missatge de l'escola</div>
+        <div class="pib-label">💬 Escola Montserrat · Grup 4t B</div>
         <div class="pib-text">
-          "Hola famílies! Recordeu que aquest divendres els nens han de portar la samarreta blanca per l'activitat de final de trimestre. També cal entregar l'autorització abans de dijous…"
+          "Aquest divendres farem la sortida al CosmoCaixa. Portar samarreta blava i esmorzar. L'autorització s'ha d'entregar dijous. Sortida a les 8:15…"
         </div>
       </div>
 
@@ -77,27 +77,37 @@
 
       <div class="phone-result">
 
-        <div class="pr-section">
-          <div class="pr-section-title">✅ Has de fer</div>
-          <div class="pr-item">Portar samarreta blanca <strong>divendres</strong></div>
-          <div class="pr-item">Entregar l'autorització <strong>abans de dijous</strong></div>
+        <div class="pr-priority pr-high">
+          <div class="pr-section-title">
+            <span class="pr-dot pr-dot-red"></span>
+            Prioritat alta
+          </div>
+          <div class="pr-item">Entregar autorització <strong>dijous</strong></div>
+          <div class="pr-item">Arribar <strong>abans de les 8:15</strong></div>
         </div>
 
-        <div class="pr-section">
-          <div class="pr-section-title">📅 Dates importants</div>
+        <div class="pr-priority pr-bring">
+          <div class="pr-section-title">
+            <span class="pr-dot pr-dot-gold"></span>
+            Has de portar
+          </div>
+          <div class="pr-tags">
+            <span class="pr-tag">Samarreta blava</span>
+            <span class="pr-tag">Esmorzar</span>
+            <span class="pr-tag">Ampolla</span>
+          </div>
+        </div>
+
+        <div class="pr-dates">
+          <div class="pr-section-title">📅 Dates</div>
           <div class="pr-date-item">
             <span class="pdi-date">Dijous</span>
-            <span class="pdi-desc">límit per entregar autorització</span>
+            <span class="pdi-desc">límit autorització</span>
           </div>
           <div class="pr-date-item">
-            <span class="pdi-date">Divendres</span>
-            <span class="pdi-desc">activitat final de trimestre</span>
+            <span class="pdi-date">Dv · 8:15</span>
+            <span class="pdi-desc">sortida CosmoCaixa</span>
           </div>
-        </div>
-
-        <div class="pr-section pr-reply-section">
-          <div class="pr-section-title">💬 Resposta suggerida</div>
-          <div class="pr-reply-text">"Perfecte, ho tindrem preparat. Gràcies!"</div>
         </div>
 
       </div>
@@ -108,71 +118,113 @@
 
 
 <!-- ══════════════════════════════════════════════════════
-     2. DEMO ABANS / DESPRÉS
+     2. DEMO — MISSATGE REAL → SORTIDA NEXLUPA
 ══════════════════════════════════════════════════════ -->
 <section class="demo" id="demo">
 
   <div class="section-label">Demo real</div>
   <h2 class="section-h2">Un missatge de l'escola.<br><em>Vist amb NexLupa.</em></h2>
-  <p class="section-sub">Enganxa el missatge. NexLupa et retorna exactament el que necessites fer.</p>
+  <p class="section-sub">Enganxa el missatge. NexLupa extreu exactament el que necessites fer.</p>
 
   <div class="demo-grid">
 
-    <!-- ABANS -->
+    <!-- MISSATGE ORIGINAL -->
     <div class="demo-card demo-before reveal">
       <div class="dc-label dc-label-before">
-        <span class="dcl-dot"></span> Missatge original
+        <span class="dcl-dot"></span>
+        Escola Montserrat · Grup Famílies 4t B
       </div>
       <div class="dc-message">
         <div class="msg-bubble">
-          <div class="msg-sender">Escola Montserrat · Grup Famílies 3r B</div>
           <div class="msg-text">
-            Hola famílies! Recordeu que aquest divendres els nens han de portar la samarreta blanca per l'activitat de final de trimestre. També cal entregar l'autorització abans de dijous. Els que es quedin al menjador no han de portar dinar. Gràcies!
+            Hola famílies! Aquest divendres farem la sortida al CosmoCaixa.<br><br>
+            Els nens han de portar esmorzar, una ampolla d'aigua i la samarreta blava de l'escola.<br><br>
+            <strong>IMPORTANT:</strong> L'autorització signada s'ha d'entregar abans de dijous.<br><br>
+            L'autocar sortirà a les 8:15 des de l'entrada principal de l'escola.<br><br>
+            Ubicació: Carrer de la Ciència, 12 — Barcelona<br><br>
+            Els alumnes que es quedin al menjador NO han de portar dinar.<br><br>
+            Recomanem arribar 10 minuts abans. Gràcies!
           </div>
           <div class="msg-meta">Avui · 08:47</div>
         </div>
       </div>
       <div class="dc-pain">
         <span class="pain-icon">😰</span>
-        <span>"Espera… era dijous o divendres? I l'autorització?"</span>
+        <span>"Era dijous o divendres? I la samarreta quina era?"</span>
       </div>
     </div>
 
     <!-- FLETXA -->
-    <div class="demo-arrow reveal">
+    <div class="demo-arrow reveal" aria-hidden="true">
       <div class="da-inner">→</div>
     </div>
 
-    <!-- DESPRÉS -->
+    <!-- SORTIDA NEXLUPA -->
     <div class="demo-card demo-after reveal">
-      <div class="dc-label dc-label-after">
-        <span class="dcl-spark">⚡</span> NexLupa
-      </div>
 
-      <div class="after-block">
-        <div class="ab-title">✅ Has de fer</div>
-        <div class="ab-item">• Portar samarreta blanca <strong>divendres</strong></div>
-        <div class="ab-item">• Entregar l'autorització <strong>abans de dijous</strong></div>
-      </div>
-
-      <div class="after-block">
-        <div class="ab-title">📅 Dates importants</div>
-        <div class="ab-date">
-          <span class="abd-date">Dijous</span>
-          <span class="abd-desc">límit per entregar autorització</span>
+      <div class="da-header">
+        <div class="dah-top">
+          <span class="dah-wordmark">nexlupa</span>
+          <span class="dah-status">✓ Anàlisi completada</span>
         </div>
-        <div class="ab-date">
-          <span class="abd-date">Divendres</span>
-          <span class="abd-desc">activitat final de trimestre</span>
+        <div class="dah-sub">Accions i informació detectada</div>
+      </div>
+
+      <!-- Prioritat alta -->
+      <div class="da-priority da-high">
+        <div class="dab-label">
+          <span class="prio-dot prio-red"></span>
+          Prioritat alta
+        </div>
+        <div class="dab-item">Entregar autorització <strong>abans de dijous</strong></div>
+        <div class="dab-item">Arribar <strong>abans de les 8:15</strong></div>
+      </div>
+
+      <!-- Has de portar -->
+      <div class="da-priority da-bring">
+        <div class="dab-label">
+          <span class="prio-dot prio-gold"></span>
+          Has de portar
+        </div>
+        <div class="dab-tags">
+          <span class="dab-tag">Samarreta blava</span>
+          <span class="dab-tag">Ampolla d'aigua</span>
+          <span class="dab-tag">Esmorzar</span>
         </div>
       </div>
 
-      <div class="after-block after-reply">
-        <div class="ab-title">💬 Resposta suggerida</div>
-        <div class="ab-reply">"Perfecte, ho tindrem preparat. Gràcies!"</div>
-        <button class="ab-copy-btn" onclick="copyReply(this)" title="Copiar resposta">
-          <span class="acb-icon">⎘</span> Copiar
-        </button>
+      <!-- Dates importants -->
+      <div class="da-section">
+        <div class="das-label">📅 Dates importants</div>
+        <div class="date-row">
+          <span class="dr-day">Dijous</span>
+          <span class="dr-sep">→</span>
+          <span class="dr-desc">límit entrega autorització</span>
+        </div>
+        <div class="date-row">
+          <span class="dr-day">Divendres · 08:15</span>
+          <span class="dr-sep">→</span>
+          <span class="dr-desc">sortida CosmoCaixa</span>
+        </div>
+      </div>
+
+      <!-- Ubicació -->
+      <div class="da-section">
+        <div class="das-label">📍 Ubicació</div>
+        <div class="location-card" role="button" tabindex="0" title="Obrir mapa">
+          <div class="lc-body">
+            <div class="lci-main">Entrada principal escola</div>
+            <div class="lci-addr">Carrer de la Ciència, 12 — Barcelona</div>
+          </div>
+          <span class="lc-chevron">›</span>
+        </div>
+      </div>
+
+      <!-- Informació important -->
+      <div class="da-section da-section-last">
+        <div class="das-label">ℹ️ Informació important</div>
+        <div class="dab-item dab-muted">Si es queda al menjador, <strong>NO cal portar dinar</strong></div>
+        <div class="dab-item dab-muted">Recomanat arribar 10 minuts abans</div>
       </div>
 
     </div>
@@ -195,25 +247,25 @@
     </h2>
 
     <p class="benefit-text">
-      NexLupa detecta accions, dates, decisions i possibles respostes perquè no hagis
+      NexLupa detecta accions, dates, ubicacions i informació clau perquè no hagis
       de rellegir el mateix missatge tres vegades ni preguntar-te si se t'escapa alguna cosa.
     </p>
 
     <div class="benefit-pillars">
       <div class="bp-item">
-        <div class="bp-icon">✅</div>
-        <div class="bp-label">Accions concretes</div>
-        <div class="bp-desc">Saps exactament què has de fer i quan</div>
+        <div class="bp-icon">🎯</div>
+        <div class="bp-label">Accions prioritzades</div>
+        <div class="bp-desc">Saps exactament què has de fer i amb quina urgència</div>
       </div>
       <div class="bp-item">
         <div class="bp-icon">📅</div>
         <div class="bp-label">Dates detectades</div>
-        <div class="bp-desc">Cap termini important passat per alt</div>
+        <div class="bp-desc">Cap termini ni data important passa desapercebuda</div>
       </div>
       <div class="bp-item">
-        <div class="bp-icon">💬</div>
-        <div class="bp-label">Resposta llesta</div>
-        <div class="bp-desc">Una resposta suggerida per enviar de seguida</div>
+        <div class="bp-icon">📍</div>
+        <div class="bp-label">Ubicació i context</div>
+        <div class="bp-desc">Llocs, horaris i informació addicional sempre visible</div>
       </div>
     </div>
 
@@ -303,20 +355,9 @@
     entries.forEach(function (e) {
       if (e.isIntersecting) e.target.classList.add('visible');
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
 })();
-
-/* ── COPY REPLY ── */
-function copyReply(btn) {
-  var text = 'Perfecte, ho tindrem preparat. Gràcies!';
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function () {
-      btn.textContent = '✓ Copiat!';
-      setTimeout(function () { btn.innerHTML = '<span class="acb-icon">⎘</span> Copiar'; }, 1800);
-    });
-  }
-}
 
 /* ── SMOOTH SCROLL ── */
 document.querySelectorAll('a[href^="#"]').forEach(function (a) {
