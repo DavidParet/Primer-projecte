@@ -232,9 +232,21 @@ nav {
   animation: fadeUp .6s .15s ease both;
 }
 
+/* Lupa de fons: pur branding, sense contingut */
+.hero-lupa-bg {
+  position: absolute;
+  width: min(400px, 100%);
+  height: auto;
+  opacity: 0.32;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Card del producte real: protagonista */
 .hero-card {
+  position: relative; z-index: 1;
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
 }
 
 /* ============================================================

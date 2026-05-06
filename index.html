@@ -54,8 +54,52 @@
 
   </div>
 
-  <!-- Producte real: output del motor NexLupa -->
+  <!-- Lupa (branding) + producte real al davant -->
   <div class="hero-lupa-wrap">
+
+    <!-- Lupa de fons: pur branding, sense contingut fals -->
+    <svg class="hero-lupa-bg" viewBox="0 0 380 440" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="hgR" x1="5%" y1="5%" x2="95%" y2="95%">
+          <stop offset="0%"   stop-color="#ffe480"/>
+          <stop offset="14%"  stop-color="#f8c020"/>
+          <stop offset="38%"  stop-color="#a86808"/>
+          <stop offset="58%"  stop-color="#d09018"/>
+          <stop offset="82%"  stop-color="#6a4808"/>
+          <stop offset="100%" stop-color="#3a2203"/>
+        </linearGradient>
+        <linearGradient id="hgH" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stop-color="#3a2002"/>
+          <stop offset="50%"  stop-color="#e8b828"/>
+          <stop offset="100%" stop-color="#281802"/>
+        </linearGradient>
+        <linearGradient id="hgF" x1="5%" y1="5%" x2="95%" y2="95%">
+          <stop offset="0%"  stop-color="#ffe080"/>
+          <stop offset="55%" stop-color="#c07810"/>
+          <stop offset="100%" stop-color="#583806"/>
+        </linearGradient>
+      </defs>
+      <!-- Ombra exterior -->
+      <circle cx="175" cy="175" r="173" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="24"/>
+      <!-- Anell daurat -->
+      <circle cx="175" cy="175" r="171" fill="none" stroke="url(#hgR)" stroke-width="16"/>
+      <!-- Reflexió especular superior -->
+      <path d="M 92.5 32 A 165 165 0 0 1 257.5 32"
+            fill="none" stroke="rgba(255,248,195,0.55)" stroke-width="4.5"
+            stroke-linecap="round"/>
+      <!-- Vora interior -->
+      <circle cx="175" cy="175" r="163" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="3"/>
+      <!-- Ferrule -->
+      <circle cx="297" cy="297" r="13" fill="url(#hgF)"/>
+      <circle cx="297" cy="297" r="8" fill="rgba(0,0,0,0.42)"/>
+      <!-- Mànec -->
+      <line x1="299" y1="300" x2="364" y2="366"
+            stroke="url(#hgH)" stroke-width="18" stroke-linecap="round"/>
+      <line x1="294" y1="294" x2="359" y2="360"
+            stroke="rgba(255,232,130,0.2)" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+
+    <!-- Producte real del motor NexLupa -->
     <div class="hero-card demo-card demo-after">
 
       <div class="da-header">
