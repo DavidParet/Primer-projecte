@@ -229,27 +229,16 @@ nav {
 .hero-lupa-wrap {
   position: relative; z-index: 1;
   display: flex; justify-content: center; align-items: center;
-  animation: fadeUp .8s .15s ease both;
+  animation: fadeUp .7s .15s ease both;
 }
 
 .lupa-svg {
   width: 100%;
-  max-width: 460px;
+  max-width: 370px;
   height: auto;
   display: block;
   overflow: visible;
-  filter: drop-shadow(0 4px 48px rgba(245,180,0,0.12));
-}
-
-.lsv-scan {
-  animation: scanDown 4s 1s linear infinite;
-  transform-origin: 0 0;
-}
-
-@keyframes scanDown {
-  0%   { transform: translateY(0); }
-  78%  { transform: translateY(425px); }
-  100% { transform: translateY(425px); }
+  filter: drop-shadow(0 2px 28px rgba(245,180,0,0.08));
 }
 
 /* ============================================================
@@ -621,7 +610,7 @@ footer {
   .hero-content { align-items: center; }
   .hero-ctas    { justify-content: center; }
   .hero-sub     { margin-left: auto; margin-right: auto; }
-  .lupa-svg { max-width: 360px; }
+  .lupa-svg { max-width: 300px; }
   .benefit-pillars { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -666,7 +655,7 @@ footer {
   .btn-secondary{ padding: 14px 24px; font-size: 14px; }
   .hero-micro   { font-size: 12px; }
 
-  .lupa-svg { max-width: 280px; }
+  .lupa-svg { max-width: 240px; }
 
   /* Demo */
   .demo { padding: 64px 5% 56px; }
@@ -715,7 +704,7 @@ footer {
 @media (max-width: 380px) {
   .hero-title { font-size: 1.8rem; }
   .uc-grid    { grid-template-columns: 1fr; }
-  .lupa-svg   { max-width: 250px; }
+  .lupa-svg   { max-width: 210px; }
   .hero-phone { width: 90vw; }
   .dr-day     { min-width: 90px; }
 }
