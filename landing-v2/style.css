@@ -139,7 +139,7 @@ nav {
 .section-h2 em { font-style: normal; color: var(--gold); }
 .section-sub {
   font-size: 15px; color: var(--gray); max-width: 480px;
-  line-height: 1.72; margin-bottom: 48px;
+  line-height: 1.72; margin-bottom: 36px;
 }
 
 /* ── REVEAL ── */
@@ -157,8 +157,8 @@ nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 56px;
-  padding: 108px 7% 80px;
+  gap: 36px;
+  padding: 88px 7% 60px;
   background: radial-gradient(ellipse at 28% 42%, #0b1c32 0%, var(--bg) 62%);
   position: relative; overflow: hidden;
   max-width: 100%; box-sizing: border-box;
@@ -225,27 +225,23 @@ nav {
   animation: fadeUp .5s .28s ease both;
 }
 
-/* ── HERO LUPA (SVG inline) ── */
+/* ── HERO PRODUCT CARD ── */
 .hero-lupa-wrap {
   position: relative; z-index: 1;
   display: flex; justify-content: center; align-items: center;
-  animation: fadeUp .7s .15s ease both;
+  animation: fadeUp .6s .15s ease both;
 }
 
-.lupa-svg {
+.hero-card {
   width: 100%;
-  max-width: 370px;
-  height: auto;
-  display: block;
-  overflow: visible;
-  filter: drop-shadow(0 2px 28px rgba(245,180,0,0.08));
+  max-width: 400px;
 }
 
 /* ============================================================
    DEMO SECTION
    ============================================================ */
 .demo {
-  padding: 96px 7%;
+  padding: 76px 7%;
   max-width: 1180px; margin: 0 auto;
   position: relative; z-index: 1;
 }
@@ -255,7 +251,7 @@ nav {
   grid-template-columns: 1fr 52px 1fr;
   gap: 0;
   align-items: start;
-  margin-top: 44px;
+  margin-top: 32px;
 }
 
 /* ── TARGETES BASE ── */
@@ -447,7 +443,7 @@ nav {
    BENEFICI
    ============================================================ */
 .benefit {
-  padding: 96px 7%;
+  padding: 76px 7%;
   position: relative; z-index: 1;
   background: linear-gradient(180deg, transparent 0%, rgba(11,20,32,.5) 50%, transparent 100%);
 }
@@ -495,7 +491,7 @@ nav {
    CASOS D'ÚS
    ============================================================ */
 .usecases {
-  padding: 96px 7%;
+  padding: 76px 7%;
   max-width: 1180px; margin: 0 auto;
   position: relative; z-index: 1;
 }
@@ -503,7 +499,7 @@ nav {
 .uc-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12px; margin-top: 44px;
+  gap: 12px; margin-top: 32px;
 }
 
 .uc-card {
@@ -539,10 +535,10 @@ nav {
    CTA FINAL
    ============================================================ */
 .cta-final {
-  margin: 32px 5% 72px;
+  margin: 20px 5% 56px;
   background: linear-gradient(135deg, var(--navy2) 0%, #091524 100%);
   border: 1px solid rgba(245,180,0,.16);
-  border-radius: 24px; padding: 72px 40px;
+  border-radius: 24px; padding: 56px 40px;
   text-align: center; position: relative; overflow: hidden; z-index: 1;
 }
 .cf-glow {
@@ -602,15 +598,15 @@ footer {
 @media (max-width: 1024px) {
   .hero {
     grid-template-columns: 1fr;
-    padding: 96px 6% 20px;
+    padding: 80px 6% 48px;
     text-align: center;
-    gap: 8px;
+    gap: 32px;
     min-height: auto;
   }
   .hero-content { align-items: center; }
   .hero-ctas    { justify-content: center; }
   .hero-sub     { margin-left: auto; margin-right: auto; }
-  .lupa-svg { max-width: 300px; }
+  .hero-card    { max-width: 440px; }
   .benefit-pillars { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -618,7 +614,7 @@ footer {
    RESPONSIVE — TABLET PETIT (≤768px)
    ============================================================ */
 @media (max-width: 768px) {
-  .hero { padding: 84px 5% 56px; gap: 40px; }
+  .hero { padding: 68px 5% 44px; gap: 28px; }
 
   .demo-grid {
     grid-template-columns: 1fr;
@@ -654,8 +650,6 @@ footer {
   .btn-primary  { padding: 15px 24px; font-size: 15px; }
   .btn-secondary{ padding: 14px 24px; font-size: 14px; }
   .hero-micro   { font-size: 12px; }
-
-  .lupa-svg { max-width: 240px; }
 
   /* Demo */
   .demo { padding: 64px 5% 56px; }
@@ -704,7 +698,5 @@ footer {
 @media (max-width: 380px) {
   .hero-title { font-size: 1.8rem; }
   .uc-grid    { grid-template-columns: 1fr; }
-  .lupa-svg   { max-width: 210px; }
-  .hero-phone { width: 90vw; }
   .dr-day     { min-width: 90px; }
 }
