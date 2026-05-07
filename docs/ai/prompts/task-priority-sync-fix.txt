@@ -1,0 +1,116 @@
+Títol: Sincronització visual Task List ↔ Motor IA
+Versió: 1.0
+
+========================================================
+PROBLEMA DETECTAT
+========================================================
+
+La pantalla de resultats (detall) mostrava correctament:
+  - ALTA → vermell
+  - MITJA → taronja
+  - BAIXA → gris
+
+Però la llista principal de Tasques mostrava tot gris.
+
+Causes:
+  1. tsk-prior-mitja usava #c07000 (taronja fosc, invisible en dark mode)
+  2. .tsk-item.tsk-pending tenia opacity: .65 (massa baix, aïllava els colors)
+  3. No hi havia overrides de dark mode per als colors de prioritat
+
+========================================================
+PIPELINE DE CREACIÓ DE TASQUES
+========================================================
+
+Flux correcte (ja implementat):
+
+  analyze()
+    → renderResult(d)
+      → accions = applyPriorityHeuristics(accions)   ← prioritat corregida
+      → saveToHistorial({ accions })
+          → forEach acció:
+              - si nova → push({ text, prioritat, isNew: true })
+              - si existent → update({ prioritat, isNew: true })
+          → localStorage.setItem('nxl_tasks', ...)
+      → renderTasques()
+          → each task → tsk-prior-{alta|mitja|baixa}
+
+Cada tasca guarda:
+  { text, src, done, id, isNew, prioritat }
+
+========================================================
+DEFINICIÓ VISUAL FINAL (implementada)
+========================================================
+
+MODE CLAR:
+  🔴 ALTA  → color: #e53935 (vermell)
+  🟠 MITJA → color: #c07000 (taronja)
+  ⚪ BAIXA → color: var(--dark) (gris fosc)
+
+DARK MODE (overrides addicionals):
+  🔴 ALTA  → color: #f87171 (vermell clar, llegible sobre fosc)
+  🟠 MITJA → color: #f5b400 (daurat/ambre, llegible sobre fosc)
+  ⚪ BAIXA → color: var(--dark) = #e0e0e0 (gris clar)
+
+Consistent amb nx-prior-pill-alta/mitja de la secció de resultats.
+
+========================================================
+ESTATS VISUALS DE TASQUES
+========================================================
+
+1. NOVA (isNew: true, done: false)
+   - Classe: tsk-item tsk-new
+   - Fons: rgba(245,197,24,.05)
+   - font-weight: 800
+   - Badge NOU visible
+   - Sense opacity reduction → colors al 100%
+
+2. PENDENT (isNew: false, done: false)
+   - Classe: tsk-item tsk-pending
+   - opacity: .72 (suavitzat però llegible)
+   - Mateixos colors de prioritat
+   - Sense badge NOU
+
+3. COMPLETADA (done: true)
+   - Classe: tsk-item done
+   - opacity: .28
+   - text-decoration: line-through
+   - Al final de la llista, secció "Completades"
+
+========================================================
+COMPORTAMENT isNew
+========================================================
+
+isNew = TRUE quan:
+  - La tasca apareix per primera vegada en una anàlisi
+  - Una tasca ja existent torna a aparèixer en una nova anàlisi
+
+isNew = FALSE quan:
+  - Arriba una NOVA anàlisi (saveToHistorial marca les anteriors com false
+    ABANS d'afegir les noves)
+  - L'usuari marca la tasca com a completada (check)
+
+isNew NO canvia per:
+  - Navegació a la pantalla Tasques
+  - Temps transcorregut
+  - Scroll o interaccions
+
+========================================================
+SECCIONS DE LA LLISTA
+========================================================
+
+Ordre: Noves → Pendents → Completades
+Separadors subtils entre seccions.
+
+Dins cada secció, les tasques s'ordenen per:
+  1. isNew (primer les noves)
+  2. prioritat (alta > mitja > baixa)
+
+========================================================
+REGLA CLAU
+========================================================
+
+La Task List HA DE reflectir exactament la mateixa classificació
+visual que la pantalla de resultats (detall).
+
+No és acceptable que el detall mostri ALTA (vermell) i la llista
+mostri la mateixa tasca en gris.
