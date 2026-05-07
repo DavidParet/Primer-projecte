@@ -498,7 +498,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* Cards */
 .card {
-  background: #ffffff;
+  background: var(--white);
   border-radius: 18px; padding: 18px;
   box-shadow: 0 2px 14px rgba(0,0,0,.055);
   margin-bottom: 12px;

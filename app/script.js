@@ -4,6 +4,38 @@
 
 'use strict';
 
+/* ── KILL OLD SERVICE WORKERS & STALE CACHES ── */
+(function () {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (reg) { reg.unregister(); });
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then(function (names) {
+      names.forEach(function (name) { caches.delete(name); });
+    });
+  }
+})();
+
+/* ── LOCALSTORAGE MIGRATION (v1 → v2) ── */
+(function () {
+  var LS_VER = '2';
+  if (localStorage.getItem('nxl_ver') === LS_VER) return;
+  try {
+    var raw = JSON.parse(localStorage.getItem('nxl_tasks') || '[]');
+    raw = raw.map(function (t) {
+      if (!t.text) {
+        t.text = String(t.accio || t.descripcio || t.action || '').trim();
+      }
+      if (!t.prioritat) t.prioritat = 'baixa';
+      return t;
+    }).filter(function (t) { return t.text; });
+    localStorage.setItem('nxl_tasks', JSON.stringify(raw));
+  } catch (e) { /* localStorage inaccessible */ }
+  localStorage.setItem('nxl_ver', LS_VER);
+})();
+
 /* ── APP INIT FLAG ── */
 var _motorInit = false;
 
