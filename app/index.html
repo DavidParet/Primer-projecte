@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <meta name="color-scheme" content="light dark"/>
   <title>nexlupa — App</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=commercial-v1"/>
+  <link rel="stylesheet" href="style.css?v=2"/>
 </head>
 <body>
+<!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
+<script>(function(){try{var c=JSON.parse(localStorage.getItem('nxl_cfg')||'{}');if(c.dark)document.body.classList.add('dark');}catch(e){}})()</script>
 
 <!-- ============================================================
      APP PAGE
@@ -362,7 +368,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=commercial-v1"></script>
+<script src="script.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
