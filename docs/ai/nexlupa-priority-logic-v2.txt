@@ -1,0 +1,104 @@
+Títol: Criteri de prioritat conservador — v2
+
+========================================================
+OBJECTIU
+========================================================
+
+Evitar la saturació de vermell.
+El color ALTA ha de destacar visualment perquè és RAR.
+Si tot és vermell, res és urgent.
+
+========================================================
+MÀXIM D'ALTES PER COMUNICAT
+========================================================
+
+Comunicat normal     → 1 acció ALTA
+Comunicat molt crític → màxim 2 accions ALTA
+Mai més de 2.
+
+========================================================
+CLASSIFICACIÓ
+========================================================
+
+🔴 ALTA — Utilitza-la NOMÉS si:
+- És l'event o acció principal del comunicat
+- Hi ha data límit real propera
+- Hi ha risc econòmic o administratiu
+- Pot generar problema real si s'oblida
+- Urgència clara i explícita al missatge
+- Acció obligatòria sense la qual no es pot participar
+
+🟠 MITJA — Per a:
+- Preparació i logística (portar, recollir, preparar, assaig)
+- Accions útils però sense conseqüència greu
+- Confirmacions i recordatoris
+- Tot el que "és important però no crític"
+
+⚪ BAIXA — Per a:
+- Informació general
+- Context addicional
+- Avisos informatius sense acció clara
+
+========================================================
+REGLA CLAU (HEURÍSTICA)
+========================================================
+
+1. Identifica l'EVENT PRINCIPAL → ALTA (1 sola)
+2. Identifica el DEADLINE CRÍTIC → ALTA (1 sola, si és diferent de l'event)
+3. Tot el reste → MITJA o BAIXA
+
+Si NO hi ha event ni deadline → confia en la IA (màxim 1 ALTA)
+
+========================================================
+EXEMPLE — Jornada escolar
+========================================================
+
+Input:
+"Jornada esportiva divendres a les 17h.
+Portar roba esportiva i ampolla d'aigua.
+Cal portar autorització signada."
+
+Output correcte:
+- Assistir a la jornada esportiva  → ALTA  (event principal)
+- Portar roba esportiva            → MITJA (logística)
+- Portar autorització signada      → MITJA (preparació)
+
+Output incorrecte:
+- Assistir a la jornada            → ALTA
+- Portar roba esportiva            → ALTA  ← MAU, no és crític
+- Portar autorització signada      → ALTA  ← MAU, satura
+
+========================================================
+EXEMPLE — Pagament
+========================================================
+
+Input:
+"Recordeu pagar les colònies abans del divendres."
+
+Output correcte:
+- Pagar les colònies abans del divendres → ALTA (deadline econòmic)
+
+========================================================
+EXEMPLE — Reunió amb preparació
+========================================================
+
+Input:
+"Reunió de pares dimarts a les 19h.
+Confirmeu assistència abans de diumenge."
+
+Output correcte:
+- Assistir a la reunió de pares    → ALTA  (event principal)
+- Confirmar l'assistència          → MITJA (recordatori previ)
+
+Output incorrecte:
+- Assistir a la reunió de pares    → ALTA
+- Confirmar l'assistència          → ALTA  ← MAU, duplica ALTA
+
+========================================================
+NO FER MAI
+========================================================
+
+❌ Marcar com ALTA per tenir hora (sense ser crític)
+❌ Marcar preparació com ALTA perquè sona important
+❌ Més de 2 ALTAs en un mateix comunicat
+❌ Marcar tot el que tingui data com ALTA

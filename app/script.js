@@ -446,26 +446,39 @@ function formatActionDate(str) {
 
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
-  var _eventRe = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió\s+import/i;
-  var _limitRe = /pagar|confirmar|entregar|lliurar|signar|inscri[ub]|termini|data\s+l[ií]mit|plaç/i;
-  var _prepRe  = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans/i;
+  /* Keywords per detectar el tipus d'acció */
+  var _eventRe    = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió/i;
+  var _deadlineRe = /pagar|lliurar|signar|entregar|termini|data\s+l[ií]mit|pla[çc]|renovar/i;
+  var _prepRe     = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans|inscri[ub]|confirmar/i;
 
-  var hasMainEvent = accions.some(function(a) {
-    return _eventRe.test(String(a.accio || ''));
+  /* Troba el primer event principal i el primer deadline crític (màxim 1 ALTA cada un) */
+  var mainEventIdx    = -1;
+  var mainDeadlineIdx = -1;
+  var aiAltaIdx       = -1; /* fallback: 1 ALTA de la IA si cap keyword coincideix */
+
+  accions.forEach(function (a, i) {
+    var txt = String(a.accio || '');
+    if (mainEventIdx    === -1 && _eventRe.test(txt))    mainEventIdx    = i;
+    if (mainDeadlineIdx === -1 && _deadlineRe.test(txt)) mainDeadlineIdx = i;
+    if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx      = i;
   });
 
-  return accions.map(function(a) {
-    var txt = String(a.accio || '');
-    var isEvent = _eventRe.test(txt);
-    var isLimit = _limitRe.test(txt);
+  /* Si no hi ha cap keyword reconeguda, permet màxim 1 ALTA de la IA */
+  var altaFallback = (mainEventIdx === -1 && mainDeadlineIdx === -1) ? aiAltaIdx : -1;
+
+  return accions.map(function (a, i) {
+    var txt     = String(a.accio || '');
     var isPrep  = _prepRe.test(txt);
     var hasDate = !!(a.data && String(a.data) !== 'null');
 
     var prioritat;
-    if (isEvent || isLimit)      prioritat = 'alta';
-    else if (hasMainEvent)       prioritat = 'mitja';
-    else if (isPrep || hasDate)  prioritat = 'mitja';
-    else                         prioritat = a.prioritat || 'baixa';
+    if (i === mainEventIdx || i === mainDeadlineIdx || i === altaFallback) {
+      prioritat = 'alta';
+    } else if (isPrep || hasDate || a.prioritat === 'mitja') {
+      prioritat = 'mitja';
+    } else {
+      prioritat = 'baixa';
+    }
 
     return Object.assign({}, a, { prioritat: prioritat });
   });

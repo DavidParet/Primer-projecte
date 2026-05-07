@@ -76,13 +76,35 @@ Retorna:
 ---
 
 6. PRIORITAT (CRÍTIC)
-- Si hi ha un EVENT PRINCIPAL (actuació, concert, partit, excursió, reunió, jornada):
-  → NOMÉS l'event principal pot ser "alta"
-  → Totes les altres accions (assaig, recollir, confirmar, preparar) → "mitja"
-- Si hi ha una DATA LÍMIT REAL (pagar, confirmar, lliurar, signar) → "alta"
-- Preparació i logística (assaig, recollir material, portar coses) → sempre "mitja"
-- Context o recordatori sense acció clara → "baixa"
-- NO marcar tot com "alta" perquè té hora.
+REGLA FONAMENTAL: En la majoria de comunicats hi hauria d'haver 1 acció "alta", màxim 2 si el comunicat és realment crític. Mai més de 2.
+
+Utilitza "alta" NOMÉS si es compleix almenys una d'aquestes condicions:
+- És l'event principal del comunicat (actuació, concert, excursió, jornada, reunió important)
+- Hi ha una data límit real propera (pagar, lliurar, signar, entregar)
+- Hi ha risc econòmic o administratiu si no es fa
+- Pot generar un problema real si s'oblida
+- El missatge transmet urgència clara i explícita
+
+Utilitza "mitja" per a:
+- Preparació i logística (assaig, portar material, recollir, preparar coses, confirmar)
+- Accions útils però sense conseqüència greu immediata
+- Recordatoris logístics
+
+Utilitza "baixa" per a:
+- Context o informació general
+- Recordatoris sense acció clara
+- Avisos sense urgència
+
+EXEMPLES:
+- Jornada esportiva divendres → "alta"
+- Portar roba esportiva → "mitja"
+- Signar autorització → "alta" (si és obligatori)
+- Portar esmorzar → "mitja"
+- Informació sobre el curs → "baixa"
+
+NO marcar com "alta": accions que tinguin hora però no siguin crítiques.
+NO marcar com "alta": tot el que tingui data.
+NO duplicar "alta" en accions relacionades al mateix event.
 
 ---
 
