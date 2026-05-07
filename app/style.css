@@ -813,14 +813,33 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .hist-meta  { font-size: 11px; color: var(--muted); }
 
 /* Tasks */
+/* ── TASQUES — 3 estats visuals ── */
 .tsk-item {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 11px 0; border-bottom: 1px solid var(--border);
   font-size: 13px; font-weight: 500;
 }
 .tsk-item:last-child { border-bottom: none; }
-.tsk-item.done { opacity: .35; text-decoration: line-through; }
-.tsk-item.tsk-new { background: rgba(245,197,24,.04); border-radius: 8px; padding: 11px 8px; margin: 0 -8px; }
+
+/* 1. NOVA — màxim impacte */
+.tsk-item.tsk-new { background: rgba(245,197,24,.05); border-radius: 8px; padding: 11px 8px; margin: 0 -8px; border-bottom: none; }
+.tsk-item.tsk-new .tsk-title { font-weight: 800; }
+
+/* 2. PENDENT — activa però sense urgència falsa */
+.tsk-item.tsk-pending { opacity: .8; }
+.tsk-item.tsk-pending .tsk-title { font-weight: 500; color: var(--dark); }
+
+/* 3. COMPLETADA — retirada visualment */
+.tsk-item.done { opacity: .28; text-decoration: line-through; }
+
+/* Separador de secció */
+.tsk-section-sep {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  padding: 14px 0 6px; margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+.tsk-section-sep:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 .tsk-chk {
   width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--border);
   flex-shrink: 0; margin-top: 1px; cursor: pointer;

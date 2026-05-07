@@ -922,7 +922,7 @@ function navTo(page) {
 
   if      (page === 'inici')    { document.getElementById('pageInici').style.display = 'block'; }
   else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistory(); }
-  else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); }
+  else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); _scheduleMarkSeen(); }
   else if (page === 'config')    { document.getElementById('pageConfig').style.display = 'block'; }
   else if (page === 'premium')   {
     document.getElementById('pagePremium').style.display = 'block';
@@ -1091,39 +1091,70 @@ function renderTasques() {
   });
 
   el.innerHTML = '';
-  sorted.forEach(function (t) {
-    var realIdx = _allTasques.indexOf(t);
-    var div = document.createElement('div');
-    div.className = 'tsk-item' + (t.done ? ' done' : '') + (t.isNew && !t.done ? ' tsk-new' : '');
+  var _sections = [
+    { key: 'new',     items: sorted.filter(function(t){ return !t.done && t.isNew; }),  label: 'Noves'     },
+    { key: 'pending', items: sorted.filter(function(t){ return !t.done && !t.isNew; }), label: 'Pendents'  },
+    { key: 'done',    items: sorted.filter(function(t){ return t.done; }),              label: 'Completades'}
+  ];
+  _sections.forEach(function(sec) {
+    if (sec.items.length === 0) return;
+    var sep = document.createElement('div');
+    sep.className = 'tsk-section-sep';
+    sep.textContent = sec.label;
+    el.appendChild(sep);
+    sec.items.forEach(function (t) {
+      var realIdx = _allTasques.indexOf(t);
+      var div = document.createElement('div');
+      var stateClass = t.done ? ' done' : (t.isNew ? ' tsk-new' : ' tsk-pending');
+      div.className = 'tsk-item' + stateClass;
 
-    var chkEl = document.createElement('div');
-    chkEl.className = 'tsk-chk';
-    if (t.done) chkEl.classList.add('tsk-chk-done');
-    if (t.done) chkEl.innerHTML = '✓';
+      var chkEl = document.createElement('div');
+      chkEl.className = 'tsk-chk';
+      if (t.done) chkEl.classList.add('tsk-chk-done');
+      if (t.done) chkEl.innerHTML = '✓';
 
-    (function (idx) {
-      chkEl.onclick = function () {
-        _allTasques[idx].done  = !_allTasques[idx].done;
-        _allTasques[idx].isNew = false;
-        localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
-        updateBadges();
-        renderTasques();
-      };
-    }(realIdx));
+      (function (idx) {
+        chkEl.onclick = function () {
+          _allTasques[idx].done  = !_allTasques[idx].done;
+          _allTasques[idx].isNew = false;
+          localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
+          updateBadges();
+          renderTasques();
+        };
+      }(realIdx));
 
-    var info = document.createElement('div');
-    info.style.cssText = 'flex:1;min-width:0;';
-    var prior = t.prioritat || 'baixa';
-    var priorClass = t.done ? '' : 'tsk-prior-' + prior;
-    var nouBadge = (t.isNew && !t.done) ? '<span class="tsk-badge-nou">NOU</span>' : '';
-    info.innerHTML =
-      '<div class="tsk-title ' + priorClass + '">' + nouBadge + escHtml(t.text) + '</div>' +
-      '<div class="tsk-src">' + escHtml(t.src) + '</div>';
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      /* Colors d'urgència NOMÉS per tasques noves; pendents = neutre */
+      var priorClass = (t.isNew && !t.done) ? 'tsk-prior-' + (t.prioritat || 'baixa') : '';
+      var nouBadge = (t.isNew && !t.done) ? '<span class="tsk-badge-nou">NOU</span>' : '';
+      info.innerHTML =
+        '<div class="tsk-title ' + priorClass + '">' + nouBadge + escHtml(t.text) + '</div>' +
+        '<div class="tsk-src">' + escHtml(t.src) + '</div>';
 
-    div.appendChild(chkEl);
-    div.appendChild(info);
-    el.appendChild(div);
+      div.appendChild(chkEl);
+      div.appendChild(info);
+      el.appendChild(div);
+    });
   });
+}
+
+/* ── MARK SEEN: les tasques noves perden estat NOU als 3s d'obrir la pestanya ── */
+var _markSeenTimer = null;
+function _scheduleMarkSeen() {
+  if (_markSeenTimer) clearTimeout(_markSeenTimer);
+  _markSeenTimer = setTimeout(function () {
+    var changed = false;
+    _allTasques.forEach(function (t) {
+      if (t.isNew && !t.done) { t.isNew = false; changed = true; }
+    });
+    if (changed) {
+      localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
+      updateBadges();
+      renderTasques();
+    }
+    _markSeenTimer = null;
+  }, 3000);
 }
 
 function updateBadges() {
