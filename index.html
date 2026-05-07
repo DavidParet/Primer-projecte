@@ -54,52 +54,87 @@
 
   </div>
 
-  <!-- Lupa (branding) + producte real al davant -->
+  <!-- Lupa gegant + producte real centrat dins l'anell -->
   <div class="hero-lupa-wrap">
 
-    <!-- Lupa de fons: pur branding, sense contingut fals -->
-    <svg class="hero-lupa-bg" viewBox="0 0 380 440" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Anell de la lupa: element de marca gegant -->
+    <svg class="hero-lupa-bg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <linearGradient id="hgR" x1="5%" y1="5%" x2="95%" y2="95%">
-          <stop offset="0%"   stop-color="#ffe480"/>
-          <stop offset="14%"  stop-color="#f8c020"/>
-          <stop offset="38%"  stop-color="#a86808"/>
-          <stop offset="58%"  stop-color="#d09018"/>
-          <stop offset="82%"  stop-color="#6a4808"/>
-          <stop offset="100%" stop-color="#3a2203"/>
+          <stop offset="0%"   stop-color="#fff0a0"/>
+          <stop offset="8%"   stop-color="#ffd040"/>
+          <stop offset="22%"  stop-color="#f0a800"/>
+          <stop offset="38%"  stop-color="#c07808"/>
+          <stop offset="52%"  stop-color="#e8a010"/>
+          <stop offset="68%"  stop-color="#f8c828"/>
+          <stop offset="82%"  stop-color="#906010"/>
+          <stop offset="100%" stop-color="#3c2403"/>
         </linearGradient>
         <linearGradient id="hgH" x1="100%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%"   stop-color="#3a2002"/>
-          <stop offset="50%"  stop-color="#e8b828"/>
-          <stop offset="100%" stop-color="#281802"/>
+          <stop offset="20%"  stop-color="#c08818"/>
+          <stop offset="50%"  stop-color="#f8d048"/>
+          <stop offset="80%"  stop-color="#b87010"/>
+          <stop offset="100%" stop-color="#2a1802"/>
         </linearGradient>
         <linearGradient id="hgF" x1="5%" y1="5%" x2="95%" y2="95%">
-          <stop offset="0%"  stop-color="#ffe080"/>
-          <stop offset="55%" stop-color="#c07810"/>
-          <stop offset="100%" stop-color="#583806"/>
+          <stop offset="0%"   stop-color="#ffe888"/>
+          <stop offset="45%"  stop-color="#d09018"/>
+          <stop offset="100%" stop-color="#5a3806"/>
         </linearGradient>
+        <filter id="hfG" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="18"/>
+        </filter>
       </defs>
-      <!-- Ombra exterior -->
-      <circle cx="175" cy="175" r="173" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="24"/>
-      <!-- Anell daurat -->
-      <circle cx="175" cy="175" r="171" fill="none" stroke="url(#hgR)" stroke-width="16"/>
-      <!-- Reflexió especular superior -->
-      <path d="M 92.5 32 A 165 165 0 0 1 257.5 32"
-            fill="none" stroke="rgba(255,248,195,0.55)" stroke-width="4.5"
+
+      <!-- Ambient glow -->
+      <circle cx="240" cy="240" r="195" fill="rgba(245,176,0,0.10)" filter="url(#hfG)"/>
+
+      <!-- Dark glass fill (inside ring — el card es veu a través d'aquí) -->
+      <circle cx="240" cy="240" r="200" fill="rgba(6,10,18,0.70)"/>
+
+      <!-- Drop shadow ring -->
+      <circle cx="240" cy="240" r="211" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="24"/>
+
+      <!-- Main gold ring -->
+      <circle cx="240" cy="240" r="210" fill="none" stroke="url(#hgR)" stroke-width="18"/>
+
+      <!-- Specular arc wide (240°→300°): top of ring -->
+      <path d="M 135 58 A 210 210 0 0 1 345 58"
+            fill="none" stroke="rgba(255,252,210,0.6)" stroke-width="5"
             stroke-linecap="round"/>
-      <!-- Vora interior -->
-      <circle cx="175" cy="175" r="163" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="3"/>
-      <!-- Ferrule -->
-      <circle cx="297" cy="297" r="13" fill="url(#hgF)"/>
-      <circle cx="297" cy="297" r="8" fill="rgba(0,0,0,0.42)"/>
-      <!-- Mànec -->
-      <line x1="299" y1="300" x2="364" y2="366"
-            stroke="url(#hgH)" stroke-width="18" stroke-linecap="round"/>
-      <line x1="294" y1="294" x2="359" y2="360"
-            stroke="rgba(255,232,130,0.2)" stroke-width="5" stroke-linecap="round"/>
+      <!-- Specular arc narrow (255°→285°): peak highlight -->
+      <path d="M 185 37 A 210 210 0 0 1 295 37"
+            fill="none" stroke="rgba(255,255,240,0.82)" stroke-width="2.5"
+            stroke-linecap="round"/>
+
+      <!-- Inner rim -->
+      <circle cx="240" cy="240" r="200" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="3"/>
+      <circle cx="240" cy="240" r="198" fill="none" stroke="rgba(255,220,100,0.10)" stroke-width="1"/>
+
+      <!-- Ferrule (45°: cx=240+219*cos45°≈395, clipped → adjust to 390,390) -->
+      <circle cx="390" cy="390" r="16" fill="url(#hgF)"/>
+      <circle cx="390" cy="390" r="10" fill="rgba(0,0,0,0.45)"/>
+      <circle cx="390" cy="390" r="9"  fill="url(#hgF)" opacity="0.55"/>
+
+      <!-- Handle -->
+      <line x1="393" y1="393" x2="458" y2="458"
+            stroke="url(#hgH)" stroke-width="22" stroke-linecap="round"/>
+      <line x1="387" y1="387" x2="452" y2="452"
+            stroke="rgba(255,240,160,0.22)" stroke-width="5" stroke-linecap="round"/>
+      <line x1="399" y1="399" x2="464" y2="464"
+            stroke="rgba(0,0,0,0.25)" stroke-width="5" stroke-linecap="round"/>
+      <line x1="399" y1="393" x2="389" y2="403" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+      <line x1="411" y1="405" x2="401" y2="415" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+      <line x1="423" y1="417" x2="413" y2="427" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+      <line x1="435" y1="429" x2="425" y2="439" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+      <line x1="447" y1="441" x2="437" y2="451" stroke="rgba(0,0,0,0.18)" stroke-width="2"/>
+      <!-- End cap -->
+      <circle cx="458" cy="458" r="13" fill="rgba(0,0,0,0.5)"/>
+      <circle cx="458" cy="458" r="11" fill="url(#hgF)" opacity="0.4"/>
     </svg>
 
-    <!-- Producte real del motor NexLupa -->
+    <!-- Producte real del motor NexLupa (protagonista) -->
     <div class="hero-card demo-card demo-after">
 
       <div class="da-header">

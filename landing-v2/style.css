@@ -232,21 +232,26 @@ nav {
   animation: fadeUp .6s .15s ease both;
 }
 
-/* Lupa de fons: pur branding, sense contingut */
+/* Lupa de fons: ring centrat sobre el card */
 .hero-lupa-bg {
   position: absolute;
-  width: min(400px, 100%);
-  height: auto;
-  opacity: 0.32;
+  width: 460px;
+  height: 460px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
   pointer-events: none;
   overflow: visible;
+  z-index: 0;
 }
 
-/* Card del producte real: protagonista */
+/* Card del producte real: protagonista dins l'anell */
 .hero-card {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
+  box-shadow: 0 20px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.07);
 }
 
 /* ============================================================
@@ -618,7 +623,8 @@ footer {
   .hero-content { align-items: center; }
   .hero-ctas    { justify-content: center; }
   .hero-sub     { margin-left: auto; margin-right: auto; }
-  .hero-card    { max-width: 440px; }
+  .hero-card    { max-width: 320px; }
+  .hero-lupa-bg { width: 380px; height: 380px; }
   .benefit-pillars { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -627,6 +633,7 @@ footer {
    ============================================================ */
 @media (max-width: 768px) {
   .hero { padding: 68px 5% 44px; gap: 28px; }
+  .hero-lupa-bg { display: none; }
 
   .demo-grid {
     grid-template-columns: 1fr;
