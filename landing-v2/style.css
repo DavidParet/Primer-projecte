@@ -255,85 +255,185 @@ nav {
 }
 
 /* ============================================================
-   DEMO SECTION
+   STORY — NARRATIVA VISUAL PREMIUM
    ============================================================ */
-.demo {
-  padding: 76px 7%;
-  max-width: 1180px; margin: 0 auto;
+.story {
+  padding: 96px 7% 80px;
   position: relative; z-index: 1;
+  background: linear-gradient(180deg, var(--bg) 0%, #060b14 45%, var(--bg) 100%);
 }
 
-.demo-grid {
+.story-intro {
+  text-align: center;
+  max-width: 600px; margin: 0 auto 80px;
+}
+.story-intro .section-sub { margin: 0 auto; }
+
+/* ── STEPS — DIVIDIT EN DOS ── */
+.story-step {
   display: grid;
-  grid-template-columns: 1fr 52px 1fr;
-  gap: 0;
-  align-items: start;
-  margin-top: 32px;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+  max-width: 1040px; margin: 0 auto 96px;
+}
+.story-step-rev {
+  /* Screen va a la dreta — copy a l'esquerra */
 }
 
-/* ── TARGETES BASE ── */
-.demo-card {
-  border-radius: 20px; padding: 26px 24px;
+/* ── PHONE SCREEN MOCKUP ── */
+.story-screen {
+  display: flex; justify-content: center;
 }
 
-/* Missatge original */
-.demo-before {
-  background: #080f1a;
-  border: 1px solid rgba(255,255,255,.08);
+.sscreen-outer {
+  position: relative;
+  border-radius: 36px;
+  padding: 3px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.75),
+    0 0 0 1px rgba(255,255,255,0.06);
 }
 
-/* Sortida NexLupa — estil Linear/Raycast: net, sobri */
-.demo-after {
-  background: var(--navy2);
-  border: 1px solid rgba(255,255,255,.1);
-  border-top: 2px solid var(--gold);
-  box-shadow: 0 12px 48px rgba(0,0,0,.45);
-  transition: transform .2s ease, box-shadow .2s ease;
+/* Glow daurat (pas 2 — decisió) */
+.sscreen-gold {
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.75),
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 0 80px rgba(245,180,0,0.09);
 }
-.demo-after:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0,0,0,.55);
-}
-
-/* Label de la targeta original */
-.dc-label {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 10px; font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; margin-bottom: 16px;
-}
-.dc-label-before { color: #3a4a5c; }
-.dcl-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #2a3a4a; flex-shrink: 0;
+.sscreen-gold::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: 37px;
+  background: linear-gradient(145deg, rgba(245,180,0,0.25), transparent 50%);
+  pointer-events: none; z-index: 0;
 }
 
-/* Bubble missatge */
-.dc-message { margin-bottom: 16px; }
-.msg-bubble {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px; padding: 14px 15px;
-}
-.msg-text {
-  font-size: 13px; color: #5a6a7c; line-height: 1.7;
-}
-.msg-text strong { color: #7a8a9c; font-weight: 600; }
-.msg-meta {
-  font-size: 9.5px; color: #2a3a4a; margin-top: 9px; text-align: right;
+/* Glow verd (pas 3 — calendari) */
+.sscreen-green {
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.75),
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 0 80px rgba(74,222,128,0.07);
 }
 
-.dc-pain {
-  display: flex; align-items: center; gap: 9px;
-  padding: 9px 13px;
-  background: rgba(255,255,255,.025);
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 10px;
-  font-size: 12px; color: #3a4a5c; font-style: italic;
-  line-height: 1.45;
+.sscreen-inner {
+  position: relative;
+  width: 260px;
+  border-radius: 34px;
+  overflow: hidden;
+  background: #111;
 }
-.pain-icon { font-size: 16px; flex-shrink: 0; }
 
-/* ── HEADER DEL RESULTAT ── */
+.sscreen-inner img {
+  width: 100%;
+  display: block;
+  /* Crop: oculta navbar superior i tabs inferiors */
+  height: 390px;
+  object-fit: cover;
+  object-position: center 22%;
+}
+
+/* Pas 2 (decisió): mostra des de dalt (DECISIÓ label) */
+.story-step-rev .sscreen-inner img {
+  object-position: center 5%;
+  height: 430px;
+}
+
+/* Pas 3 (calendari): focus als botons */
+.sscreen-cal img {
+  object-position: center 10% !important;
+  height: 400px !important;
+}
+
+/* Botó "Afegir al calendari" glow overlay */
+.cal-highlight {
+  position: absolute;
+  bottom: 100px; left: 50%; transform: translateX(-50%);
+  width: 180px; height: 56px;
+  border-radius: 28px;
+  background: rgba(74,222,128,0.12);
+  box-shadow: 0 0 32px rgba(74,222,128,0.25);
+  pointer-events: none;
+}
+
+/* ── COPY ── */
+.story-copy {
+  display: flex; flex-direction: column; gap: 18px;
+}
+.story-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--gold); letter-spacing: 3.5px;
+  opacity: 0.65;
+}
+.story-h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.story-h3 em { font-style: normal; color: var(--gold); }
+.story-p {
+  font-size: 15px; color: var(--gray); line-height: 1.75;
+  max-width: 340px;
+}
+
+/* ── TRANSICIÓ IA ── */
+.story-ai {
+  max-width: 520px; margin: 0 auto 96px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+}
+.ai-beam {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(245,180,0,0.4) 20%,
+    rgba(245,180,0,1) 50%,
+    rgba(245,180,0,0.4) 80%, transparent 100%);
+  position: relative;
+  box-shadow: 0 0 18px rgba(245,180,0,0.35);
+  animation: beamPulse 2.8s ease-in-out infinite;
+}
+.ai-beam::after {
+  content: '';
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 14px rgba(245,180,0,1), 0 0 28px rgba(245,180,0,0.5);
+  animation: dotTravel 2.8s ease-in-out infinite;
+}
+@keyframes beamPulse {
+  0%,100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+@keyframes dotTravel {
+  0%   { left: 0;    opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.ai-pills {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+.ai-pill {
+  font-size: 11px; color: rgba(245,180,0,0.85);
+  background: rgba(245,180,0,0.06);
+  border: 1px solid rgba(245,180,0,0.16);
+  border-radius: 50px; padding: 5px 15px;
+  letter-spacing: 0.3px;
+  animation: pillFade 3.2s ease-in-out infinite;
+}
+.ai-pill-2 { animation-delay: 0.9s; }
+.ai-pill-3 { animation-delay: 1.8s; }
+@keyframes pillFade {
+  0%,100% { opacity: 0.25; }
+  40%,60% { opacity: 1; }
+}
+
+/* ── HEADER DEL RESULTAT (hero card) ── */
 .da-header {
   margin-bottom: 18px;
   padding-bottom: 14px;
@@ -635,16 +735,16 @@ footer {
   .hero { padding: 68px 5% 44px; gap: 28px; }
   .hero-lupa-bg { display: none; }
 
-  .demo-grid {
+  .story-step {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 36px;
+    margin-bottom: 64px;
   }
-  .demo-arrow {
-    padding-top: 0;
-    font-size: 22px;
-    transform: rotate(90deg);
-    margin: 12px auto;
-  }
+  .story-step-rev { direction: ltr; }
+  .story-step-rev .story-copy { order: -1; }
+  .story-ai { margin-bottom: 64px; }
+  .sscreen-inner img { height: 340px; }
+  .story-step-rev .sscreen-inner img { height: 360px; }
 
   .benefit-pillars {
     grid-template-columns: 1fr;
@@ -670,10 +770,16 @@ footer {
   .btn-secondary{ padding: 14px 24px; font-size: 14px; }
   .hero-micro   { font-size: 12px; }
 
-  /* Demo */
-  .demo { padding: 64px 5% 56px; }
-  .demo-card { padding: 20px 18px; }
-  .demo-before { margin-bottom: 0; }
+  /* Story */
+  .story { padding: 72px 5% 56px; }
+  .story-intro { margin-bottom: 56px; }
+  .story-step { gap: 28px; margin-bottom: 52px; }
+  .story-h3 { font-size: 1.65rem; }
+  .sscreen-inner { width: 220px; }
+  .sscreen-inner img { height: 300px; }
+  .story-step-rev .sscreen-inner img { height: 320px; }
+  .ai-pills { gap: 8px; }
+  .ai-pill { font-size: 10.5px; padding: 4px 12px; }
 
   .section-h2  { font-size: clamp(1.5rem, 7vw, 1.9rem); }
   .section-sub { font-size: 13.5px; margin-bottom: 32px; }
