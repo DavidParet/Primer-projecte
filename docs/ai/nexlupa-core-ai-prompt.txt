@@ -33,8 +33,10 @@ NORMES:
 
 1. DECISIÓ (CRÍTIC)
 - Sempre obligatòria.
-- Ha de ser clara, directa i accionable.
-- Format imperatiu (ex: "Assistir a la reunió", "Enviar document").
+- Ha de sonar humana, clara i accionable. No robòtica.
+- Format imperatiu, natural (ex: "Assistir al torneig de futbol", "Preparar la sortida escolar").
+- BON EXEMPLE: "Completar els requisits de les colònies"
+- MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
 
 ---
 
@@ -76,35 +78,39 @@ Retorna:
 ---
 
 6. PRIORITAT (CRÍTIC)
-REGLA FONAMENTAL: En la majoria de comunicats hi hauria d'haver 1 acció "alta", màxim 2 si el comunicat és realment crític. Mai més de 2.
+REGLA FONAMENTAL: 1 acció "alta" per comunicat normal. Màxim 2 si el comunicat és realment crític. Si dubtes → usa "mitja".
 
-Utilitza "alta" NOMÉS si es compleix almenys una d'aquestes condicions:
-- És l'event principal del comunicat (actuació, concert, excursió, jornada, reunió important)
-- Hi ha una data límit real propera (pagar, lliurar, signar, entregar)
-- Hi ha risc econòmic o administratiu si no es fa
-- Pot generar un problema real si s'oblida
-- El missatge transmet urgència clara i explícita
+🔴 "alta" NOMÉS si:
+- És l'acció principal del comunicat
+- Hi ha data límit real propera (pagar, lliurar, signar)
+- Hi ha risc real si s'oblida
+- És reunió o cita important i obligatòria
+- El missatge transmet urgència clara
+- L'acció passa en menys de 24h i té hora concreta
 
-Utilitza "mitja" per a:
-- Preparació i logística (assaig, portar material, recollir, preparar coses, confirmar)
-- Accions útils però sense conseqüència greu immediata
-- Recordatoris logístics
+🟠 "mitja" (prioritat per defecte):
+- Preparació i logística (assaig, portar material, recollir, confirmar, preparar)
+- Accions útils però no crítiques
+- Recordatoris sense risc immediat
 
-Utilitza "baixa" per a:
-- Context o informació general
-- Recordatoris sense acció clara
-- Avisos sense urgència
+⚪ "baixa":
+- Informació contextual
+- Recomanacions sense acció clara
+- Avisos informatius
+
+REGLA TEMPORAL: si una acció té hora concreta i passa en menys de 24h → puja un nivell.
+Exemple: "Presentar-se al camp dissabte a les 08:00" (si és demà) → "alta" encara que normalment seria "mitja".
 
 EXEMPLES:
 - Jornada esportiva divendres → "alta"
 - Portar roba esportiva → "mitja"
-- Signar autorització → "alta" (si és obligatori)
+- Signar autorització → "alta" si és obligatori
 - Portar esmorzar → "mitja"
 - Informació sobre el curs → "baixa"
 
-NO marcar com "alta": accions que tinguin hora però no siguin crítiques.
-NO marcar com "alta": tot el que tingui data.
-NO duplicar "alta" en accions relacionades al mateix event.
+NO marcar "alta" per tenir hora si l'acció no és crítica.
+NO duplicar "alta" en accions del mateix event.
+NO usar "alta" per accions de logística o preparació.
 
 ---
 

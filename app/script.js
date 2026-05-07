@@ -446,32 +446,42 @@ function formatActionDate(str) {
 
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
-  /* Keywords per detectar el tipus d'acció */
   var _eventRe    = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió/i;
   var _deadlineRe = /pagar|lliurar|signar|entregar|termini|data\s+l[ií]mit|pla[çc]|renovar/i;
   var _prepRe     = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans|inscri[ub]|confirmar/i;
 
-  /* Troba el primer event principal i el primer deadline crític (màxim 1 ALTA cada un) */
+  /* Retorna true si la data és una hora concreta dins les properes 24h */
+  function isWithin24h(dateStr) {
+    if (!dateStr || dateStr === 'null') return false;
+    var m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+    if (!m || !m[4] || (m[4] === '00' && m[5] === '00')) return false;
+    var dt   = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+    var diff = dt - new Date();
+    return diff >= 0 && diff <= 86400000; /* 24h en ms */
+  }
+
+  /* Índexs del primer event, primer deadline i primer ALTA de la IA */
   var mainEventIdx    = -1;
   var mainDeadlineIdx = -1;
-  var aiAltaIdx       = -1; /* fallback: 1 ALTA de la IA si cap keyword coincideix */
+  var aiAltaIdx       = -1;
 
   accions.forEach(function (a, i) {
     var txt = String(a.accio || '');
-    if (mainEventIdx    === -1 && _eventRe.test(txt))    mainEventIdx    = i;
-    if (mainDeadlineIdx === -1 && _deadlineRe.test(txt)) mainDeadlineIdx = i;
-    if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx      = i;
+    if (mainEventIdx    === -1 && _eventRe.test(txt))     mainEventIdx    = i;
+    if (mainDeadlineIdx === -1 && _deadlineRe.test(txt))  mainDeadlineIdx = i;
+    if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx       = i;
   });
 
-  /* Si no hi ha cap keyword reconeguda, permet màxim 1 ALTA de la IA */
+  /* Si cap keyword coincideix, permet 1 ALTA de la IA com a fallback */
   var altaFallback = (mainEventIdx === -1 && mainDeadlineIdx === -1) ? aiAltaIdx : -1;
 
-  return accions.map(function (a, i) {
-    var txt     = String(a.accio || '');
-    var isPrep  = _prepRe.test(txt);
+  /* Primera passada: prioritat base */
+  var result = accions.map(function (a, i) {
+    var txt    = String(a.accio || '');
+    var isPrep = _prepRe.test(txt);
     var hasDate = !!(a.data && String(a.data) !== 'null');
-
     var prioritat;
+
     if (i === mainEventIdx || i === mainDeadlineIdx || i === altaFallback) {
       prioritat = 'alta';
     } else if (isPrep || hasDate || a.prioritat === 'mitja') {
@@ -482,6 +492,20 @@ function applyPriorityHeuristics(accions) {
 
     return Object.assign({}, a, { prioritat: prioritat });
   });
+
+  /* Segona passada: regla temporal — hora concreta dins 24h → +1 nivell (màx 2 ALTA total) */
+  var altaCount = result.filter(function (a) { return a.prioritat === 'alta'; }).length;
+  result = result.map(function (a) {
+    if (!isWithin24h(a.data)) return a;
+    if (a.prioritat === 'baixa') return Object.assign({}, a, { prioritat: 'mitja' });
+    if (a.prioritat === 'mitja' && altaCount < 2) {
+      altaCount++;
+      return Object.assign({}, a, { prioritat: 'alta' });
+    }
+    return a;
+  });
+
+  return result;
 }
 
 /* ── CALENDAR PER ACTION ── */
