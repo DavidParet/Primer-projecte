@@ -922,7 +922,7 @@ function navTo(page) {
 
   if      (page === 'inici')    { document.getElementById('pageInici').style.display = 'block'; }
   else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistory(); }
-  else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); _scheduleMarkSeen(); }
+  else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); }
   else if (page === 'config')    { document.getElementById('pageConfig').style.display = 'block'; }
   else if (page === 'premium')   {
     document.getElementById('pagePremium').style.display = 'block';
@@ -956,6 +956,11 @@ function _accionText(a) {
 }
 
 function saveToHistorial(d) {
+  /* Nova anàlisi → les tasques anteriors "noves" passen a "pendents" */
+  _allTasques.forEach(function (t) {
+    if (t.isNew && !t.done) t.isNew = false;
+  });
+
   var now     = new Date();
   var dateStr = now.toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
               + ' · '
@@ -1125,8 +1130,8 @@ function renderTasques() {
 
       var info = document.createElement('div');
       info.style.cssText = 'flex:1;min-width:0;';
-      /* Colors d'urgència NOMÉS per tasques noves; pendents = neutre */
-      var priorClass = (t.isNew && !t.done) ? 'tsk-prior-' + (t.prioritat || 'baixa') : '';
+      /* Colors de prioritat actius sempre (pendents suavitzats per opacity del pare) */
+      var priorClass = !t.done ? 'tsk-prior-' + (t.prioritat || 'baixa') : '';
       var nouBadge = (t.isNew && !t.done) ? '<span class="tsk-badge-nou">NOU</span>' : '';
       info.innerHTML =
         '<div class="tsk-title ' + priorClass + '">' + nouBadge + escHtml(t.text) + '</div>' +
@@ -1137,24 +1142,6 @@ function renderTasques() {
       el.appendChild(div);
     });
   });
-}
-
-/* ── MARK SEEN: les tasques noves perden estat NOU als 3s d'obrir la pestanya ── */
-var _markSeenTimer = null;
-function _scheduleMarkSeen() {
-  if (_markSeenTimer) clearTimeout(_markSeenTimer);
-  _markSeenTimer = setTimeout(function () {
-    var changed = false;
-    _allTasques.forEach(function (t) {
-      if (t.isNew && !t.done) { t.isNew = false; changed = true; }
-    });
-    if (changed) {
-      localStorage.setItem('nxl_tasks', JSON.stringify(_allTasques));
-      updateBadges();
-      renderTasques();
-    }
-    _markSeenTimer = null;
-  }, 3000);
 }
 
 function updateBadges() {
