@@ -18,9 +18,9 @@
   }
 })();
 
-/* ── LOCALSTORAGE MIGRATION (v1 → v2) ── */
+/* ── LOCALSTORAGE MIGRATION (v1 → v3) ── */
 (function () {
-  var LS_VER = '2';
+  var LS_VER = '3';
   if (localStorage.getItem('nxl_ver') === LS_VER) return;
   try {
     var raw = JSON.parse(localStorage.getItem('nxl_tasks') || '[]');
@@ -29,6 +29,8 @@
         t.text = String(t.accio || t.descripcio || t.action || '').trim();
       }
       if (!t.prioritat) t.prioritat = 'baixa';
+      /* v3: mark all non-done tasks as isNew so priority colors and NOU badge show */
+      if (!t.done) t.isNew = true;
       return t;
     }).filter(function (t) { return t.text; });
     localStorage.setItem('nxl_tasks', JSON.stringify(raw));
@@ -1167,11 +1169,17 @@ function renderTasques() {
 
       var info = document.createElement('div');
       info.style.cssText = 'flex:1;min-width:0;';
-      /* Colors de prioritat actius sempre (pendents suavitzats per opacity del pare) */
-      var priorClass = !t.done ? 'tsk-prior-' + (t.prioritat || 'baixa') : '';
+      var prior = !t.done ? (t.prioritat || 'baixa') : '';
+      var priorClass = prior ? 'tsk-prior-' + prior : '';
+      var isDark = document.body.classList.contains('dark');
+      var priorColor = '';
+      if (prior === 'alta')  priorColor = isDark ? '#f87171' : '#e53935';
+      else if (prior === 'mitja') priorColor = isDark ? '#f5b400' : '#c07000';
+      else if (prior === 'baixa') priorColor = isDark ? '#e0e0e0' : '#2e2e2e';
+      var priorStyle = priorColor ? ' style="color:' + priorColor + '"' : '';
       var nouBadge = (t.isNew && !t.done) ? '<span class="tsk-badge-nou">NOU</span>' : '';
       info.innerHTML =
-        '<div class="tsk-title ' + priorClass + '">' + nouBadge + escHtml(t.text) + '</div>' +
+        '<div class="tsk-title ' + priorClass + '"' + priorStyle + '>' + nouBadge + escHtml(t.text) + '</div>' +
         '<div class="tsk-src">' + escHtml(t.src) + '</div>';
 
       div.appendChild(chkEl);
