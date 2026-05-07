@@ -875,6 +875,22 @@ body.dark {
 }
 body.dark .usage-label { color: var(--gold); }
 
+/* ── TEXTAREA DARK MODE ── */
+body.dark #pageApp textarea,
+body.dark #pageApp .app-col-right textarea {
+  background: #111;
+  color: #f0f0f0;
+  border-color: rgba(245,197,24,.2);
+}
+body.dark #pageApp textarea::placeholder {
+  color: rgba(255,255,255,.28);
+}
+body.dark #pageApp textarea:focus,
+body.dark #pageApp .app-col-right textarea:focus {
+  border-color: rgba(245,197,24,.75);
+  box-shadow: 0 0 0 3px rgba(245,197,24,.08), 0 0 16px rgba(245,197,24,.07);
+}
+
 /* Premium header button */
 .btn-premium-header {
   padding: 7px 14px; background: var(--gold); color: var(--darker);
