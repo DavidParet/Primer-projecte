@@ -1,0 +1,143 @@
+NEXLUPA — PROMPT EVENTS ESCOLARS v1
+Data: 2026-05-11
+Fitxer: nexlupa-core-ai-prompt-v-prioritats-esdeveniments-escolars.txt
+
+Integrat a: docs/ai/nexlupa-core-ai-prompt.txt (seccions 1, 11, 12, 13 + exemple)
+
+---
+
+OBJECTIU
+
+Millorar el comportament del motor NexLupa en comunicacions escolars amb múltiples
+activitats, dates i preparatius.
+
+---
+
+REGLES IMPLEMENTADES
+
+REGLA CRÍTICA — "ASSISTIR A" NO ÉS UNA TASCA
+Evitar generar:
+  "Assistir a la reunió"
+  "Assistir a la sortida"
+  "Assistir al teatre"
+
+Excepció: Només generar l'esdeveniment calendari.
+
+La tasca ha de ser:
+  - el que s'ha de preparar
+  - el que s'ha d'entregar
+  - el que s'ha de pagar
+  - el que es pot oblidar
+
+EXEMPLES CORRECTES:
+✅ Portar samarreta blanca
+✅ Completar el pagament
+✅ Entregar autorització
+✅ Preparar gorra i aigua
+✅ Portar crema solar i banyador
+
+---
+
+REGLA — MATERIALS I PREPARATIUS
+
+Quan un text inclogui materials, roba o objectes:
+convertir-los en tasques preparatòries.
+
+EXEMPLES:
+"cal portar gorra"
+→ ✅ Preparar gorra per la sortida
+
+"cal portar crema solar"
+→ ✅ Preparar crema solar i banyador
+
+"roba còmoda i bambes"
+→ ✅ Preparar roba esportiva i bambes
+
+Aquestes tasques:
+- normalment PRIORITAT MITJA
+- preferiblement la tarda/vespre anterior
+
+---
+
+REGLA — DECISIÓ EXECUTIVA
+
+El bloc DECISIÓ:
+- NO ha de repetir el text original
+- NO ha de ser genèric
+- NO "Revisar dates i materials"
+
+Ha de donar lectura executiva real.
+
+EXEMPLE DOLENT:
+"Revisar les dates i materials necessaris"
+
+EXEMPLE BO:
+"Aquest trimestre hi ha 4 activitats escolars amb pagaments, autoritzacions i material específic a preparar."
+
+El bloc ha de:
+- sintetitzar càrrega mental
+- detectar complexitat
+- explicar què importa
+
+---
+
+REGLA — PRIORITATS REALS
+
+Alta:
+- pagaments amb data límit
+- autoritzacions
+- accions obligatòries
+- esdeveniments principals
+
+Mitja:
+- preparació de material
+- roba
+- logística
+
+Baixa:
+- recordatoris informatius
+- accions condicionals ("si aplica")
+
+IMPORTANT:
+Un esdeveniment important de calendari pot ser ALTA encara que no tingui tasca.
+
+---
+
+REGLA — INFORMACIÓ CONDICIONAL
+
+Si el text diu:
+"famílies amb pagaments pendents"
+"si aplica"
+"en cas necessari"
+
+NO assumir que aplica sempre.
+
+Convertir-ho en:
+- prioritat baixa
+  o
+- informació
+
+---
+
+REGLA — EVITAR SORTIDA MASSIVA D'EVENTS MECÀNICS
+
+No generar moltes línies repetitives:
+📅 Assistir a...
+📅 Assistir a...
+📅 Assistir a...
+
+El calendari ha de semblar:
+- net
+- humà
+- intel·ligent
+- útil
+
+---
+
+OBJECTIU FINAL UX
+
+Quan un pare/mare ho llegeixi ha de sentir:
+"Perfecte. Ja sé què he de fer i què és important."
+
+NO:
+"He rebut un resum llarg."

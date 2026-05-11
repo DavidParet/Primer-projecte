@@ -3,372 +3,420 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-  <meta http-equiv="Pragma" content="no-cache"/>
-  <meta http-equiv="Expires" content="0"/>
-  <meta name="color-scheme" content="light dark"/>
-  <title>nexlupa — App</title>
+  <meta name="theme-color" content="#ffffff"/>
+  <title>nexlupa — La lupa que treballa sola</title>
+  <meta name="description" content="nexlupa analitza qualsevol missatge i et diu exactament que has de fer, quan i per quina ordre."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=13"/>
+  <link rel="stylesheet" href="style.css?v=14"/>
 </head>
 <body>
 <!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
-<script>(function(){try{var c=JSON.parse(localStorage.getItem('nxl_cfg')||'{}');if(c.dark)document.body.classList.add('dark');}catch(e){}})()</script>
+<script>
+(function(){
+  try {
+    var cfg = JSON.parse(localStorage.getItem('nxl_cfg')||'{}');
+    if(cfg.dark) document.documentElement.classList.add('dark-pre');
+  } catch(e){}
+})();
+</script>
 
-<!-- ============================================================
-     APP PAGE
-     ============================================================ -->
-<div id="pageApp">
+<!-- ═══════════════════════════════════════════════════════════════════
+     LANDING PAGE
+═══════════════════════════════════════════════════════════════════ -->
+<div id="pageLanding">
+
+  <!-- HEADER -->
+  <header class="landing-header">
+    <div class="landing-header-inner">
+      <a href="#" class="landing-logo" onclick="return false;">nexlupa</a>
+      <nav class="landing-nav">
+        <a href="#funcionalitats" class="landing-nav-link">Com funciona</a>
+        <a href="#pricing" class="landing-nav-link">Plans</a>
+        <button class="btn-cta-sm" id="btnObrirApp1">Provar gratis</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="landing-hero">
+    <div class="hero-inner">
+      <div class="hero-badge reveal">IA · Decisions instantànies</div>
+      <h1 class="hero-title reveal">La lupa que<br/>treballa sola</h1>
+      <p class="hero-sub reveal">Enganxa qualsevol missatge llarg i nexlupa et diu exactament<br/>el que has de fer, quan i per quina ordre.</p>
+      <div class="hero-cta reveal">
+        <button class="btn-hero" id="btnObrirApp2">Provar ara — és gratis</button>
+        <p class="hero-cta-note">Sense registre. Sense targeta.</p>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="mock-phone">
+        <div class="mock-screen">
+          <div class="mock-row mock-header">
+            <span class="mock-dot"></span>
+            <span class="mock-title">nexlupa</span>
+          </div>
+          <div class="mock-decisio">
+            <span class="mock-label">👉 Decisió</span>
+            <span class="mock-text">Completar els requisits de les colònies</span>
+          </div>
+          <div class="mock-action mock-alta">
+            <span>💳 Pagament colònies</span><span class="mock-pill alta">Alta</span>
+          </div>
+          <div class="mock-action mock-mitja">
+            <span>📋 Autorització mèdica</span><span class="mock-pill mitja">Mitja</span>
+          </div>
+          <div class="mock-action">
+            <span>👕 Preparar roba</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="landing-features" id="funcionalitats">
+    <div class="features-inner">
+      <h2 class="features-title reveal">Tot el que necessites, sense l'excés</h2>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">🎯</div>
+          <h3>Decisió clara</h3>
+          <p>Una sola frase: el que has de fer. Sense ambigüitats, sense rodeos.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">✅</div>
+          <h3>Accions executables</h3>
+          <p>Cada tasca és concreta, accionable i prioritzada. No llistes genèriques.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">📅</div>
+          <h3>Calendari automàtic</h3>
+          <p>Les dates surten directament al Google Calendar amb un clic.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">⚡</div>
+          <h3>10 segons</h3>
+          <p>Enganxa el missatge. Rep la decisió. Llestos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="landing-how">
+    <div class="how-inner">
+      <h2 class="how-title reveal">Com funciona</h2>
+      <div class="how-steps">
+        <div class="how-step reveal">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Enganxa el missatge</strong>
+            <p>Qualsevol text: email, WhatsApp, comunicat escolar, newsletter...</p>
+          </div>
+        </div>
+        <div class="how-step reveal">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>nexlupa l'analitza</strong>
+            <p>La IA detecta decisions, accions, dates i prioritats reals.</p>
+          </div>
+        </div>
+        <div class="how-step reveal">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Tu executes</strong>
+            <p>Reps un resum net, accionable i sincronitzat amb el teu calendari.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="landing-pricing" id="pricing">
+    <div class="pricing-inner">
+      <h2 class="pricing-title reveal">Plans</h2>
+      <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pricing-badge">Gratis</div>
+          <div class="pricing-price">0€<span>/mes</span></div>
+          <ul class="pricing-features">
+            <li>✓ 3 anàlisis al dia</li>
+            <li>✓ Historial de 7 dies</li>
+            <li>✓ Exportació calendari</li>
+            <li>✓ Compartir per WhatsApp</li>
+          </ul>
+          <button class="btn-pricing" id="btnObrirApp3">Començar gratis</button>
+        </div>
+        <div class="pricing-card pricing-pro reveal">
+          <div class="pricing-badge">Pro</div>
+          <div class="pricing-price">4.99€<span>/mes</span></div>
+          <ul class="pricing-features">
+            <li>✓ Anàlisis il·limitades</li>
+            <li>✓ Historial complet</li>
+            <li>✓ Prioritat en processament</li>
+            <li>✓ Suport prioritari</li>
+          </ul>
+          <button class="btn-pricing btn-pricing-pro" disabled>Pròximament</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">nexlupa</span>
+      <span class="footer-tagline">De la informació a la decisió</span>
+      <span class="footer-copy">© 2026</span>
+    </div>
+  </footer>
+
+</div><!-- fi pageLanding -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     APP
+═══════════════════════════════════════════════════════════════════ -->
+<div id="pageApp" style="display:none;">
 
   <!-- HEADER -->
   <header>
-    <div class="logo">
-      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#2e2e2e;">nex<span style="color:#F5C518;">lupa</span></span>
+    <div class="header-inner">
+      <button class="btn-back" onclick="tornarLanding()" title="Tornar">
+        <span>←</span>
+      </button>
+      <span class="app-logo" style="color:#2e2e2e;font-weight:800;">nexlupa</span>
+      <span class="app-tagline">La lupa que treballa sola</span>
     </div>
-    <div class="header-sub">La lupa que treballa sola</div>
-    <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
   </header>
 
-  <!-- DEMO BANNER -->
-  <div class="demo-banner" id="demoBanner" style="display:none;">
-    🎬 MODE DEMO — Les respostes són simulades
-  </div>
+  <main>
+    <!-- NAV -->
+    <nav class="app-nav">
+      <button class="nav-btn active" id="navInici" onclick="navTo('inici')">
+        🏠 Inici
+      </button>
+      <button class="nav-btn" id="navHistorial" onclick="navTo('historial')">
+        🕐 Historial
+        <div class="nav-badge" id="badgeHistorial" style="display:none;">0</div>
+      </button>
+      <button class="nav-btn" id="navTasques" onclick="navTo('tasques')">
+        ✅ Tasques
+        <div class="nav-badge" id="badgeTasques" style="display:none;">0</div>
+      </button>
+      <button class="nav-btn" id="navConfig" onclick="navTo('config')">⚙️ Config</button>
+    </nav>
 
-  <!-- ONBOARDING OVERLAY -->
+    <!-- PÀGINA INICI -->
+    <div id="pageInici">
+
+      <div class="app-main-headline">Analitza qualsevol missatge</div>
+
+      <div class="app-content-row app-col-layout">
+        <!-- COL LEFT: input -->
+        <div class="app-col-left">
+
+          <!-- exemples ràpids -->
+          <div class="app-examples">
+            <span class="ex-label">Exemples:</span>
+            <button class="ex-btn" onclick="loadEx('escola')">📚 Escola</button>
+            <button class="ex-btn" onclick="loadEx('ampa')">👨‍👩‍👧 AMPA</button>
+            <button class="ex-btn" onclick="loadEx('feina')">💼 Feina</button>
+          </div>
+
+          <!-- pestanyes text / imatge -->
+          <div class="tab-bar">
+            <button class="tab-btn active" id="tabText" onclick="switchTab('text')">✏️ Text</button>
+            <button class="tab-btn" id="tabImg" onclick="switchTab('img')">🖼 Imatge</button>
+          </div>
+
+          <!-- PANEL TEXT -->
+          <div id="panelText">
+            <div class="card">
+              <textarea id="txt" placeholder="Enganxa aquí el missatge, email o comunicat..."
+                rows="8" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            </div>
+          </div>
+
+          <!-- PANEL IMATGE -->
+          <div id="panelImg" style="display:none;">
+            <div class="card">
+              <div id="imgDrop" class="img-drop-zone">
+                <div id="imgDropContent" class="img-drop-content">
+                  <div class="img-drop-icon">🖼</div>
+                  <p>Arrossega una imatge aquí</p>
+                  <p class="img-drop-sub">o fes clic per seleccionar</p>
+                  <input type="file" accept="image/*" onchange="handleImg(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;"/>
+                </div>
+                <img id="imgPreview" style="display:none;max-width:100%;border-radius:8px;"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÓ ANALITZAR -->
+          <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
+            🔍 &nbsp;Analitzar amb nexlupa
+          </button>
+
+          <!-- USAGE COUNTER -->
+          <div class="usage-wrap" id="usageWrap">
+            <span class="usage-text" id="usageText"></span>
+            <div class="usage-bar" id="usageBar"></div>
+          </div>
+
+          <!-- LIMIT BANNER -->
+          <div class="limit-banner" id="limitBanner" style="display:none;">
+            Has assolit el límit diari de <strong id="limitCount">3</strong> anàlisis.
+            <button onclick="navTo('premium')">Veure plans →</button>
+          </div>
+
+        </div><!-- fi app-col-left -->
+
+        <!-- COL RIGHT: resultats -->
+        <div class="app-col-right">
+
+          <!-- loading -->
+          <div class="loading" id="loading">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+          </div>
+
+          <!-- error -->
+          <div class="err-msg" id="errMsg"></div>
+
+          <!-- resultats -->
+          <div class="results" id="results">
+
+            <!-- DECISIÓ -->
+            <div class="nx-decisio-block">
+              <div class="nx-decisio-label" id="nx-decisio-label">👉 Decisió</div>
+              <div class="nx-decisio-text" id="nx-decisio"></div>
+            </div>
+
+            <!-- ACCIONS -->
+            <div class="nx-actions" id="nx-actions"></div>
+
+            <!-- RESUM -->
+            <div class="nx-resum-block" id="nx-resum-block">
+              <div class="nx-resum-label">📋 Context</div>
+              <div class="nx-resum" id="nx-resum"></div>
+            </div>
+
+            <!-- SHARE -->
+            <div class="nx-share-row">
+              <button class="nx-btn-share" onclick="shareWhatsApp()">📤 WhatsApp</button>
+              <button class="nx-btn-share" id="btnCopy" onclick="copyCardText()">📋 Copiar</button>
+              <button class="nx-btn-share" onclick="reset()">↩ Nova anàlisi</button>
+            </div>
+            <div class="copy-ok" id="copyOk">Copiat al porta-retalls ✓</div>
+
+            <!-- hidden legacy -->
+            <div id="resum" style="display:none;"></div>
+            <div id="dates" style="display:none;"></div>
+            <div class="card" id="datesCard" style="display:none;"></div>
+
+          </div><!-- fi results -->
+
+        </div><!-- fi app-col-right -->
+      </div><!-- fi app-content-row -->
+
+    </div><!-- fi pageInici -->
+
+    <!-- HISTORIAL -->
+    <div id="pageHistorial" style="display:none;">
+      <div class="page-header">
+        <h2>Historial d'anàlisis</h2>
+      </div>
+      <div class="search-wrap">
+        <input type="text" id="historySearch" placeholder="Cerca en l'historial..." class="search-input"/>
+      </div>
+      <div id="historyList" class="hist-list"></div>
+    </div>
+
+    <!-- TASQUES -->
+    <div id="pageTasques" style="display:none;">
+      <div class="page-header">
+        <h2>Tasques pendents</h2>
+        <button class="btn-clear" onclick="clearTasques()">Netejar completades</button>
+      </div>
+      <div id="tasquesList"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="pageConfig" style="display:none;">
+      <div class="page-header"><h2>Configuració</h2></div>
+      <div class="config-section">
+        <label class="config-label">El teu nom</label>
+        <input type="text" id="cfgNom" class="config-input" placeholder="Per personalitzar nexlupa"/>
+      </div>
+      <div class="config-section">
+        <label class="config-label config-row">
+          Mode fosc
+          <input type="checkbox" id="cfgDark" onchange="toggleDark()"/>
+        </label>
+      </div>
+      <div class="config-section">
+        <label class="config-label config-row">
+          Notificacions
+          <input type="checkbox" id="cfgNotif" checked/>
+        </label>
+      </div>
+      <div class="config-section">
+        <label class="config-label config-row">
+          Recordatoris
+          <input type="checkbox" id="cfgRemind" checked/>
+        </label>
+      </div>
+      <button class="btn-save-config" onclick="saveConfig()">Desar configuració</button>
+      <div class="config-danger">
+        <button class="btn-clear" onclick="clearHistorial()">Esborrar historial</button>
+      </div>
+      <div class="config-version">nexlupa v1.0 · <a href="#" onclick="toggleDemo()">mode demo</a></div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div id="pagePremium" style="display:none;">
+      <div class="premium-hero">
+        <div class="premium-icon">⚡</div>
+        <h2>nexlupa Pro</h2>
+        <p>Anàlisis il·limitades, historial complet i prioritat en processament.</p>
+        <div class="premium-price">4.99€<span>/mes</span></div>
+        <button class="btn-premium" disabled>Pròximament</button>
+        <p class="premium-note">Avisa'm quan estigui disponible →</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ONBOARDING -->
   <div class="onboarding-overlay" id="onboarding" style="display:none;">
     <div class="onboarding-card">
-      <div class="ob-step" id="obStep">PAS 1 DE 3</div>
+      <div class="ob-step-label" id="obStep">PAS 1 DE 3</div>
       <div class="ob-icon" id="obIcon">🔍</div>
       <div class="ob-title" id="obTitle">Benvingut a nexlupa</div>
-      <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
+      <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.</div>
       <div class="ob-dots">
         <div class="ob-dot active" id="obDot0"></div>
         <div class="ob-dot" id="obDot1"></div>
         <div class="ob-dot" id="obDot2"></div>
       </div>
       <button class="ob-btn" id="obBtn" onclick="nextStep()">Continua →</button>
-      <div class="ob-skip" onclick="closeOnboarding()">Salta</div>
+      <button class="ob-skip" onclick="closeOnboarding()">Saltar</button>
     </div>
   </div>
 
-  <!-- LIMIT BANNER -->
-  <div id="limitBanner" style="display:none; padding:6px 16px; font-size:12px; color:#999; font-family:'Nunito',sans-serif; text-align:center; border-bottom:1px solid rgba(0,0,0,.08);">
-    Límit diari assolit. Torna demà per 3 anàlisis més. <span id="limitCount" style="display:none;"></span>
+  <!-- DEMO BANNER -->
+  <div class="demo-banner" id="demoBanner" style="display:none;">
+    MODE DEMO ACTIU — <button onclick="toggleDemo()">Desactivar</button>
   </div>
-
-  <!-- MAIN CONTENT -->
-  <main>
-
-    <!-- INICI -->
-    <div id="pageInici">
-      <div class="app-2col">
-
-      <div class="app-col-left">
-        <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
-        <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa per tu.</p>
-        <div class="app-left-feats">
-          <div class="app-feat-item">⚡ Resum en 10 segons</div>
-          <div class="app-feat-item">✅ Accions detectades automàticament</div>
-          <div class="app-feat-item">📅 Dates i terminis identificats</div>
-        </div>
-      </div>
-
-      <div class="app-col-right">
-
-      <div class="card">
-        <div class="card-head">
-          <div class="c-icon ci-gold">✉️</div>
-          <div class="c-label">Missatge original</div>
-        </div>
-
-        <h2 class="app-main-headline">
-          <span class="hl-line1">Enganxa el missatge.</span>
-          <span class="hl-line2">La resta ho fa <em>nexlupa.</em></span>
-        </h2>
-
-        <div class="input-tabs">
-          <button class="tab-btn active" id="tabText" onclick="switchTab('text')">✏️ Text</button>
-          <button class="tab-btn" id="tabImg"  onclick="switchTab('img')">📷 Imatge</button>
-        </div>
-
-        <div id="panelText">
-          <textarea id="txt" placeholder="Ex: correu, WhatsApp o comunicat…"></textarea>
-
-        </div>
-
-        <div id="panelImg" style="display:none;">
-          <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgInput').click()">
-            <div id="imgDropContent">
-              <span style="font-size:36px;">📷</span>
-              <p style="font-size:14px;font-weight:700;margin:8px 0 4px;">Puja una imatge o pantallàs</p>
-              <p style="font-size:12px;color:var(--muted);">Clica aquí o arrossega la imatge</p>
-            </div>
-            <img id="imgPreview" style="display:none;max-width:100%;border-radius:10px;margin-top:10px;" alt="preview"/>
-          </div>
-          <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="handleImg(event)"/>
-        </div>
-
-        <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
-          🔍 Analitzar amb nexlupa
-        </button>
-        <p class="btn-micro-copy">Resum i accions en 10 segons</p>
-
-        <div class="usage-counter" id="usageCounter">
-          <div class="usage-label">FREE · 3 ANÀLISIS AL DIA</div>
-          <div class="usage-info">
-            <span id="usageBar"></span>
-            <span id="usageText">0 de 3 anàlisis avui</span>
-          </div>
-        </div>
-
-        <div id="premiumPromoCard" style="text-align:center;margin-top:10px;padding:10px 0 4px;border-top:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics?</div>
-          <button onclick="navTo('premium')"
-            style="background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;"
-            onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold2)';"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
-            ⭐ Descobreix Premium
-          </button>
-        </div>
-
-        <div class="err" id="errMsg"></div>
-      </div>
-
-      <div class="loading" id="loading">
-        <span class="spin-lupa">🔍</span>
-        <p>Analitzant el missatge...</p>
-        <small>La lupa està treballant per tu</small>
-      </div>
-
-      <div class="results" id="results">
-
-        <!-- DECISIÓ — element protagonista -->
-        <div class="nx-decisio-block">
-          <div class="nx-decisio-label" id="nx-decisio-label">👉 Decisió</div>
-          <div class="nx-decisio-text" id="nx-decisio"></div>
-        </div>
-
-        <!-- ACCIONS — targetes tipades -->
-        <div class="nx-actions-block" id="nx-actions"></div>
-
-        <!-- BOTONS: Compartir / Copiar / Analitzar -->
-        <div class="nx-share-block">
-          <div class="nx-share-row">
-            <button class="nx-btn-wa" onclick="shareWhatsApp()">💬 Compartir</button>
-            <button class="nx-btn-copy" id="btnCopy" onclick="copyCardText()">📋 Copiar</button>
-          </div>
-          <div class="copy-ok" id="copyOk">✓ Copiat!</div>
-          <button class="nx-btn-reset" onclick="reset()">Analitzar un altre missatge</button>
-        </div>
-
-        <!-- RESUM centrat al peu -->
-        <div class="nx-resum-block" id="nx-resum-block" style="display:none;">
-          <div class="nx-resum-text" id="nx-resum"></div>
-        </div>
-
-        <!-- hidden compat: history + calendar legacy -->
-        <div style="display:none;">
-          <div id="resum"></div><div id="decisio"></div>
-          <div id="actions"></div><div id="urgBadge"></div>
-          <div id="urgDots"></div><div id="urgTxt"></div>
-          <div id="dates"></div><div id="sharePreview"></div>
-          <div id="datesCard"></div>
-          <button id="btnCalendar"></button>
-        </div>
-
-      </div>
-
-      </div><!-- fi app-col-right -->
-      </div><!-- fi app-2col -->
-
-    </div><!-- fi pageInici -->
-
-    <!-- PREMIUM -->
-    <div id="pagePremium" style="display:none;">
-
-      <div class="premium-hero">
-        <div class="premium-badge">⭐ nexlupa PREMIUM</div>
-        <h1 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">La lupa sense límits</h1>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;">Mai més et perdràs res important.</p>
-
-        <div class="premium-checklist">
-          <div class="pchk-item yes">✔ Anàlisis il·limitades</div>
-          <div class="pchk-item yes">✔ Respostes suggerides</div>
-          <div class="pchk-item yes">✔ Carpetes i projectes</div>
-          <div class="pchk-item yes">✔ Anàlisi múltiple de missatges</div>
-          <div class="pchk-item yes">✔ Recordatoris push automàtics</div>
-          <div class="pchk-item yes">✔ Informe setmanal en PDF</div>
-          <div class="pchk-item no">✖ Versió gratuïta limitada a 3/dia</div>
-        </div>
-
-        <div class="plans-row">
-          <div class="plan-card">
-            <div class="plan-name">Free</div>
-            <div class="plan-price">0€</div>
-            <div class="plan-desc">3 anàlisis/dia<br>Funcions bàsiques</div>
-          </div>
-          <div class="plan-card active">
-            <div class="plan-badge">⭐ RECOMANAT</div>
-            <div class="plan-name">Premium</div>
-            <div class="plan-price" style="font-size:16px;padding-top:6px;letter-spacing:.01em;">Properament</div>
-            <div class="plan-desc">Tot inclòs<br>Preu de llançament</div>
-          </div>
-        </div>
-
-        <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20nexlupa%20%E2%80%94%20Avisa%27m" style="display:block;text-decoration:none;text-align:center;">
-          ⭐ Vull Premium — Avisa'm quan llanci
-        </a>
-        <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:10px;">Sense compromís · Cancel·la quan vulguis</div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">🆓</div><div class="c-label">Free vs Premium</div></div>
-        <div class="compare-row"><span>Anàlisi de text i imatges</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span>Resum + accions + dates</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span>Compartir per WhatsApp</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span style="color:var(--red);">Límit diari</span><span style="color:var(--red);font-weight:700;">3 anàlisis/dia</span></div>
-        <div class="compare-row"><span>Anàlisis il·limitats</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Respostes suggerides</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Carpetes i projectes</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Anàlisi múltiple</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Recordatoris push</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Informe setmanal PDF</span><span class="compare-yes">⭐ Premium</span></div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">⭐</div><div class="c-label">Funcionalitats Premium</div></div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-blue">💬</div>
-          <div><div class="feat-ttl">Respostes suggerides</div><div class="feat-dsc">L'app et proposa com respondre el missatge directament.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-green">📁</div>
-          <div><div class="feat-ttl">Carpetes i projectes</div><div class="feat-dsc">Organitza els missatges per temes, projectes o àmbits. Tot classificat automàticament.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-purple">📊</div>
-          <div><div class="feat-ttl">Anàlisi múltiple</div><div class="feat-dsc">Analitza diversos missatges alhora i obté un resum del dia consolidat.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-red">🔔</div>
-          <div><div class="feat-ttl">Recordatoris push</div><div class="feat-dsc">Avís al mòbil quan s'acosta una data detectada. Mai més oblides res.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-gold">📄</div>
-          <div><div class="feat-ttl">Informe setmanal PDF</div><div class="feat-dsc">Totes les tasques i dates de la setmana en un PDF per compartir.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-blue">♾️</div>
-          <div><div class="feat-ttl">Anàlisis il·limitats</div><div class="feat-dsc">Sense límit diari. Analitza tots els missatges que vulguis.</div></div>
-        </div>
-      </div>
-
-      <button class="btn-reset" onclick="navTo('inici')">← Tornar a l'app</button>
-
-    </div><!-- fi pagePremium -->
-
-    <!-- CONFIG -->
-    <div id="pageConfig" style="display:none;">
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">👤</div><div class="c-label">Perfil</div></div>
-        <div style="display:flex;align-items:center;gap:14px;padding:4px 0;">
-          <div style="width:52px;height:52px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;">😊</div>
-          <div>
-            <input id="cfgNom" type="text" placeholder="El teu nom"
-              style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;border:none;outline:none;background:transparent;color:var(--darker);width:180px;"
-              oninput="saveConfig()"/>
-            <div style="font-size:11px;color:var(--muted);">Usuari nexlupa</div>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-blue">🎨</div><div class="c-label">Aparença</div></div>
-        <div class="cfg-row">
-          <span>Mode fosc</span>
-          <label class="toggle">
-            <input type="checkbox" id="cfgDark" onchange="toggleDark()"/>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-green">🔔</div><div class="c-label">Notificacions</div></div>
-        <div class="cfg-row">
-          <span>Avisos d'urgència</span>
-          <label class="toggle"><input type="checkbox" id="cfgNotif" checked onchange="saveConfig()"/><span class="slider"></span></label>
-        </div>
-        <div class="cfg-row" style="margin-top:10px;">
-          <span>Recordatoris de tasques</span>
-          <label class="toggle"><input type="checkbox" id="cfgRemind" checked onchange="saveConfig()"/><span class="slider"></span></label>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-red">🗑️</div><div class="c-label">Dades</div></div>
-        <button class="cfg-danger-btn" onclick="clearHistorial()">🗑️ Esborrar historial</button>
-        <button class="cfg-danger-btn" onclick="clearTasques()" style="margin-top:8px;">✅ Esborrar tasques completades</button>
-      </div>
-
-      <div class="card" style="text-align:center;">
-        <div style="font-size:28px;margin-bottom:8px;">🔍</div>
-        <div style="font-size:14px;font-weight:800;color:var(--darker);">nexlupa motor</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>
-      </div>
-
-    </div><!-- fi pageConfig -->
-
-    <!-- HISTORIAL -->
-    <div id="pageHistorial" style="display:none;">
-      <input id="historySearch" type="text" placeholder="Buscar..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--dark);background:var(--bg);outline:none;margin-bottom:10px;box-sizing:border-box;"/>
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">🕐</div><div class="c-label">Historial</div></div>
-        <div id="historyList"></div>
-      </div>
-    </div>
-
-    <!-- TASQUES -->
-    <div id="pageTasques" style="display:none;">
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Totes les tasques</div></div>
-        <div id="tasquesList">
-          <p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha tasques pendents.</p>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="navInici"    onclick="navTo('inici')">
-      <span>🏠</span><small>Inici</small>
-    </button>
-    <button class="nav-btn" id="navTasques"  onclick="navTo('tasques')">
-      <span>✅</span><small>Tasques</small>
-      <div class="nav-badge" id="badgeTasques" style="display:none;">0</div>
-    </button>
-    <button class="nav-btn" id="navHistorial" onclick="navTo('historial')">
-      <span>🕐</span><small>Historial</small>
-      <div class="nav-badge" id="badgeHistorial" style="display:none;">0</div>
-    </button>
-    <button class="nav-btn" id="navConfig"   onclick="navTo('config')">
-      <span>⚙️</span><small>Config</small>
-    </button>
-  </nav>
-
-  <div class="bottom-spacer"></div>
-  <footer>La lupa que treballa sola · <b>nexlupa</b></footer>
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=13"></script>
+<script src="script.js?v=14"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');

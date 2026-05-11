@@ -32,11 +32,15 @@ SORTIDA (estructura obligàtoria):
 NORMES:
 
 1. DECISIÓ (CRÍTIC)
-- Sempre obligàtoria.
+- Sempre obligatòria.
 - Ha de sonar humana, clara i accionable. No robòtica.
-- Format imperatiu, natural (ex: "Assistir al torneig de futbol", "Preparar la sortida escolar").
-- BON EXEMPLE: "Completar els requisits de les colònies"
+- Per a comunicats simples → format imperatiu directe (ex: "Completar els requisits del casal", "Preparar la sortida escolar").
+- Per a comunicats complexos amb múltiples activitats → sintetitza la càrrega mental real (ex: "Hi ha 3 activitats amb pagaments, autoritzacions i material per preparar.").
+- Ha de reflectir el que importa, no el que diu el text.
+- BON EXEMPLE SIMPLE: "Completar els requisits de les colònies"
+- BON EXEMPLE COMPLEX: "Aquest trimestre hi ha 4 activitats escolars amb pagaments i preparatius pendents."
 - MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
+- MAL EXEMPLE: "Revisar les dates i materials necessaris"
 
 ---
 
@@ -73,7 +77,7 @@ Retorna:
 - Si no hi ha hora → posar 00:00
 - Si no aplica → null
 - NO recalculis ni corregeixis el calendari. Mantén fidelitat al text.
-- Si el text diu "Dijous 16 maig", no canviïis el dia de la setmana.
+- Si el text diu "Dijous 16 maig", no canviïs el dia de la setmana.
 
 ---
 
@@ -179,6 +183,33 @@ PROHIBIT:
 
 ---
 
+11. REGLA — "ASSISTIR A" NO ÉS UNA TASCA (CRÍTIC)
+- PROHIBIT generar "Assistir a [event]" com a element de l'array accions.
+- Un event amb data → generar 1 entrada de tipus "calendari" amb la data i hora.
+- Les accions han de ser el que s'ha de preparar, pagar, entregar o portar.
+- CORRECTE: "Portar samarreta blanca", "Completar el pagament", "Entregar autorització signada"
+- INCORRECTE: "Assistir a la jornada esportiva", "Assistir al teatre", "Assistir a la sortida"
+- EXCEPCIÓ: "Assistir" pot aparèixer al camp "decisio" si és la decisió executiva principal.
+
+---
+
+12. REGLA — MATERIALS I PREPARATIUS
+- Si el text menciona materials, roba, objectes o instruments necessaris → crear 1 tasca preparatòria.
+- Combinar materials relacionats en 1 sola acció (no crear una acció per cada objecte).
+- "cal portar gorra" → "Preparar gorra per la sortida"
+- "roba còmoda i bambes" → "Preparar roba esportiva i bambes"
+- "crema solar i banyador" → "Preparar crema solar i banyador"
+- Tipus: "tasca". Prioritat: "mitja".
+
+---
+
+13. REGLA — INFORMACIÓ CONDICIONAL
+- Si el text diu "famílies amb pagaments pendents", "si aplica", "en cas necessari" → NO assumir que aplica.
+- Convertir en tipus "informatiu", prioritat "baixa", o ometre si no és rellevant per a l'usuari general.
+- NO generar tasques per informació que pot no afectar tothom.
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -209,4 +240,38 @@ OUTPUT:
   "resum": "Confirmació que tot és correcte",
   "decisio": "cap acció necessària",
   "accions": []
+}
+
+---
+
+INPUT:
+"Dijous 22 de maig tenim la jornada esportiva. Cal portar roba còmoda, bambes i una ampolla d'aigua. L'autorització s'ha de lliurar abans del dimarts 20."
+
+OUTPUT:
+{
+  "resum": "Jornada esportiva dijous 22 de maig amb autorització a lliurar abans del dimarts 20.",
+  "decisio": "Lliurar l'autorització i preparar el material per la jornada esportiva.",
+  "accions": [
+    {
+      "accio": "Lliurar l'autorització signada a l'escola",
+      "tipus": "tasca",
+      "data": "2026-05-20 00:00",
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Preparar roba còmoda, bambes i ampolla d'aigua",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Jornada esportiva escolar",
+      "tipus": "calendari",
+      "data": "2026-05-22 00:00",
+      "prioritat": "mitja",
+      "lloc": null
+    }
+  ]
 }
