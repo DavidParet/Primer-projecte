@@ -39,12 +39,14 @@ NORMES:
 - Per a missatges de grups socials o coordinació → explica l'estat actual: què falta, què és crític, què ja està cobert (ex: "El dinar és dissabte; falta confirmar el pagament de la reserva i les compres pendents.").
 - Per a comunicats esportius o activitats recurrents → detecta requisits crítics i riscos de no participació (ex: "Els entrenaments comencen dissabte; cal tenir la llicència federativa en regla i fer la inscripció al campionat abans del 18.").
 - Per a festivals o esdeveniments familiars → detecta la tensió logística real: canvis d'ubicació, vestuari obligatori, accessibilitat (ex: "El festival requereix vestuari complet des de casa, pagament abans del dimecres i arribar aviat per l'aparcament.").
+- Per a tornejos i sortides amb autocar → detecta el risc principal: puntualitat obligatòria, documentació imprescindible (ex: "El torneig requereix sortida molt puntual — l'autocar no esperarà. El risc principal és arribar tard o oblidar la documentació.").
 - Ha de reflectir el que importa, no el que diu el text.
 - BON EXEMPLE SIMPLE: "Completar els requisits de les colònies"
 - BON EXEMPLE COMPLEX: "Aquest trimestre hi ha 4 activitats escolars amb pagaments i preparatius pendents."
 - BON EXEMPLE SOCIAL: "El dinar ja està bastant organitzat; falta confirmar comensals i pagar la reserva."
 - BON EXEMPLE ESPORTIU: "Els entrenaments comencen dissabte; cal tenir la llicència en regla i completar la inscripció al campionat."
 - BON EXEMPLE FESTIVAL: "El festival requereix vestuari complet des de casa, pagament abans del dimecres i arribar aviat per dificultats d'aparcament."
+- BON EXEMPLE TORNEIG: "El torneig requereix sortida molt puntual — l'autocar no esperarà. El risc principal és arribar tard o oblidar la targeta federativa."
 - MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
 - MAL EXEMPLE: "Revisar les dates i materials necessaris"
 - MAL EXEMPLE SOCIAL: "Assistir al dinar dissabte" [no explica res d'útil]
@@ -301,6 +303,38 @@ PROHIBIT:
 
 ---
 
+22. REGLA — RISCOS CRÍTICS I PUNTUALITAT OBLIGATÒRIA
+- Detectar frases de risc alt: "l'autocar no podrà esperar", "obligatori", "abans de pujar", "sense això no participa", canvis d'horari, convocatòries molt d'hora.
+- Interpretar com RISC ALT → PRIORITAT ALTA obligatòria.
+- NO tractar com a context ni logística secundària: és risc real que pot impedir participació.
+- Generar tasca específica que evidenciï el risc i l'acció necessària.
+- CORRECTE: "Tenir la targeta federativa preparada per presentar abans de pujar a l'autocar" → alta
+- CORRECTE: "Arribar puntualment a la convocatòria — l'autocar no esperarà" → alta
+- INCORRECTE: ometre o agrupar el risc de puntualitat amb preparació general
+
+---
+
+23. REGLA — AGRUPAR SORTIDA I CONVOCATÒRIA
+- Si el text conté convocatòria i sortida separades per pocs minuts del mateix desplaçament → NO generar 2 entrades de calendari.
+- Fusionar en 1 sola entrada de calendari.
+- Format: "[Activitat] — [Lloc] (HH:MM convocatòria · HH:MM sortida [vehicle])"
+- La "data" JSON = hora de la convocatòria (la primera).
+- CORRECTE: "Sortida torneig UE Gavà — Reus (06:45 convocatòria · 07:00 sortida autocar)" → calendari, data: 2026-06-28 06:45
+- INCORRECTE: 2 entrades separades "Convocatòria 6:45" + "Sortida 7:00" → soroll visual
+- Tipus: "calendari". Prioritat: "alta" si hi ha risc de puntualitat, "mitja" en cas contrari.
+
+---
+
+24. REGLA — INFORMACIÓ FUTURA CONDICIONAL
+- Si el text menciona possibles retards, escenaris condicionals, canvis segons resultats o seguiment per WhatsApp → generar com "informatiu".
+- NO ometre: pot afectar la planificació familiar.
+- Format de l'acció: "Si [condició], [conseqüència possible]"
+- CORRECTE: "Si l'equip arriba a semifinals, la tornada podria ser més tard de les 20:30h" → informatiu, baixa
+- CORRECTE: "Seguiment per WhatsApp del grup de l'equip" → informatiu, baixa
+- Tipus: "informatiu". Prioritat: "baixa".
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -496,6 +530,61 @@ OUTPUT:
     },
     {
       "accio": "Cada família disposarà de 4 entrades",
+      "tipus": "informatiu",
+      "data": null,
+      "prioritat": "baixa",
+      "lloc": null
+    }
+  ]
+}
+
+---
+
+INPUT:
+"Torneig de futbol 7 dissabte 28 de juny a Reus. Convocatòria a les 6:45h al camp de la UE Gavà. L'autocar sortirà a les 7:00h i no podrà esperar. Cal portar: equipació oficial, mitgetes, cantimplora i protector solar. Els porters han de portar la segona samarreta. Cal presentar la targeta federativa abans de pujar a l'autocar. Es portaran diners per al dinar (mínim 10€). Si l'equip arriba a semifinals, la tornada podria ser més tard de les 20:30h."
+
+OUTPUT:
+{
+  "resum": "Torneig de futbol a Reus dissabte; convocatòria 6:45, sortida autocar 7:00 puntual i targeta federativa obligatòria.",
+  "decisio": "El torneig requereix sortida molt puntual — l'autocar no esperarà. El principal risc és arribar tard o oblidar la targeta federativa obligatòria.",
+  "accions": [
+    {
+      "accio": "Tenir la targeta federativa preparada per presentar abans de pujar a l'autocar",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Sortida torneig UE Gavà — Reus (06:45 convocatòria · 07:00 sortida autocar)",
+      "tipus": "calendari",
+      "data": "2026-06-28 06:45",
+      "prioritat": "alta",
+      "lloc": "Camp UE Gavà"
+    },
+    {
+      "accio": "Preparar equipació del torneig (equipació oficial, mitgetes, cantimplora, protector solar)",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Porters: portar la segona samarreta",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Portar diners per al dinar (mínim 10€)",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Si l'equip arriba a semifinals, la tornada podria ser més tard de les 20:30h",
       "tipus": "informatiu",
       "data": null,
       "prioritat": "baixa",

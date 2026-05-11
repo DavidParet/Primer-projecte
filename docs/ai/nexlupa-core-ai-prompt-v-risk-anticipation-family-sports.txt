@@ -1,0 +1,113 @@
+NEXLUPA — PROMPT TORNEJOS + SORTIDES AUTOCAR + ANTICIPACIÓ DE RISCOS v1
+Data: 2026-05-11
+Fitxer: nexlupa-core-ai-prompt-v-risk-anticipation-family-sports.txt
+
+Integrat a: docs/ai/nexlupa-core-ai-prompt.txt (seccions 1, 22, 23, 24 + exemple)
+
+---
+
+OBJECTIU
+
+Millorar el motor NexLupa en:
+- tornejos esportius
+- sortides amb autocar
+- activitats amb risc de retard
+- documentació obligatòria
+- logística familiar sota pressió
+
+---
+
+REGLES IMPLEMENTADES
+
+REGLA — RISCOS CRÍTICS I PUNTUALITAT OBLIGATÒRIA
+
+Quan aparegui:
+  "no podrà esperar"
+  "obligatori"
+  "abans de pujar"
+  "sense això no participa"
+  canvis d'horari
+  convocatòries molt d'hora
+
+→ RISC ALT. PRIORITAT ALTA sempre.
+
+EXEMPLE:
+  "l'autocar no podrà esperar"
+  → informatiu crític + tasca "Arribar puntualment a la convocatòria (l'autocar no esperarà)" → alta
+
+Aquest tipus d'informació NO és context: és risc operatiu real.
+
+---
+
+REGLA — AGRUPAR SORTIDA + CONVOCATÒRIA
+
+Quan hi hagi convocatòria i sortida separades per pocs minuts:
+NO generar 2 entrades de calendari.
+
+Fusionar en 1 entrada amb format:
+  "[Activitat] — [Lloc] (HH:MM convocatòria · HH:MM sortida autocar)"
+
+La "data" JSON = hora de la convocatòria (la primera).
+
+EXEMPLE DOLENT:
+  📅 Trobada 6:45
+  📅 Sortida 7:00
+
+EXEMPLE BO:
+  📅 Sortida torneig UE Gavà — Reus (06:45 convocatòria · 07:00 sortida autocar)
+
+---
+
+REGLA — INFORMACIÓ FUTURA CONDICIONAL
+
+Quan el text inclogui:
+  "possibles retards"
+  "canvis segons resultats"
+  "seguiment per WhatsApp"
+  "escenaris condicionals"
+  "si l'equip arriba a..."
+
+→ Generar com "informatiu", prioritat "baixa".
+Format: "Si [condició], [conseqüència possible]"
+
+EXEMPLE:
+  "Si l'equip arriba a semifinals, la tornada podria ser més tard de les 20:30h."
+  → informatiu, baixa
+
+---
+
+REGLA — DECISIÓ EXECUTIVA TORNEIG
+
+Per a tornejos i sortides amb autocar:
+La DECISIÓ ha de detectar el risc principal.
+
+NO:
+  "Portar documentació i equipació."
+
+SÍ:
+  "El torneig requereix sortir molt puntuals i portar la documentació preparada
+   abans d'arribar al camp. El principal risc és arribar tard o oblidar la
+   documentació obligatòria."
+
+---
+
+EXEMPLE COMPLET
+
+INPUT:
+"Torneig de futbol 7 dissabte 28 de juny a Reus. Convocatòria a les 6:45h al camp
+de la UE Gavà. L'autocar sortirà a les 7:00h i no podrà esperar. Cal portar:
+equipació oficial, mitgetes, cantimplora i protector solar. Els porters han de
+portar la segona samarreta. Cal presentar la targeta federativa abans de pujar a
+l'autocar. Es portaran diners per al dinar (mínim 10€). Si l'equip arriba a
+semifinals, la tornada podria ser més tard de les 20:30h."
+
+OUTPUT ESPERAT:
+decisio: "El torneig requereix sortida molt puntual — l'autocar no esperarà.
+          El principal risc és arribar tard o oblidar la targeta federativa."
+accions:
+  - "Tenir la targeta federativa preparada per presentar abans de pujar a l'autocar" → alta
+  - "Sortida torneig UE Gavà — Reus (06:45 convocatòria · 07:00 sortida autocar)" → calendari, alta
+  - "Preparar equipació del torneig (equipació oficial, mitgetes, cantimplora, protector solar)" → mitja
+  - "Porters: portar la segona samarreta" → mitja
+  - "Portar diners per al dinar (mínim 10€)" → mitja
+  - "Si l'equip arriba a semifinals, la tornada podria ser més tard de les 20:30h" → informatiu, baixa
