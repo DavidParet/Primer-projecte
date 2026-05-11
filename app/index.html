@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=18"/>
+  <link rel="stylesheet" href="style.css?v=19"/>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
 <!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
@@ -30,7 +31,9 @@
   <!-- HEADER -->
   <header class="landing-header">
     <div class="landing-header-inner">
-      <a href="#" class="landing-logo" onclick="return false;">nexlupa</a>
+      <a href="#" class="landing-logo" onclick="return false;">
+        <img src="assets/nexlupa-light.png" srcset="assets/nexlupa-light@2x.png 2x" alt="nexlupa" class="logo-img" height="28">
+      </a>
       <nav class="landing-nav">
         <a href="#funcionalitats" class="landing-nav-link">Com funciona</a>
         <a href="#pricing" class="landing-nav-link">Plans</a>
@@ -168,7 +171,7 @@
   <!-- FOOTER -->
   <footer class="landing-footer">
     <div class="footer-inner">
-      <span class="footer-brand">nexlupa</span>
+      <img src="assets/nexlupa-light.png" srcset="assets/nexlupa-light@2x.png 2x" alt="nexlupa" class="footer-logo-img" height="18">
       <span class="footer-tagline">De la informació a la decisió</span>
       <span class="footer-copy">© 2026</span>
     </div>
@@ -188,7 +191,7 @@
       <button class="btn-back" onclick="tornarLanding()" title="Tornar">
         <span>←</span>
       </button>
-      <span class="app-logo" style="color:#2e2e2e;font-weight:800;">nexlupa</span>
+      <img src="assets/nexlupa-dark.png" srcset="assets/nexlupa-dark@2x.png 2x" alt="nexlupa" class="app-logo-img" height="28">
       <span class="app-tagline">La lupa que treballa sola</span>
     </div>
   </header>
@@ -416,7 +419,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=18"></script>
+<script src="script.js?v=19"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');

@@ -1,0 +1,68 @@
+NEXLUPA — SUBSTITUCIÓ LOGO v1
+Data: 2026-05-11
+Fitxer: nexlupa-logo-replacement-v1.txt
+
+---
+
+OBJECTIU
+
+Substituir el logo antic (CSS pur de text) per la nova identitat visual oficial:
+- neXlupa amb X en forma de diamant groc i lupa estilitzada a la "a"
+
+---
+
+ASSETS ORIGINALS
+
+Nexlupa Dark (3).svg   → fons clars (text gris fosc #2e2e2e, X groga, lupa groga)
+Nexlupa Light (2).svg  → fons foscos (text blanc, X groga, lupa groga)
+
+Processats a PNG (autocrop + resize) amb Python/Pillow:
+  app/assets/nexlupa-dark.png      240×43px   ~9KB  (1x)
+  app/assets/nexlupa-dark@2x.png   480×86px  ~19KB  (2x retina)
+  app/assets/nexlupa-light.png     240×43px   ~6KB  (1x)
+  app/assets/nexlupa-light@2x.png  480×86px  ~13KB  (2x retina)
+
+Favicon SVG creat manualment:
+  app/assets/favicon.svg — quadrat navy arrodonit + X groga (32×32)
+
+---
+
+REGLES D'ÚS
+
+DARK logo (nexlupa-dark.png) → fons CLARS (#ffffff, --bg, --light)
+  - Header app (fons blanc)
+
+LIGHT logo (nexlupa-light.png) → fons FOSCOS (--navy, rgba(13,27,42,...))
+  - Header landing (fons navy translúcid)
+  - Footer landing (fons navy)
+
+---
+
+CANVIS IMPLEMENTATS (v19)
+
+index.html:
+  - <link rel="icon"> amb favicon.svg
+  - Landing header logo → <img class="logo-img" src="assets/nexlupa-light.png">
+  - Footer logo → <img class="footer-logo-img" src="assets/nexlupa-light.png">
+  - App header logo → <img class="app-logo-img" src="assets/nexlupa-dark.png">
+  - srcset amb @2x per a pantalles retina
+  - Cache bump: v=18 → v=19
+
+style.css:
+  - Eliminat: .nav-logo, .logo-ne, .logo-x, .logo-x::before, .logo-lupa, .logo-dot, .logo svg
+  - Afegit: .landing-logo, .logo-img, .app-logo-img, .footer-logo-img
+
+---
+
+ELEMENTS NO CANVIATS
+
+- mock-title "nexlupa" dins el telèfon mock (element UI de demostració)
+- Cap funcionalitat visual modificada
+- Layout, colors, responsive, sistema calendari, compartició: sense canvis
+
+---
+
+FAVICON
+
+SVG inline: quadrat navy (rx=7) + X groga (stroke #F5C518, stroke-width=3.5)
+Coherent amb el símbol X del logotip oficial.
