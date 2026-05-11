@@ -1,0 +1,123 @@
+NEXLUPA — FEEDBACK REAL MOTOR v3
+Data: 2026-05-11
+Proves: emails gestoria + logística de colònies (app.nexlupa.app)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VALORACIÓ GENERAL
+La direcció actual és molt millor.
+El concepte "DECISIÓ" és un gran encert i s'ha de potenciar.
+
+El producte evoluciona cap a:
+- motor de claredat
+- assistent executiu IA
+- sistema de priorització intel·ligent
+
+NO cap a: resumidor / checklist / gestor de tasques genèric
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. CONCEPTE "DECISIÓ" ✅ ENCERT
+Pantalla amb:
+  👉 DECISIÓ
+  + titular gran
+  + accions detectades
+
+Genera: calma, confiança, sensació d'intel·ligència real, focus.
+MANTENIR I POTENCIAR.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. PROBLEMA CRÍTIC — DATES 🔴 FIX IMPLEMENTAT
+Error detectat:
+  Email: "abans del divendres 16 de maig"
+  Output erroni: "Dissabte 16 maig"
+
+CAUSA: Any incorrecte (2026-05-16 = dissabte; correcte era 2025-05-16 = divendres)
+FIX: Prompt actualitzat amb resolució d'any per dia setmana + inject data actual a cada petició API.
+FIX CLIENT: Dates >2 mesos al passat marcades "data pendent validar".
+
+PRIORITAT MÀXIMA: validació estricta dia setmana / número / mes / any.
+Si dubte → mostrar data numèrica o marcar "data pendent de validar".
+Mai inventar o assumir.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3. DIFERENCIAR RESPONSABLE DE L'ACCIÓ 🔴 FIX IMPLEMENTAT
+El motor detectava accions correctes semànticament però no qui les executa.
+Exemple: "Preparar menú adaptat" = tasca de la casa de colònies, NO de l'escola.
+
+FIX:
+- Toggle Rebut/Enviat a la UI
+- Camp "responsable": jo | altra_part | compartit a cada acció
+- Accions altra_part dimades + tag "No ets tu"
+- Regles al prompt per detectar emissor/receptor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4. ELIMINAR SENSACIÓ TASK MANAGER ✅ FIX IMPLEMENTAT
+Problema: "TOTES LES TASQUES", "PENDENTS", historial barrejat → trenca màgia IA.
+Focus ha de ser: RESULTAT ACTUAL.
+
+FIX:
+- Nav "Tasques" → "Accions"
+- Pàgina → "Accions detectades per la IA"
+- Nav icon ✅ → ◆
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5. HEADER PREMIUM ✅ FIX IMPLEMENTAT
+El header blanc trencava la immersió amb la UI dark premium.
+FIX: Header negre translúcid + blur (backdrop-filter), logo blanc, tagline fosca discreta.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+6. CLAIM / TAGLINE ✅ FIX IMPLEMENTAT
+Eliminat: "La lupa que treballa sola"
+Nou: "Del missatge a l'acció"
+Premium hero: "Menys lectura. Més decisions."
+
+Opcions valorades:
+- "El que importa, en 10 segons"
+- "Del missatge a l'acció" ← ESCOLLIT
+- "Menys lectura. Més decisions." ← hero premium
+- "La IA que detecta què has de fer"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+7. BOTÓ CALENDARI ✅ FIX IMPLEMENTAT
+"Afegir al calendari" → "◷ Crear recordatori"
+Estil: gradient verd, glow shadow, hover animat, font weight 800.
+La IA no només llegeix → detecta → decideix → executa. Futur premium.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+8. ICONOGRAFIA CHECK ✅ FIX IMPLEMENTAT
+✅ → Cercle CSS daurat amb glow (nx-icon-task)
+📅 → ◷ verd per calendari
+ℹ️ → ℹ gris per informatiu
+Altra part → cercle gris apagat sense glow
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+9. CONTEXT IA ✅ FIX IMPLEMENTAT
+Afegit chip sota DECISIÓ:
+  "↓ Missatge rebut · nexlupa motor"
+Dona confiança, context, sensació d'IA real.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10. OBJECTIU FINAL
+Quan algú obri NexLupa ha de pensar:
+"Aquesta IA ja ha llegit per mi i m'ha dit exactament què importa."
+
+No resumir. No ordenar. DECIDIR.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FITXERS MODIFICATS (branca: claude/enhance-decision-concept-96FFG)
+- docs/ai/nexlupa-core-ai-prompt.txt  → resolució any + perspectiva + responsable
+- api/analyze.js                      → inject data actual + pas perspectiva
+- app/script.js                       → validació dates, perspectiva, context IA, icones, botó cal
+- app/index.html                      → header logo, tagline, toggle, context block, nav rename
+- app/style.css                       → header dark blur, botó premium, icones CSS, context block
