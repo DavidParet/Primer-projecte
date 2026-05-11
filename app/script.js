@@ -452,16 +452,6 @@ function applyPriorityHeuristics(accions) {
   var _deadlineRe = /pagar|lliurar|signar|entregar|termini|data\s+l[ií]mit|pla[çc]|renovar/i;
   var _prepRe     = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans|inscri[ub]|confirmar/i;
 
-  /* Retorna true si la data és una hora concreta dins les properes 24h */
-  function isWithin24h(dateStr) {
-    if (!dateStr || dateStr === 'null') return false;
-    var m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
-    if (!m || !m[4] || (m[4] === '00' && m[5] === '00')) return false;
-    var dt   = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
-    var diff = dt - new Date();
-    return diff >= 0 && diff <= 86400000; /* 24h en ms */
-  }
-
   /* Índexs del primer event, primer deadline i primer ALTA de la IA */
   var mainEventIdx    = -1;
   var mainDeadlineIdx = -1;
@@ -493,18 +483,6 @@ function applyPriorityHeuristics(accions) {
     }
 
     return Object.assign({}, a, { prioritat: prioritat });
-  });
-
-  /* Segona passada: regla temporal — hora concreta dins 24h → +1 nivell (màx 2 ALTA total) */
-  var altaCount = result.filter(function (a) { return a.prioritat === 'alta'; }).length;
-  result = result.map(function (a) {
-    if (!isWithin24h(a.data)) return a;
-    if (a.prioritat === 'baixa') return Object.assign({}, a, { prioritat: 'mitja' });
-    if (a.prioritat === 'mitja' && altaCount < 2) {
-      altaCount++;
-      return Object.assign({}, a, { prioritat: 'alta' });
-    }
-    return a;
   });
 
   return result;
@@ -569,7 +547,7 @@ function renderResult(d) {
     if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
     if (!a || typeof a !== 'object') return null;
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
-    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: a.prioritat || 'baixa', lloc: a.lloc || null };
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
