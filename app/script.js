@@ -464,12 +464,11 @@ function applyPriorityHeuristics(accions) {
     if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx       = i;
   });
 
-  /* Fallback keyword: si la IA no ha marcat cap "alta", usa keywords com a xarxa de seguretat */
-  var aiHasAlta   = aiAltaIdx !== -1;
-  var altaFallback = (!aiHasAlta && mainEventIdx === -1 && mainDeadlineIdx === -1) ? -1 : -1;
-  var keywordAlta  = !aiHasAlta ? (mainEventIdx !== -1 ? mainEventIdx : mainDeadlineIdx) : -1;
+  /* Fallback keyword: actua NOMÉS si la IA no ha marcat cap "alta" */
+  var aiHasAlta  = aiAltaIdx !== -1;
+  var keywordAlta = !aiHasAlta ? (mainEventIdx !== -1 ? mainEventIdx : mainDeadlineIdx) : -1;
 
-  /* Primera passada: prioritat combinada (IA + keyword safety net) */
+  /* Primera passada: IA és la font primària, keywords actuen com a xarxa de seguretat */
   var result = accions.map(function (a, i) {
     var txt    = String(a.accio || '');
     var isPrep = _prepRe.test(txt);
@@ -488,7 +487,7 @@ function applyPriorityHeuristics(accions) {
     return Object.assign({}, a, { _origIdx: i, prioritat: prioritat });
   });
 
-  /* Cap: màxim 2 "alta" — si n'hi ha més, els addicionals cauen a "mitja" */
+  /* Cap: màxim 2 "alta" */
   var altaCount = 0;
   result = result.map(function (a) {
     if (a.prioritat !== 'alta') return a;
@@ -496,7 +495,7 @@ function applyPriorityHeuristics(accions) {
     return altaCount <= 2 ? a : Object.assign({}, a, { prioritat: 'mitja' });
   });
 
-  /* Ordre estable: alta → mitja → baixa, després per data, després ordre original */
+  /* Ordre estable: alta → mitja → baixa, per data ISO, per ordre original */
   var priorRank = { alta: 0, mitja: 1, baixa: 2 };
   result.sort(function (a, b) {
     var pa = priorRank[a.prioritat] !== undefined ? priorRank[a.prioritat] : 2;
