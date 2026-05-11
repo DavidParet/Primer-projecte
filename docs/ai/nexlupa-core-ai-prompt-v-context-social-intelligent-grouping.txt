@@ -1,0 +1,130 @@
+NEXLUPA — PROMPT CONTEXT SOCIAL + AGRUPACIÓ INTEL·LIGENT v1
+Data: 2026-05-11
+Fitxer: nexlupa-core-ai-prompt-v-context-social-intelligent-grouping.txt
+
+Integrat a: docs/ai/nexlupa-core-ai-prompt.txt (seccions 1, 14, 15 + exemple)
+
+---
+
+OBJECTIU
+
+Millorar el comportament del motor NexLupa en:
+- grups socials
+- dinars i events informals
+- organització col·laborativa
+- llistes de compra
+- coordinació entre persones
+
+---
+
+REGLES IMPLEMENTADES
+
+REGLA — DECISIÓ = ESTAT DE SITUACIÓ
+
+El bloc DECISIÓ NO ha de dir:
+  "Assistir al dinar dissabte"
+  (això és només el tema del missatge)
+
+La DECISIÓ ha d'explicar:
+  - què falta
+  - què és crític
+  - què està pendent
+  - què ja està cobert
+
+EXEMPLES BONS:
+✅ "El dinar ja està bastant organitzat, però encara falten compres i el pagament de la reserva."
+✅ "La logística principal està resolta; només falta confirmar transport i material."
+
+La DECISIÓ ha de semblar una lectura executiva humana, no un títol del missatge.
+
+---
+
+REGLA — EVITAR "ASSISTIR A"
+
+No generar:
+  📅 Assistir al dinar
+  📅 Assistir al tardeo
+
+Generar:
+  📅 Dinar a La Barqueta
+  📅 Tardeo al Mirador Lounge
+
+Els esdeveniments NO són tasques.
+
+---
+
+REGLA — TASQUES JA COBERTES O ASSIGNADES
+
+Si el text indica que algú JA s'encarrega d'alguna cosa → NO generar com a tasca pendent.
+
+Patrons de cobertura:
+  "X porta Y"
+  "X s'encarrega de Y"
+  "X ho porta"
+  "X ja ha fet Z"
+
+EXEMPLE:
+  "La Laura porta formatges" → NO tasca / ometre o informatiu
+  "La Mireia porta gots" → NO tasca / ometre o informatiu
+
+Generar tasques Únicament per a coses sense assignar o explícitament pendents.
+
+---
+
+REGLA — AGRUPACIÓ INTEL·LIGENT
+
+Quan hi hagi moltes compres:
+NO crear una tasca per cada article.
+
+Agrupar per context/categoria.
+
+EXEMPLE:
+✅ "Comprar begudes pendents (vi, cava, gel)"
+
+NO:
+  tasca "Comprar vi"
+  tasca "Comprar cava"
+  tasca "Comprar gel"
+
+---
+
+REGLA — DETECTAR CÀRREGA PRINCIPAL
+
+El motor ha d'identificar què és REALMENT el centre organitzatiu.
+
+En un dinar: pagaments, compres, confirmacions — NO "assistir"
+En una sortida: reserves, transport, material — NO "anar a"
+En una reunió: preparació, documents, confirmació — NO "acudir"
+
+---
+
+REGLA — PRIORITATS SOCIALS
+
+Alta:
+  - pagaments i reserves amb data
+  - confirmacions crítiques per al grup
+
+Mitja:
+  - compres i material compartit
+  - logística
+
+Baixa:
+  - recomanacions personals
+  - suggeriments opcionals
+
+---
+
+EXEMPLE COMPLET
+
+INPUT:
+"Dinar dissabte a La Barqueta a les 14h. La Laura porta formatges i la Mireia porta gots.
+Falta comprar vi, cava i gel. Hem de confirmar si venim 8 o 10 persones,
+perquè la reserva s'ha de pagar per avançat."
+
+OUTPUT ESPERAT:
+decisio: "El dinar és dissabte; falta confirmar el nombre de comensals i pagar la reserva."
+accions:
+  - "Confirmar nombre de comensals i pagar la reserva" → alta
+  - "Comprar begudes pendents (vi, cava, gel)" → mitja
+  - "Dinar a La Barqueta" → calendari, mitja
+[Laura/Mireia → NO tasques, ja cobert]

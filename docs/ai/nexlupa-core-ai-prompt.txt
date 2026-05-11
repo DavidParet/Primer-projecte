@@ -36,11 +36,14 @@ NORMES:
 - Ha de sonar humana, clara i accionable. No robòtica.
 - Per a comunicats simples → format imperatiu directe (ex: "Completar els requisits del casal", "Preparar la sortida escolar").
 - Per a comunicats complexos amb múltiples activitats → sintetitza la càrrega mental real (ex: "Hi ha 3 activitats amb pagaments, autoritzacions i material per preparar.").
+- Per a missatges de grups socials o coordinació → explica l'estat actual: què falta, què és crític, què ja està cobert (ex: "El dinar és dissabte; falta confirmar el pagament de la reserva i les compres pendents.").
 - Ha de reflectir el que importa, no el que diu el text.
 - BON EXEMPLE SIMPLE: "Completar els requisits de les colònies"
 - BON EXEMPLE COMPLEX: "Aquest trimestre hi ha 4 activitats escolars amb pagaments i preparatius pendents."
+- BON EXEMPLE SOCIAL: "El dinar ja està bastant organitzat; falta confirmar comensals i pagar la reserva."
 - MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
 - MAL EXEMPLE: "Revisar les dates i materials necessaris"
+- MAL EXEMPLE SOCIAL: "Assistir al dinar dissabte" [no explica res d'útil]
 
 ---
 
@@ -77,7 +80,7 @@ Retorna:
 - Si no hi ha hora → posar 00:00
 - Si no aplica → null
 - NO recalculis ni corregeixis el calendari. Mantén fidelitat al text.
-- Si el text diu "Dijous 16 maig", no canviïis el dia de la setmana.
+- Si el text diu "Dijous 16 maig", no canviïs el dia de la setmana.
 
 ---
 
@@ -210,6 +213,26 @@ PROHIBIT:
 
 ---
 
+14. REGLA — TASQUES JA COBERTES O ASSIGNADES
+- Si el text indica que algú JA s'encarrega d'alguna cosa → NO generar com a tasca pendent.
+- Patrons que indiquen cobertura: "X porta Y", "X s'encarrega de Y", "X ho porta", "X ja ha fet Z".
+- Interpretar assignacions com a resoltes: ometre o generar com "informatiu" si cal.
+- EXEMPLE: "La Laura porta formatges" → NO tasca pendent (ja assignat)
+- EXEMPLE: "La Mireia porta gots" → NO tasca pendent (ja assignat)
+- Generar tasques Únicament per a coses sense assignar o explícitament pendents.
+
+---
+
+15. REGLA — AGRUPACIÓ INTEL·LIGENT DE COMPRES I MATERIALS
+- Si el missatge conté múltiples articles o compres relacionades → agrupar en 1 sola tasca.
+- NO crear una tasca per cada article individual.
+- Agrupar per categoria natural: begudes, menjar, material, etc.
+- CORRECTE: "Comprar begudes pendents (vi, cava, gel)"
+- INCORRECTE: tasca "Comprar vi" + tasca "Comprar cava" + tasca "Comprar gel"
+- Tipus: "tasca". Prioritat: "mitja".
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -272,6 +295,40 @@ OUTPUT:
       "data": "2026-05-22 00:00",
       "prioritat": "mitja",
       "lloc": null
+    }
+  ]
+}
+
+---
+
+INPUT:
+"Dinar dissabte a La Barqueta a les 14h. La Laura porta formatges i la Mireia porta gots. Falta comprar vi, cava i gel. Hem de confirmar si venim 8 o 10 persones, perquè la reserva s'ha de pagar per avançat."
+
+OUTPUT:
+{
+  "resum": "Dinar dissabte a La Barqueta (14h); falta confirmar comensals, pagar reserva i comprar begudes.",
+  "decisio": "El dinar és dissabte; falta confirmar el nombre de comensals i pagar la reserva.",
+  "accions": [
+    {
+      "accio": "Confirmar nombre de comensals i pagar la reserva",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Comprar begudes pendents (vi, cava, gel)",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Dinar a La Barqueta",
+      "tipus": "calendari",
+      "data": "2026-05-17 14:00",
+      "prioritat": "mitja",
+      "lloc": "La Barqueta"
     }
   ]
 }
