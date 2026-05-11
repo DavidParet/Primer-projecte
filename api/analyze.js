@@ -22,12 +22,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'El camp text és obligatori' });
   }
 
-  const today = new Date();
-  const dayNames = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
-  const dateContext = `DATA ACTUAL: ${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')} (${dayNames[today.getDay()]}). Usa-la per resoldre anys ambigus.`;
-
-  const systemWithDate = SYSTEM_PROMPT + '\n\n---\n\n' + dateContext;
-
   try {
     let messages;
 
@@ -35,7 +29,7 @@ module.exports = async function handler(req, res) {
       const base64Data = image.includes(',') ? image.split(',')[1] : image;
       const mediaType  = image.startsWith('data:') ? image.split(';')[0].split(':')[1] : 'image/jpeg';
       messages = [
-        { role: 'system', content: systemWithDate },
+        { role: 'system', content: SYSTEM_PROMPT },
         {
           role: 'user',
           content: [
@@ -46,7 +40,7 @@ module.exports = async function handler(req, res) {
       ];
     } else {
       messages = [
-        { role: 'system', content: systemWithDate },
+        { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: 'Analitza:\n\n' + text.trim() }
       ];
     }

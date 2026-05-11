@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=10"/>
+  <link rel="stylesheet" href="style.css?v=11"/>
 </head>
 <body>
 <!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
@@ -25,9 +25,9 @@
   <!-- HEADER -->
   <header>
     <div class="logo">
-      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#ffffff;">nex<span style="color:#F5C518;">lupa</span></span>
+      <span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#2e2e2e;">nex<span style="color:#F5C518;">lupa</span></span>
     </div>
-    <div class="header-sub">Del missatge a l'acció</div>
+    <div class="header-sub">La lupa que treballa sola</div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
   </header>
 
@@ -42,7 +42,7 @@
       <div class="ob-step" id="obStep">PAS 1 DE 3</div>
       <div class="ob-icon" id="obIcon">🔍</div>
       <div class="ob-title" id="obTitle">Benvingut a nexlupa</div>
-      <div class="ob-desc" id="obDesc">Del missatge a l'acció. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
+      <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
       <div class="ob-dots">
         <div class="ob-dot active" id="obDot0"></div>
         <div class="ob-dot" id="obDot1"></div>
@@ -110,15 +110,10 @@
           <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="handleImg(event)"/>
         </div>
 
-        <div class="persp-toggle">
-          <button class="persp-btn active" id="perspRebut"  onclick="setPerspective('rebut')">↓ Rebut</button>
-          <button class="persp-btn"        id="perspEnviat" onclick="setPerspective('enviat')">↑ Enviat</button>
-        </div>
-
         <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
-          Analitzar
+          🔍 Analitzar amb nexlupa
         </button>
-        <p class="btn-micro-copy">Del missatge a la decisió en 10 segons</p>
+        <p class="btn-micro-copy">Resum i accions en 10 segons</p>
 
         <div class="usage-counter" id="usageCounter">
           <div class="usage-label">FREE · 3 ANÀLISIS AL DIA</div>
@@ -144,16 +139,15 @@
       <div class="loading" id="loading">
         <span class="spin-lupa">🔍</span>
         <p>Analitzant el missatge...</p>
-        <small>Analitzant i detectant el que importa</small>
+        <small>La lupa està treballant per tu</small>
       </div>
 
       <div class="results" id="results">
 
         <!-- DECISIÓ — element protagonista -->
         <div class="nx-decisio-block">
-          <div class="nx-decisio-label" id="nx-decisio-label">DECISIÓ</div>
+          <div class="nx-decisio-label" id="nx-decisio-label">👉 Decisió</div>
           <div class="nx-decisio-text" id="nx-decisio"></div>
-          <div class="nx-context-block" id="nx-context-block" style="display:none;"></div>
         </div>
 
         <!-- ACCIONS — targetes tipades -->
@@ -196,7 +190,7 @@
 
       <div class="premium-hero">
         <div class="premium-badge">⭐ nexlupa PREMIUM</div>
-        <h1 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">Menys lectura. Més decisions.</h1>
+        <h1 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">La lupa sense límits</h1>
         <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;">Mai més et perdràs res important.</p>
 
         <div class="premium-checklist">
@@ -325,7 +319,7 @@
         <div style="font-size:28px;margin-bottom:8px;">🔍</div>
         <div style="font-size:14px;font-weight:800;color:var(--darker);">nexlupa motor</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Del missatge a l'acció</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>
       </div>
 
     </div><!-- fi pageConfig -->
@@ -339,12 +333,12 @@
       </div>
     </div>
 
-    <!-- TASQUES / ACCIONS IA -->
+    <!-- TASQUES -->
     <div id="pageTasques" style="display:none;">
       <div class="card">
-        <div class="card-head"><div class="c-icon ci-green">◆</div><div class="c-label">Accions detectades per la IA</div></div>
+        <div class="card-head"><div class="c-icon ci-green">✅</div><div class="c-label">Totes les tasques</div></div>
         <div id="tasquesList">
-          <p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha accions detectades.</p>
+          <p style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">Encara no hi ha tasques pendents.</p>
         </div>
       </div>
     </div>
@@ -357,7 +351,7 @@
       <span>🏠</span><small>Inici</small>
     </button>
     <button class="nav-btn" id="navTasques"  onclick="navTo('tasques')">
-      <span>◆</span><small>Accions</small>
+      <span>✅</span><small>Tasques</small>
       <div class="nav-badge" id="badgeTasques" style="display:none;">0</div>
     </button>
     <button class="nav-btn" id="navHistorial" onclick="navTo('historial')">
@@ -370,11 +364,11 @@
   </nav>
 
   <div class="bottom-spacer"></div>
-  <footer>Del missatge a l'acció · <b>nexlupa</b></footer>
+  <footer>La lupa que treballa sola · <b>nexlupa</b></footer>
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=10"></script>
+<script src="script.js?v=11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
