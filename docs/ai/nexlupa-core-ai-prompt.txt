@@ -16,13 +16,15 @@ SORTIDA (estructura obligatòria):
 {
   "resum": "string curt i clar (1 frase)",
   "decisio": "acció clara en format imperatiu",
+  "perspectiva": "rebut | enviat",
   "accions": [
     {
       "accio": "string",
       "tipus": "calendari | tasca | informatiu",
       "data": "YYYY-MM-DD HH:MM (si aplica, sinó null)",
       "prioritat": "alta | mitja | baixa",
-      "lloc": "ubicació literal del missatge o null"
+      "lloc": "ubicació literal del missatge o null",
+      "responsable": "jo | altra_part | compartit"
     }
   ]
 }
@@ -72,8 +74,17 @@ Retorna:
 - Convertir a format: YYYY-MM-DD HH:MM
 - Si no hi ha hora → posar 00:00
 - Si no aplica → null
-- NO recalculis ni corregeixis el calendari. Mantén fidelitat al text.
-- Si el text diu "Dijous 16 maig", no canviïs el dia de la setmana.
+
+RESOLUCIÓ D'ANY QUAN HI HA DIA SETMANA (CRÍTIC):
+Si el text conté dia setmana + número + mes (ex: "divendres 16 de maig"):
+  1. Calcula quin any fa que el dia setmana sigui CORRECTE.
+  2. Prova primer l'any actual. Si no coincideix → prova l'any anterior. Si tampoc → prova l'any següent.
+  3. Usa SEMPRE l'any que valida el dia de la setmana indicat al text.
+  4. EXEMPLE (any actual = 2026): text diu "divendres 16 de maig"
+     - 2026-05-16 = dissabte → INCORRECTE
+     - 2025-05-16 = divendres → CORRECTE → usar 2025-05-16
+  5. Si hi ha hora concreta al text, inclou-la. Si no → 00:00.
+  6. Si no és possible validar (cap any proper coincideix) → usa el número+mes amb l'any actual.
 
 ---
 
@@ -137,7 +148,24 @@ NO usar "alta" per accions de logística o preparació.
 
 ---
 
-10. QUALITAT DEL TEXT DE LES ACCIONS (CRÍTIC)
+10. PERSPECTIVA I RESPONSABLE (CRÍTIC)
+- Camp "perspectiva" del JSON arrel: indica si el missatge és "rebut" (l'usuari rep el missatge) o "enviat" (l'usuari ha enviat el missatge).
+  - Si el text sembla un correu rebut (és comunicació d'altri cap a l'usuari) → "rebut"
+  - Si el text sembla un correu enviat o una petició feta per l'usuari → "enviat"
+- Camp "responsable" de cada acció: qui executa l'acció.
+  - "jo" → l'usuari ha d'executar aquesta acció
+  - "altra_part" → l'altra persona/entitat ha d'executar aquesta acció
+  - "compartit" → ambdues parts
+- Si perspectiva="rebut":
+  - Accions que ha de fer l'usuari: responsable="jo"
+  - Accions que ha de fer qui va enviar el missatge (ex: preparar menú, organitzar transport): responsable="altra_part"
+- REGLA CRÍTICA: No confonguis peticions rebudes amb accions pròpies.
+  - EXEMPLE: escola rep correu de casa de colònies dient "prepararem menú adaptat" → acció responsable="altra_part"
+  - EXEMPLE: correu demana a l'usuari "porta autorització signada" → acció responsable="jo"
+
+---
+
+11. QUALITAT DEL TEXT DE LES ACCIONS (CRÍTIC)
 - Cada acció ha de ser una frase completa, clara i gramaticalment correcta.
 - PROHIBIT: fragments de text, paraules soltes, llistes sense context.
 - Si el text original conté informació fragmentada o poc clara → interpreta-la i converteix-la en una acció neta.

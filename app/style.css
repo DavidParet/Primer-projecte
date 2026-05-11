@@ -440,16 +440,18 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   font-family: 'Nunito', sans-serif;
 }
 
-/* App header */
+/* App header — dark premium */
 #pageApp header {
-  background: #ffffff;
+  background: rgba(14, 14, 14, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   padding: 14px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   position: sticky; top: 0; z-index: 10;
 }
 .logo svg  { height: 32px; width: auto; }
-.header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.35); font-style: italic; }
 
 /* App hero */
 #pageApp .app-hero {
@@ -1538,8 +1540,8 @@ body.dark #pageApp .app-col-right textarea:focus {
 /* ── DECISIÓ ── */
 .nx-decisio-block { margin-bottom: 14px; }
 .nx-decisio-label {
-  font-size: 10px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 8px;
+  font-size: 9px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: 2.5px; color: #f5b400; margin-bottom: 6px; opacity: .9;
 }
 .nx-decisio-text {
   font-family: 'Syne', sans-serif;
@@ -1649,17 +1651,22 @@ body.dark #pageApp .app-col-right textarea:focus {
 .nx-btn-copy:active { background: #222; }
 .nx-btn-copy.copied { background: #14532d; color: #4ade80; border-color: #166534; }
 
-/* ── CALENDAR PER ACTION ── */
+/* ── CALENDAR PER ACTION — premium ── */
 .nx-btn-cal {
-  display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 8px; margin-left: 28px;
-  padding: 5px 12px;
-  background: rgba(61,186,111,.12); color: #3dba6f;
-  border: 1px solid rgba(61,186,111,.25); border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: background .2s;
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; margin-left: 28px;
+  padding: 7px 16px;
+  background: linear-gradient(135deg, rgba(61,186,111,.06), rgba(61,186,111,.14));
+  color: #3dba6f;
+  border: 1px solid rgba(61,186,111,.3); border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  cursor: pointer; transition: all .2s;
+  letter-spacing: .3px;
+  box-shadow: 0 0 12px rgba(61,186,111,.08);
 }
-.nx-btn-cal:active { background: rgba(61,186,111,.22); }
+.nx-btn-cal:hover  { background: rgba(61,186,111,.2); box-shadow: 0 0 16px rgba(61,186,111,.18); }
+.nx-btn-cal:active { background: rgba(61,186,111,.25); }
+.nx-btn-cal-icon   { font-size: 14px; }
 
 /* ── RESET ── */
 .nx-btn-reset {
@@ -1671,3 +1678,74 @@ body.dark #pageApp .app-col-right textarea:focus {
   transition: all .2s; letter-spacing: .1px;
 }
 .nx-btn-reset:active { background: #2e2e2e; color: #fff; border-color: #444; }
+
+/* ── PERSPECTIVE TOGGLE ── */
+.persp-toggle {
+  display: flex; gap: 6px; margin-bottom: 12px;
+}
+.persp-btn {
+  flex: 1; padding: 7px 12px;
+  background: transparent; color: #888;
+  border: 1px solid #e0e0e0; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .2s; letter-spacing: .2px;
+}
+.persp-btn.active {
+  background: #1c1c1c; color: #f5b400;
+  border-color: rgba(245,180,0,.4);
+}
+body.dark .persp-btn { border-color: #333; color: #555; }
+body.dark .persp-btn.active { background: #2a2a2a; color: #f5b400; border-color: rgba(245,180,0,.4); }
+
+/* ── AI CONTEXT BLOCK ── */
+.nx-context-block {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+.nx-ctx-origin { color: rgba(245,180,0,.7); }
+.nx-ctx-dot    { color: rgba(255,255,255,.15); }
+.nx-ctx-label  { color: rgba(255,255,255,.25); }
+
+/* ── PREMIUM ACTION ICONS ── */
+.nx-icon-task {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid rgba(245,180,0,.4);
+  background: rgba(245,180,0,.06);
+  box-shadow: 0 0 6px rgba(245,180,0,.12);
+  flex-shrink: 0;
+}
+.nx-icon-task::after {
+  content: '';
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(245,180,0,.5);
+}
+.nx-icon-other {
+  border-color: rgba(120,120,120,.35);
+  background: rgba(120,120,120,.06);
+  box-shadow: none;
+}
+.nx-icon-other::after { background: rgba(120,120,120,.4); }
+.nx-icon-cal {
+  font-size: 16px; color: #3dba6f; line-height: 1;
+}
+.nx-icon-info {
+  font-size: 14px; color: #888; line-height: 1;
+}
+
+/* ── ACTION OTHER-SIDE STYLING ── */
+.nx-action-other { opacity: .7; }
+.nx-text-other   { color: #888 !important; }
+.nx-resp-tag {
+  flex-shrink: 0; align-self: flex-start;
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(120,120,120,.12); color: #666;
+  border: 1px solid rgba(120,120,120,.2);
+}
+
+/* ── DATE WARNING ── */
+.nx-date-warn { color: #e5a000 !important; }
+
