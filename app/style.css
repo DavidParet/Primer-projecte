@@ -440,18 +440,16 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   font-family: 'Nunito', sans-serif;
 }
 
-/* App header — dark premium */
+/* App header */
 #pageApp header {
-  background: rgba(14, 14, 14, 0.88);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: #ffffff;
   padding: 14px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 10;
 }
 .logo svg  { height: 32px; width: auto; }
-.header-sub { font-size: 11px; color: rgba(255,255,255,0.35); font-style: italic; }
+.header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
 /* App hero */
 #pageApp .app-hero {
@@ -610,22 +608,10 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .results.on {
   display: block;
   animation: appFadeUp .4s ease;
-  background: linear-gradient(170deg, #161616 0%, #111 55%);
+  background: #111;
   border-radius: 20px;
-  padding: 22px 18px 20px;
+  padding: 22px 18px 18px;
   margin-top: 0;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.05),
-    0 4px 30px rgba(0,0,0,.45);
-  position: relative;
-  overflow: hidden;
-}
-.results.on::before {
-  content: '';
-  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-  width: 220px; height: 70px;
-  background: radial-gradient(ellipse, rgba(245,180,0,.07) 0%, transparent 70%);
-  pointer-events: none;
 }
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -1124,6 +1110,12 @@ body.dark #pageApp .app-col-right textarea:focus {
    MOBILE FIXES (max-width: 899px) — no toca landing ni desktop
    ============================================================ */
 @media (max-width: 899px) {
+  /* ── Propaga l'alçada de main fins a la card ─────────────────
+     Objectiu: card omple tota la pantalla → cap espai mort.
+     Cadena: main(overflow:hidden) > pageInici(h:100%) >
+             app-2col(h:100%) > app-col-right(flex col, h:100%) >
+             card(flex:1) > #panelText(flex:1) > textarea(flex:1) */
+
   #pageApp main {
     padding: 0;
     overflow: hidden;
@@ -1150,6 +1142,7 @@ body.dark #pageApp .app-col-right textarea:focus {
     overflow: hidden;
   }
 
+  /* panelText (tab actiu) omple l'espai de la card */
   #panelText {
     flex: 1;
     display: flex;
@@ -1157,8 +1150,10 @@ body.dark #pageApp .app-col-right textarea:focus {
     min-height: 0;
   }
 
+  /* panelImg quan és actiu */
   #panelImg { flex: 1; min-height: 0; }
 
+  /* Textarea creix per omplir tot l'espai disponible */
   #pageApp .app-col-right textarea {
     flex: 1;
     min-height: 80px;
@@ -1166,6 +1161,7 @@ body.dark #pageApp .app-col-right textarea:focus {
     resize: none;
   }
 
+  /* Tots els altres elements de la card no s'estiren */
   .app-col-right .app-main-headline,
   .app-col-right .card-head,
   .app-col-right .input-tabs,
@@ -1174,14 +1170,25 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .btn-micro-copy,
   .app-col-right .usage-counter { flex-shrink: 0; }
 
+  /* Promo oculta: no afegeix alçada */
   #premiumPromoCard { display: none; }
+
+  /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
+
+  /* Eliminar padding superior: card toca quasi l'header */
   .app-col-right { padding-top: 2px; }
   .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
+
+  /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
   .app-col-right .btn-micro-copy { margin-top: 4px; }
+
+  /* Tabs: més compactes per donar espai a la textarea */
   .app-col-right .tab-btn { padding: 7px; font-size: 12px; }
   .app-col-right .input-tabs { margin-bottom: 6px; }
+
+  /* Usage counter: mínim, discret */
   .app-col-right .usage-counter {
     flex-direction: column;
     align-items: center;
@@ -1190,17 +1197,35 @@ body.dark #pageApp .app-col-right textarea:focus {
     margin-top: 4px;
   }
 
+  /* ── Qualitat comercial mobile ─────────────────────────────── */
+
+  /* Footer "powered by..." ocult — missatge amateur en producte comercial */
   #pageApp footer { display: none; }
+
+  /* Header més compacte — guanya alçada per al contingut */
   #pageApp header { padding: 8px 16px; }
+
+  /* Card amb més definició — shadow i border lleugers */
   .app-col-right .card {
     box-shadow: 0 4px 20px rgba(0,0,0,0.10);
     border: 1px solid rgba(0,0,0,0.07);
   }
+
+  /* Textarea fons blanc — contrasta amb el fons gris de la pàgina */
   #pageApp .app-col-right textarea { background: #ffffff; }
+
+  /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
   .ex-lbl { display: none; }
+
+  /* Loader: flex:1 per omplir l'espai de la card oculta → quedarà centrat */
   .loading.on { flex: 1; }
+
+  /* Resultats: marge superior per no quedar enganxats al header */
   .results.on { margin-top: 8px; }
 
+  /* ── Scroll per pàgines dins main (overflow:hidden) ─────────────
+     main té overflow:hidden → les pàgines internes necessiten
+     height:100% + overflow-y:auto per poder fer scroll amb el dit. */
   #pageHistorial,
   #pageTasques,
   #pageConfig,
@@ -1217,12 +1242,15 @@ body.dark #pageApp .app-col-right textarea:focus {
    2-COLUMN DESKTOP LAYOUT
    ============================================================ */
 
+/* Left column: hidden on mobile */
 .app-col-left {
   display: none;
 }
 
+/* Headline visible only on mobile — desktop has left column */
 .app-main-headline { display: block; }
 
+/* Right column: full width on mobile */
 .app-col-right {
   width: 100%;
   padding: 12px;
@@ -1230,6 +1258,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   overflow-y: auto;
 }
 
+/* Desktop 2-col */
 @media (min-width: 768px) {
   .app-main-headline { display: none; }
 
@@ -1317,7 +1346,11 @@ body.dark #pageApp .app-col-right textarea:focus {
   border-left: 3px solid var(--gold);
 }
 
+/* ============================================================
+   DESKTOP REFINEMENTS — only affects min-width: 900px
+   ============================================================ */
 @media (min-width: 900px) {
+
   #pageApp main       { overflow: hidden; }
   #pageInici          { height: 100%; }
   .app-2col           { height: 100%; }
@@ -1367,7 +1400,9 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
 }
 
-/* DECISIÓ CARD */
+/* ─────────────────────────────────────────────────────────
+   DECISIÓ CARD — protagonista principal del resultat
+   ───────────────────────────────────────────────────────── */
 .decisio-card {
   border-left: 4px solid #f5b400;
   background: linear-gradient(135deg, #fffbea 0%, #fff 100%);
@@ -1388,7 +1423,9 @@ body.dark #pageApp .app-col-right textarea:focus {
   color: var(--green); font-size: 18px;
 }
 
-/* ACCIONS TIPADES */
+/* ─────────────────────────────────────────────────────────
+   ACCIONS TIPADES
+   ───────────────────────────────────────────────────────── */
 .act-item-typed {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 11px 0; border-bottom: 1px solid var(--border);
@@ -1413,10 +1450,14 @@ body.dark #pageApp .app-col-right textarea:focus {
 .act-item-typed.prior-alta  { border-left: 2px solid var(--red);   padding-left: 8px; }
 .act-item-typed.prior-mitja { border-left: 2px solid var(--gold2); padding-left: 8px; }
 
-/* SHARE CARD */
+/* ─────────────────────────────────────────────────────────
+   SHARE CARD — preview + botons
+   ───────────────────────────────────────────────────────── */
 .share-btns {
   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
 }
+
+/* Preview visual de la targeta */
 .share-card-preview {
   background: #0b0e14;
   border-radius: 16px;
@@ -1468,30 +1509,16 @@ body.dark #pageApp .app-col-right textarea:focus {
    ═══════════════════════════════════════════════════════════ */
 
 /* ── DECISIÓ ── */
-.nx-decisio-block {
-  margin-bottom: 20px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
+.nx-decisio-block { margin-bottom: 14px; }
 .nx-decisio-label {
-  font-size: 9px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 3px; color: #f5b400;
-  margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.nx-decisio-label::before {
-  content: '';
-  display: inline-block; width: 18px; height: 2px;
-  background: #f5b400; border-radius: 1px;
-  box-shadow: 0 0 8px rgba(245,180,0,.7);
-  flex-shrink: 0;
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.8px; color: #f5b400; margin-bottom: 8px;
 }
 .nx-decisio-text {
   font-family: 'Syne', sans-serif;
-  font-size: 24px; font-weight: 900;
-  color: #ffffff; line-height: 1.18;
-  letter-spacing: -0.03em;
-  text-shadow: 0 2px 20px rgba(255,255,255,.08);
+  font-size: 22px; font-weight: 900;
+  color: #ffffff; line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 .nx-decisio-text.nx-no-action {
   font-size: 22px; color: #3dba6f;
@@ -1505,26 +1532,19 @@ body.dark #pageApp .app-col-right textarea:focus {
 }
 
 /* ── ACCIONS ── */
-.nx-actions-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.nx-actions-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 
 .nx-action-card {
-  background: linear-gradient(135deg, #202020 0%, #1a1a1a 100%);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 14px;
-  padding: 12px 14px;
-  transition: all .15s;
-  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: background .15s;
 }
 .nx-action-card:active { background: #222; }
 
-.nx-prior-alta {
-  border-left: 3px solid #ef4444; padding-left: 13px;
-  background: linear-gradient(135deg, rgba(239,68,68,.09) 0%, rgba(26,26,26,.0) 60%) !important;
-}
-.nx-prior-mitja {
-  border-left: 3px solid #f5b400; padding-left: 13px;
-  background: linear-gradient(135deg, rgba(245,180,0,.07) 0%, rgba(26,26,26,.0) 60%) !important;
-}
+.nx-prior-alta  { border-left: 3px solid #ef4444; padding-left: 13px; }
+.nx-prior-mitja { border-left: 3px solid #f5b400; padding-left: 13px; }
 
 .nx-action-top {
   display: flex; align-items: flex-start; gap: 10px;
@@ -1541,12 +1561,12 @@ body.dark #pageApp .app-col-right textarea:focus {
   text-transform: uppercase; letter-spacing: .6px;
   padding: 3px 9px; border-radius: 20px;
 }
-.nx-prior-pill-alta  { background: rgba(239,68,68,.22); color: #ff7070; border: 1px solid rgba(239,68,68,.3); }
-.nx-prior-pill-mitja { background: rgba(245,180,0,.18); color: #f5c000; border: 1px solid rgba(245,180,0,.3); }
+.nx-prior-pill-alta  { background: rgba(239,68,68,.15);  color: #f87171; }
+.nx-prior-pill-mitja { background: rgba(245,180,0,.15);  color: #f5b400; }
 
 .nx-action-date {
   margin-top: 5px; padding-left: 28px;
-  font-size: 12px; color: #777; font-weight: 500;
+  font-size: 12px; color: #555; font-weight: 500;
 }
 .nx-action-lloc {
   display: block;
@@ -1602,22 +1622,17 @@ body.dark #pageApp .app-col-right textarea:focus {
 .nx-btn-copy:active { background: #222; }
 .nx-btn-copy.copied { background: #14532d; color: #4ade80; border-color: #166534; }
 
-/* ── CALENDAR PER ACTION — premium ── */
+/* ── CALENDAR PER ACTION ── */
 .nx-btn-cal {
-  display: inline-flex; align-items: center; gap: 6px;
-  margin-top: 10px; margin-left: 28px;
-  padding: 7px 16px;
-  background: linear-gradient(135deg, rgba(61,186,111,.06), rgba(61,186,111,.14));
-  color: #3dba6f;
-  border: 1px solid rgba(61,186,111,.3); border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
-  cursor: pointer; transition: all .2s;
-  letter-spacing: .3px;
-  box-shadow: 0 0 12px rgba(61,186,111,.08);
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; margin-left: 28px;
+  padding: 5px 12px;
+  background: rgba(61,186,111,.12); color: #3dba6f;
+  border: 1px solid rgba(61,186,111,.25); border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background .2s;
 }
-.nx-btn-cal:hover  { background: rgba(61,186,111,.2); box-shadow: 0 0 16px rgba(61,186,111,.18); }
-.nx-btn-cal:active { background: rgba(61,186,111,.25); }
-.nx-btn-cal-icon   { font-size: 14px; }
+.nx-btn-cal:active { background: rgba(61,186,111,.22); }
 
 /* ── RESET ── */
 .nx-btn-reset {
@@ -1629,73 +1644,3 @@ body.dark #pageApp .app-col-right textarea:focus {
   transition: all .2s; letter-spacing: .1px;
 }
 .nx-btn-reset:active { background: #2e2e2e; color: #fff; border-color: #444; }
-
-/* ── PERSPECTIVE TOGGLE ── */
-.persp-toggle {
-  display: flex; gap: 6px; margin-bottom: 12px;
-}
-.persp-btn {
-  flex: 1; padding: 7px 12px;
-  background: transparent; color: #888;
-  border: 1px solid #e0e0e0; border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: all .2s; letter-spacing: .2px;
-}
-.persp-btn.active {
-  background: #1c1c1c; color: #f5b400;
-  border-color: rgba(245,180,0,.4);
-}
-body.dark .persp-btn { border-color: #333; color: #555; }
-body.dark .persp-btn.active { background: #2a2a2a; color: #f5b400; border-color: rgba(245,180,0,.4); }
-
-/* ── AI CONTEXT BLOCK ── */
-.nx-context-block {
-  display: flex; align-items: center; gap: 6px;
-  margin-top: 8px;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .5px; text-transform: uppercase;
-}
-.nx-ctx-origin { color: rgba(245,180,0,.7); }
-.nx-ctx-dot    { color: rgba(255,255,255,.15); }
-.nx-ctx-label  { color: rgba(255,255,255,.25); }
-
-/* ── PREMIUM ACTION ICONS ── */
-.nx-icon-task {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 1.5px solid rgba(245,180,0,.4);
-  background: rgba(245,180,0,.06);
-  box-shadow: 0 0 6px rgba(245,180,0,.12);
-  flex-shrink: 0;
-}
-.nx-icon-task::after {
-  content: '';
-  width: 7px; height: 7px; border-radius: 50%;
-  background: rgba(245,180,0,.5);
-}
-.nx-icon-other {
-  border-color: rgba(120,120,120,.35);
-  background: rgba(120,120,120,.06);
-  box-shadow: none;
-}
-.nx-icon-other::after { background: rgba(120,120,120,.4); }
-.nx-icon-cal {
-  font-size: 16px; color: #3dba6f; line-height: 1;
-}
-.nx-icon-info {
-  font-size: 14px; color: #888; line-height: 1;
-}
-
-/* ── ACTION OTHER-SIDE STYLING ── */
-.nx-action-other { opacity: .7; }
-.nx-text-other   { color: #888 !important; }
-.nx-resp-tag {
-  flex-shrink: 0; align-self: flex-start;
-  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
-  padding: 3px 8px; border-radius: 20px;
-  background: rgba(120,120,120,.12); color: #666;
-  border: 1px solid rgba(120,120,120,.2);
-}
-
-/* ── DATE WARNING ── */
-.nx-date-warn { color: #e5a000 !important; }
