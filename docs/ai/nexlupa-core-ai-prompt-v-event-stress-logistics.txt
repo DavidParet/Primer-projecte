@@ -1,0 +1,110 @@
+NEXLUPA — PROMPT FESTIVALS + LOGÍSTICA D'EVENTS + TENSIÓ ORGANITZATIVA v1
+Data: 2026-05-11
+Fitxer: nexlupa-core-ai-prompt-v-event-stress-logistics.txt
+
+Integrat a: docs/ai/nexlupa-core-ai-prompt.txt (seccions 1, 19, 20, 21 + exemple)
+
+---
+
+OBJECTIU
+
+Millorar el comportament del motor NexLupa en:
+- festivals escolars
+- esdeveniments familiars
+- activitats amb logística complexa
+- preparació de vestuari
+- detecció de tensió organitzativa
+
+---
+
+REGLES IMPLEMENTADES
+
+REGLA — DETECTAR TENSIÓ LOGÍSTICA
+
+Quan apareguin frases com:
+  "arribar amb temps"
+  "problemes d'aparcament"
+  "canvi d'ubicació"
+  "venir ja vestits de casa"
+  "accés limitat"
+  "requisits d'entrada"
+
+→ Interpretar com logística important. NO tractar com a context decoratiu.
+
+EXEMPLE:
+  "hi haurà dificultats d'aparcament"
+  → "Arribar amb temps per dificultats d'aparcament" → informatiu, mitja
+
+  "han de venir ja vestits de casa"
+  → tasca obligatòria → alta
+
+---
+
+REGLA — SEPARACIÓ INTEL·LIGENT DE VESTUARI
+
+Quan hi hagi vestuari principal + complements addicionals o excepcions:
+NO fusionar-ho tot en 1 sola tasca.
+
+EXEMPLE BO:
+  ✅ Preparar vestuari obligatori (samarreta blanca, texans blaus, vambes blanques) → alta
+  ✅ Preparar dessuadora negra i ampolla d'aigua per la coreografia final → mitja
+
+EXEMPLE DOLENT:
+  ❌ Preparar samarreta blanca, texans blaus, vambes blanques, dessuadora negra i ampolla d'aigua
+
+OBJECTIU: millor lectura mental, prioritats visibles.
+
+---
+
+REGLA — LÍMITS I RESTRICCIONS D'ACCÉS
+
+Quan hi hagi:
+  - límit d'entrades
+  - restriccions d'accés
+  - normes especials
+
+→ Generar com "informatiu" destacat. NO ocultar-ho.
+
+EXEMPLE:
+  "Cada família disposarà de 4 entrades."
+  → informatiu, baixa
+
+  "Accés únicament amb invitació prèvia."
+  → informatiu, alta [bloqueja participació]
+
+---
+
+REGLA — DECISIÓ EXECUTIVA FESTIVAL
+
+Per a festivals i esdeveniments familiars:
+La DECISIÓ ha de sintetitzar la tensió real.
+
+NO:
+  "Portar vestuari i arribar al festival."
+
+SÍ:
+  "El festival canvia d'ubicació i requerirà arribar amb temps, portar el vestuari
+   complet des de casa i tenir resolt el pagament abans de dimecres."
+
+---
+
+EXEMPLE COMPLET
+
+INPUT:
+"Festival de fi de curs el divendres 20 de juny al Pavelló Municipal de Gavà.
+Inici a les 18h, però recomanem arribar a partir de les 17:30h per dificultats
+d'aparcament. Els alumnes han de venir ja vestits de casa amb: samarreta blanca,
+texans blaus i vambes blanques. Per a la coreografia final cal portar també
+dessuadora negra i una ampolla d'aigua. El pagament de l'activitat s'ha de fer
+abans del dimecres 18 (15€). Cada família disposarà de 4 entrades."
+
+OUTPUT ESPERAT:
+decisio: "El festival requereix vestuari complet des de casa, pagament abans del dimecres 18
+          i arribar al pavelló a les 17:30h per dificultats d'aparcament."
+accions:
+  - "Completar el pagament de l'activitat (15€)" → alta, data: 2026-06-18
+  - "Preparar vestuari obligatori (samarreta blanca, texans blaus i vambes blanques)" → alta
+  - "Preparar dessuadora negra i ampolla d'aigua per la coreografia final" → mitja
+  - "Arribar al pavelló a partir de les 17:30h per dificultats d'aparcament" → informatiu, mitja
+  - "Festival de fi de curs — Pavelló Municipal de Gavà" → calendari, mitja, data: 2026-06-20 18:00
+  - "Cada família disposarà de 4 entrades" → informatiu, baixa

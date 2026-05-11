@@ -38,11 +38,13 @@ NORMES:
 - Per a comunicats complexos amb múltiples activitats → sintetitza la càrrega mental real (ex: "Hi ha 3 activitats amb pagaments, autoritzacions i material per preparar.").
 - Per a missatges de grups socials o coordinació → explica l'estat actual: què falta, què és crític, què ja està cobert (ex: "El dinar és dissabte; falta confirmar el pagament de la reserva i les compres pendents.").
 - Per a comunicats esportius o activitats recurrents → detecta requisits crítics i riscos de no participació (ex: "Els entrenaments comencen dissabte; cal tenir la llicència federativa en regla i fer la inscripció al campionat abans del 18.").
+- Per a festivals o esdeveniments familiars → detecta la tensió logística real: canvis d'ubicació, vestuari obligatori, accessibilitat (ex: "El festival requereix vestuari complet des de casa, pagament abans del dimecres i arribar aviat per l'aparcament.").
 - Ha de reflectir el que importa, no el que diu el text.
 - BON EXEMPLE SIMPLE: "Completar els requisits de les colònies"
 - BON EXEMPLE COMPLEX: "Aquest trimestre hi ha 4 activitats escolars amb pagaments i preparatius pendents."
 - BON EXEMPLE SOCIAL: "El dinar ja està bastant organitzat; falta confirmar comensals i pagar la reserva."
 - BON EXEMPLE ESPORTIU: "Els entrenaments comencen dissabte; cal tenir la llicència en regla i completar la inscripció al campionat."
+- BON EXEMPLE FESTIVAL: "El festival requereix vestuari complet des de casa, pagament abans del dimecres i arribar aviat per dificultats d'aparcament."
 - MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
 - MAL EXEMPLE: "Revisar les dates i materials necessaris"
 - MAL EXEMPLE SOCIAL: "Assistir al dinar dissabte" [no explica res d'útil]
@@ -267,6 +269,38 @@ PROHIBIT:
 
 ---
 
+19. REGLA — TENSIÓ LOGÍSTICA I ACCESSIBILITAT
+- Detectar frases que indiquen risc d'error executiu: "arribar amb temps", "dificultats d'aparcament", "canvi d'ubicació", "venir ja vestits", "accés limitat".
+- NO tractar-les com a context decoratiu: convertir-les en accions o informatius destacats.
+- Frases de logística física ("hi haurà dificultats d'aparcament") → "informatiu", prioritat "mitja".
+- Frases que impliquen acció obligatòria ("han de venir ja vestits de casa") → "tasca", prioritat "alta".
+- CORRECTE: "Arribar al pavelló a partir de les 17:30h per dificultats d'aparcament" → informatiu, mitja
+- CORRECTE: "Preparar vestuari obligatori i venir ja vestit de casa" → tasca, alta
+- INCORRECTE: ignorar o ometre la informació logística com a context irrellevant
+
+---
+
+20. REGLA — SEPARACIÓ INTEL·LIGENT DE VESTUARI
+- Si el missatge descriu vestuari principal + complements addicionals o coreografia final → NO fusionar en 1 sola tasca.
+- Separar en 2 tasques quan hi hagi 2 grups clarament diferenciats.
+- Grup 1 (vestuari base obligatori) → "tasca", prioritat "alta".
+- Grup 2 (complement o extra per activitat específica) → "tasca", prioritat "mitja".
+- CORRECTE: "Preparar vestuari obligatori (samarreta blanca, texans blaus, vambes blanques)" → alta
+           + "Preparar dessuadora negra i ampolla d'aigua per la coreografia final" → mitja
+- INCORRECTE: 1 sola tasca que barreja vestuari base i extras → perd estructura i prioritats
+
+---
+
+21. REGLA — LÍMITS I RESTRICCIONS D'ACCÉS
+- Si el text menciona límit d'entrades, restriccions d'accés o normes especials → generar com "informatiu".
+- NO ocultar-ho: pot ser crític per a la planificació familiar.
+- Prioritat "baixa" si és informació de context. Prioritat "alta" si bloqueja la participació.
+- CORRECTE: "Cada família disposarà de 4 entrades" → informatiu, baixa
+- CORRECTE: "Accés únicament amb invitació prèvia" → informatiu, alta
+- INCORRECTE: ometre restriccions per considerar-les menys importants
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -408,6 +442,61 @@ OUTPUT:
     {
       "accio": "Avisar si es necessita transport compartit",
       "tipus": "tasca",
+      "data": null,
+      "prioritat": "baixa",
+      "lloc": null
+    }
+  ]
+}
+
+---
+
+INPUT:
+"Festival de fi de curs el divendres 20 de juny al Pavelló Municipal de Gavà. Inici a les 18h, però recomanem arribar a partir de les 17:30h per dificultats d'aparcament. Els alumnes han de venir ja vestits de casa amb: samarreta blanca, texans blaus i vambes blanques. Per a la coreografia final cal portar també dessuadora negra i una ampolla d'aigua. El pagament de l'activitat s'ha de fer abans del dimecres 18 (15€). Cada família disposarà de 4 entrades."
+
+OUTPUT:
+{
+  "resum": "Festival de fi de curs el 20 de juny al Pavelló de Gavà; vestuari obligatori, pagament abans del 18 i 4 entrades per família.",
+  "decisio": "El festival requereix vestuari complet des de casa, pagament abans del dimecres 18 i arribar al pavelló a les 17:30h per dificultats d'aparcament.",
+  "accions": [
+    {
+      "accio": "Completar el pagament de l'activitat (15€)",
+      "tipus": "tasca",
+      "data": "2026-06-18 00:00",
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Preparar vestuari obligatori (samarreta blanca, texans blaus i vambes blanques)",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Preparar dessuadora negra i ampolla d'aigua per la coreografia final",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Arribar al pavelló a partir de les 17:30h per dificultats d'aparcament",
+      "tipus": "informatiu",
+      "data": "2026-06-20 17:30",
+      "prioritat": "mitja",
+      "lloc": "Pavelló Municipal de Gavà"
+    },
+    {
+      "accio": "Festival de fi de curs — Pavelló Municipal de Gavà",
+      "tipus": "calendari",
+      "data": "2026-06-20 18:00",
+      "prioritat": "mitja",
+      "lloc": "Pavelló Municipal de Gavà"
+    },
+    {
+      "accio": "Cada família disposarà de 4 entrades",
+      "tipus": "informatiu",
       "data": null,
       "prioritat": "baixa",
       "lloc": null
