@@ -1,0 +1,131 @@
+NEXLUPA — PROMPT CLUBS ESPORTIUS + EVENTS RECURRENTS + DETECCIÓ DE RISCOS v1
+Data: 2026-05-11
+Fitxer: nexlupa-core-ai-prompt-v-recurring-events-risk-detection.txt
+
+Integrat a: docs/ai/nexlupa-core-ai-prompt.txt (seccions 1, 6, 16, 17, 18 + exemple)
+
+---
+
+OBJECTIU
+
+Millorar el comportament del motor NexLupa en:
+- clubs esportius
+- activitats recurrents
+- entrenaments
+- competicions
+- logística familiar esportiva
+- detecció de riscos i requisits obligatoris
+
+---
+
+REGLES IMPLEMENTADES
+
+REGLA — REQUISITS OBLIGATORIS I RISC DE NO PARTICIPACIÓ
+
+Quan el text contingui:
+  "obligatori"
+  "imprescindible"
+  "no podrà participar"
+  "sense X no pot"
+  "requisit necessari"
+
+→ PRIORITAT ALTA sempre.
+
+EXEMPLE:
+  "Sense casc no podran participar"
+  → Verificar casc obligatori pels entrenaments → alta
+
+Aquest tipus d'informació NO és context:
+és risc operatiu real que pot impedir participació.
+
+---
+
+REGLA — ESDEVENIMENTS RECURRENTS
+
+Quan hi hagi 3 o més dates del mateix tipus d'activitat:
+NO generar un event de calendari per cada data.
+
+EXEMPLE DOLENT:
+  📅 Entrenament 16 maig
+  📅 Entrenament 23 maig
+  📅 Entrenament 30 maig
+
+EXEMPLE BO:
+  📅 Entrenaments Club d'Esquí — La Molina
+  Dissabtes 16, 23 i 30 maig · 06:30
+
+L'acció s'etiqueta com "calendari", la data és la del primer event,
+i l'accio inclou el rang de dates.
+
+---
+
+REGLA — LOGÍSTICA FAMILIAR I TRANSPORT
+
+Quan el text inclogui:
+  "aviseu si necessiteu transport"
+  "cotxes compartits"
+  "coordinació de cotxes"
+  "qui porta a qui"
+
+→ Generar tasca concreta i útil.
+
+EXEMPLE:
+  "aviseu si necessiteu transport"
+  → "Avisar si es necessita transport compartit" → baixa
+
+---
+
+REGLA — DECISIÓ EXECUTIVA ESPORTIVA
+
+Per a comunicats esportius o activitats recurrents:
+La DECISIÓ ha de sintetitzar la càrrega mental real.
+
+NO:
+  "Preparar materials i assistir als entrenaments."
+
+SÍ:
+  "Les properes setmanes combinen entrenaments recurrents i el Campionat Social.
+   Les prioritats principals són la inscripció, la llicència federativa i
+   el material obligatori."
+
+---
+
+PRIORITATS ESPORTIVES
+
+Alta:
+  - inscripcions amb termini
+  - llicències federatives i documentació obligatòria
+  - requisits sense els quals no es pot participar
+  - competicions principals
+
+Mitja:
+  - preparació material i equipament
+  - logística esportiva
+  - roba i equipament no crític
+
+Baixa:
+  - coordinació opcional (transport, cotxes)
+  - recomanacions no crítiques
+  - recordatoris informatius
+
+---
+
+EXEMPLE COMPLET
+
+INPUT:
+"Club d'Esquí La Molina. Entrenaments els dissabtes 16, 23 i 30 de maig a les 6:30h.
+Cal tenir la llicència federativa en regla — sense ella no podreu pujar a pista.
+Inscripció al Campionat Social oberta fins el 18 de maig (25€).
+Recordeu portar: forfet, guants, crema solar, esmorzar i aigua.
+Aviseu si algú necessita transport compartit."
+
+OUTPUT ESPERAT:
+decisio: "Els pròxims entrenaments i el Campionat Social requereixen llicència federativa en regla
+          i inscripció abans del 18 de maig."
+accions:
+  - "Verificar llicència federativa en regla" → alta
+    [sense ella no es pot participar]
+  - "Inscriure's al Campionat Social (25€)" → alta, data: 2026-05-18
+  - "Preparar material pels entrenaments (forfet, guants, crema solar, esmorzar, aigua)" → mitja
+  - "Entrenaments Club d'Esquí — La Molina (Dissabtes 16, 23 i 30 maig · 06:30)" → calendari, mitja
+  - "Avisar si es necessita transport compartit" → baixa

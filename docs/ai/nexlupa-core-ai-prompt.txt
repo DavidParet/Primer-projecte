@@ -11,7 +11,7 @@ IMPORTANT:
 
 ---
 
-SORTIDA (estructura obligàtoria):
+SORTIDA (estructura obligatòria):
 
 {
   "resum": "string curt i clar (1 frase)",
@@ -37,10 +37,12 @@ NORMES:
 - Per a comunicats simples → format imperatiu directe (ex: "Completar els requisits del casal", "Preparar la sortida escolar").
 - Per a comunicats complexos amb múltiples activitats → sintetitza la càrrega mental real (ex: "Hi ha 3 activitats amb pagaments, autoritzacions i material per preparar.").
 - Per a missatges de grups socials o coordinació → explica l'estat actual: què falta, què és crític, què ja està cobert (ex: "El dinar és dissabte; falta confirmar el pagament de la reserva i les compres pendents.").
+- Per a comunicats esportius o activitats recurrents → detecta requisits crítics i riscos de no participació (ex: "Els entrenaments comencen dissabte; cal tenir la llicència federativa en regla i fer la inscripció al campionat abans del 18.").
 - Ha de reflectir el que importa, no el que diu el text.
 - BON EXEMPLE SIMPLE: "Completar els requisits de les colònies"
 - BON EXEMPLE COMPLEX: "Aquest trimestre hi ha 4 activitats escolars amb pagaments i preparatius pendents."
 - BON EXEMPLE SOCIAL: "El dinar ja està bastant organitzat; falta confirmar comensals i pagar la reserva."
+- BON EXEMPLE ESPORTIU: "Els entrenaments comencen dissabte; cal tenir la llicència en regla i completar la inscripció al campionat."
 - MAL EXEMPLE: "Gestionar correctament els diversos requeriments del comunicat"
 - MAL EXEMPLE: "Revisar les dates i materials necessaris"
 - MAL EXEMPLE SOCIAL: "Assistir al dinar dissabte" [no explica res d'útil]
@@ -109,6 +111,7 @@ MAPA DE PRIORITAT:
 — Documentació mèdica o legal obligatòria per participar (dimensió 5)
 — Terminis i venciments crítics: pagar, lliurar, signar, renovar (dimensió 6)
 — Reunions o cites importants i obligatòries amb data concreta
+— Requisits obligatoris esportius sense els quals no es pot participar (llicència, casc, documentació federativa)
 
 "mitja" QUAN:
 — Preparació i logística: portar material, preparar documents complementaris
@@ -233,6 +236,37 @@ PROHIBIT:
 
 ---
 
+16. REGLA — REQUISITS OBLIGATORIS I RISC DE NO PARTICIPACIÓ (CRÍTIC)
+- Si el text conté "obligatori", "imprescindible", "no podrà participar", "sense X no pot", "requisit necessari" → PRIORITAT ALTA obligatòria.
+- Aquest tipus d'informació NO és context ni logística: és risc operatiu real.
+- Generar com a tasca independent, no agrupada amb preparació general.
+- CORRECTE: "Verificar llicència federativa en regla" → alta [sense ella no es pot participar]
+- CORRECTE: "Assegurar casc homologat per als entrenaments" → alta [requisit obligatori]
+- INCORRECTE: agrupar requisit obligatori amb preparació de material → perd visibilitat
+
+---
+
+17. REGLA — ESDEVENIMENTS RECURRENTS
+- Si el missatge conté 3 o més dates del mateix tipus d'activitat → NO generar 1 event per cada data.
+- Agrupar en 1 sola entrada de calendari amb el rang de dates al camp "accio".
+- Format: "[Nom activitat] — [Lloc] (Dissabtes DD, DD i DD [mes] · HH:MM)"
+- La "data" del camp JSON = data del primer event del grup.
+- CORRECTE: "Entrenaments Club d'Esquí — La Molina (Dissabtes 16, 23 i 30 maig · 06:30)" → calendari, data: primer event
+- INCORRECTE: 3 entrades separades "Entrenament 16 maig", "Entrenament 23 maig", "Entrenament 30 maig"
+- Tipus: "calendari". Prioritat: "mitja".
+
+---
+
+18. REGLA — LOGÍSTICA FAMILIAR I TRANSPORT
+- Si el text menciona "transport compartit", "cotxes", "coordinació de cotxes", "aviseu si necessiteu" → generar 1 tasca concreta.
+- NO ometre informació de transport: pot ser crítica per a les famílies.
+- La tasca ha de ser accionable, no genèrica.
+- CORRECTE: "Avisar si es necessita transport compartit"
+- INCORRECTE: ometre la informació o posar-la com informatiu sense acció
+- Tipus: "tasca". Prioritat: "baixa".
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -329,6 +363,54 @@ OUTPUT:
       "data": "2026-05-17 14:00",
       "prioritat": "mitja",
       "lloc": "La Barqueta"
+    }
+  ]
+}
+
+---
+
+INPUT:
+"Club d'Esquí La Molina. Entrenaments els dissabtes 16, 23 i 30 de maig a les 6:30h. Cal tenir la llicència federativa en regla — sense ella no podreu pujar a pista. Inscripció al Campionat Social oberta fins el 18 de maig (25€). Recordeu portar: forfet, guants, crema solar, esmorzar i aigua. Aviseu si algú necessita transport compartit."
+
+OUTPUT:
+{
+  "resum": "Entrenaments Club d'Esquí els dissabtes de maig; llicència obligatòria i inscripció al Campionat fins el 18.",
+  "decisio": "Els pròxims entrenaments i el Campionat Social requereixen llicència federativa en regla i inscripció abans del 18 de maig.",
+  "accions": [
+    {
+      "accio": "Verificar llicència federativa en regla",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Inscriure's al Campionat Social (25€)",
+      "tipus": "tasca",
+      "data": "2026-05-18 00:00",
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Preparar material pels entrenaments (forfet, guants, crema solar, esmorzar i aigua)",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "mitja",
+      "lloc": null
+    },
+    {
+      "accio": "Entrenaments Club d'Esquí — La Molina (Dissabtes 16, 23 i 30 maig · 06:30)",
+      "tipus": "calendari",
+      "data": "2026-05-16 06:30",
+      "prioritat": "mitja",
+      "lloc": "La Molina"
+    },
+    {
+      "accio": "Avisar si es necessita transport compartit",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "baixa",
+      "lloc": null
     }
   ]
 }
