@@ -610,10 +610,22 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .results.on {
   display: block;
   animation: appFadeUp .4s ease;
-  background: #111;
+  background: linear-gradient(170deg, #161616 0%, #111 55%);
   border-radius: 20px;
-  padding: 22px 18px 18px;
+  padding: 22px 18px 20px;
   margin-top: 0;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.05),
+    0 4px 30px rgba(0,0,0,.45);
+  position: relative;
+  overflow: hidden;
+}
+.results.on::before {
+  content: '';
+  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  width: 220px; height: 70px;
+  background: radial-gradient(ellipse, rgba(245,180,0,.07) 0%, transparent 70%);
+  pointer-events: none;
 }
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -1112,12 +1124,6 @@ body.dark #pageApp .app-col-right textarea:focus {
    MOBILE FIXES (max-width: 899px) — no toca landing ni desktop
    ============================================================ */
 @media (max-width: 899px) {
-  /* ── Propaga l'alçada de main fins a la card ─────────────────
-     Objectiu: card omple tota la pantalla → cap espai mort.
-     Cadena: main(overflow:hidden) > pageInici(h:100%) >
-             app-2col(h:100%) > app-col-right(flex col, h:100%) >
-             card(flex:1) > #panelText(flex:1) > textarea(flex:1) */
-
   #pageApp main {
     padding: 0;
     overflow: hidden;
@@ -1144,7 +1150,6 @@ body.dark #pageApp .app-col-right textarea:focus {
     overflow: hidden;
   }
 
-  /* panelText (tab actiu) omple l'espai de la card */
   #panelText {
     flex: 1;
     display: flex;
@@ -1152,10 +1157,8 @@ body.dark #pageApp .app-col-right textarea:focus {
     min-height: 0;
   }
 
-  /* panelImg quan és actiu */
   #panelImg { flex: 1; min-height: 0; }
 
-  /* Textarea creix per omplir tot l'espai disponible */
   #pageApp .app-col-right textarea {
     flex: 1;
     min-height: 80px;
@@ -1163,7 +1166,6 @@ body.dark #pageApp .app-col-right textarea:focus {
     resize: none;
   }
 
-  /* Tots els altres elements de la card no s'estiren */
   .app-col-right .app-main-headline,
   .app-col-right .card-head,
   .app-col-right .input-tabs,
@@ -1172,25 +1174,14 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .btn-micro-copy,
   .app-col-right .usage-counter { flex-shrink: 0; }
 
-  /* Promo oculta: no afegeix alçada */
   #premiumPromoCard { display: none; }
-
-  /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
-
-  /* Eliminar padding superior: card toca quasi l'header */
   .app-col-right { padding-top: 2px; }
   .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
-
-  /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
   .app-col-right .btn-micro-copy { margin-top: 4px; }
-
-  /* Tabs: més compactes per donar espai a la textarea */
   .app-col-right .tab-btn { padding: 7px; font-size: 12px; }
   .app-col-right .input-tabs { margin-bottom: 6px; }
-
-  /* Usage counter: mínim, discret */
   .app-col-right .usage-counter {
     flex-direction: column;
     align-items: center;
@@ -1199,35 +1190,17 @@ body.dark #pageApp .app-col-right textarea:focus {
     margin-top: 4px;
   }
 
-  /* ── Qualitat comercial mobile ─────────────────────────────── */
-
-  /* Footer "powered by..." ocult — missatge amateur en producte comercial */
   #pageApp footer { display: none; }
-
-  /* Header més compacte — guanya alçada per al contingut */
   #pageApp header { padding: 8px 16px; }
-
-  /* Card amb més definició — shadow i border lleugers */
   .app-col-right .card {
     box-shadow: 0 4px 20px rgba(0,0,0,0.10);
     border: 1px solid rgba(0,0,0,0.07);
   }
-
-  /* Textarea fons blanc — contrasta amb el fons gris de la pàgina */
   #pageApp .app-col-right textarea { background: #ffffff; }
-
-  /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
   .ex-lbl { display: none; }
-
-  /* Loader: flex:1 per omplir l'espai de la card oculta → quedarà centrat */
   .loading.on { flex: 1; }
-
-  /* Resultats: marge superior per no quedar enganxats al header */
   .results.on { margin-top: 8px; }
 
-  /* ── Scroll per pàgines dins main (overflow:hidden) ─────────────
-     main té overflow:hidden → les pàgines internes necessiten
-     height:100% + overflow-y:auto per poder fer scroll amb el dit. */
   #pageHistorial,
   #pageTasques,
   #pageConfig,
@@ -1244,15 +1217,12 @@ body.dark #pageApp .app-col-right textarea:focus {
    2-COLUMN DESKTOP LAYOUT
    ============================================================ */
 
-/* Left column: hidden on mobile */
 .app-col-left {
   display: none;
 }
 
-/* Headline visible only on mobile — desktop has left column */
 .app-main-headline { display: block; }
 
-/* Right column: full width on mobile */
 .app-col-right {
   width: 100%;
   padding: 12px;
@@ -1260,7 +1230,6 @@ body.dark #pageApp .app-col-right textarea:focus {
   overflow-y: auto;
 }
 
-/* Desktop 2-col */
 @media (min-width: 768px) {
   .app-main-headline { display: none; }
 
@@ -1348,35 +1317,12 @@ body.dark #pageApp .app-col-right textarea:focus {
   border-left: 3px solid var(--gold);
 }
 
-/* ============================================================
-   DESKTOP REFINEMENTS — only affects min-width: 900px
-   Cap d'aquestes regles toca el layout mobile.
-   ============================================================
-
-   Cadena d'alçades (1366x768 exemple):
-     #pageApp (fixed, 768px)
-       header (~55px)
-       main (flex:1 → ~657px, overflow:hidden)
-         #pageInici (height:100% → 657px)
-           .app-2col (height:100% → 657px, display:flex)
-             .app-col-left (flex-stretch → 657px, contingut centrat)
-             .app-col-right (flex:1, overflow-y:auto)
-       .bottom-nav (~56px)
-       footer (display:none)
-   ============================================================ */
 @media (min-width: 900px) {
-
-  /* ── ESTRUCTURA D'ALÇADA ──────────────────────────────────────
-     Cadena: #pageApp(100vh) > header + main(flex:1) + bottom-nav
-     main té overflow:hidden → cap scroll extern visible
-     Columnes hereten l'alçada via height:100% en cadena        */
-
   #pageApp main       { overflow: hidden; }
   #pageInici          { height: 100%; }
   .app-2col           { height: 100%; }
   #pageApp footer     { display: none; }
 
-  /* ── BOTTOM-NAV: discret en desktop ─────────────────────────── */
   .bottom-nav {
     padding-top: 0;
     padding-bottom: 0;
@@ -1389,13 +1335,11 @@ body.dark #pageApp .app-col-right textarea:focus {
   .nav-btn span  { font-size: 17px; }
   .nav-btn small { font-size: 9px; }
 
-  /* ── COLUMNA ESQUERRA: 28%, centrada verticalment ───────────── */
   .app-col-left {
     flex: 0 0 28%;
     padding: 24px 22px;
   }
 
-  /* ── COLUMNA DRETA: sense scrollbar visible ─────────────────── */
   .app-col-right {
     padding: 10px 18px;
     overflow-y: auto;
@@ -1403,24 +1347,18 @@ body.dark #pageApp .app-col-right textarea:focus {
   }
   .app-col-right::-webkit-scrollbar { display: none; }
 
-  /* ── TEXTAREA: selector específic per sobreescriure #pageApp textarea ── */
-  /* #pageApp textarea té especificitat (1,0,0,1)=101                      */
-  /* #pageApp .app-col-right textarea té (1,1,0,1)=111 → guanya            */
   #pageApp .app-col-right textarea {
     min-height: 130px;
     max-height: 180px;
   }
 
-  /* ── SECCIÓ PREMIUM: oculta en desktop (estalvia ~76px) ──────── */
   #premiumPromoCard { display: none; }
 
-  /* ── TIPOGRAFIA COLUMNA ESQUERRA ────────────────────────────── */
   .app-left-h1        { font-size: 22px; margin-bottom: 8px; }
   .app-left-p         { font-size: 13px; margin-bottom: 14px; }
   .app-left-feats     { gap: 7px; }
   .app-feat-item      { padding: 6px 10px; font-size: 12px; }
 
-  /* ── CARD INTERIOR: espais verticals mínims ─────────────────── */
   .app-col-right .card          { padding: 10px 14px; margin-bottom: 0; }
   .app-col-right .card-head     { margin-bottom: 4px; }
   .app-col-right .input-tabs    { margin-bottom: 6px; }
@@ -1429,9 +1367,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
 }
 
-/* ─────────────────────────────────────────────────────────
-   DECISIÓ CARD — protagonista principal del resultat
-   ───────────────────────────────────────────────────────── */
+/* DECISIÓ CARD */
 .decisio-card {
   border-left: 4px solid #f5b400;
   background: linear-gradient(135deg, #fffbea 0%, #fff 100%);
@@ -1452,9 +1388,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   color: var(--green); font-size: 18px;
 }
 
-/* ─────────────────────────────────────────────────────────
-   ACCIONS TIPADES
-   ───────────────────────────────────────────────────────── */
+/* ACCIONS TIPADES */
 .act-item-typed {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 11px 0; border-bottom: 1px solid var(--border);
@@ -1479,14 +1413,10 @@ body.dark #pageApp .app-col-right textarea:focus {
 .act-item-typed.prior-alta  { border-left: 2px solid var(--red);   padding-left: 8px; }
 .act-item-typed.prior-mitja { border-left: 2px solid var(--gold2); padding-left: 8px; }
 
-/* ─────────────────────────────────────────────────────────
-   SHARE CARD — preview + botons
-   ───────────────────────────────────────────────────────── */
+/* SHARE CARD */
 .share-btns {
   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
 }
-
-/* Preview visual de la targeta */
 .share-card-preview {
   background: #0b0e14;
   border-radius: 16px;
@@ -1538,16 +1468,30 @@ body.dark #pageApp .app-col-right textarea:focus {
    ═══════════════════════════════════════════════════════════ */
 
 /* ── DECISIÓ ── */
-.nx-decisio-block { margin-bottom: 14px; }
+.nx-decisio-block {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
 .nx-decisio-label {
   font-size: 9px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 2.5px; color: #f5b400; margin-bottom: 6px; opacity: .9;
+  letter-spacing: 3px; color: #f5b400;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.nx-decisio-label::before {
+  content: '';
+  display: inline-block; width: 18px; height: 2px;
+  background: #f5b400; border-radius: 1px;
+  box-shadow: 0 0 8px rgba(245,180,0,.7);
+  flex-shrink: 0;
 }
 .nx-decisio-text {
   font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 900;
-  color: #ffffff; line-height: 1.2;
-  letter-spacing: -0.02em;
+  font-size: 24px; font-weight: 900;
+  color: #ffffff; line-height: 1.18;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 20px rgba(255,255,255,.08);
 }
 .nx-decisio-text.nx-no-action {
   font-size: 22px; color: #3dba6f;
@@ -1561,19 +1505,26 @@ body.dark #pageApp .app-col-right textarea:focus {
 }
 
 /* ── ACCIONS ── */
-.nx-actions-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.nx-actions-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 
 .nx-action-card {
-  background: #1c1c1c;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 10px 14px;
-  transition: background .15s;
+  background: linear-gradient(135deg, #202020 0%, #1a1a1a 100%);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 12px 14px;
+  transition: all .15s;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
 }
 .nx-action-card:active { background: #222; }
 
-.nx-prior-alta  { border-left: 3px solid #ef4444; padding-left: 13px; }
-.nx-prior-mitja { border-left: 3px solid #f5b400; padding-left: 13px; }
+.nx-prior-alta {
+  border-left: 3px solid #ef4444; padding-left: 13px;
+  background: linear-gradient(135deg, rgba(239,68,68,.09) 0%, rgba(26,26,26,.0) 60%) !important;
+}
+.nx-prior-mitja {
+  border-left: 3px solid #f5b400; padding-left: 13px;
+  background: linear-gradient(135deg, rgba(245,180,0,.07) 0%, rgba(26,26,26,.0) 60%) !important;
+}
 
 .nx-action-top {
   display: flex; align-items: flex-start; gap: 10px;
@@ -1590,12 +1541,12 @@ body.dark #pageApp .app-col-right textarea:focus {
   text-transform: uppercase; letter-spacing: .6px;
   padding: 3px 9px; border-radius: 20px;
 }
-.nx-prior-pill-alta  { background: rgba(239,68,68,.15);  color: #f87171; }
-.nx-prior-pill-mitja { background: rgba(245,180,0,.15);  color: #f5b400; }
+.nx-prior-pill-alta  { background: rgba(239,68,68,.22); color: #ff7070; border: 1px solid rgba(239,68,68,.3); }
+.nx-prior-pill-mitja { background: rgba(245,180,0,.18); color: #f5c000; border: 1px solid rgba(245,180,0,.3); }
 
 .nx-action-date {
   margin-top: 5px; padding-left: 28px;
-  font-size: 12px; color: #555; font-weight: 500;
+  font-size: 12px; color: #777; font-weight: 500;
 }
 .nx-action-lloc {
   display: block;
@@ -1748,4 +1699,3 @@ body.dark .persp-btn.active { background: #2a2a2a; color: #f5b400; border-color:
 
 /* ── DATE WARNING ── */
 .nx-date-warn { color: #e5a000 !important; }
-
