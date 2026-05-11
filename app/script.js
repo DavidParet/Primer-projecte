@@ -464,25 +464,56 @@ function applyPriorityHeuristics(accions) {
     if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx       = i;
   });
 
-  /* Si cap keyword coincideix, permet 1 ALTA de la IA com a fallback */
-  var altaFallback = (mainEventIdx === -1 && mainDeadlineIdx === -1) ? aiAltaIdx : -1;
+  /* Fallback keyword: si la IA no ha marcat cap "alta", usa keywords com a xarxa de seguretat */
+  var aiHasAlta   = aiAltaIdx !== -1;
+  var altaFallback = (!aiHasAlta && mainEventIdx === -1 && mainDeadlineIdx === -1) ? -1 : -1;
+  var keywordAlta  = !aiHasAlta ? (mainEventIdx !== -1 ? mainEventIdx : mainDeadlineIdx) : -1;
 
-  /* Primera passada: prioritat base */
+  /* Primera passada: prioritat combinada (IA + keyword safety net) */
   var result = accions.map(function (a, i) {
     var txt    = String(a.accio || '');
     var isPrep = _prepRe.test(txt);
     var hasDate = !!(a.data && String(a.data) !== 'null');
+    var aiPrior = a.prioritat;
     var prioritat;
 
-    if (i === mainEventIdx || i === mainDeadlineIdx || i === altaFallback) {
+    if (aiPrior === 'alta' || i === keywordAlta) {
       prioritat = 'alta';
-    } else if (isPrep || hasDate || a.prioritat === 'mitja') {
+    } else if (isPrep || hasDate || aiPrior === 'mitja') {
       prioritat = 'mitja';
     } else {
       prioritat = 'baixa';
     }
 
-    return Object.assign({}, a, { prioritat: prioritat });
+    return Object.assign({}, a, { _origIdx: i, prioritat: prioritat });
+  });
+
+  /* Cap: màxim 2 "alta" — si n'hi ha més, els addicionals cauen a "mitja" */
+  var altaCount = 0;
+  result = result.map(function (a) {
+    if (a.prioritat !== 'alta') return a;
+    altaCount++;
+    return altaCount <= 2 ? a : Object.assign({}, a, { prioritat: 'mitja' });
+  });
+
+  /* Ordre estable: alta → mitja → baixa, després per data, després ordre original */
+  var priorRank = { alta: 0, mitja: 1, baixa: 2 };
+  result.sort(function (a, b) {
+    var pa = priorRank[a.prioritat] !== undefined ? priorRank[a.prioritat] : 2;
+    var pb = priorRank[b.prioritat] !== undefined ? priorRank[b.prioritat] : 2;
+    if (pa !== pb) return pa - pb;
+    var aHasDate = !!(a.data && a.data !== 'null');
+    var bHasDate = !!(b.data && b.data !== 'null');
+    if (aHasDate && !bHasDate) return -1;
+    if (!aHasDate && bHasDate) return  1;
+    if (aHasDate && bHasDate && a.data !== b.data) return a.data < b.data ? -1 : 1;
+    return (a._origIdx || 0) - (b._origIdx || 0);
+  });
+
+  result = result.map(function (a) {
+    var clean = Object.assign({}, a);
+    delete clean._origIdx;
+    return clean;
   });
 
   return result;
