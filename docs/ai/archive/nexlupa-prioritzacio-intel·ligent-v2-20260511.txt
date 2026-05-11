@@ -1,0 +1,107 @@
+NEXLUPA — SISTEMA DE PRIORITZACIÓ INTEL·LIGENT v2
+Data: 2026-05-11
+Sessió: claude/enhance-decision-concept-96FFG
+
+---
+
+OBJECTIU
+
+Substituir la priorització semàntica simple per un motor de scoring contextual
+en 7 dimensions que assigni prioritats relatives i coherents amb el criteri humà.
+
+"NexLupa ha de semblar un assistent amb criteri, no un resumidor automàtic."
+
+---
+
+CANVIS IMPLEMENTATS
+
+1. PROMPT IA — docs/ai/nexlupa-core-ai-prompt.txt (secció 6 reescrita)
+   - Sistema de scoring en 7 dimensions
+   - Principi de relativitat dins del missatge
+   - Mapa de prioritat contextual amb exemples correctes i prohibits
+   - Eliminació de la "REGLA TEMPORAL" (que depenia de new Date() del servidor)
+
+2. API — api/analyze.js
+   - temperature: 0 (resposta determinista)
+   - response_format: { type: 'json_object' } per a text (JSON pur, sense markdown)
+
+3. CLIENT — app/script.js (applyPriorityHeuristics)
+   - La IA és ara la font primària: si assigna "alta", es respecta
+   - Keyword safety net actua NOMÉS si la IA no ha marcat cap "alta"
+   - Cap: màxim 2 "alta" per missatge
+   - Ordre estable: alta → mitja → baixa, per data (ISO), per ordre original
+
+---
+
+7 DIMENSIONS DE SCORING
+
+1. Conseqüència si NO es fa → pèrdua de plaça, cancel·lació, risc real
+2. Impacte econòmic → pagament, dipòsit, penalització, matrícula
+3. Dependència → bloqueja accions posteriors?
+4. Bloqueig del procés → el procés no pot avançar sense aquesta acció
+5. Obligació mèdica o legal → sense la qual no es pot participar
+6. Urgència temporal → venciment proper, termini clar
+7. Risc de pèrdua irrecuperable → plaça, reserva, oportunitat
+
+---
+
+CLASSIFICACIÓ FINAL (mapa al camp "prioritat" del JSON)
+
+"alta" = CRÍTIC o ALTA del criteri humà
+  — Pagaments/matrícules amb termini
+  — Accions bloquejants del procés
+  — Risc de pèrdua irrecuperable
+  — Documentació mèdica/legal obligatòria
+  — Reunions obligatòries amb data
+
+"mitja" = MITJA del criteri humà
+  — Preparació i logística
+  — Accions importants però no bloquejants
+  — Seguiment, recordatoris
+
+"baixa" = INFORMACIÓ del criteri humà
+  — Context pur, dades de referència
+  — Recomanacions opcionals
+
+---
+
+REGLA DE RELATIVITAT (CRÍTICA)
+
+Mai assignar la mateixa prioritat a allò que bloqueja i a allò que depèn.
+
+Exemple correcte:
+  Pagament casal → "alta"      (bloqueja la inscripció)
+  Autorització mèdica → "mitja" (necessària però no la porta)
+  Còpia targeta → "baixa"       (complementari)
+
+Exemple prohibit:
+  Pagament casal → "mitja"
+  Autorització mèdica → "alta"
+
+---
+
+FITXERS MODIFICATS
+
+api/analyze.js          → temperature: 0, response_format JSON
+docs/ai/nexlupa-core-ai-prompt.txt → secció 6 reescrita
+app/script.js           → heurística respecta IA, ordre estable, cap 2 alta
+app/index.html          → cache bust v=13
+
+---
+
+PROVES RECOMANADES (5 escenaris)
+
+1. Casal escola: pagament + autorització mèdica + còpia targeta + contacte
+   Esperat: pagament=alta, autorització=mitja, còpia=baixa, contacte=baixa
+
+2. Email banc: venciment hipoteca + cita oficina + actualitzar dades
+   Esperat: venciment=alta, cita=alta(o mitja), actualitzar=mitja
+
+3. Reunió comunitat: data+ordre del dia + preparar documents + confirmar assistència
+   Esperat: reunió=alta, documents=mitja, confirmar=mitja
+
+4. Logística activitats escola: roba esportiva + esmorzar + autorització + hora
+   Esperat: autorització=alta (si obligatòria), roba=mitja, esmorzar=baixa
+
+5. Reserva/inscripció: termini inscripció + dipositar fiança + confirmar places
+   Esperat: termini+fiança=alta, confirmar=mitja

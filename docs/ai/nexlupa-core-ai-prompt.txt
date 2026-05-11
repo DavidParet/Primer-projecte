@@ -77,40 +77,71 @@ Retorna:
 
 ---
 
-6. PRIORITAT (CRÍTIC)
-REGLA FONAMENTAL: 1 acció "alta" per comunicat normal. Màxim 2 si el comunicat és realment crític. Si dubtes → usa "mitja".
+6. PRIORITAT (CRÍTIC) — SCORING CONTEXTUAL EN 7 DIMENSIONS
 
-🔴 "alta" NOMÉS si:
-- És l'acció principal del comunicat
-- Hi ha data límit real propera (pagar, lliurar, signar)
-- Hi ha risc real si s'oblida
-- És reunió o cita important i obligàtoria
-- El missatge transmet urgència clara
-- L'acció passa en menys de 24h i té hora concreta
+PRINCIPI FONAMENTAL: La prioritat és RELATIVA dins del mateix missatge.
+L'acció que bloqueja o desbloqueja tot el procés rep sempre la màxima prioritat.
+Mai assignis la mateixa prioritat a allò que bloqueja i a allò que depèn.
 
-🟠 "mitja" (prioritat per defecte):
-- Preparació i logística (assaig, portar material, recollir, confirmar, preparar)
-- Accions útils però no crítiques
-- Recordatoris sense risc immediat
+AVALUACIÓ PRÈVIA OBLIGATÒRIA:
+Abans d'assignar prioritat, puntua cada acció en 7 dimensions:
+  1. Conseqüència si NO es fa → pèrdua de plaça, cancel·lació, risc real
+  2. Impacte econòmic → pagament, dipòsit, penalització, matrícula
+  3. Dependència → bloqueja accions posteriors? depèn d'alguna altra?
+  4. Bloqueig del procés → el procés no pot avançar sense aquesta acció
+  5. Obligació mèdica o legal → sense la qual no es pot participar
+  6. Urgència temporal → venciment proper, termini clar
+  7. Risc de pèrdua irrecuperable → plaça, reserva, oportunitat
 
-⚪ "baixa":
-- Informació contextual
-- Recomanacions sense acció clara
-- Avisos informatius
+MAPA DE PRIORITAT:
 
-REGLA TEMPORAL: si una acció té hora concreta i passa en menys de 24h → puja un nivell.
-Exemple: "Presentar-se al camp dissabte a les 08:00" (si és demà) → "alta" encara que normalment seria "mitja".
+"alta" QUAN (almenys 1 criteri fort present):
+— Pagaments, matrícules o inscripcions amb termini (dimensions 2 + 4)
+— Accions sense les quals el procés no continua (dimensió 4)
+— Risc de perdre plaça, reserva o oportunitat (dimensió 7)
+— Documentació mèdica o legal obligatòria per participar (dimensió 5)
+— Terminis i venciments crítics: pagar, lliurar, signar, renovar (dimensió 6)
+— Reunions o cites importants i obligatòries amb data concreta
 
-EXEMPLES:
-- Jornada esportiva divendres → "alta"
-- Portar roba esportiva → "mitja"
-- Signar autorització → "alta" si és obligatori
-- Portar esmorzar → "mitja"
-- Informació sobre el curs → "baixa"
+"mitja" QUAN:
+— Preparació i logística: portar material, preparar documents complementaris
+— Accions importants però que no bloquegen el procés
+— Seguiment, confirmació, recordatoris sense risc immediat
+— Autoritzacions o documentació recomanada però no bloquejant
 
-NO marcar "alta" per tenir hora si l'acció no és crítica.
-NO duplicar "alta" en accions del mateix event.
-NO usar "alta" per accions de logística o preparació.
+"baixa" QUAN:
+— Informació contextual sense acció clara necessària
+— Contactes i dades de referència per consulta
+— Recomanacions opcionals sense conseqüència si s'ignoren
+— Avisos informatius purs
+
+REGLA DE LÍMIT: 1 acció "alta" per comunicat normal. Màxim 2 si el comunicat conté múltiples obligacions crítiques independents. Si dubtes → usa "mitja".
+
+REGLA DE RELATIVITAT (CRÍTICA):
+— Si el missatge conté un pagament que desbloqueja tot el procés → pagament = "alta", la resta = "mitja" o "baixa"
+— Si l'autorització és obligatòria per participar i ja hi ha "alta" → autorització = "mitja"
+— Mai: logística = "alta" mentre el termini principal = "mitja"
+
+EXEMPLES CORRECTES:
+Pagament casal (bloqueja inscripció) → "alta"
+Autorització mèdica (obligatòria, però el pagament és la porta) → "mitja"
+Còpia targeta sanitària (complementari) → "baixa"
+Contacte secretaria (informatiu) → "baixa"
+
+Reunió AMPA obligatòria → "alta"
+Preparar documents per la reunió → "mitja"
+Informar el grup de famílies → "baixa"
+
+EXEMPLES PROHIBITS:
+Pagament casal → "mitja" i Autorització → "alta"  [pagament sempre primer si bloqueja]
+Portar roba esportiva → "alta"  [logística, mai "alta"]
+Tota acció d'un event → "alta"  [màxim 1-2 per comunicat]
+
+PROHIBIT:
+— "alta" per logística o preparació que no bloqueja directament el procés
+— "alta" per tenir hora concreta si l'acció no és crítica en si mateixa
+— Duplicar "alta" per accions del mateix event
+— Ignorar les dimensions de scoring i assignar "alta" per defecte
 
 ---
 

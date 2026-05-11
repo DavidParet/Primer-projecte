@@ -45,11 +45,15 @@ module.exports = async function handler(req, res) {
       ];
     }
 
-    const completion = await client.chat.completions.create({
-      model:      image ? 'gpt-4o' : 'gpt-4o-mini',
-      max_tokens: 1000,
+    const completionOpts = {
+      model:       image ? 'gpt-4o' : 'gpt-4o-mini',
+      max_tokens:  1000,
+      temperature: 0,
       messages
-    });
+    };
+    if (!image) completionOpts.response_format = { type: 'json_object' };
+
+    const completion = await client.chat.completions.create(completionOpts);
 
     const raw    = completion.choices[0].message.content.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(raw);
