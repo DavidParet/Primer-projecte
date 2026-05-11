@@ -218,17 +218,6 @@ function formatDate(str) {
   return _DIES[d.getDay()] + ' · ' + d.getDate() + ' ' + _MESOS[d.getMonth()] + timeSuffix;
 }
 
-/* ── PERSPECTIVE MODE ── */
-var _perspective = 'rebut'; /* 'rebut' (default) | 'enviat' */
-
-function setPerspective(val) {
-  _perspective = val;
-  var btnRebut  = document.getElementById('perspRebut');
-  var btnEnviat = document.getElementById('perspEnviat');
-  if (btnRebut)  btnRebut.classList.toggle('active',  val === 'rebut');
-  if (btnEnviat) btnEnviat.classList.toggle('active', val === 'enviat');
-}
-
 /* ── DEMO MODE ── */
 var _demoMode = false;
 var DEMO_RESULTS = {
@@ -408,7 +397,7 @@ async function analyze() {
   err.classList.remove('on');
 
   try {
-    var body = isImg ? { image: _imgBase64, perspectiva: _perspective } : { text: text, perspectiva: _perspective };
+    var body = isImg ? { image: _imgBase64 } : { text: text };
 
     var r = await fetch('/api/analyze', {
       method: 'POST',
@@ -454,22 +443,7 @@ function formatActionDate(str) {
   var dt = new Date(+m[1], +m[2]-1, +m[3]);
   var out = DAYS[dt.getDay()] + ' ' + dt.getDate() + ' ' + MONTHS[dt.getMonth()];
   if (m[4] && !(m[4] === '00' && m[5] === '00')) out += ' · ' + m[4] + ':' + m[5];
-  /* Flag dates more than 2 months in the past — likely a wrong-year resolution */
-  var now = new Date();
-  var twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
-  if (dt < twoMonthsAgo) out += ' · data pendent validar';
   return out;
-}
-
-/* Returns true if the ISO date string looks suspicious (past > 2 months) */
-function isDateSuspicious(str) {
-  if (!str || str === 'null') return false;
-  var m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!m) return false;
-  var dt = new Date(+m[1], +m[2]-1, +m[3]);
-  var twoMonthsAgo = new Date();
-  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-  return dt < twoMonthsAgo;
 }
 
 /* ── PRIORITY HEURISTICS ── */
@@ -614,46 +588,28 @@ function renderResult(d) {
     }
   }
 
-  /* AI CONTEXT BLOCK */
-  var ctxEl = document.getElementById('nx-context-block');
-  if (ctxEl) {
-    var perspLabel = _perspective === 'enviat' ? 'Missatge enviat' : 'Missatge rebut';
-    var perspIcon  = _perspective === 'enviat' ? '↑' : '↓';
-    ctxEl.innerHTML =
-      '<span class="nx-ctx-origin">' + perspIcon + ' ' + perspLabel + '</span>' +
-      '<span class="nx-ctx-dot">·</span>' +
-      '<span class="nx-ctx-label">nexlupa motor</span>';
-    ctxEl.style.display = '';
-  }
-
   /* ACCIONS */
   var actionsEl = document.getElementById('nx-actions');
   if (actionsEl) {
     actionsEl.innerHTML = '';
     if (!noAction && accions.length > 0) {
       accions.forEach(function(a) {
-        var fmtDate     = formatActionDate(a.data);
-        var prior       = a.prioritat || 'baixa';
-        var isOtherSide = a.responsable === 'altra_part';
+        var icon    = a.tipus === 'calendari' ? '📅' : a.tipus === 'informatiu' ? 'ℹ️' : '✅';
+        var fmtDate = formatActionDate(a.data);
+        var prior   = a.prioritat || 'baixa';
 
         var card = document.createElement('div');
-        card.className = 'nx-action-card nx-prior-' + prior + (isOtherSide ? ' nx-action-other' : '');
+        card.className = 'nx-action-card nx-prior-' + prior;
 
         var top = document.createElement('div');
         top.className = 'nx-action-top';
 
         var iconEl = document.createElement('span');
         iconEl.className = 'nx-action-icon';
-        if (a.tipus === 'calendari') {
-          iconEl.innerHTML = '<span class="nx-icon-cal">◷</span>';
-        } else if (a.tipus === 'informatiu') {
-          iconEl.innerHTML = '<span class="nx-icon-info">ℹ</span>';
-        } else {
-          iconEl.innerHTML = '<span class="nx-icon-task' + (isOtherSide ? ' nx-icon-other' : '') + '"></span>';
-        }
+        iconEl.textContent = icon;
 
         var textEl = document.createElement('span');
-        textEl.className = 'nx-action-text' + (isOtherSide ? ' nx-text-other' : '');
+        textEl.className = 'nx-action-text';
         textEl.textContent = String(a.accio);
 
         top.appendChild(iconEl);
@@ -666,18 +622,11 @@ function renderResult(d) {
           top.appendChild(pill);
         }
 
-        if (isOtherSide) {
-          var respTag = document.createElement('span');
-          respTag.className = 'nx-resp-tag';
-          respTag.textContent = 'No ets tu';
-          top.appendChild(respTag);
-        }
-
         card.appendChild(top);
 
         if (fmtDate) {
           var dateEl = document.createElement('div');
-          dateEl.className = 'nx-action-date' + (isDateSuspicious(a.data) ? ' nx-date-warn' : '');
+          dateEl.className = 'nx-action-date';
           dateEl.textContent = fmtDate;
           card.appendChild(dateEl);
         }
@@ -692,10 +641,10 @@ function renderResult(d) {
           card.appendChild(llocEl);
         }
 
-        if (a.data && a.data !== 'null' && !isOtherSide) {
+        if (a.data && a.data !== 'null') {
           var calBtn = document.createElement('button');
           calBtn.className = 'nx-btn-cal';
-          calBtn.innerHTML = '<span class="nx-btn-cal-icon">◷</span> Crear recordatori';
+          calBtn.textContent = '📅 Afegir al calendari';
           (function(action) { calBtn.onclick = function() { addActionToCalendar(action); }; }(a));
           card.appendChild(calBtn);
         }
@@ -823,7 +772,7 @@ function exportCalendar() {
 
 /* ── SHARE ── */
 function tipusIcon(tipus) {
-  return tipus === 'calendari' ? '📅' : tipus === 'informatiu' ? 'ℹ️' : '◆';
+  return tipus === 'calendari' ? '📅' : tipus === 'informatiu' ? 'ℹ️' : '✅';
 }
 
 function buildShareText(d) {
