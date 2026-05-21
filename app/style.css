@@ -1242,9 +1242,12 @@ body.dark #pageApp .app-col-right textarea:focus {
    2-COLUMN DESKTOP LAYOUT
    ============================================================ */
 
-/* Left column: hidden on mobile */
+/* Left column: visible on mobile, full width */
 .app-col-left {
-  display: none;
+  display: block;
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
 }
 
 /* Headline visible only on mobile — desktop has left column */
