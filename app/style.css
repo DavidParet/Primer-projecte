@@ -458,7 +458,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* App header */
 #pageApp header {
-  background: linear-gradient(160deg, #0f1219 0%, #18203a 100%);
+  background: linear-gradient(160deg, #111318 0%, #15192a 100%);
   padding: 14px 20px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(200,164,60,.14);
@@ -1304,7 +1304,7 @@ body.dark #pageApp .app-col-right textarea:focus {
     flex-direction: column;
     justify-content: center;
     flex: 0 0 40%;
-    background: linear-gradient(160deg, #0f1219 0%, #18203a 100%);
+    background: linear-gradient(160deg, #111318 0%, #15192a 100%);
     padding: 40px 40px;
     position: relative;
     overflow: hidden;
