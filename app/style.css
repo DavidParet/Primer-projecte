@@ -467,6 +467,19 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   position: sticky; top: 0; z-index: 10;
 }
 .logo svg  { height: 32px; width: auto; }
+.logo img {
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  forced-color-adjust: none !important;
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  image-rendering: -webkit-optimize-contrast;
+}
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
 /* App hero */
