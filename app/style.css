@@ -55,16 +55,16 @@ body.app-active {
   color-scheme: dark;
 
   /* Dark premium: always on — independent of OS/browser theme */
-  --gold:     #C8A43C;   /* amber-gold, not yellow-neon */
-  --gold2:    #A8841C;   /* amber hover/darker */
-  --bg:       #12151e;   /* dark navy-black */
-  --white:    #181c2a;   /* dark navy panels */
+  --gold:     #D4A830;   /* warm gold, luminous — no brown, no neon */
+  --gold2:    #B08818;   /* gold hover */
+  --bg:       #060810;   /* near-black OLED */
+  --white:    #0d1120;   /* dark navy panels */
   --dark:     #e2e4ec;   /* cool white text */
   --darker:   #f0f2f8;   /* headings */
-  --border:   #242c3e;   /* blue-gray subtle */
+  --border:   #1a2030;   /* blue-gray subtle */
   --muted:    #5c6580;   /* cool muted */
   --soft:     #8891a6;   /* cool soft */
-  --gold-bg:  #1c1806;   /* very dark gold tint */
+  --gold-bg:  #130c02;   /* very dark warm tint */
   --green-bg: #091e12;
   --red-bg:   #200a0a;
   --blue-bg:  #091525;
@@ -454,14 +454,16 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   background: var(--bg);
   color: var(--dark);
   font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* App header */
 #pageApp header {
-  background: linear-gradient(160deg, #111318 0%, #15192a 100%);
+  background: linear-gradient(160deg, #080c14 0%, #0f1428 100%);
   padding: 14px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(200,164,60,.14);
+  border-bottom: 1px solid rgba(212,168,48,.16);
   position: sticky; top: 0; z-index: 10;
 }
 .logo svg  { height: 32px; width: auto; }
@@ -510,13 +512,17 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   padding: 16px 16px 16px;
   max-width: 460px; width: 100%; margin: 0 auto;
   box-sizing: border-box;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Cards */
 .card {
   background: var(--white);
   border-radius: 18px; padding: 18px;
-  box-shadow: 0 2px 14px rgba(0,0,0,.055);
+  box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 24px rgba(0,0,0,.9);
+  border: 1px solid rgba(255,255,255,.06);
   margin-bottom: 12px;
 }
 .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -543,7 +549,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 #pageApp textarea:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+  box-shadow: 0 0 0 3px rgba(212,168,48,.16);
 }
 #pageApp textarea::placeholder { color: #b0b0b0; font-weight: 400; font-size: 14px; }
 
@@ -593,11 +599,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: all .2s; margin-top: 10px; letter-spacing: .2px;
-  box-shadow: 0 5px 16px rgba(200,164,60,.22);
+  box-shadow: 0 5px 16px rgba(212,168,48,.28);
 }
 .btn-analyze:hover:not(:disabled) {
   background: var(--gold2); transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(200,164,60,.30);
+  box-shadow: 0 8px 22px rgba(212,168,48,.36);
 }
 .btn-analyze:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -624,10 +630,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .results.on {
   display: block;
   animation: appFadeUp .4s ease;
-  background: #111;
+  background: #060810;
   border-radius: 20px;
   padding: 22px 18px 18px;
   margin-top: 0;
+  border: 1px solid rgba(255,255,255,.05);
 }
 @keyframes appFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -793,7 +800,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* Bottom nav */
 .bottom-nav {
   flex-shrink: 0;
-  background: #0d1018; border-top: 1px solid #1e2535;
+  background: #040608; border-top: 1px solid #151c2a;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
   position: static;
@@ -910,28 +917,29 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 .cfg-danger-btn:hover { background: #fee2e2; }
 
-/* Dark mode */
+/* Dark mode — sincronitzat amb body.app-active per evitar sobreescriptura */
 body.dark {
-  --bg: #1a1a1a; --white: #242424; --dark: #e0e0e0; --darker: #f0f0f0;
-  --border: #333; --muted: #666; --soft: #999;
-  --gold-bg: #2a2200; --green-bg: #0a2a15; --red-bg: #2a0a0a; --blue-bg: #0a1a2a;
+  --gold: #D4A830; --gold2: #B08818;
+  --bg: #060810; --white: #0d1120; --dark: #e2e4ec; --darker: #f0f2f8;
+  --border: #1a2030; --muted: #5c6580; --soft: #8891a6;
+  --gold-bg: #130c02; --green-bg: #091e12; --red-bg: #200a0a; --blue-bg: #091525;
 }
 body.dark .usage-label { color: var(--gold); }
 
 /* ── TEXTAREA DARK MODE ── */
 body.dark #pageApp textarea,
 body.dark #pageApp .app-col-right textarea {
-  background: #111;
-  color: #f0f0f0;
-  border-color: rgba(245,197,24,.2);
+  background: #060810;
+  color: #e2e4ec;
+  border-color: rgba(212,168,48,.25);
 }
 body.dark #pageApp textarea::placeholder {
   color: rgba(255,255,255,.28);
 }
 body.dark #pageApp textarea:focus,
 body.dark #pageApp .app-col-right textarea:focus {
-  border-color: rgba(245,197,24,.75);
-  box-shadow: 0 0 0 3px rgba(245,197,24,.08), 0 0 16px rgba(245,197,24,.07);
+  border-color: rgba(212,168,48,.75);
+  box-shadow: 0 0 0 3px rgba(212,168,48,.12), 0 0 16px rgba(212,168,48,.08);
 }
 
 /* Premium header button */
@@ -1222,14 +1230,14 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Header més compacte — guanya alçada per al contingut */
   #pageApp header { padding: 8px 16px; }
 
-  /* Card amb més definició — shadow i border subtil dark */
+  /* Card OLED — shadow profund + micro highlight */
   .app-col-right .card {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 24px rgba(0,0,0,.9);
     border: 1px solid rgba(255,255,255,0.06);
   }
 
-  /* Textarea fons fosc — contrasta amb el fons gris de la pàgina */
-  #pageApp .app-col-right textarea { background: #111111; }
+  /* Textarea fons negre profund */
+  #pageApp .app-col-right textarea { background: #060810; }
 
   /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
   .ex-lbl { display: none; }
@@ -1304,7 +1312,7 @@ body.dark #pageApp .app-col-right textarea:focus {
     flex-direction: column;
     justify-content: center;
     flex: 0 0 40%;
-    background: linear-gradient(160deg, #111318 0%, #15192a 100%);
+    background: linear-gradient(160deg, #080c14 0%, #0f1428 100%);
     padding: 40px 40px;
     position: relative;
     overflow: hidden;
@@ -1552,13 +1560,13 @@ body.dark #pageApp .app-col-right textarea:focus {
 .nx-actions-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 
 .nx-action-card {
-  background: #1c1c1c;
-  border: 1px solid #2a2a2a;
+  background: #0d1120;
+  border: 1px solid #1a2030;
   border-radius: 12px;
   padding: 10px 14px;
   transition: background .15s;
 }
-.nx-action-card:active { background: #222; }
+.nx-action-card:active { background: #121825; }
 
 .nx-prior-alta  { border-left: 3px solid #ef4444; padding-left: 13px; }
 .nx-prior-mitja { border-left: 3px solid var(--gold2); padding-left: 13px; }
