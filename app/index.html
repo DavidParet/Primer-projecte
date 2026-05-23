@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=17"/>
+  <link rel="stylesheet" href="style.css?v=18"/>
 </head>
 <body>
 <!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
@@ -25,7 +25,7 @@
   <!-- HEADER -->
   <header>
     <div class="logo">
-      <div class="nexlupa-logo" role="img" aria-label="nexlupa"></div>
+      <canvas class="nexlupa-logo" width="360" height="180" role="img" aria-label="nexlupa"></canvas>
     </div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
   </header>
@@ -379,6 +379,15 @@ document.addEventListener('DOMContentLoaded', function () {
   try { showOnboarding(); }    catch(e) {}
   try { loadConfig(); }        catch(e) {}
   try { updateBadges(); }      catch(e) {}
+  // Canvas logo — bypassa el dark mode processing de Samsung Internet
+  (function(){
+    var cv=document.querySelector('canvas.nexlupa-logo');
+    if(!cv)return;
+    var ctx=cv.getContext('2d');
+    var img=new Image();
+    img.onload=function(){ctx.drawImage(img,0,0,360,180);};
+    img.src='assets/logo-white.png';
+  })();
 });
 </script>
 </body>
