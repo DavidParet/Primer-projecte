@@ -52,7 +52,7 @@ body.app-active {
   background: var(--bg);
   color: var(--dark);
   overflow: hidden;   /* prevent landing scroll while app is open */
-  color-scheme: dark;
+  color-scheme: only dark;
 
   /* Dark premium: always on — independent of OS/browser theme */
   --gold:     #D4A830;   /* warm gold, luminous — no brown, no neon */
