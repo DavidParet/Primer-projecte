@@ -575,7 +575,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .app-main-headline {
   text-align: center;
   max-width: 300px;
-  margin: 0 auto 10px;
+  margin: 0 auto 6px;
 }
 .hl-line1 {
   display: block;
@@ -952,9 +952,9 @@ body.dark #pageApp .app-col-right textarea:focus {
 
 /* Premium header button */
 .btn-premium-header {
-  padding: 7px 14px; background: var(--gold); color: var(--darker);
+  padding: 5px 11px; background: var(--gold); color: var(--darker);
   border: none; border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800;
   cursor: pointer; transition: all .2s; white-space: nowrap;
 }
 .btn-premium-header:hover { background: var(--gold2); transform: scale(1.05); }
@@ -1158,7 +1158,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   .app-col-right {
     height: 100%;
-    padding: 10px 10px 20px;
+    padding: 10px 10px 10px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1211,7 +1211,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   /* Eliminar padding superior: card toca quasi l'header */
   .app-col-right { padding-top: 2px; }
-  .app-col-right .card { padding-top: 10px; padding-bottom: 10px; }
+  .app-col-right .card { padding-top: 6px; padding-bottom: 8px; }
 
   /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
