@@ -952,9 +952,9 @@ body.dark #pageApp .app-col-right textarea:focus {
 
 /* Premium header button */
 .btn-premium-header {
-  padding: 5px 11px; background: var(--gold); color: var(--darker);
+  padding: 4px 9px; background: var(--gold); color: var(--darker);
   border: none; border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
   cursor: pointer; transition: all .2s; white-space: nowrap;
 }
 .btn-premium-header:hover { background: var(--gold2); transform: scale(1.05); }
@@ -1189,7 +1189,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Textarea creix per omplir tot l'espai disponible */
   #pageApp .app-col-right textarea {
     flex: 1;
-    min-height: 80px;
+    min-height: 150px;
     max-height: none;
     resize: none;
   }
@@ -1211,15 +1211,20 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   /* Eliminar padding superior: card toca quasi l'header */
   .app-col-right { padding-top: 2px; }
-  .app-col-right .card { padding-top: 6px; padding-bottom: 8px; }
+  .app-col-right .card { padding-top: 4px; padding-bottom: 6px; }
 
   /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
   .app-col-right .btn-micro-copy { margin-top: 4px; }
 
-  /* Tabs: més compactes per donar espai a la textarea */
-  .app-col-right .tab-btn { padding: 7px; font-size: 12px; }
-  .app-col-right .input-tabs { margin-bottom: 6px; }
+  /* Headline: compacte en mobile per cedir protagonisme al textarea */
+  .app-col-right .hl-line1 { font-size: 17px; }
+  .app-col-right .hl-line2 { font-size: 15px; }
+  .app-col-right .app-main-headline { margin-bottom: 4px; }
+
+  /* Tabs: més primes per donar espai a la textarea */
+  .app-col-right .tab-btn { padding: 5px 7px; font-size: 11px; }
+  .app-col-right .input-tabs { margin-bottom: 5px; }
 
   /* Micro-copy ocult: el botó Analitzar ja és prou explícit */
   .app-col-right .btn-micro-copy { display: none; }
