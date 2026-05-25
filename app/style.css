@@ -600,20 +600,102 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 
 /* Analyze button */
+/* ── CTA ANALYZE — Motor IA de NexLupa ── */
 .btn-analyze {
-  width: 100%; padding: 17px;
-  background: var(--gold); color: var(--darker);
+  width: 100%; padding: 14px 20px;
   border: none; border-radius: 50px;
-  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+  letter-spacing: 0.5px;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .2s; margin-top: 10px; letter-spacing: .2px;
-  box-shadow: 0 5px 16px rgba(212,168,48,.28);
+  margin-top: 8px; position: relative; overflow: hidden;
+  color: #0d0a00;
+
+  /* Gradient premium: deep gold → champagne center → deep gold */
+  background: linear-gradient(135deg,
+    #B8860B 0%,
+    #D6A93D 28%,
+    #F4D06F 52%,
+    #D6A93D 76%,
+    #B8860B 100%
+  );
+
+  /* Depth OLED: inner top highlight + outer glow */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.22) inset,
+    0 -1px 0 rgba(0,0,0,.18) inset,
+    0 6px 24px rgba(214,169,61,.38),
+    0 2px 6px rgba(0,0,0,.4);
+
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+  animation: breatheAnalyze 3.5s ease-in-out infinite;
 }
+
+/* Shimmer sweep — llum que passa per sobre */
+.btn-analyze::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit; pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255,255,255,.18) 42%,
+    rgba(255,255,255,.08) 55%,
+    transparent 78%
+  );
+  background-size: 300% 100%;
+  animation: shimmerAnalyze 5s ease-in-out infinite;
+}
+
+@keyframes shimmerAnalyze {
+  0%       { background-position: 160% 0; }
+  45%, 100% { background-position: -60% 0; }
+}
+
+@keyframes breatheAnalyze {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.22) inset,
+      0 -1px 0 rgba(0,0,0,.18) inset,
+      0 6px 24px rgba(214,169,61,.38),
+      0 2px 6px rgba(0,0,0,.4);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.25) inset,
+      0 -1px 0 rgba(0,0,0,.18) inset,
+      0 10px 34px rgba(244,208,111,.55),
+      0 2px 6px rgba(0,0,0,.4);
+  }
+}
+
 .btn-analyze:hover:not(:disabled) {
-  background: var(--gold2); transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(212,168,48,.36);
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.28) inset,
+    0 -1px 0 rgba(0,0,0,.18) inset,
+    0 14px 38px rgba(244,208,111,.6),
+    0 4px 14px rgba(0,0,0,.45);
+  animation-play-state: paused;
 }
-.btn-analyze:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-analyze:active:not(:disabled) {
+  transform: translateY(0) scale(.985);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.15) inset,
+    0 -1px 0 rgba(0,0,0,.18) inset,
+    0 3px 14px rgba(214,169,61,.35),
+    0 1px 4px rgba(0,0,0,.35);
+  animation-play-state: paused;
+}
+
+.btn-analyze:disabled {
+  opacity: .45; cursor: not-allowed; transform: none;
+  box-shadow: none; animation: none;
+}
+.btn-analyze:disabled::before { display: none; }
+
+/* Icona spark IA */
+.nxl-spark { flex-shrink: 0; opacity: .92; }
 
 /* Loading */
 .loading { display: none; text-align: center; padding: 44px 20px; }
