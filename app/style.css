@@ -1377,7 +1377,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 /* Right column: full width on mobile */
 .app-col-right {
   width: 100%;
-  padding: 12px;
+  padding: 7px;
   box-sizing: border-box;
   overflow-y: auto;
 }
@@ -1428,7 +1428,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   .app-col-right {
     flex: 1;
-    padding: 20px 24px;
+    padding: 12px 24px;
     overflow-y: auto;
   }
 }
