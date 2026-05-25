@@ -461,18 +461,27 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* App header */
 #pageApp header {
   background: linear-gradient(160deg, #080c14 0%, #0f1428 100%);
-  padding: 14px 20px;
+  padding: 6px 18px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(212,168,48,.16);
   position: sticky; top: 0; z-index: 10;
 }
 .logo svg  { height: 32px; width: auto; }
 
+/* Logo clip — crops the PNG's internal transparent padding (37% top/bottom),
+   letting the canvas be 11% bigger while the header shrinks ~30% */
+.logo-clip {
+  height: 65px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
 /* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet */
 .nexlupa-logo {
-  height: 90px;
-  width: 180px;
+  height: 100px;
+  width: 200px;
   display: block;
+  margin-top: -17px;
 }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
@@ -1034,10 +1043,11 @@ body.dark #pageApp .app-col-right textarea:focus {
 
 /* Premium header button */
 .btn-premium-header {
-  padding: 4px 9px; background: var(--gold); color: var(--darker);
-  border: none; border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+  padding: 3px 8px; background: var(--gold); color: #0a0800;
+  border: none; border-radius: 16px;
+  font-family: 'Nunito', sans-serif; font-size: 9px; font-weight: 800;
   cursor: pointer; transition: all .2s; white-space: nowrap;
+  letter-spacing: 0.3px;
 }
 .btn-premium-header:hover { background: var(--gold2); transform: scale(1.05); }
 
@@ -1292,8 +1302,8 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .card-head { display: none; }
 
   /* Eliminar padding superior: card toca quasi l'header */
-  .app-col-right { padding-top: 2px; }
-  .app-col-right .card { padding-top: 4px; padding-bottom: 6px; }
+  .app-col-right { padding-top: 0; }
+  .app-col-right .card { padding-top: 2px; padding-bottom: 6px; }
 
   /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
@@ -1326,8 +1336,8 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Footer "powered by..." ocult — missatge amateur en producte comercial */
   #pageApp footer { display: none; }
 
-  /* Header més compacte — guanya alçada per al contingut */
-  #pageApp header { padding: 5px 16px; }
+  /* Header compacte premium — logo clip + padding mínim */
+  #pageApp header { padding: 3px 14px; }
 
   /* Card OLED — shadow profund + micro highlight */
   .app-col-right .card {
