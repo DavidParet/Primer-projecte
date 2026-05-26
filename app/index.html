@@ -25,7 +25,7 @@
   <!-- HEADER -->
   <header>
     <div class="logo">
-      <canvas class="nexlupa-logo" width="360" height="180" role="img" aria-label="nexlupa"></canvas>
+      <canvas class="nexlupa-logo" width="432" height="216" role="img" aria-label="nexlupa"></canvas>
     </div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
   </header>
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if(!cv)return;
     var ctx=cv.getContext('2d');
     var img=new Image();
-    img.onload=function(){ctx.drawImage(img,0,0,360,180);};
+    img.onload=function(){ctx.drawImage(img,0,0,432,216);};
     img.src='assets/logo-white.png';
   })();
 });
