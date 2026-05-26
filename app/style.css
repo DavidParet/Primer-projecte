@@ -1133,6 +1133,18 @@ body.dark #pageApp .app-col-right textarea:focus {
 .compare-yes { color: var(--green); font-weight: 800; }
 .compare-no  { color: var(--muted); }
 
+/* ── BACK BUTTON — pàgines internes (Premium, etc.) ─────────── */
+.btn-back-page {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: transparent; border: none;
+  color: var(--muted); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; padding: 6px 0 2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s;
+}
+.btn-back-page:active { color: var(--gold); }
+
 /* ── CONVERSION STRIP — Premium upsell ─────────────────────── */
 .conv-strip {
   display: flex; align-items: center; gap: 10px;
@@ -1357,9 +1369,10 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Eliminar padding superior: card toca quasi l'header */
-  .app-col-right { padding-top: 2px; }
-  .app-col-right .card { padding-top: 2px; padding-bottom: 6px; }
+  /* Mòbil: logo compacte (72px) i respiració visual cap al contingut */
+  #pageApp header .nexlupa-logo { height: 72px; width: 144px; }
+  .app-col-right { padding-top: 10px; }
+  .app-col-right .card { padding-top: 8px; padding-bottom: 6px; }
 
   /* Botó: enganxat al textarea, sense marge sobrer */
   .app-col-right .btn-analyze { margin-top: 6px; }
