@@ -123,14 +123,16 @@
           </div>
         </div>
 
-        <div id="premiumPromoCard" style="text-align:center;margin-top:10px;padding:12px 0 14px;border-top:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics?</div>
-          <button onclick="navTo('premium')"
-            style="background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;"
-            onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold2)';"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
-            ⭐ Descobreix Premium
-          </button>
+        <div class="conv-strip" id="convStrip" onclick="navTo('premium')">
+          <div class="conv-left">
+            <div class="conv-label">⭐ PASSA A PREMIUM</div>
+            <div class="conv-title">Anàlisis il·limitades</div>
+            <div class="conv-sub">+ recordatoris automàtics · sense límits</div>
+          </div>
+          <div class="conv-right">
+            <div class="conv-price">4,99€<span class="conv-per">/mes</span></div>
+            <button class="conv-btn" onclick="event.stopPropagation();navTo('premium')">Activar ara →</button>
+          </div>
         </div>
 
         <div class="err" id="errMsg"></div>
@@ -388,6 +390,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var img=new Image();
     img.onload=function(){ctx.drawImage(img,0,0,432,216);};
     img.src='assets/logo-white.png';
+  })();
+  // Touch radial glow — CTA "Analitzar ara"
+  (function(){
+    var btn=document.getElementById('btnAnalyze');
+    if(!btn)return;
+    function setPos(x,y){
+      var r=btn.getBoundingClientRect();
+      btn.style.setProperty('--btn-x',((x-r.left)/r.width*100).toFixed(1)+'%');
+      btn.style.setProperty('--btn-y',((y-r.top)/r.height*100).toFixed(1)+'%');
+    }
+    btn.addEventListener('mousemove',function(e){btn.classList.add('is-touched');setPos(e.clientX,e.clientY);});
+    btn.addEventListener('touchstart',function(e){btn.classList.add('is-touched');if(e.touches[0])setPos(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    btn.addEventListener('touchmove',function(e){if(e.touches[0])setPos(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    btn.addEventListener('mouseleave',function(){btn.classList.remove('is-touched');});
+    btn.addEventListener('touchend',function(){btn.classList.remove('is-touched');});
   })();
 });
 </script>
