@@ -609,29 +609,28 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   -webkit-font-smoothing: antialiased;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
   margin-top: 8px; position: relative; overflow: hidden;
-  color: #0d0900;
-  --btn-x: 50%; --btn-y: 50%;
+  color: #0d0a00;
 
-  /* Gradient taronja/ambre viu */
+  /* Gradient premium: daurat càlid → deep gold (sense tons vermellosos) */
   background: linear-gradient(180deg,
-    #FFB340 0%,
-    #F08020 45%,
-    #D06010 80%,
-    #A04808 100%
+    #F5C840 0%,
+    #E0AC28 40%,
+    #B89020 78%,
+    #7A6214 100%
   );
 
-  /* Glow ambre */
+  /* Glow curt i intens + ombra neta */
   box-shadow:
     0 1px 0 rgba(255,255,255,.32) inset,
-    0 -1px 0 rgba(0,0,0,.26) inset,
-    0 3px 12px rgba(240,140,20,.52),
+    0 -1px 0 rgba(0,0,0,.24) inset,
+    0 3px 10px rgba(230,185,20,.48),
     0 2px 5px rgba(0,0,0,.55);
 
   transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .25s ease;
   animation: breatheAnalyze 3.5s ease-in-out infinite;
 }
 
-/* Shimmer — franja de llum cada 2.5s */
+/* Shimmer sweep — llum que passa per sobre */
 .btn-analyze::before {
   content: '';
   position: absolute; inset: 0;
@@ -639,24 +638,13 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   background: linear-gradient(
     105deg,
     transparent 20%,
-    rgba(255,255,255,.22) 42%,
-    rgba(255,255,255,.10) 55%,
+    rgba(255,255,255,.18) 42%,
+    rgba(255,255,255,.08) 55%,
     transparent 78%
   );
   background-size: 300% 100%;
-  animation: shimmerAnalyze 2.5s ease-in-out infinite;
+  animation: shimmerAnalyze 5s ease-in-out infinite;
 }
-
-/* Touch radial — segueix la posició del dit */
-.btn-analyze::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: inherit; pointer-events: none;
-  background: radial-gradient(circle at var(--btn-x) var(--btn-y), rgba(255,255,255,.22) 0%, transparent 58%);
-  opacity: 0;
-  transition: opacity .15s ease;
-}
-.btn-analyze.is-touched::after { opacity: 1; }
 
 @keyframes shimmerAnalyze {
   0%       { background-position: 160% 0; }
@@ -667,15 +655,15 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   0%, 100% {
     box-shadow:
       0 1px 0 rgba(255,255,255,.32) inset,
-      0 -1px 0 rgba(0,0,0,.26) inset,
-      0 3px 12px rgba(240,140,20,.52),
+      0 -1px 0 rgba(0,0,0,.24) inset,
+      0 3px 10px rgba(230,185,20,.48),
       0 2px 5px rgba(0,0,0,.55);
   }
   50% {
     box-shadow:
       0 1px 0 rgba(255,255,255,.34) inset,
-      0 -1px 0 rgba(0,0,0,.26) inset,
-      0 6px 18px rgba(255,160,30,.68),
+      0 -1px 0 rgba(0,0,0,.24) inset,
+      0 5px 14px rgba(235,190,20,.62),
       0 2px 5px rgba(0,0,0,.55);
   }
 }
@@ -684,19 +672,19 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   transform: scale(.98);
   box-shadow:
     0 1px 0 rgba(255,255,255,.38) inset,
-    0 -1px 0 rgba(0,0,0,.26) inset,
-    0 6px 18px rgba(255,160,30,.65),
+    0 -1px 0 rgba(0,0,0,.24) inset,
+    0 5px 14px rgba(235,190,20,.65),
     0 2px 6px rgba(0,0,0,.58);
   animation-play-state: paused;
 }
 
 .btn-analyze:active:not(:disabled) {
-  transform: translateY(0) scale(.97);
+  transform: translateY(0) scale(.985);
   box-shadow:
     0 1px 0 rgba(255,255,255,.15) inset,
-    0 -1px 0 rgba(0,0,0,.20) inset,
-    0 2px 8px rgba(240,140,20,.38),
-    0 1px 4px rgba(0,0,0,.40);
+    0 -1px 0 rgba(0,0,0,.18) inset,
+    0 3px 14px rgba(214,169,61,.35),
+    0 1px 4px rgba(0,0,0,.35);
   animation-play-state: paused;
 }
 
@@ -705,7 +693,6 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   box-shadow: none; animation: none;
 }
 .btn-analyze:disabled::before { display: none; }
-.btn-analyze:disabled::after  { display: none; }
 
 /* Icona spark IA */
 .nxl-spark { flex-shrink: 0; opacity: .92; }
@@ -1133,51 +1120,6 @@ body.dark #pageApp .app-col-right textarea:focus {
 .compare-yes { color: var(--green); font-weight: 800; }
 .compare-no  { color: var(--muted); }
 
-/* Conversion Strip — Premium upsell */
-.conv-strip {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
-  padding: 14px 16px;
-  background: rgba(212,168,48,.07);
-  border: 1px solid rgba(212,168,48,.38);
-  border-radius: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
-  animation: convGlow 2.8s ease-in-out infinite;
-}
-@keyframes convGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212,168,48,.00), 0 2px 10px rgba(212,168,48,.10); }
-  50%       { box-shadow: 0 0 0 3px rgba(212,168,48,.13), 0 4px 20px rgba(212,168,48,.22); }
-}
-.conv-left { flex: 1; min-width: 0; }
-.conv-label {
-  font-size: 10px; font-weight: 700; color: var(--gold);
-  letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px;
-}
-.conv-title {
-  font-size: 16px; font-weight: 800; color: var(--darker);
-  line-height: 1.2; margin-bottom: 3px;
-}
-.conv-sub { font-size: 11px; color: var(--muted); line-height: 1.45; }
-.conv-right {
-  display: flex; flex-direction: column;
-  align-items: flex-end; gap: 7px; flex-shrink: 0;
-}
-.conv-price {
-  font-size: 22px; font-weight: 800; color: var(--gold); line-height: 1;
-}
-.conv-per { font-size: 12px; font-weight: 400; color: var(--muted); }
-.conv-btn {
-  background: var(--gold); color: #0d0900;
-  border: none; border-radius: 20px; padding: 8px 14px;
-  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-  cursor: pointer; white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-.conv-btn:active { transform: scale(.97); }
-
 /* Usage counter — element secundari, no competeix amb el CTA */
 .usage-counter {
   display: flex; flex-direction: column;
@@ -1342,12 +1284,10 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .ex-row,
   .app-col-right .btn-analyze,
   .app-col-right .btn-micro-copy,
-  .app-col-right .usage-counter,
-  .app-col-right #convStrip { flex-shrink: 0; }
+  .app-col-right .usage-counter { flex-shrink: 0; }
 
-  /* Promo antiga oculta; conversion strip sempre visible */
+  /* Promo oculta: no afegeix alçada */
   #premiumPromoCard { display: none; }
-  #convStrip { display: flex; margin-top: 10px; }
 
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
