@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=30"/>
+  <link rel="stylesheet" href="style.css?v=31"/>
 </head>
 <body>
 <!-- dark mode pre-init: prevents flash of wrong theme before JS loads -->
@@ -24,11 +24,13 @@
 
   <!-- HEADER -->
   <header>
-    <div class="logo">
-      <canvas class="nexlupa-logo" width="432" height="216" role="img" aria-label="nexlupa"></canvas>
-      <p class="logo-tagline">enganxa el missatge. la resta ho fa nexlupa.</p>
+    <div class="header-top">
+      <div class="logo">
+        <canvas class="nexlupa-logo" width="432" height="216" role="img" aria-label="nexlupa"></canvas>
+      </div>
+      <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
     </div>
-    <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
+    <p class="logo-tagline"><span class="lt-gold">enganxa el missatge.</span><span class="lt-white"> la resta ho fa nexlupa.</span></p>
   </header>
 
   <!-- DEMO BANNER -->
@@ -116,12 +118,6 @@
         </button>
         <p class="btn-micro-copy">Resum i accions en 10 segons</p>
 
-        <div class="usage-counter" id="usageCounter">
-          <span class="usage-plan-tag">Free</span>
-          <span id="usageBar"></span>
-          <span class="usage-quota" id="usageText">0 / 3 avui</span>
-        </div>
-
         <div id="premiumPromoCard" style="text-align:center;margin-top:10px;padding:12px 0 14px;border-top:1px solid var(--border);">
           <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Vols anàlisis il·limitats i recordatoris automàtics?</div>
           <button onclick="navTo('premium')"
@@ -133,6 +129,13 @@
         </div>
 
         <div class="err" id="errMsg"></div>
+      </div>
+
+      <!-- Free status — entre la card i el premium strip -->
+      <div class="usage-counter" id="usageCounter">
+        <span class="usage-plan-tag">Free</span>
+        <span id="usageBar"></span>
+        <span class="usage-quota" id="usageText">0 / 3 avui</span>
       </div>
 
       <!-- Conv strip: FORA de la card → sibling en app-col-right flex column -->

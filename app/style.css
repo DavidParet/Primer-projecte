@@ -461,37 +461,36 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* App header */
 #pageApp header {
   background: linear-gradient(160deg, #080c14 0%, #0f1428 100%);
-  padding: 14px 20px;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  display: flex; flex-direction: column; gap: 5px;
   border-bottom: 1px solid rgba(212,168,48,.16);
   position: sticky; top: 0; z-index: 10;
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
 }
 .logo svg  { height: 32px; width: auto; }
 
 /* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet */
 .nexlupa-logo {
-  height: 108px;
-  width: 216px;
+  height: 76px;
+  width: 152px;
   display: block;
 }
 
-#pageApp header .logo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+#pageApp header .logo { display: block; }
 
+/* Tagline dos colors — visible per defecte, ocult en desktop */
 .logo-tagline {
   font-family: 'DM Sans', sans-serif;
-  font-size: 10.5px;
-  font-weight: 300;
-  font-style: normal;
-  color: rgba(255,255,255,.58);
-  margin-top: 3px;
-  letter-spacing: .25px;
-  line-height: 1.5;
-  max-width: 196px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: .1px;
+  display: block;
 }
+.lt-gold  { color: var(--gold); }
+.lt-white { color: rgba(255,255,255,.75); }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
@@ -1370,8 +1369,6 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   .app-col-right .card {
     flex: 1;
-    /* Reserva 84px per a la conv-strip sibling (76px altura + 6px margin-top + 2px marge) */
-    max-height: calc(100% - 84px);
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
@@ -1413,9 +1410,9 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Mòbil: logo compacte, zero aire mort */
-  #pageApp header { padding: 2px 14px; }
-  #pageApp header .nexlupa-logo { height: 99px; width: 198px; }
+  /* Mòbil: header ja definit globalment, sobreescrivim el que cal */
+  #pageApp header { padding: 8px 14px 6px; gap: 4px; }
+  #pageApp header .nexlupa-logo { height: 76px; width: 152px; }
   .app-col-right { padding-top: 4px; }
   .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
 
@@ -1430,11 +1427,12 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .tab-btn { padding: 6px 10px; font-size: 12px; }
   .app-col-right .input-tabs { margin-bottom: 6px; }
 
-  /* Usage counter: ras al botó, sense aire */
+  /* Free: fora de la card, pill entre card i conv-strip */
   .app-col-right .usage-counter {
-    margin-top: 6px;
-    padding-top: 5px;
-    border-top-color: rgba(255,255,255,.05);
+    margin-top: 5px;
+    margin-bottom: 0;
+    padding-top: 0;
+    border-top: none;
   }
 
   /* ── Qualitat comercial mobile ─────────────────────────────── */
@@ -1499,6 +1497,13 @@ body.dark #pageApp .app-col-right textarea:focus {
 
 /* Headline visible only on mobile — desktop has left column */
 .app-main-headline { display: block; }
+
+/* Tagline header: visible on mobile, hidden on desktop (left col has it) */
+@media (min-width: 900px) {
+  .logo-tagline { display: none; }
+  #pageApp header { flex-direction: row; align-items: center; padding: 10px 20px; gap: 0; }
+  .header-top { flex: 1; }
+}
 
 /* Right column: full width on mobile */
 .app-col-right {
