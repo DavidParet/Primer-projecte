@@ -475,6 +475,22 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   display: block;
 }
 
+#pageApp header .logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logo-tagline {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  font-style: italic;
+  color: rgba(255,255,255,.32);
+  margin-top: 1px;
+  letter-spacing: .15px;
+}
+
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
 /* App hero */
@@ -602,28 +618,28 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* Analyze button */
 /* ── CTA ANALYZE — Motor IA de NexLupa ── */
 .btn-analyze {
-  width: 100%; padding: 11px 20px;
+  width: 100%; padding: 13px 20px;
   border: none; border-radius: 50px;
-  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
   letter-spacing: 0.5px;
   -webkit-font-smoothing: antialiased;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 8px; position: relative; overflow: hidden;
-  color: #1a1000;
+  margin-top: 18px; position: relative; overflow: hidden;
+  color: #ffffff;
   --btn-x: 50%; --btn-y: 50%;
 
-  /* Gradient ambre/or premium — tecnològic i net */
+  /* Gradient blau elèctric viu — acció primària, diferent del gold premium */
   background: linear-gradient(180deg,
-    #F0C040 0%,
-    #D8A020 42%,
-    #C08820 76%,
-    #A87218 100%
+    #38BDF8 0%,
+    #0EA5E9 38%,
+    #0284C7 72%,
+    #0369A1 100%
   );
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.38) inset,
+    0 1px 0 rgba(255,255,255,.32) inset,
     0 -1px 0 rgba(0,0,0,.28) inset,
-    0 3px 12px rgba(200,152,24,.50),
+    0 4px 16px rgba(14,165,233,.60),
     0 2px 5px rgba(0,0,0,.52);
 
   transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .25s ease;
@@ -666,16 +682,16 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 @keyframes breatheAnalyze {
   0%, 100% {
     box-shadow:
-      0 1px 0 rgba(255,255,255,.38) inset,
+      0 1px 0 rgba(255,255,255,.32) inset,
       0 -1px 0 rgba(0,0,0,.28) inset,
-      0 3px 12px rgba(200,152,24,.50),
+      0 4px 16px rgba(14,165,233,.60),
       0 2px 5px rgba(0,0,0,.52);
   }
   50% {
     box-shadow:
-      0 1px 0 rgba(255,255,255,.40) inset,
+      0 1px 0 rgba(255,255,255,.36) inset,
       0 -1px 0 rgba(0,0,0,.28) inset,
-      0 6px 22px rgba(210,160,24,.65),
+      0 8px 28px rgba(14,165,233,.80),
       0 2px 5px rgba(0,0,0,.52);
   }
 }
@@ -683,9 +699,9 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .btn-analyze:hover:not(:disabled) {
   transform: scale(.98);
   box-shadow:
-    0 1px 0 rgba(255,255,255,.42) inset,
+    0 1px 0 rgba(255,255,255,.38) inset,
     0 -1px 0 rgba(0,0,0,.28) inset,
-    0 6px 20px rgba(210,160,24,.62),
+    0 8px 24px rgba(14,165,233,.75),
     0 2px 6px rgba(0,0,0,.55);
   animation-play-state: paused;
 }
@@ -693,9 +709,9 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .btn-analyze:active:not(:disabled) {
   transform: scale(.97);
   box-shadow:
-    0 1px 0 rgba(255,255,255,.20) inset,
+    0 1px 0 rgba(255,255,255,.18) inset,
     0 -1px 0 rgba(0,0,0,.22) inset,
-    0 2px 8px rgba(255,140,10,.40),
+    0 2px 8px rgba(14,165,233,.40),
     0 1px 4px rgba(0,0,0,.42);
   animation-play-state: paused;
 }
@@ -1375,8 +1391,8 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right { padding-top: 4px; }
   .app-col-right .card { padding-top: 8px; padding-bottom: 6px; }
 
-  /* Botó: enganxat al textarea, sense marge sobrer */
-  .app-col-right .btn-analyze { margin-top: 6px; }
+  /* Botó: separat del textarea per remarcar l'acció */
+  .app-col-right .btn-analyze { margin-top: 14px; }
   .app-col-right .btn-micro-copy { margin-top: 4px; }
 
   /* Headline oculta en mòbil: tabs+placeholder ja expliquen l'acció */
@@ -1597,7 +1613,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .card-head     { margin-bottom: 4px; }
   .app-col-right .input-tabs    { margin-bottom: 6px; }
   .app-col-right .ex-row        { margin-top: 2px; }
-  .app-col-right .btn-analyze   { margin-top: 6px; padding: 12px; }
+  .app-col-right .btn-analyze   { margin-top: 14px; padding: 12px; }
   .app-col-right .usage-counter { margin-top: 3px; flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
 }
 
