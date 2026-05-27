@@ -489,8 +489,8 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   letter-spacing: .1px;
   display: block;
 }
-.lt-gold  { color: var(--gold); }
-.lt-white { color: rgba(255,255,255,.75); }
+.lt-gold  { color: var(--gold); font-weight: 700; }
+.lt-white { color: rgba(255,255,255,.90); font-weight: 700; }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
