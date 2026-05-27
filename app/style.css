@@ -482,13 +482,15 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 
 .logo-tagline {
-  font-family: 'Nunito', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 300;
   font-style: normal;
-  color: rgba(255,255,255,.50);
-  margin-top: 1px;
-  letter-spacing: .1px;
+  color: rgba(255,255,255,.58);
+  margin-top: 3px;
+  letter-spacing: .25px;
+  line-height: 1.5;
+  max-width: 196px;
 }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
@@ -1421,8 +1423,8 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .btn-analyze { margin-top: 14px; }
   .app-col-right .btn-micro-copy { margin-top: 4px; }
 
-  /* Headline visible en mòbil — jerarquia emocional */
-  .app-col-right .app-main-headline { display: block; margin-bottom: 6px; }
+  /* Headline ocult — home minimalista premium */
+  .app-col-right .app-main-headline { display: none; }
 
   /* Tabs: més primes per donar espai a la textarea */
   .app-col-right .tab-btn { padding: 8px 10px; font-size: 12px; }
