@@ -1413,30 +1413,27 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Mòbil: logo +10% (99px), header compacte, gap mínim */
+  /* Mòbil: logo compacte, zero aire mort */
   #pageApp header { padding: 2px 14px; }
   #pageApp header .nexlupa-logo { height: 99px; width: 198px; }
-  .app-col-right { padding-top: 6px; }
-  .app-col-right .card { padding: 10px 14px 10px; border-radius: 16px; }
+  .app-col-right { padding-top: 4px; }
+  .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
 
-  /* Botó: separat del textarea per remarcar l'acció */
-  .app-col-right .btn-analyze { margin-top: 14px; }
-  .app-col-right .btn-micro-copy { margin-top: 4px; }
+  /* Botó: marge mínim — el color ja el separa prou */
+  .app-col-right .btn-analyze { margin-top: 8px; }
+  .app-col-right .btn-micro-copy { display: none; }
 
   /* Headline ocult — home minimalista premium */
   .app-col-right .app-main-headline { display: none; }
 
-  /* Tabs: més primes per donar espai a la textarea */
-  .app-col-right .tab-btn { padding: 8px 10px; font-size: 12px; }
-  .app-col-right .input-tabs { margin-bottom: 9px; }
+  /* Tabs més compactes */
+  .app-col-right .tab-btn { padding: 6px 10px; font-size: 12px; }
+  .app-col-right .input-tabs { margin-bottom: 6px; }
 
-  /* Micro-copy ocult: el botó Analitzar ja és prou explícit */
-  .app-col-right .btn-micro-copy { display: none; }
-
-  /* Usage counter mòbil: elimina el border-top (massa aire en pantalla petita) */
+  /* Usage counter: ras al botó, sense aire */
   .app-col-right .usage-counter {
-    padding-top: 8px;
-    margin-top: 10px;
+    margin-top: 6px;
+    padding-top: 5px;
     border-top-color: rgba(255,255,255,.05);
   }
 
