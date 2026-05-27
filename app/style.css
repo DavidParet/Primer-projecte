@@ -460,21 +460,23 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 
 /* App header */
 #pageApp header {
-  background: linear-gradient(160deg, #080c14 0%, #0f1428 100%);
-  padding: 10px 16px;
-  display: flex; flex-direction: column; gap: 5px;
-  border-bottom: 1px solid rgba(212,168,48,.16);
+  background: linear-gradient(180deg, #070b12 0%, #0c1220 100%);
+  padding: 14px 18px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
   position: sticky; top: 0; z-index: 10;
 }
 .header-top {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: flex-start;   /* botó alineat al top del logo, no flotant */
+  justify-content: space-between;
 }
 .logo svg  { height: 32px; width: auto; }
 
 /* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet */
 .nexlupa-logo {
-  height: 76px;
-  width: 152px;
+  height: 88px;
+  width: 176px;
   display: block;
 }
 
@@ -485,12 +487,12 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 400;
-  line-height: 1.35;
-  letter-spacing: .1px;
+  line-height: 1.4;
+  letter-spacing: .15px;
   display: block;
 }
 .lt-gold  { color: var(--gold); font-weight: 700; }
-.lt-white { color: rgba(255,255,255,.90); font-weight: 700; }
+.lt-white { color: rgba(255,255,255,.88); font-weight: 700; }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
@@ -1074,12 +1076,20 @@ body.dark #pageApp .app-col-right textarea:focus {
 
 /* Premium header button */
 .btn-premium-header {
-  padding: 4px 9px; background: var(--gold); color: var(--darker);
-  border: none; border-radius: 20px;
-  font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700;
+  padding: 5px 12px;
+  background: rgba(212,168,48,.08);
+  color: var(--gold);
+  border: 1px solid rgba(212,168,48,.30);
+  border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 600;
   cursor: pointer; transition: all .2s; white-space: nowrap;
+  letter-spacing: .2px;
+  flex-shrink: 0;
 }
-.btn-premium-header:hover { background: var(--gold2); transform: scale(1.05); }
+.btn-premium-header:hover {
+  background: rgba(212,168,48,.16);
+  border-color: rgba(212,168,48,.55);
+}
 
 /* Premium page */
 .premium-checklist { margin: 20px auto 0; max-width: 280px; text-align: left; position: relative; z-index: 1; }
@@ -1410,9 +1420,9 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Mòbil: header ja definit globalment, sobreescrivim el que cal */
-  #pageApp header { padding: 8px 14px 6px; gap: 4px; }
-  #pageApp header .nexlupa-logo { height: 76px; width: 152px; }
+  /* Mòbil: lleugeres correccions sobre el base mobile-first */
+  #pageApp header { padding: 12px 16px 10px; gap: 8px; }
+  #pageApp header .nexlupa-logo { height: 88px; width: 176px; }
   .app-col-right { padding-top: 4px; }
   .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
 
@@ -1501,8 +1511,13 @@ body.dark #pageApp .app-col-right textarea:focus {
 /* Tagline header: visible on mobile, hidden on desktop (left col has it) */
 @media (min-width: 900px) {
   .logo-tagline { display: none; }
-  #pageApp header { flex-direction: row; align-items: center; padding: 10px 20px; gap: 0; }
-  .header-top { flex: 1; }
+  #pageApp header {
+    flex-direction: row; align-items: center;
+    padding: 10px 24px; gap: 0;
+    border-bottom-color: rgba(212,168,48,.14);
+  }
+  .header-top { flex: 1; align-items: center; }
+  #pageApp header .nexlupa-logo { height: 108px; width: 216px; }
 }
 
 /* Right column: full width on mobile */
