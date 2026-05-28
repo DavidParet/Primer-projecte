@@ -643,7 +643,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* Analyze button */
 /* ── CTA ANALYZE — Motor IA de NexLupa ── */
 .btn-analyze {
-  width: 100%; padding: 11px 20px;
+  width: 100%; padding: 9px 20px;
   border: none; border-radius: 50px;
   font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
   letter-spacing: 0.3px;
@@ -661,10 +661,10 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   );
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.22) inset,
-    0 -1px 0 rgba(0,0,0,.24) inset,
-    0 3px 10px rgba(14,165,233,.38),
-    0 1px 4px rgba(0,0,0,.45);
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 -1px 0 rgba(0,0,0,.22) inset,
+    0 2px 6px rgba(14,165,233,.20),
+    0 1px 3px rgba(0,0,0,.40);
 
   transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .25s ease;
   animation: breatheAnalyze 4s ease-in-out infinite;
@@ -713,20 +713,20 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   }
   50% {
     box-shadow:
-      0 1px 0 rgba(255,255,255,.26) inset,
-      0 -1px 0 rgba(0,0,0,.24) inset,
-      0 5px 18px rgba(14,165,233,.55),
-      0 1px 4px rgba(0,0,0,.45);
+      0 1px 0 rgba(255,255,255,.22) inset,
+      0 -1px 0 rgba(0,0,0,.22) inset,
+      0 3px 10px rgba(14,165,233,.28),
+      0 1px 3px rgba(0,0,0,.40);
   }
 }
 
 .btn-analyze:hover:not(:disabled) {
   transform: scale(.985);
   box-shadow:
-    0 1px 0 rgba(255,255,255,.28) inset,
-    0 -1px 0 rgba(0,0,0,.24) inset,
-    0 6px 18px rgba(14,165,233,.55),
-    0 2px 5px rgba(0,0,0,.48);
+    0 1px 0 rgba(255,255,255,.24) inset,
+    0 -1px 0 rgba(0,0,0,.22) inset,
+    0 4px 12px rgba(14,165,233,.28),
+    0 1px 4px rgba(0,0,0,.44);
   animation-play-state: paused;
 }
 
@@ -956,10 +956,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   cursor: pointer; position: relative;
   font-family: 'Nunito', sans-serif; transition: all .15s;
 }
-.nav-btn span  { font-size: 20px; line-height: 1; }
-.nav-btn small { font-size: 9px; font-weight: 600; color: var(--muted); }
+.nav-btn span  { font-size: 19px; line-height: 1; }
+.nav-btn small { font-size: 9px; font-weight: 600; color: var(--muted); letter-spacing: .1px; }
+.nav-btn:not(.active) span  { filter: grayscale(0.35) opacity(0.65); }
 .nav-btn.active small { color: var(--gold2); }
-.nav-btn.active span  { filter: drop-shadow(0 0 4px rgba(200,164,60,.35)); }
+.nav-btn.active span  { filter: drop-shadow(0 0 3px rgba(200,164,60,.30)); }
 .nav-badge {
   position: absolute; top: 6px; right: calc(50% - 18px);
   background: rgba(196,42,42,.80); color: white;
@@ -1201,7 +1202,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   cursor: pointer; flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   animation: convGlow 4s ease-in-out infinite;
-  margin-top: 8px;
+  margin-top: 14px;
 }
 .conv-strip:active { opacity: .82; }
 @keyframes convGlow {
@@ -1255,19 +1256,18 @@ body.dark #pageApp .app-col-right textarea:focus {
 }
 .usage-plan-tag {
   font-family: 'Nunito', sans-serif;
-  font-size: 9px; font-weight: 700;
-  letter-spacing: .8px; text-transform: uppercase;
-  color: var(--gold);
-  opacity: .65;
-  border: 1px solid rgba(212,168,48,.22);
-  border-radius: 20px;
-  padding: 2px 8px;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: .6px; text-transform: uppercase;
+  color: rgba(212,168,48,.75);
   flex-shrink: 0;
+}
+.usage-sep {
+  font-size: 10px; color: rgba(255,255,255,.22);
 }
 .usage-quota {
   font-family: 'Nunito', sans-serif;
   font-size: 11px; font-weight: 500;
-  color: var(--muted);
+  color: rgba(255,255,255,.38);
   flex-shrink: 0;
 }
 .usage-dots { display: flex; gap: 4px; }
@@ -1429,27 +1429,27 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Mòbil: padding ajustat, canvas confirmat */
-  #pageApp header { padding: 8px 16px 6px; gap: 10px; }
+  /* Mòbil: capçalera compacta — menys gap sota el logo */
+  #pageApp header { padding: 8px 16px 2px; gap: 10px; }
   #pageApp header .nexlupa-logo { height: 96px; width: 192px; }
   .app-col-right { padding-top: 0; }
-  .app-col-right .card { padding: 6px 12px 8px; border-radius: 16px; }
+  .app-col-right .card { padding: 4px 12px 8px; border-radius: 16px; }
 
-  /* Botó: marge mínim — el color ja el separa prou */
-  .app-col-right .btn-analyze { margin-top: 8px; }
+  /* Botó: marge mínim */
+  .app-col-right .btn-analyze { margin-top: 6px; }
   .app-col-right .btn-micro-copy { display: none; }
 
   /* Headline ocult — home minimalista premium */
   .app-col-right .app-main-headline { display: none; }
 
-  /* Tabs més compactes */
+  /* Tabs compactes */
   .app-col-right .tab-btn { padding: 6px 10px; font-size: 12px; }
-  .app-col-right .input-tabs { margin-bottom: 6px; }
+  .app-col-right .input-tabs { margin-bottom: 4px; }
 
-  /* Free: fora de la card, pill entre card i conv-strip */
+  /* Free: sense punts, format inline */
   .app-col-right .usage-counter {
-    margin-top: 5px;
-    margin-bottom: 0;
+    margin-top: 6px;
+    margin-bottom: 10px;
     padding-top: 0;
     border-top: none;
   }

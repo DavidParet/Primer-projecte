@@ -294,20 +294,10 @@ function checkLimit() {
 function updateCounter() {
   var used = getUsageToday();
   var el   = document.getElementById('usageText');
-  var dots = document.getElementById('usageBar');
-  if (!el || !dots) return;
+  if (!el) return;
   el.textContent = used >= FREE_LIMIT
-    ? 'Límit diari assolit'
-    : used + ' / ' + FREE_LIMIT + ' avui';
-  var html = '<div class="usage-dots">';
-  for (var i = 0; i < FREE_LIMIT; i++) {
-    var cls = i < used
-      ? (used === FREE_LIMIT && i === FREE_LIMIT - 1 ? 'usage-dot last' : 'usage-dot used')
-      : 'usage-dot';
-    html += '<div class="' + cls + '"></div>';
-  }
-  html += '</div>';
-  dots.innerHTML = html;
+    ? 'Límit assolit'
+    : used + '/' + FREE_LIMIT + ' avui';
 }
 
 /* ── ANALYZE ── */
