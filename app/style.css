@@ -461,16 +461,23 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* App header */
 #pageApp header {
   background: linear-gradient(180deg, #070b12 0%, #0c1220 100%);
-  padding: 14px 18px 12px;
-  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 18px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
   border-bottom: 1px solid rgba(255,255,255,.06);
   position: sticky; top: 0; z-index: 10;
 }
-.header-top {
+
+/* Bloc unificat: logo + tagline com una sola composició */
+.header-brand {
   display: flex;
-  align-items: flex-start;   /* botó alineat al top del logo, no flotant */
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
 }
+
 .logo svg  { height: 32px; width: auto; }
 
 /* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet */
@@ -480,19 +487,18 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   display: block;
 }
 
-#pageApp header .logo { display: block; }
-
-/* Tagline dos colors — visible per defecte, ocult en desktop */
+/* Tagline — visible en mòbil, ocult en desktop */
 .logo-tagline {
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.45;
   letter-spacing: .15px;
   display: block;
 }
 .lt-gold  { color: var(--gold); font-weight: 700; }
-.lt-white { color: rgba(255,255,255,.88); font-weight: 700; }
+.lt-white { color: rgba(255,255,255,.82); font-weight: 500; }
+.lt-brand { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.92); }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
@@ -1420,8 +1426,8 @@ body.dark #pageApp .app-col-right textarea:focus {
   /* Capçalera "MISSATGE ORIGINAL" oculta: guanya ~45px per al textarea */
   .app-col-right .card-head { display: none; }
 
-  /* Mòbil: lleugeres correccions sobre el base mobile-first */
-  #pageApp header { padding: 12px 16px 10px; gap: 8px; }
+  /* Mòbil: padding ajustat, canvas confirmat */
+  #pageApp header { padding: 10px 16px 12px; gap: 10px; }
   #pageApp header .nexlupa-logo { height: 88px; width: 176px; }
   .app-col-right { padding-top: 4px; }
   .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
@@ -1512,11 +1518,10 @@ body.dark #pageApp .app-col-right textarea:focus {
 @media (min-width: 900px) {
   .logo-tagline { display: none; }
   #pageApp header {
-    flex-direction: row; align-items: center;
+    align-items: center;
     padding: 10px 24px; gap: 0;
     border-bottom-color: rgba(212,168,48,.14);
   }
-  .header-top { flex: 1; align-items: center; }
   #pageApp header .nexlupa-logo { height: 108px; width: 216px; }
 }
 
