@@ -475,16 +475,19 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .header-brand {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
 
 .logo svg  { height: 32px; width: auto; }
 
-/* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet */
+/* Logo — canvas bypassa completament el dark-mode processing de Samsung Internet
+   margin-left negatiu compensa el whitespace intern del PNG
+   perquè el logo visual s'alineï amb la E d'Enganxa */
 .nexlupa-logo {
-  height: 88px;
-  width: 176px;
+  height: 96px;
+  width: 192px;
   display: block;
+  margin-left: -14px;
 }
 
 /* Tagline — visible en mòbil, ocult en desktop */
@@ -498,7 +501,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 .lt-gold  { color: var(--gold); font-weight: 700; }
 .lt-white { color: rgba(255,255,255,.82); font-weight: 500; }
-.lt-brand { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.92); }
+.lt-brand { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.92); }
 
 .header-sub { font-size: 11px; color: var(--muted); font-style: italic; }
 
@@ -1428,7 +1431,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 
   /* Mòbil: padding ajustat, canvas confirmat */
   #pageApp header { padding: 10px 16px 12px; gap: 10px; }
-  #pageApp header .nexlupa-logo { height: 88px; width: 176px; }
+  #pageApp header .nexlupa-logo { height: 96px; width: 192px; }
   .app-col-right { padding-top: 4px; }
   .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
 
