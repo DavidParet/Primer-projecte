@@ -475,7 +475,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .header-brand {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 }
 
 .logo svg  { height: 32px; width: auto; }
@@ -1430,10 +1430,10 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .card-head { display: none; }
 
   /* Mòbil: padding ajustat, canvas confirmat */
-  #pageApp header { padding: 10px 16px 12px; gap: 10px; }
+  #pageApp header { padding: 8px 16px 6px; gap: 10px; }
   #pageApp header .nexlupa-logo { height: 96px; width: 192px; }
-  .app-col-right { padding-top: 4px; }
-  .app-col-right .card { padding: 8px 12px 8px; border-radius: 16px; }
+  .app-col-right { padding-top: 0; }
+  .app-col-right .card { padding: 6px 12px 8px; border-radius: 16px; }
 
   /* Botó: marge mínim — el color ja el separa prou */
   .app-col-right .btn-analyze { margin-top: 8px; }
