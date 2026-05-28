@@ -1,6 +1,9 @@
 {
   "name": "nexlupa",
   "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/inject-version.js"
+  },
   "dependencies": {
     "openai": "^4.0.0"
   }
