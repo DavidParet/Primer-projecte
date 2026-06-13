@@ -62,6 +62,44 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Resposta invàlida de la IA' });
     }
 
+    /* ── POST-PROCESSAMENT SERVER-SIDE: fallback mainEvent en 3 capes ──────
+     * Garanteix que l'event principal mai aparegui com a targeta MITJA,
+     * independentment del que retorni la IA.
+     */
+    const EVT_KEY_RE = /\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
+
+    if (!parsed.mainEvent) {
+      let srcIdx = -1;
+
+      // Capa 1: tipus === 'calendari'
+      for (let i = 0; i < parsed.accions.length; i++) {
+        if (parsed.accions[i].tipus === 'calendari') {
+          const a = parsed.accions[i];
+          parsed.mainEvent = { title: a.accio, data: a.data || null, lloc: a.lloc || null, edat: a.edat || null };
+          srcIdx = i;
+          break;
+        }
+      }
+
+      // Capa 2: data + (lloc o keyword d'event)
+      if (!parsed.mainEvent) {
+        for (let i = 0; i < parsed.accions.length; i++) {
+          const a = parsed.accions[i];
+          if (a.data && (a.lloc || EVT_KEY_RE.test(a.accio || ''))) {
+            parsed.mainEvent = { title: a.accio, data: a.data || null, lloc: a.lloc || null, edat: a.edat || null };
+            srcIdx = i;
+            break;
+          }
+        }
+      }
+
+      // Elimina l'acció usada com a mainEvent → no pot arribar al frontend com a MITJA
+      if (srcIdx !== -1) {
+        parsed.accions = parsed.accions.filter((_, idx) => idx !== srcIdx);
+      }
+    }
+    /* ──────────────────────────────────────────────────────────────────── */
+
     return res.status(200).json(parsed);
 
   } catch (err) {
