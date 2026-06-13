@@ -557,12 +557,15 @@ function addActionToCalendar(a) {
 }
 
 /* ── CATEGORITZACIÓ D'ACCIONS (motor v3 — sense calendari, que va a mainEvent) ── */
+/* Filtre de verbs d'event: "Assistir a", "Participar a", "Anar a", "Acudir a" mai són accions */
+var _evtVerbRe = /^(assistir|participar|anar\s+a|acudir)\b/i;
 function categorizeAccions(accions) {
   var p1   = [];
   var p2   = [];
   var info = [];
   accions.forEach(function(a) {
     if (a.tipus === 'calendari') return; /* l'event principal va a mainEvent */
+    if (_evtVerbRe.test((a.accio || '').trim())) return; /* verb d'event → filtrat */
     if (a.prioritat === 'alta')        p1.push(a);
     else if (a.prioritat === 'mitja')  p2.push(a);
     else                               info.push(a);
