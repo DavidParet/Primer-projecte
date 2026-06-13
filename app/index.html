@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=a7b18877"/>
+  <link rel="stylesheet" href="style.css?v=4f102b03"/>
   <style>.logo-tagline{margin:0!important;margin-top:-22px!important;}</style>
 </head>
 <body>
@@ -160,14 +160,48 @@
 
       <div class="results" id="results">
 
-        <!-- DECISIÓ — element protagonista -->
+        <!-- DECISIÓ — resum executiu -->
         <div class="nx-decisio-block">
-          <div class="nx-decisio-label" id="nx-decisio-label">👉 Decisió</div>
+          <div class="nx-decisio-label" id="nx-decisio-label">👉 En resum</div>
           <div class="nx-decisio-text" id="nx-decisio"></div>
         </div>
 
-        <!-- ACCIONS — targetes tipades -->
-        <div class="nx-actions-block" id="nx-actions"></div>
+        <!-- ESDEVENIMENT PRINCIPAL -->
+        <div class="nx-event-block" id="nx-event-block" style="display:none;">
+          <div class="nx-section-label nx-event-label">
+            <span class="nxs-icon">📌</span>
+            <span>Esdeveniment principal</span>
+          </div>
+          <div id="nx-event-content"></div>
+        </div>
+
+        <!-- P1 — ACCIONS IMPRESCINDIBLES -->
+        <div class="nx-p1-block" id="nx-p1-block" style="display:none;">
+          <div class="nx-section-label nx-p1-label">
+            <span class="nxs-icon">⚡</span>
+            <span>P1 — Accions imprescindibles</span>
+          </div>
+          <div id="nx-p1-content"></div>
+          <div class="nx-empty-msg" id="nx-p1-empty" style="display:none;">No s'han detectat accions imprescindibles.</div>
+        </div>
+
+        <!-- P2 — PREPARACIÓ -->
+        <div class="nx-p2-block" id="nx-p2-block" style="display:none;">
+          <div class="nx-section-label nx-p2-label">
+            <span class="nxs-icon">📋</span>
+            <span>P2 — Preparació</span>
+          </div>
+          <div id="nx-p2-content"></div>
+        </div>
+
+        <!-- INFORMACIÓ ADDICIONAL -->
+        <div class="nx-info-block" id="nx-info-block" style="display:none;">
+          <div class="nx-section-label nx-info-label">
+            <span class="nxs-icon">ℹ️</span>
+            <span>Informació addicional</span>
+          </div>
+          <div id="nx-info-content"></div>
+        </div>
 
         <!-- BOTONS: Compartir / Copiar / Analitzar -->
         <div class="nx-share-block">
@@ -386,7 +420,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=a7b18877"></script>
+<script src="script.js?v=4f102b03"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');

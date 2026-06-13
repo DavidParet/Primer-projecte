@@ -556,6 +556,115 @@ function addActionToCalendar(a) {
   document.body.removeChild(link);
 }
 
+/* ── CATEGORITZACIÓ D'ACCIONS (motor v2) ── */
+function categorizeAccions(accions) {
+  var events = [];
+  var p1     = [];
+  var p2     = [];
+  var info   = [];
+  accions.forEach(function(a) {
+    if (a.tipus === 'calendari') {
+      events.push(a);
+    } else if (a.prioritat === 'alta') {
+      p1.push(a);
+    } else if (a.prioritat === 'mitja') {
+      p2.push(a);
+    } else {
+      info.push(a);
+    }
+  });
+  return { events: events, p1: p1, p2: p2, info: info };
+}
+
+function _buildLlocLink(lloc) {
+  var el = document.createElement('a');
+  el.className = 'nx-card-lloc';
+  el.href      = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc);
+  el.target    = '_blank';
+  el.rel       = 'noopener noreferrer';
+  el.textContent = '📍 ' + lloc;
+  return el;
+}
+
+function _buildCalBtn(action) {
+  var btn = document.createElement('button');
+  btn.className   = 'nx-btn-cal';
+  btn.textContent = '📅 Afegir al calendari';
+  btn.onclick = function() { addActionToCalendar(action); };
+  return btn;
+}
+
+function buildEventCard(a) {
+  var card = document.createElement('div');
+  card.className = 'nx-event-card';
+
+  var nameEl = document.createElement('div');
+  nameEl.className   = 'nx-event-name';
+  nameEl.textContent = String(a.accio);
+  card.appendChild(nameEl);
+
+  var fmtDate = formatActionDate(a.data);
+  if (fmtDate || a.lloc) {
+    var meta = document.createElement('div');
+    meta.className = 'nx-event-meta';
+    if (fmtDate) {
+      var dc = document.createElement('span');
+      dc.className   = 'nx-event-chip';
+      dc.textContent = '📅 ' + fmtDate;
+      meta.appendChild(dc);
+    }
+    if (a.lloc) {
+      var lc = document.createElement('a');
+      lc.className   = 'nx-event-chip nx-event-chip-lloc';
+      lc.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.lloc);
+      lc.target      = '_blank';
+      lc.rel         = 'noopener noreferrer';
+      lc.textContent = '📍 ' + a.lloc;
+      meta.appendChild(lc);
+    }
+    card.appendChild(meta);
+  }
+
+  if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
+  return card;
+}
+
+function buildActionCard(a, cardClass) {
+  var icon = a.tipus === 'calendari' ? '📅' : a.tipus === 'informatiu' ? 'ℹ️' : '✅';
+
+  var card = document.createElement('div');
+  card.className = cardClass;
+
+  var row = document.createElement('div');
+  row.className = 'nx-card-row';
+
+  var iconEl = document.createElement('span');
+  iconEl.className   = 'nx-card-icon';
+  iconEl.textContent = icon;
+
+  var textEl = document.createElement('span');
+  textEl.className   = 'nx-card-text';
+  textEl.textContent = String(a.accio);
+
+  row.appendChild(iconEl);
+  row.appendChild(textEl);
+  card.appendChild(row);
+
+  var fmtDate = formatActionDate(a.data);
+  if (fmtDate) {
+    var dateEl = document.createElement('div');
+    dateEl.className   = 'nx-card-date';
+    dateEl.textContent = fmtDate;
+    card.appendChild(dateEl);
+  }
+
+  if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
+
+  if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
+
+  return card;
+}
+
 /* ── RENDER PRINCIPAL ── */
 function renderResult(d) {
   hideInputCard();
@@ -570,6 +679,8 @@ function renderResult(d) {
     return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
+
+  var cats = categorizeAccions(accions);
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -586,69 +697,61 @@ function renderResult(d) {
     }
   }
 
-  /* ACCIONS */
-  var actionsEl = document.getElementById('nx-actions');
-  if (actionsEl) {
-    actionsEl.innerHTML = '';
-    if (!noAction && accions.length > 0) {
-      accions.forEach(function(a) {
-        var icon    = a.tipus === 'calendari' ? '📅' : a.tipus === 'informatiu' ? 'ℹ️' : '✅';
-        var fmtDate = formatActionDate(a.data);
-        var prior   = a.prioritat || 'baixa';
+  /* ESDEVENIMENT PRINCIPAL */
+  var eventBlock   = document.getElementById('nx-event-block');
+  var eventContent = document.getElementById('nx-event-content');
+  if (eventBlock && eventContent) {
+    eventContent.innerHTML = '';
+    if (!noAction && cats.events.length > 0) {
+      cats.events.forEach(function(a) { eventContent.appendChild(buildEventCard(a)); });
+      eventBlock.style.display = '';
+    } else {
+      eventBlock.style.display = 'none';
+    }
+  }
 
-        var card = document.createElement('div');
-        card.className = 'nx-action-card nx-prior-' + prior;
+  /* P1 — ACCIONS IMPRESCINDIBLES */
+  var p1Block   = document.getElementById('nx-p1-block');
+  var p1Content = document.getElementById('nx-p1-content');
+  var p1Empty   = document.getElementById('nx-p1-empty');
+  if (p1Block && p1Content) {
+    p1Content.innerHTML = '';
+    if (!noAction) {
+      if (cats.p1.length > 0) {
+        cats.p1.forEach(function(a) { p1Content.appendChild(buildActionCard(a, 'nx-p1-card')); });
+        if (p1Empty) p1Empty.style.display = 'none';
+      } else {
+        if (p1Empty) p1Empty.style.display = '';
+      }
+      p1Block.style.display = '';
+    } else {
+      p1Block.style.display = 'none';
+    }
+  }
 
-        var top = document.createElement('div');
-        top.className = 'nx-action-top';
+  /* P2 — PREPARACIÓ */
+  var p2Block   = document.getElementById('nx-p2-block');
+  var p2Content = document.getElementById('nx-p2-content');
+  if (p2Block && p2Content) {
+    p2Content.innerHTML = '';
+    if (!noAction && cats.p2.length > 0) {
+      cats.p2.forEach(function(a) { p2Content.appendChild(buildActionCard(a, 'nx-p2-card')); });
+      p2Block.style.display = '';
+    } else {
+      p2Block.style.display = 'none';
+    }
+  }
 
-        var iconEl = document.createElement('span');
-        iconEl.className = 'nx-action-icon';
-        iconEl.textContent = icon;
-
-        var textEl = document.createElement('span');
-        textEl.className = 'nx-action-text';
-        textEl.textContent = String(a.accio);
-
-        top.appendChild(iconEl);
-        top.appendChild(textEl);
-
-        if (prior === 'alta' || prior === 'mitja') {
-          var pill = document.createElement('span');
-          pill.className = 'nx-prior-pill nx-prior-pill-' + prior;
-          pill.textContent = prior === 'alta' ? 'Alta' : 'Mitja';
-          top.appendChild(pill);
-        }
-
-        card.appendChild(top);
-
-        if (fmtDate) {
-          var dateEl = document.createElement('div');
-          dateEl.className = 'nx-action-date';
-          dateEl.textContent = fmtDate;
-          card.appendChild(dateEl);
-        }
-
-        if (a.lloc) {
-          var llocEl = document.createElement('a');
-          llocEl.className = 'nx-action-lloc';
-          llocEl.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.lloc);
-          llocEl.target = '_blank';
-          llocEl.rel = 'noopener noreferrer';
-          llocEl.textContent = '📍 ' + a.lloc;
-          card.appendChild(llocEl);
-        }
-
-        if (a.data && a.data !== 'null') {
-          var calBtn = document.createElement('button');
-          calBtn.className = 'nx-btn-cal';
-          calBtn.textContent = '📅 Afegir al calendari';
-          (function(action) { calBtn.onclick = function() { addActionToCalendar(action); }; }(a));
-          card.appendChild(calBtn);
-        }
-
-        actionsEl.appendChild(card);
-      });
+  /* INFORMACIÓ ADDICIONAL */
+  var infoBlock   = document.getElementById('nx-info-block');
+  var infoContent = document.getElementById('nx-info-content');
+  if (infoBlock && infoContent) {
+    infoContent.innerHTML = '';
+    if (!noAction && cats.info.length > 0) {
+      cats.info.forEach(function(a) { infoContent.appendChild(buildActionCard(a, 'nx-info-card')); });
+      infoBlock.style.display = '';
+    } else {
+      infoBlock.style.display = 'none';
     }
   }
 
