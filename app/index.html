@@ -467,5 +467,34 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 });
 </script>
+<script>
+/* PATCH — fallback mainEvent en 3 capes (s'executa sempre, independent de la caché de script.js) */
+(function(){
+  if(typeof renderResult!=='function') return;
+  var _orig=renderResult;
+  var _re=/\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
+  window.renderResult=function(d){
+    if(!d.mainEvent&&Array.isArray(d.accions)){
+      var acc=d.accions;
+      for(var i=0;i<acc.length;i++){
+        var a=acc[i];
+        if(!a||!a.accio) continue;
+        if(a.data&&(a.lloc||_re.test(a.accio))){
+          d=Object.assign({},d,{
+            mainEvent:{title:a.accio,data:a.data,lloc:a.lloc||null,edat:a.edat||null},
+            accions:acc.filter(function(_,j){return j!==i;})
+          });
+          break;
+        }
+      }
+    }
+    _orig(d);
+  };
+  if(typeof render==='function'){
+    var _origRender=render;
+    window.render=function(d){ window.renderResult(d); };
+  }
+})();
+</script>
 </body>
 </html>
