@@ -1,0 +1,23 @@
+{
+  "_comment": "Cas Festa d'Estiu — si la IA no retorna mainEvent i posa l'event a accions[]",
+  "resum": "Festa d'Estiu de l'Escola el 28 de juny al Parc de la Torre Lluc — cal confirmar assistència abans del 25.",
+  "decisio": "Confirmar l'assistència al formulari abans del dimecres 25 de juny",
+  "mainEvent": null,
+  "contingut": null,
+  "accions": [
+    {
+      "accio": "Confirmar assistència omplint el formulari",
+      "tipus": "tasca",
+      "data": "2026-06-25 00:00",
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "Festa d'Estiu de l'Escola — Parc de la Torre Lluc de Gavà",
+      "tipus": "tasca",
+      "data": "2026-06-28 10:00",
+      "prioritat": "mitja",
+      "lloc": "Parc de la Torre Lluc de Gavà"
+    }
+  ]
+}
