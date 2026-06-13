@@ -16,10 +16,23 @@ SORTIDA (estructura obligatòria):
 {
   "resum": "string curt i clar (1 frase)",
   "decisio": "acció clara en format imperatiu",
+  "mainEvent": {
+    "title": "Nom clar de l'acte principal",
+    "data": "YYYY-MM-DD HH:MM (o null)",
+    "lloc": "ubicació literal o null",
+    "edat": "rang d'edat si s'esmenta o null"
+  },
+  "contingut": {
+    "items": ["Música", "Jocs", "Samarreta de regal"],
+    "edat": "6 a 12 anys (si no s'ha posat a mainEvent) o null",
+    "places": "Places limitades — 50 màxim (o null)",
+    "organitzador": "nom de l'organitzador o null",
+    "cost": "15€ (o null si és gratuït o no s'esmenta)"
+  },
   "accions": [
     {
       "accio": "string",
-      "tipus": "calendari | tasca | informatiu",
+      "tipus": "tasca | informatiu",
       "data": "YYYY-MM-DD HH:MM (si aplica, sinó null)",
       "prioritat": "alta | mitja | baixa",
       "lloc": "ubicació literal del missatge o null"
@@ -335,6 +348,30 @@ PROHIBIT:
 
 ---
 
+25. REGLA — MAIN EVENT (CRÍTIC)
+- Si el missatge descriu un acte, festa, jornada, excursió, sortida, reunió, espectacle, festival, torneig o evento similar → generar "mainEvent".
+- "mainEvent" NO és una acció. No entra a "accions". És una categoria independent.
+- PROHIBIT generar "Assistir a [event]" com a acció dins "accions".
+- El "mainEvent" conté: title (nom clar), data (YYYY-MM-DD HH:MM o null), lloc (ubicació o null), edat (rang si s'esmenta o null).
+- Si no hi ha cap acte central → "mainEvent": null.
+- CORRECTE: festival, excursió, reunió AMPA → mainEvent present
+- INCORRECTE: missatge informatiu sense acte → mainEvent null
+
+---
+
+26. REGLA — CONTINGUT (QUÈ HI TROBARÀS)
+- Si "mainEvent" és present i el text descriu activitats, contingut o inclusions → generar "contingut".
+- "contingut.items": array de strings amb activitats i coses incloses (màxim 8). Combinar "Música", "Jocs", "Samarreta de regal" etc.
+- "contingut.edat": rang d'edat si s'esmenta al text (ex: "6 a 12 anys", "a partir de 3 anys"). null si no s'esmenta.
+- "contingut.places": text sobre places disponibles o limitació (ex: "Places limitades", "50 places"). null si no s'esmenta.
+- "contingut.organitzador": nom de l'organitzador si s'esmenta. null si no.
+- "contingut.cost": cost de l'activitat en text (ex: "15€", "Gratuït"). null si no s'esmenta.
+- Si "mainEvent" és null → "contingut": null.
+- NO repetir en "contingut" informació que ja és a "mainEvent" (lloc, data, hora).
+- PROHIBIT incloure informació de pagament aquí: va a "accions" com a tasca alta.
+
+---
+
 EXEMPLES:
 
 INPUT:
@@ -492,6 +529,19 @@ OUTPUT:
 {
   "resum": "Festival de fi de curs el 20 de juny al Pavelló de Gavà; vestuari obligatori, pagament abans del 18 i 4 entrades per família.",
   "decisio": "El festival requereix vestuari complet des de casa, pagament abans del dimecres 18 i arribar al pavelló a les 17:30h per dificultats d'aparcament.",
+  "mainEvent": {
+    "title": "Festival de fi de curs",
+    "data": "2026-06-20 18:00",
+    "lloc": "Pavelló Municipal de Gavà",
+    "edat": null
+  },
+  "contingut": {
+    "items": ["Actuació dels alumnes", "Coreografia final"],
+    "edat": null,
+    "places": "4 entrades per família",
+    "organitzador": null,
+    "cost": "15€"
+  },
   "accions": [
     {
       "accio": "Completar el pagament de l'activitat (15€)",
@@ -522,13 +572,6 @@ OUTPUT:
       "lloc": "Pavelló Municipal de Gavà"
     },
     {
-      "accio": "Festival de fi de curs — Pavelló Municipal de Gavà",
-      "tipus": "calendari",
-      "data": "2026-06-20 18:00",
-      "prioritat": "mitja",
-      "lloc": "Pavelló Municipal de Gavà"
-    },
-    {
       "accio": "Cada família disposarà de 4 entrades",
       "tipus": "informatiu",
       "data": null,
@@ -547,6 +590,13 @@ OUTPUT:
 {
   "resum": "Torneig de futbol a Reus dissabte; convocatòria 6:45, sortida autocar 7:00 puntual i targeta federativa obligatòria.",
   "decisio": "El torneig requereix sortida molt puntual — l'autocar no esperarà. El principal risc és arribar tard o oblidar la targeta federativa obligatòria.",
+  "mainEvent": {
+    "title": "Torneig de futbol 7 — Reus",
+    "data": "2026-06-28 06:45",
+    "lloc": "Camp UE Gavà",
+    "edat": null
+  },
+  "contingut": null,
   "accions": [
     {
       "accio": "Tenir la targeta federativa preparada per presentar abans de pujar a l'autocar",
@@ -554,13 +604,6 @@ OUTPUT:
       "data": null,
       "prioritat": "alta",
       "lloc": null
-    },
-    {
-      "accio": "Sortida torneig UE Gavà — Reus (06:45 convocatòria · 07:00 sortida autocar)",
-      "tipus": "calendari",
-      "data": "2026-06-28 06:45",
-      "prioritat": "alta",
-      "lloc": "Camp UE Gavà"
     },
     {
       "accio": "Preparar equipació del torneig (equipació oficial, mitgetes, cantimplora, protector solar)",

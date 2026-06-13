@@ -2037,3 +2037,73 @@ body.dark #pageApp .app-col-right textarea:focus {
   font-size: 13px; color: #5c6580;
   font-style: italic; padding: 4px 0 2px;
 }
+
+/* ── CHIPS ESPECIALS DE LA TARGETA D'ESDEVENIMENT ── */
+.nx-chip-lloc { cursor: default; }
+.nx-chip-days {
+  background: rgba(61,186,111,.12) !important;
+  border-color: rgba(61,186,111,.25) !important;
+  color: #3dba6f !important;
+  font-weight: 700;
+}
+
+/* ── BOTONS D'ACCIÓ DE LA TARGETA D'ESDEVENIMENT ── */
+.nx-event-btn-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+}
+.nx-event-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  transition: all .2s; flex: 1; justify-content: center;
+  white-space: nowrap;
+}
+.nx-event-btn-cal {
+  background: rgba(212,168,48,.12);
+  border: 1px solid rgba(212,168,48,.3);
+  color: var(--gold);
+}
+.nx-event-btn-cal:hover  { background: rgba(212,168,48,.22); }
+.nx-event-btn-cal:active { background: rgba(212,168,48,.3); }
+.nx-event-btn-maps {
+  background: rgba(59,130,246,.1);
+  border: 1px solid rgba(59,130,246,.25);
+  color: #60a5fa;
+}
+.nx-event-btn-maps:hover  { background: rgba(59,130,246,.18); }
+.nx-event-btn-maps:active { background: rgba(59,130,246,.26); }
+
+/* ── BLOC QUÈ HI TROBARÀS ── */
+.nx-what-block { margin-bottom: 14px; }
+.nx-what-label { color: #a78bfa; }
+
+.nx-what-list {
+  list-style: none; padding: 0; margin: 0 0 10px;
+  background: rgba(167,139,250,.05);
+  border: 1px solid rgba(167,139,250,.15);
+  border-radius: 12px; overflow: hidden;
+}
+.nx-what-item {
+  padding: 10px 14px;
+  font-size: 14px; font-weight: 500; color: #d0c8e8;
+  border-bottom: 1px solid rgba(167,139,250,.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.nx-what-item:last-child { border-bottom: none; }
+.nx-what-item::before {
+  content: '•';
+  color: #a78bfa; font-weight: 900; font-size: 16px; flex-shrink: 0;
+}
+
+.nx-what-details {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.nx-what-detail-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; font-weight: 600; color: #8891a6;
+}

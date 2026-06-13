@@ -556,24 +556,18 @@ function addActionToCalendar(a) {
   document.body.removeChild(link);
 }
 
-/* ── CATEGORITZACIÓ D'ACCIONS (motor v2) ── */
+/* ── CATEGORITZACIÓ D'ACCIONS (motor v3 — sense calendari, que va a mainEvent) ── */
 function categorizeAccions(accions) {
-  var events = [];
-  var p1     = [];
-  var p2     = [];
-  var info   = [];
+  var p1   = [];
+  var p2   = [];
+  var info = [];
   accions.forEach(function(a) {
-    if (a.tipus === 'calendari') {
-      events.push(a);
-    } else if (a.prioritat === 'alta') {
-      p1.push(a);
-    } else if (a.prioritat === 'mitja') {
-      p2.push(a);
-    } else {
-      info.push(a);
-    }
+    if (a.tipus === 'calendari') return; /* l'event principal va a mainEvent */
+    if (a.prioritat === 'alta')        p1.push(a);
+    else if (a.prioritat === 'mitja')  p2.push(a);
+    else                               info.push(a);
   });
-  return { events: events, p1: p1, p2: p2, info: info };
+  return { p1: p1, p2: p2, info: info };
 }
 
 function _buildLlocLink(lloc) {
@@ -594,43 +588,155 @@ function _buildCalBtn(action) {
   return btn;
 }
 
-function buildEventCard(a) {
+/* ── HELPERS DE DATA PER AL MAIN EVENT ── */
+function splitDateTime(dateStr) {
+  if (!dateStr || dateStr === 'null') return { date: null, time: null };
+  var m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+  if (!m) return { date: null, time: null };
+  var DAYS   = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
+  var MONTHS = ['gen','feb','març','abr','maig','juny','jul','ago','set','oct','nov','des'];
+  var dt = new Date(+m[1], +m[2]-1, +m[3]);
+  var dateLabel = DAYS[dt.getDay()] + ' ' + dt.getDate() + ' de ' + MONTHS[dt.getMonth()];
+  var hasTime = m[4] && !(m[4] === '00' && m[5] === '00');
+  return { date: dateLabel, time: hasTime ? m[4] + ':' + m[5] + 'h' : null };
+}
+
+function calcDiesRestants(dateStr) {
+  if (!dateStr || dateStr === 'null') return null;
+  var m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  var evDate = new Date(+m[1], +m[2]-1, +m[3]);
+  var today  = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((evDate - today) / 86400000);
+}
+
+/* ── TARGETA ESDEVENIMENT PRINCIPAL ── */
+function buildEventCard(mainEvent) {
   var card = document.createElement('div');
   card.className = 'nx-event-card';
 
   var nameEl = document.createElement('div');
   nameEl.className   = 'nx-event-name';
-  nameEl.textContent = String(a.accio);
+  nameEl.textContent = String(mainEvent.title || mainEvent.accio || '');
   card.appendChild(nameEl);
 
-  var fmtDate = formatActionDate(a.data);
-  if (fmtDate || a.lloc) {
-    var meta = document.createElement('div');
-    meta.className = 'nx-event-meta';
-    if (fmtDate) {
-      var dc = document.createElement('span');
-      dc.className   = 'nx-event-chip';
-      dc.textContent = '📅 ' + fmtDate;
-      meta.appendChild(dc);
-    }
-    if (a.lloc) {
-      var lc = document.createElement('a');
-      lc.className   = 'nx-event-chip nx-event-chip-lloc';
-      lc.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.lloc);
-      lc.target      = '_blank';
-      lc.rel         = 'noopener noreferrer';
-      lc.textContent = '📍 ' + a.lloc;
-      meta.appendChild(lc);
-    }
-    card.appendChild(meta);
+  var meta = document.createElement('div');
+  meta.className = 'nx-event-meta';
+
+  var dt = splitDateTime(mainEvent.data);
+
+  if (dt.date) {
+    var dc = document.createElement('span');
+    dc.className   = 'nx-event-chip';
+    dc.textContent = '📅 ' + dt.date;
+    meta.appendChild(dc);
+  }
+  if (dt.time) {
+    var tc = document.createElement('span');
+    tc.className   = 'nx-event-chip';
+    tc.textContent = '🕒 ' + dt.time;
+    meta.appendChild(tc);
+  }
+  if (mainEvent.lloc) {
+    var lc = document.createElement('span');
+    lc.className   = 'nx-event-chip nx-chip-lloc';
+    lc.textContent = '📍 ' + mainEvent.lloc;
+    meta.appendChild(lc);
+  }
+  if (mainEvent.edat) {
+    var ac = document.createElement('span');
+    ac.className   = 'nx-event-chip';
+    ac.textContent = '👥 ' + mainEvent.edat;
+    meta.appendChild(ac);
   }
 
-  if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
+  var dies = calcDiesRestants(mainEvent.data);
+  if (dies !== null && dies >= 0) {
+    var daysChip = document.createElement('span');
+    daysChip.className = 'nx-event-chip nx-chip-days';
+    daysChip.textContent = dies === 0 ? '⏳ Avui!' : dies === 1 ? '⏳ Demà!' : '⏳ ' + dies + ' dies';
+    meta.appendChild(daysChip);
+  }
+
+  if (meta.children.length > 0) card.appendChild(meta);
+
+  /* Botons d'acció */
+  var btnRow = document.createElement('div');
+  btnRow.className = 'nx-event-btn-row';
+
+  if (mainEvent.data && mainEvent.data !== 'null') {
+    var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc };
+    var calBtn = document.createElement('button');
+    calBtn.className   = 'nx-event-btn nx-event-btn-cal';
+    calBtn.textContent = '📅 Afegir al calendari';
+    (function(act) { calBtn.onclick = function() { addActionToCalendar(act); }; }(calAction));
+    btnRow.appendChild(calBtn);
+  }
+
+  if (mainEvent.lloc) {
+    var mapsBtn = document.createElement('a');
+    mapsBtn.className   = 'nx-event-btn nx-event-btn-maps';
+    mapsBtn.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mainEvent.lloc);
+    mapsBtn.target      = '_blank';
+    mapsBtn.rel         = 'noopener noreferrer';
+    mapsBtn.textContent = '🗺️ Obrir Maps';
+    btnRow.appendChild(mapsBtn);
+  }
+
+  if (btnRow.children.length > 0) card.appendChild(btnRow);
   return card;
 }
 
+/* ── BLOC "QUÈ HI TROBARÀS" ── */
+function renderContingut(contingut) {
+  var block   = document.getElementById('nx-what-block');
+  var content = document.getElementById('nx-what-content');
+  if (!block || !content) return;
+  if (!contingut) { block.style.display = 'none'; return; }
+
+  var items = [];
+  (contingut.items || []).forEach(function(s) { if (s && String(s).trim()) items.push(String(s)); });
+
+  var details = [];
+  if (contingut.edat)         details.push({ icon: '👥', text: contingut.edat });
+  if (contingut.places)       details.push({ icon: '⚠️', text: contingut.places });
+  if (contingut.organitzador) details.push({ icon: '🏫', text: contingut.organitzador });
+  if (contingut.cost)         details.push({ icon: '💰', text: contingut.cost });
+
+  if (items.length === 0 && details.length === 0) { block.style.display = 'none'; return; }
+
+  content.innerHTML = '';
+
+  if (items.length > 0) {
+    var list = document.createElement('ul');
+    list.className = 'nx-what-list';
+    items.forEach(function(item) {
+      var li = document.createElement('li');
+      li.className   = 'nx-what-item';
+      li.textContent = item;
+      list.appendChild(li);
+    });
+    content.appendChild(list);
+  }
+
+  if (details.length > 0) {
+    var dr = document.createElement('div');
+    dr.className = 'nx-what-details';
+    details.forEach(function(d) {
+      var chip = document.createElement('span');
+      chip.className   = 'nx-what-detail-chip';
+      chip.textContent = d.icon + ' ' + d.text;
+      dr.appendChild(chip);
+    });
+    content.appendChild(dr);
+  }
+
+  block.style.display = '';
+}
+
+/* ── TARGETA D'ACCIÓ (P1 / P2 / INFO) ── */
 function buildActionCard(a, cardClass) {
-  var icon = a.tipus === 'calendari' ? '📅' : a.tipus === 'informatiu' ? 'ℹ️' : '✅';
+  var icon = a.tipus === 'informatiu' ? 'ℹ️' : '✅';
 
   var card = document.createElement('div');
   card.className = cardClass;
@@ -679,7 +785,6 @@ function renderResult(d) {
     return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
-
   var cats = categorizeAccions(accions);
 
   /* DECISIÓ */
@@ -697,18 +802,31 @@ function renderResult(d) {
     }
   }
 
-  /* ESDEVENIMENT PRINCIPAL */
+  /* MAIN EVENT — ve del camp mainEvent (AI v3) o fallback des de calendari */
+  var mainEvent = d.mainEvent || null;
+  if (!mainEvent) {
+    for (var i = 0; i < accions.length; i++) {
+      if (accions[i].tipus === 'calendari') {
+        mainEvent = { title: accions[i].accio, data: accions[i].data, lloc: accions[i].lloc };
+        break;
+      }
+    }
+  }
+
   var eventBlock   = document.getElementById('nx-event-block');
   var eventContent = document.getElementById('nx-event-content');
   if (eventBlock && eventContent) {
     eventContent.innerHTML = '';
-    if (!noAction && cats.events.length > 0) {
-      cats.events.forEach(function(a) { eventContent.appendChild(buildEventCard(a)); });
+    if (!noAction && mainEvent && (mainEvent.title || mainEvent.accio)) {
+      eventContent.appendChild(buildEventCard(mainEvent));
       eventBlock.style.display = '';
     } else {
       eventBlock.style.display = 'none';
     }
   }
+
+  /* CONTINGUT — bloc "QUÈ HI TROBARÀS" */
+  renderContingut(!noAction ? (d.contingut || null) : null);
 
   /* P1 — ACCIONS IMPRESCINDIBLES */
   var p1Block   = document.getElementById('nx-p1-block');
