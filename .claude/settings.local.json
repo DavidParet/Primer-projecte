@@ -35,7 +35,15 @@
       "mcp__86991a26-cc7b-49d7-979c-a57cf20be139__get_project",
       "mcp__86991a26-cc7b-49d7-979c-a57cf20be139__web_fetch_vercel_url",
       "Bash(git rm *)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "mcp__Vercel__deploy_to_vercel",
+      "mcp__Vercel__list_projects",
+      "mcp__Vercel__list_teams",
+      "mcp__Vercel__get_deployment",
+      "mcp__Vercel__list_deployments",
+      "mcp__Vercel__get_project",
+      "mcp__Vercel__get_runtime_logs",
+      "mcp__Vercel__get_deployment_build_logs"
     ]
   }
 }
