@@ -1,0 +1,22 @@
+{
+  "resum": "Festa del Bàsquet Escolar el 17 de juliol al Pavelló Can Tintorer — cal inscriure's per assegurar plaça.",
+  "decisio": "Inscriure's a la festa per assegurar plaça",
+  "mainEvent": null,
+  "contingut": null,
+  "accions": [
+    {
+      "accio": "Inscriure's a la festa per assegurar plaça",
+      "tipus": "tasca",
+      "data": null,
+      "prioritat": "alta",
+      "lloc": null
+    },
+    {
+      "accio": "III Festa del Bàsquet Escolar — Pavelló Can Tintorer de Gavà",
+      "tipus": "tasca",
+      "data": "2026-07-17 10:00",
+      "prioritat": "mitja",
+      "lloc": "Pavelló Can Tintorer de Gavà"
+    }
+  ]
+}

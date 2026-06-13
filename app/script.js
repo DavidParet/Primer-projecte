@@ -788,6 +788,35 @@ function renderResult(d) {
     return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
+
+  /* MAIN EVENT — fallback en 3 capes (abans de categorizeAccions per eliminar de P2) */
+  var _evtKeyRe2    = /\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
+  var mainEvent     = d.mainEvent || null;
+  var _meSrcIdx     = -1;
+  if (!mainEvent) {
+    /* capa 1: tipus === 'calendari' */
+    for (var _mei = 0; _mei < accions.length; _mei++) {
+      if (accions[_mei].tipus === 'calendari') {
+        mainEvent = { title: accions[_mei].accio, data: accions[_mei].data, lloc: accions[_mei].lloc };
+        _meSrcIdx = _mei; break;
+      }
+    }
+  }
+  if (!mainEvent) {
+    /* capa 2: data + (lloc o keyword d'event) */
+    for (var _mei2 = 0; _mei2 < accions.length; _mei2++) {
+      var _mea = accions[_mei2];
+      if (_mea.data && (_mea.lloc || _evtKeyRe2.test(_mea.accio || ''))) {
+        mainEvent = { title: _mea.accio, data: _mea.data, lloc: _mea.lloc };
+        _meSrcIdx = _mei2; break;
+      }
+    }
+  }
+  /* elimina l'acció usada com a mainEvent → no apareix a P2 */
+  if (_meSrcIdx !== -1) {
+    accions = accions.filter(function(_, idx) { return idx !== _meSrcIdx; });
+  }
+
   var cats = categorizeAccions(accions);
 
   /* DECISIÓ */
@@ -802,17 +831,6 @@ function renderResult(d) {
       decisioEl.textContent = decisio || d.resum || '';
       decisioEl.className   = 'nx-decisio-text';
       if (decisioLabel) decisioLabel.style.display = '';
-    }
-  }
-
-  /* MAIN EVENT — ve del camp mainEvent (AI v3) o fallback des de calendari */
-  var mainEvent = d.mainEvent || null;
-  if (!mainEvent) {
-    for (var i = 0; i < accions.length; i++) {
-      if (accions[i].tipus === 'calendari') {
-        mainEvent = { title: accions[i].accio, data: accions[i].data, lloc: accions[i].lloc };
-        break;
-      }
     }
   }
 
