@@ -203,3 +203,45 @@ Criteri d'èxit: mesurar passos humans, temps estalviat, canvis correctes de Cal
 - Si WhatsApp no s'ha pogut sincronitzar, informar que es respon només amb les dades disponibles.
 
 **Prioritat:** la conciliació Gmail + WhatsApp s'inclou des del primer MVP Premium de fitxa viva; el filtratge de múltiples subgrups continua sent un cas avançat, no el flux principal.
+
+
+## AGENT FAMILIAR PREMIUM — CONSULTES EN LLENGUATGE NATURAL AL MOMENT (REQUISIT CENTRAL)
+
+**Decisió de producte, 2026-11-07:** l'usuari vol un agent disponible en tot moment per resoldre qualsevol dubte de la vida familiar utilitzant les dades que NEXLUPA té autoritzades. No és una funció menor: és la **interfície principal de Premium** al costat de l'automatització de comunicacions.
+
+### Experiència que ha d'oferir
+- Xat conversacional en català (i altres idiomes segons l'usuari), accessible en una única pantalla mòbil, amb preguntes normals i seguiment contextual: «Quan és la sortida de ball?», «A quina hora hem de ser-hi?», «Què han de portar?», «Què falta pagar?», «Hi ha hagut algun canvi avui?».
+- Cerca en **una fitxa viva unificada per activitat**, informació realment rebuda per Gmail i WhatsApp, historial de canvis, tasques pendents i esdeveniments de Google Calendar autoritzats.
+- Resposta **breu i accionable**, amb font i data de l'última comunicació. Diferenciar «hora d'arribada» d'«hora d'inici» i altres camps; no inventar informació.
+- Si una dada és contradictòria, incompleta o anterior a una rectificació, **mostrar la incertesa i demanar verificació**. Si NEXLUPA no ha rebut tots els missatges de WhatsApp, no insinuar que disposa d'un historial complet.
+- Suggerir i preparar accions immediates: «Afegeix el material al recordatori», «Actualitza el calendari», «Prepara un WhatsApp per confirmar assistència», «Mostra'm el missatge original».
+- **Confirmació abans d'enviar missatges a tercers** o executar canvis no trivials; els canvis de calendari habituals només s'automatitzen després de permisos concrets i revisables.
+- Resposta ràpida a consultes indexades: cerca per família, activitat, data, acció, emissor, source message i calendarEventId. No és obligatori fer una trucada al model per recuperar una dada estructurada inequívoca.
+- Permetre seguiment: «I a quina hora?», «Qui ho ha comunicat?», «És segur?», «Ja ho tenim apuntat?», i correccions explícites de l'usuari amb historial.
+- Separar coneixement general de dades particulars: si l'usuari pregunta una cosa que NEXLUPA no sap a partir de fonts autoritzades, respondre honestament i, si escau, oferir passos per verificar-ho.
+
+### Arquitectura proposada
+1. Ingesta legítima dels canals autoritzats i informació aportada manualment.
+2. Normalització, deduplicació i reconciliació en fitxes i esdeveniments canònics.
+3. Índex de cerca familiar amb identitat de cada font, permís i procedència; dades no accessibles entre famílies.
+4. Agent amb eines amb permisos separats: consultar fitxes, cercar fonts, llegir Google Calendar, crear/editar propostes d'esdeveniments, preparar respostes.
+5. Regles de decisió i traçabilitat: resposta fonamentada, estat de confiança, font més recent, què s'ha actualitzat i què requereix aprovació.
+6. Avaluació de rendiment i privacitat: objectius mesurables de latència, cost per consulta, exactitud i falses afirmacions.
+
+### Conversa d'exemple (dades fictícies)
+Usuari: «NEXLUPA, quan és la sortida de ball?»
+Agent: «Dissabte 21 de novembre. L'acte comença a les 17:00, però heu d'arribar a les 16:15 amb el vestuari posat. Ho indica la circular de Gmail i un missatge posterior de WhatsApp. Ja consta al calendari.»
+Usuari: «Què hem de portar?»
+Agent: «El vestuari de ball posat. No tinc confirmat cap altre material.»
+Usuari: «Prepara una resposta de confirmació.»
+Agent: prepara l'esborrany i l'ofereix per revisar; no l'envia sense autorització.
+
+### Proves d'acceptació
+- 10 consultes amb respostes repartides entre Gmail, WhatsApp i Calendar; totes amb fonts precises.
+- Informació contradictòria: l'agent no escull silenciosament una dada falsa ni confon convocatòria amb actuació.
+- Consultes de seguiment sense repetir tota la pregunta inicial.
+- Una petició d'edició del calendari identifica un sol esdeveniment existent i no duplica.
+- No consulta xats no autoritzats, no envia missatges sense aprovació i no exposa dades d'una família a una altra.
+- Quan falta accés a un canal, ho diu clarament.
+
+**Estat:** visió i requisits de producte; ni l'agent multicanal ni les integracions de WhatsApp han estat implementats encara.
