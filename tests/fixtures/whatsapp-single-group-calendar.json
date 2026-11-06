@@ -1,0 +1,123 @@
+{
+  "case": "single-whatsapp-group-living-card-calendar",
+  "synthetic": true,
+  "status": "expected-behavior-only",
+  "family": {
+    "activityId": "basket-001",
+    "activityName": "Bàsquet",
+    "timezone": "Europe/Madrid",
+    "whatsappGroupLabel": "Bàsquet U12",
+    "connectedCalendarId": "calendar-family-test"
+  },
+  "initial": {
+    "activityCard": {
+      "schedule": "Dijous 18:00",
+      "venue": "Pavelló Municipal",
+      "materials": [],
+      "pendingTasks": []
+    },
+    "calendarEvents": [
+      {
+        "id": "evt-001",
+        "calendarEventId": "gcal-unchanged-123",
+        "title": "Entrenament de bàsquet",
+        "date": "2026-11-12",
+        "start": "18:00",
+        "end": "19:00",
+        "venue": "Pavelló Municipal"
+      }
+    ]
+  },
+  "input": [
+    {
+      "messageId": "m01",
+      "at": "2026-11-09T10:15:00+01:00",
+      "text": "Recordatori: l'entrenament de dijous 12 de novembre és a les 18 h al Pavelló Municipal.",
+      "expect": {
+        "calendar": "unchanged",
+        "card": "unchanged",
+        "alert": false
+      }
+    },
+    {
+      "messageId": "m02",
+      "at": "2026-11-09T10:16:00+01:00",
+      "text": "Gràcies! Que tingueu bon dia 😊",
+      "expect": {
+        "calendar": "unchanged",
+        "card": "unchanged",
+        "alert": false
+      }
+    },
+    {
+      "messageId": "m03",
+      "at": "2026-11-10T12:00:00+01:00",
+      "text": "Canvi: l'entrenament d'aquesta setmana passa de dijous 12 a divendres 13 a les 18 h. Mateix pavelló.",
+      "expect": {
+        "calendar": "update evt-001 / gcal-unchanged-123 to 2026-11-13T18:00:00+01:00",
+        "card": "schedule changes to divendres 18:00",
+        "alert": true
+      }
+    },
+    {
+      "messageId": "m04",
+      "at": "2026-11-10T12:10:00+01:00",
+      "text": "Us recordem que l'entrenament serà divendres 13 a les 18 h.",
+      "expect": {
+        "calendar": "unchanged, no duplicate",
+        "card": "unchanged",
+        "alert": false
+      }
+    },
+    {
+      "messageId": "m05",
+      "at": "2026-11-11T17:00:00+01:00",
+      "text": "Per divendres, porteu samarreta blanca i ampolla d'aigua.",
+      "expect": {
+        "calendar": "same evt-001, optional existing event note",
+        "card": "materials white shirt + water bottle",
+        "alert": true
+      }
+    },
+    {
+      "messageId": "m06",
+      "at": "2026-11-11T19:00:00+01:00",
+      "text": "La trobada de dissabte és a les 17 h. Encara no sabem al pavelló que anirem.",
+      "expect": {
+        "calendar": "do not create with guessed venue or date",
+        "card": "needs confirmation",
+        "alert": "review"
+      }
+    },
+    {
+      "messageId": "m07",
+      "at": "2026-11-12T09:00:00+01:00",
+      "text": "Disculpeu, cancel·lem l'entrenament de divendres 13.",
+      "expect": {
+        "calendar": "mark cancellation/remove occurrence with confirmation according to preferences",
+        "card": "training canceled",
+        "alert": true
+      }
+    },
+    {
+      "messageId": "m08",
+      "at": "2026-11-12T09:01:00+01:00",
+      "text": "Cancel·lem l'entrenament de divendres 13.",
+      "expect": {
+        "calendar": "unchanged after cancel, no duplicate",
+        "card": "unchanged",
+        "alert": false
+      }
+    }
+  ],
+  "acceptance": [
+    "Input must be from explicitly authorized source, not claim automatic full group access.",
+    "Same calendarEventId persists through change; no duplicate event created.",
+    "Materials associated with activity and relevant event, not generic clutter.",
+    "No update for irrelevant chat or repeated reminders.",
+    "Ambiguous dates and places need user confirmation.",
+    "Cancellation respects user-approved automation scope, shows history and undo.",
+    "Event revisions and message provenance recorded.",
+    "Fixture is specification; no engine was executed to pass these assertions."
+  ]
+}
