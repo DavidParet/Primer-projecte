@@ -1,6 +1,7 @@
 {
   "version": 2,
   "buildCommand": "node scripts/inject-version.js",
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",
