@@ -245,3 +245,23 @@ Agent: prepara l'esborrany i l'ofereix per revisar; no l'envia sense autoritzaci
 - Quan falta accés a un canal, ho diu clarament.
 
 **Estat:** visió i requisits de producte; ni l'agent multicanal ni les integracions de WhatsApp han estat implementats encara.
+
+
+## DECISIÓ DE PRODUCTE — «LA PREGUNTA FÀCIL» COM A INTERFÍCIE CENTRAL
+**Necessitat expressada:** els pares reben massa comunicacions i acaben preguntant a altres famílies: «Escolta, quin dia era l'últim per pagar?». No volen consultar una base de dades; volen formular una pregunta natural i obtenir resposta immediata, contrastada.
+
+### Experiència Premium desitjada
+- Pantalla inicial centrada en «Pregunta a NEXLUPA…», amb entrada per veu o text; fitxes i agenda disponibles com a suport, no com a barrera.
+- Consulta de dades unificades i autoritzades de Gmail, WhatsApp rebut, fitxes i Google Calendar: «Fins quan tenim per pagar el teatre?», «A quina hora hem de ser al festival de ball?», «Què han de portar dissabte?», «Hi ha hagut algun canvi?».
+- **Resposta breu amb dada al davant i font al darrere:** «El termini és el 18 de novembre. Font: circular de Ball del 5 de novembre».
+- Una sola acció rellevant: «Afegir recordatori», «Obrir comunicació original», «Preparar resposta» o «Veure calendari».
+- Gestió de rectificacions: compara la informació més recent amb l'anterior; no confon un termini de pagament amb una data d'activitat.
+- **No confondre termini amb pagament fet**: sense confirmació bancària, rebut o dada explícita, respondre «No tinc confirmació que s'hagi pagat».
+- Si la font de WhatsApp està incompleta perquè no s'han rebut totes les notificacions, declarar-ho. No prometre respondre dubtes sobre comunicacions no rebudes.
+- Conversa contextual: «I del ball?», «Ho han canviat?», «Ja ho tenim a Calendar?»; fonamentar cada resposta en les dades de la família, no inventar.
+- Mètriques: precisió i cobertura de preguntes amb font, temps estalviat, incidències, intervencions requerides i confiança de les famílies.
+
+### Posicionament
+«Pregunta com ho faries a un altre pare. NEXLUPA troba la resposta en la informació de la teva família.»
+
+**Estat: requisit de producte pendent d'implementar i provar.**
