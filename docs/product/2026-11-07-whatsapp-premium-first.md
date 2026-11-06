@@ -72,3 +72,29 @@ E. Resums, notificacions, respostes suggerides, controls i sistema de subscripci
 F. Beta amb famílies i dades reals consentides, mètriques de temps estalviat i fiabilitat; després llançament.
 
 Criteri d'èxit: mesurar passos humans, temps estalviat, canvis correctes de Calendar, falsos positius i incidències de privacitat. Premium ha de reduir molt clarament la feina, no només augmentar la quota d'anàlisis.
+
+
+## Cas real prioritari: comunitat de teatre amb 20 subgrups — filtratge de pertinència
+**Problema expressat per l'usuari (novembre 2026):** cal entrar constantment a WhatsApp Teatre i llegir anuncis per determinar si una novetat afecta el subgrup propi entre uns 20 subgrups. Això crea sobrecàrrega i fa que es perdin canvis importants.
+
+### Producte desitjat
+- Configuració inicial mínima: el pare/mare tria l'activitat «Teatre» i identifica **el seu subgrup**, nom/sinònims, edat/curs i, si escau, horari habitual.
+- NEXLUPA diferencia entre avisos generals (que afecten tothom), avisos exclusius d'altres subgrups, i avisos específics del subgrup propi. **No és suficient filtrar pel nom del xat**, perquè una comunitat pot posar anuncis de 20 grups al mateix espai.
+- Fer servir context semàntic, no només paraules exactes: «grup 4», «dijous 18h», «els grans», canvis de denominació, etc. Quan la confiança és insuficient, demanar verificació i no descartar silenciosament possibles avisos importants.
+- Evitar notificacions de soroll, donar **avisos només quan són rellevants**: canvis d'horari, material, actuacions, autoritzacions, pagaments, canvis de lloc, terminis.
+- Mostrar fonts i raó de pertinència: «Afecta Teatre - grup 4, perquè el missatge menciona aquest grup i el nou horari». Mantenir historial i actualitzar calendari sense crear duplicats, amb confirmació quan calgui.
+- Oferir un resum opcional «La resta de missatges no afecten el vostre grup» sense revelar dades privades de grups no seleccionats.
+
+### Viabilitat i límits
+- WhatsApp Communities agrupa grups i té canal d'anuncis per tota la comunitat; els anuncis de la comunitat poden barrejar informació de 20 subgrups.
+- NEXLUPA **no pot entrar de manera silenciosa i llegir tot l'historial de grups privats** a través de WhatsApp Business Cloud API.
+- Via potencial Android: aplicació nativa i NotificationListenerService amb permís informat i revocable, que permet accés a notificacions noves del dispositiu, no a tot el contingut de WhatsApp. Les notificacions de grups silenciats o que no apareguin, els fitxers o els missatges llargs poden no arribar íntegres.
+- Aquest permís és ampli a nivell Android: filtratge estricte local només dels grups escollits, no transmetre notificacions d'altres xats, controls de privacitat per dades de menors i prova prèvia de requisits de Google Play.
+- Alternativa fiable per cobrir omissions: reenviament puntual al contacte oficial NEXLUPA o integració amb el centre de teatre (publicació consentida d'avisos estructurats directament a NEXLUPA).
+- No prometre detecció 100% ni actualització de Calendar a partir de notificacions incompletes; en cas de dubte, avisar i demanar revisió.
+
+### Proves d'acceptació
+- 20 subgrups simulats, 100 anuncis: detectar tots els avisos generals i específics del subgrup seleccionat; no crear alertes d'altres subgrups.
+- Mencions indirectes i canvi de nom del subgrup; evitar falsos negatius de novetats crítiques.
+- Canvi d'hora d'una actuació: modificar l'esdeveniment existent a Google Calendar, amb identificació de l'origen i confirmació abans de fer canvis si la font és ambigua.
+- Validar amb notificacions reals Android, incloent comunitats, grups silenciats, missatges llargs, ocultació de contingut, iOS i configuracions de privacitat; mesurar cobertura i descartar l'automatització passiva quan no sigui prou fiable.
