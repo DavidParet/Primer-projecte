@@ -43,6 +43,38 @@ Prioritat: ALTA, després de l'estabilització de desplegament i del motor.
 
 ---
 
+
+## AGENT CONVERSACIONAL PREMIUM — RECUPERAT DE LES DECISIONS DE MAIG / JUNY 2026
+**Decisió:** la fitxa viva i Google Calendar són també la base d'un agent familiar consultable en llenguatge natural. És una funcionalitat PREMIUM CENTRAL del MVP, **no una millora tardana**.
+- Exemples: «Quin dia és la sortida de teatre?», «A quina hora hem d'arribar?», «Què hem de portar dissabte?», «Ja hem confirmat la plaça?», «Han canviat l'horari de l'entrenament?», «Què tenim pendent aquesta setmana?».
+- L'agent consulta dades de la fitxa, cronologia de comunicacions que NEXLUPA hagi rebut lícitament, esdeveniments/tasques de Google Calendar que l'usuari hagi autoritzat, i Gmail si l'usuari l'ha connectat específicament.
+- Fa cerca semàntica i resol conflictes i actualitzacions amb traçabilitat: un avís posterior verificat pot substituir l'horari anterior; una pregunta o rumor no s'ha de considerar canvi confirmat.
+- Respostes breus amb data, hora, lloc, material i cita de la font concreta (canal, data/hora, missatge o fitxa), més una indicació de l'última actualització i grau de certesa.
+- **No inventar informació**: si no consta la sortida, respondre «No he trobat una data confirmada als missatges rebuts ni a la fitxa», oferir revisar el missatge reenviat o preguntar al club. Mai afirmar que ha cercat directament dins del grup quan no té accés al seu historial.
+- Consulta i lectura no requereixen confirmació addicional per cada pregunta dins dels permisos de l'usuari; enviar una resposta a tercers, tocar Calendar o modificar informació crítica segueix el control de permisos i confirmació configurat.
+- Funció «Resol-ho»: després de respondre, proposar una acció («Afegeixo aquesta sortida al calendari?», «Preparo la resposta al responsable?»), que només s'executa segons les regles d'autorització.
+- Mantenir minimització, aïllament per família, xifrat i esborrat; evitar exposar converses alienes al context autoritzat. No retenir ni cercar informació de grups no autoritzats.
+- **Free:** consulta manual del contingut que s'acaba d'enganxar o pujar, si escau, sense monitoratge, historial sincronitzat ni consulta transversal a grups.
+- **Premium:** pregunta a l'agent sobre el coneixement acumulat de les activitats i fonts connectades amb permís; historial i cerca transversal; accions i calendari integrats.
+
+### Escenaris d'acceptació de l'agent
+1. Missatge rebut: «Excursió divendres 20 de novembre a les 09:00, punt de trobada a la biblioteca». Pregunta: «Quin dia i a quina hora és la sortida?» → data/hora + punt de trobada + font.
+2. Correcció posterior: «La sortida canvia a dissabte 21 de novembre a les 09:30» → l'agent prioritza la nova comunicació, identifica el canvi i conserva el rastre.
+3. Missatges «Potser ho canvien» → no modificar cap data ni tractar la informació especulativa com a definitiva.
+4. L'activitat no consta a les fonts autoritzades → «No he trobat la data», sense al·lucinacions.
+5. Mateixa pregunta via web o WhatsApp oficial → mateixa informació, dins de les limitacions de missatgeria i permisos.
+6. Dos fills amb activitats semblants → demanar l'aclariment mínim necessari en comptes de barrejar fitxes.
+7. Dues fonts en conflicte → citar ambdues i demanar confirmació en lloc de canviar Calendar silenciosament.
+
+### Prioritat efectiva de producte
+1. Canal d'entrada autoritzat viable per a un únic grup d'activitat.
+2. Fitxa viva i consolidació d'informació.
+3. **Agent conversacional per preguntar al coneixement acumulat.**
+4. Google Calendar sincronitzat amb control de canvis.
+5. Respostes preparades i fluxos d'execució aprovats.
+6. Comunitats amb molts subgrups: cas avançat, no MVP.
+---
+
 ## Principi comercial
 - FREE: l'usuari copia/enganxa text o puja captura; NEXLUPA analitza i mostra decisions, dates i tasques; límit just i transparent.
 - PREMIUM: recepció amb el mínim de passos, processament automàtic, consolidació dels grups, agenda, recordatoris i respostes preparades, sempre amb permisos i control de l'usuari.
