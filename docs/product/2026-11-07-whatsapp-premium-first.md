@@ -3,6 +3,46 @@ Data: 2026-11-07
 Estat: PROPOSTA PER VALIDAR. No implementat ni publicat.
 Prioritat: ALTA, després de l'estabilització de desplegament i del motor.
 
+## REORIENTACIÓ PRODUCTE — NOVEMBRE 2026: CAS PRINCIPAL = UN GRUP PER ACTIVITAT
+**Decisió de producte de l'usuari:** no prioritzar les comunitats de 20 subgrups. El cas majoritari és **un únic grup de WhatsApp per activitat** (bàsquet, dansa, teatre, futbol). Premium ha de mantenir **automàticament actualitzada la fitxa de l'activitat i Google Calendar quan entra una comunicació**.
+
+### Experiència objectiu, no capacitat ja desplegada
+1. Configuració inicial senzilla: l'usuari vincula un grup/activitat («Bàsquet») i dona permís per connectar Google Calendar.
+2. Quan arriba un nou avís **per un canal d'entrada realment disponible i autoritzat**, NEXLUPA l'analitza sense copiar ni enganxar.
+3. Discrimina informació nova, rectificacions, cancel·lacions i conversa sense acció; reconcilia amb l'historial de la fitxa i les dades de Calendar.
+4. **Fitxa viva**: horaris, dates, lloc, material, terminis, autoritzacions, pagaments i estat de pendents. Cada camp important inclou font, hora d'actualització i confiança.
+5. **Calendar upsert**: crear si no existeix; modificar l'event correcte si ja existeix (usar `calendarEventId` persistent, recurrències i zona horària). Mai duplicar per cada missatge.
+6. Alertar només dels canvis útils, i demanar confirmació de les dades incertes o de modificacions amb impacte. Accions rutinàries autoritzades es poden automatitzar; sempre desfer i registre auditable.
+7. Opcional: resposta contextual preparada per WhatsApp. Cap resposta enviada a tercers sense aprovació explícita.
+8. No cal tornar a consultar WhatsApp si l'avís s'ha incorporat correctament a la fitxa i calendari.
+
+### Dependència tècnica imprescindible: com arriba el missatge
+- **No prometre lectura passiva integral dels grups existents.** L'API oficial habitual de WhatsApp Business no permet connectar-se lliurement al grup escolar personal per llegir-ne totes les publicacions.
+- Prioritzar investigació d'un client **Android natiu** amb consentiment revocable de notificacions; estudiar capturar **només les notificacions de les activitats autoritzades**, filtrant localment i sense transferir contingut d'altres converses. Cobertura parcial: les notificacions no són el registre complet del xat; no es poden prometre novetats silenciades, contingut ocult ni missatges antics.
+- Mantenir via alternativa sòlida: reenviar missatges al WhatsApp oficial NEXLUPA (sense copiar/enganxar); per a clubs i escoles col·laboradors, recepció directa d'avisos.
+- No confondre detectar una notificació amb tenir un missatge verificat; si la informació és parcial, sol·licitar revisió abans de canviar Calendar.
+
+### Model mínim de fitxa
+`Activity {id, familyId, name, sourceChannels[], timezone, calendarId, events[], tasks[], materials[], notes[], lastUpdate}`
+`Event {id, activityId, calendarEventId, title, start, end, place, recurrence, status, sourceMessageIds[], confidence, revision}`
+`Incoming {id, activityId, channel, timestamp, content, consentScope, processingStatus}`
+- Idempotència per entrada, deduplicació semàntica i control de versions d'esdeveniment.
+- Persistència segura entre dispositius i controls d'accés per família. Privacitat específica de dades de menors.
+
+### Criteris d'acceptació (primer MVP Premium)
+- Nova comunicació única en un grup de bàsquet → actualitza la fitxa.
+- «Dijous 18 h» → «divendres 18 h» → edita **el mateix** event de Calendar, no en crea un altre.
+- «Porteu samarreta blanca» → afegeix material/recordatori, no un segon entrenament.
+- Conversa informal → cap avís ni actualització d'agenda.
+- Rectificacions i cancel·lacions: conservar rastre i aplicar amb permís/confirmació adequada.
+- Dades ambigües o incompletes → no modificar Calendar silenciosament.
+- Sense autorització, o grup silenciat sense notificacions → no afirmar haver-ho monitorat.
+- Prova E2E amb dades fictícies; després beta Android amb consentiment i mesura de cobertura.
+
+**Ordre de prioritat:** (1) grup únic i fitxa viva + Calendar, (2) canal automàtic d'entrada viable, (3) respostes i seguiment, (4) comunitats amb múltiples subgrups com a funcionalitat avançada opcional.
+
+---
+
 ## Principi comercial
 - FREE: l'usuari copia/enganxa text o puja captura; NEXLUPA analitza i mostra decisions, dates i tasques; límit just i transparent.
 - PREMIUM: recepció amb el mínim de passos, processament automàtic, consolidació dels grups, agenda, recordatoris i respostes preparades, sempre amb permisos i control de l'usuari.
