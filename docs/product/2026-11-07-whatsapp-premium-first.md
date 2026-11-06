@@ -170,3 +170,36 @@ Criteri d'èxit: mesurar passos humans, temps estalviat, canvis correctes de Cal
 - Mencions indirectes i canvi de nom del subgrup; evitar falsos negatius de novetats crítiques.
 - Canvi d'hora d'una actuació: modificar l'esdeveniment existent a Google Calendar, amb identificació de l'origen i confirmació abans de fer canvis si la font és ambigua.
 - Validar amb notificacions reals Android, incloent comunitats, grups silenciats, missatges llargs, ocultació de contingut, iOS i configuracions de privacitat; mesurar cobertura i descartar l'automatització passiva quan no sigui prou fiable.
+
+
+## DECISIÓ PRODUCTE — FONT DOBLE (GMAIL OFICIAL + WHATSAPP INFORMAL) EN UNA ÚNICA ACTIVITAT
+**Requisit expressat per l'usuari (7 de novembre de 2026):** per exemple, les comunicacions de Ball arriben per **dues vies simultànies**: un correu més formal i un grup de WhatsApp amb canvis i aclariments informals. L'agent Premium no ha de separar-les en dues activitats; ha de fusionar-les de manera segura dins una única fitxa viva i Google Calendar.
+
+### Flux de referència
+- L'escola envia un **email oficial**: «Festival de Ball dissabte a les 17:00 al Teatre Municipal».
+- El monitor envia un **WhatsApp** posterior: «Les nenes han d'arribar a les 16:15, ja vestides».
+- NEXLUPA identifica que les dues comunicacions parlen del mateix festival i **conserva tant l'hora de l'actuació (17:00) com l'hora de convocatòria (16:15)**. No substitueix una per l'altra.
+- La fitxa manté activitats, fonts de cada camp, estat, materials, arribada, acte, terminis i canvis; l'agent respon «A quina hora hem de ser al teatre?» → 16:15, citant el WhatsApp; «A quina hora comença?» → 17:00, citant el correu.
+- Google Calendar conté **un sol esdeveniment de festival** amb inici de l'acte i una anotació/recordatori d'arribada; si l'usuari prefereix registrar també la convocatòria com a esdeveniment independent, és una opció de configuració, no un duplicat involuntari.
+
+### Regles de reconciliació multicanal
+1. Normalitzar tots els missatges autoritzats a la mateixa entitat `Activity` i vincular-los amb `sourceChannel = email|whatsapp`, `sourceId`, emissor, data/hora de recepció i fiabilitat.
+2. Entendre **la semàntica del camp**: hora d'inici, hora de convocatòria, hora de sortida, termini de pagament, hora de recollida i recordatori són camps diferents.
+3. **La formalitat no és una regla automàtica de preferència.** El correu pot ser oficial però anterior, i WhatsApp pot rectificar-lo legítimament. Conservar l'historial de versions i mostrar el motiu de l'elecció.
+4. Si una comunicació rectifica una dada que ja existeix, analitzar si és una correcció explícita i si l'emissor està autoritzat. Si és ambigu o contradictori, marcar `needsReview` i no sobreescriure Calendar silenciosament.
+5. Deduplicació per IDs originals d'email/WhatsApp quan n'hi hagi, més desduplicació semàntica entre canals; **una activitat i un esdeveniment, no dos perquè han arribat per canals diferents**.
+6. Actualitzar Google Calendar amb permisos OAuth limitats, referència persistent `calendarEventId`, traçabilitat, confirmació per rectificacions amb impacte i capacitat de desfer.
+7. La fitxa ha d'indicar «Última novetat de WhatsApp» i «Circular oficial de Gmail» amb links només quan l'accés de l'usuari ho permeti; no fer accessibles textos o identificadors privats a tercers.
+8. L'agent de consultes utilitza tant el correu com els missatges WhatsApp **realment rebuts**; ha de declarar quan no pot verificar si un grup té missatges més recents perquè l'accés no és complet.
+9. **Cobertura per canals:** Gmail connectat es pot sincronitzar amb permisos; grups privats preexistents de WhatsApp no poden ser llegits completament per l'API Business habitual. No prometre unificació completa sense una entrada de WhatsApp validada i legítima.
+
+### Escenaris de prova obligatoris
+- Correu oficial crea acte; WhatsApp afegeix hora d'arribada i vestuari: un sol acte al calendari.
+- Email i WhatsApp repeteixen el mateix lloc i hora: sense notificació duplicada.
+- WhatsApp canvia explícitament l'hora d'inici anunciada a Gmail: proposar modificació al mateix `calendarEventId` i confirmar si cal.
+- WhatsApp fa referència a «quedar a les 16:15» sense especificar si és convocatòria o canvi d'acte: no substituir les 17:00 de Gmail.
+- Email posterior que contradiu WhatsApp: ordenar per evidència, tipus de dada i autoritat real, no pel canal; demanar confirmació quan no hi ha certesa.
+- L'agent respon preguntes concretes sobre convocatòria, material, inici de l'acte, lloc i pagaments, amb font i dates.
+- Si WhatsApp no s'ha pogut sincronitzar, informar que es respon només amb les dades disponibles.
+
+**Prioritat:** la conciliació Gmail + WhatsApp s'inclou des del primer MVP Premium de fitxa viva; el filtratge de múltiples subgrups continua sent un cas avançat, no el flux principal.
