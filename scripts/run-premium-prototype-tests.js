@@ -20,6 +20,7 @@ const suites=[
   'tests/run-premium-mailgun-queue-worker.js',
   'tests/run-premium-email-sender-policy.js',
   'tests/run-premium-resend-inbound.js',
+  'tests/run-premium-resend-poll-worker.js',
   'tests/run-premium-family-inbox.js'
 ];
 let failed=0;
