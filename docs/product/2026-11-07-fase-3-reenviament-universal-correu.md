@@ -20,7 +20,7 @@ Una família que té un Gmail personal rep una circular, la **reenvia al Gmail/a
 - `lib/premium-forwarded-email.js`: un router intern de correus reenviats, no un servidor/webhook exposat. Exigeix resultat de verificació de transport i remitent per part d'un adaptador de confiança. Resol alias receptor únic, remitent familiar verificat, activitat candidata, text, adjunts i duplicats.
 - Reconeixement del canal `email-forwarded` a `lib/premium-agent-pilot.js`, `lib/premium-ai-extractor.js` i `lib/premium-agent-pipeline.js`.
 - `tests/run-premium-forwarded-email.js`: comprovació amb famílies simulades, dues activitats, remitent de família diferent, destinataris desconeguts, alias duplicats, correus dubtosos, adjunts, idempotència i conciliació a fitxa.
-- `scripts/run-premium-prototype-tests.js`: ara agrega **sis suites** de proves.
+- `scripts/run-premium-prototype-tests.js`: ara agrega **set suites** de proves.
 - Les sis suites actuals han passat en avaluació JS en memòria amb els fitxers de GitHub; el test de SHA-256 utilitza un hash de prova dins aquest entorn, no una comprovació criptogràfica del runtime Node. En Node real s'ha utilitzat `node:crypto` al codi.
 
 ## Seguretat i limitacions
@@ -52,3 +52,11 @@ Abans de fer promeses comercials: primer amb missatges sintètics lliurats realm
 
 ## Prohibicions vigents
 No tocar web, preus, domini en producció, main, Gmail particular, WhatsApp particular ni Calendar real sense instrucció expressa. No confondre el funcionament del mòdul a GitHub amb disposar ja d'una adreça receptora pública.
+
+
+## Ampliació de la fase 3 — bústia compartida de múltiples famílies
+- `lib/premium-family-inbox.js`: orquestrador **només en memòria** que manté, per separat, els estats de diverses famílies, les fitxes de cadascuna de les seves activitats, les empremtes de reenviaments ja processats i una cua de metadades dels casos pendents de classificació.
+- `tests/run-premium-family-inbox.js`: prova d'un lot de **6 correus ficticis**: tres comunicacions vàlides per a **dues famílies** i **tres fitxes** (Ball família A, Bàsquet família A, Ball família B), un missatge ambigu pendent de revisió, un reenviament repetit i un correu amb remitent incorrecte. Verifica els identificadors de Calendar separats i que no es repeteixin crides a l'IA per un reenviament duplicat.
+- Una segona prova simula una fallada del proveïdor d'IA i comprova que no es marca com a processat el correu ni es modifica la fitxa original.
+- Les **7 suites de regressió** s'han tornat a comprovar en un entorn JavaScript experimental. Les proves d'integració continuen fent servir clients d'IA simulats; no s'ha cridat un model real.
+- **Limitació:** la cua i els estats viuen només en memòria. Encara no hi ha base de dades, receptor Gmail/SMTP, webhook segur, ni garanties de persistència i recuperació després d'una interrupció.
