@@ -16,6 +16,7 @@ const suites=[
   'tests/run-premium-forwarded-email.js',
   'tests/run-premium-mailgun-route.js',
   'tests/run-premium-mailgun-inbox.js',
+  'tests/run-premium-mailgun-local-pilot.js',
   'tests/run-premium-family-inbox.js'
 ];
 let failed=0;
