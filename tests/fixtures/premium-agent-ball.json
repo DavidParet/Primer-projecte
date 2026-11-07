@@ -1,0 +1,136 @@
+{
+  "activity": {
+    "id": "ball-family-demo",
+    "name": "Ball",
+    "calendarEventId": "DEMO-CALENDAR-ID"
+  },
+  "synthetic": true,
+  "interpretations": "PREPARED_STRUCTURED_FIXTURE_NOT_AI",
+  "messages": [
+    {
+      "messageId": "gmail-001",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "gmail",
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "Circular: festival dissabte 21 de novembre a les 17 h al Teatre Municipal. Inscripció/pagament fins al 18.",
+      "facts": [
+        {
+          "eventId": "festival-001",
+          "field": "start",
+          "value": "2026-11-21T17:00:00+01:00",
+          "confidence": 0.99
+        },
+        {
+          "eventId": "festival-001",
+          "field": "venue",
+          "value": "Teatre Municipal",
+          "confidence": 0.99
+        },
+        {
+          "eventId": "festival-001",
+          "field": "paymentDeadline",
+          "value": "18 de novembre de 2026",
+          "confidence": 0.99
+        }
+      ]
+    },
+    {
+      "messageId": "wa-001",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "whatsapp",
+      "receivedAt": "2026-11-15T12:10:00+01:00",
+      "text": "Porteu el vestuari posat i sigueu al teatre a les 16:15.",
+      "facts": [
+        {
+          "eventId": "festival-001",
+          "field": "arrival",
+          "value": "2026-11-21T16:15:00+01:00",
+          "confidence": 0.98
+        },
+        {
+          "eventId": "festival-001",
+          "field": "material",
+          "value": "Vestuari de ball posat",
+          "confidence": 0.98
+        }
+      ]
+    },
+    {
+      "messageId": "wa-002",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "whatsapp",
+      "receivedAt": "2026-11-15T12:15:00+01:00",
+      "text": "Recordeu que el festival comença a les 17:00.",
+      "facts": [
+        {
+          "eventId": "festival-001",
+          "field": "start",
+          "value": "2026-11-21T17:00:00+01:00",
+          "confidence": 0.99
+        }
+      ]
+    },
+    {
+      "messageId": "wa-003",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "whatsapp",
+      "receivedAt": "2026-11-16T18:00:00+01:00",
+      "text": "Ens veiem a les 16:00, potser s'avança l'hora.",
+      "facts": [
+        {
+          "eventId": "festival-001",
+          "field": "arrival",
+          "value": "2026-11-21T16:00:00+01:00",
+          "confidence": 0.58
+        }
+      ]
+    },
+    {
+      "messageId": "gmail-002",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "gmail",
+      "receivedAt": "2026-11-17T09:00:00+01:00",
+      "text": "Confirmem de nou que el termini per pagar és el 18 de novembre.",
+      "facts": [
+        {
+          "eventId": "festival-001",
+          "field": "paymentDeadline",
+          "value": "18 de novembre de 2026",
+          "confidence": 0.99
+        }
+      ]
+    },
+    {
+      "messageId": "wa-foreign",
+      "authorized": true,
+      "activityId": "futbol",
+      "channel": "whatsapp",
+      "receivedAt": "2026-11-17T09:30:00+01:00",
+      "text": "Un missatge d'una altra activitat.",
+      "facts": []
+    },
+    {
+      "messageId": "wa-002",
+      "authorized": true,
+      "activityId": "ball-family-demo",
+      "channel": "whatsapp",
+      "receivedAt": "2026-11-15T12:15:00+01:00",
+      "text": "Duplicat.",
+      "facts": []
+    }
+  ],
+  "questions": [
+    "Quin dia és el festival de ball?",
+    "A quina hora hem d'arribar?",
+    "A quina hora comença?",
+    "Què hem de portar?",
+    "Quin era l'últim dia per pagar?",
+    "Ja està pagat?",
+    "Ja ho tenim al calendari?"
+  ]
+}
