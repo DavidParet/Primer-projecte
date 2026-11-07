@@ -1,0 +1,9 @@
+{
+  "name": "nexlupa-resend-isolated-pilot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "resend": "^6.9.2"
+  }
+}
