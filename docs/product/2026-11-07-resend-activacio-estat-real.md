@@ -64,3 +64,16 @@ Captura autenticada de Resend: `<anything>@pibnolee.resend.app`. Adreça real em
 - Següent fase abans de qualsevol tractament de correus reals: API key de lectura guardada en secrets sense publicar-la; acreditació de remetents independent dels headers `From`; bústia/cua xifrada i idempotent, separació entre famílies, política de conservació i consentiment; provar pipeline amb missatges ficticis de punta a punta. **No activar públicament encara**.
 
 **Conclusió verificable:** recepció real + notificació signada al servidor real **OK**; processament intel·ligent automàtic i estat persistent **PENDENT**.
+
+
+## Entorn servidor Vercel i webhook: auditoria del 7/11/2026
+- Es comprova a Vercel un projecte **separat** anomenat `nexlupa-resend-pilot`, no el projecte públic `primer-projecte`.
+- El primer desplegament del pilot a Vercel és `READY`: ruta `/api/webhook` que declara verificació de signatura només; no processa correus, no escriu Calendar ni utilitza IA.
+- Resend té **1 webhook habilitat** per a `email.received` apuntant a `https://nexlupa-resend-pilot-davidparets-projects.vercel.app/api/webhook`. Això **no acredita** recepció web end-to-end.
+- L'auditoria de Vercel mostra **0 variables d'entorn configurades** en aquest projecte. Sense `RESEND_WEBHOOK_SECRET` no pot verificar esdeveniments reals.
+- S'ha desenvolupat, en aquesta branca, una **segona variant deliberadament bloquejada** a `pilot/resend-vercel/` (status i webhook), sense credencials, amb verificació de signatura i resposta 503 per a `email.received` mentre manca cua durable. En cas de reinteig l'emissor conserva els correus al seu costat.
+- Aquesta variant està **desplegada com a PREVIEW**, sense substituir el desplegament ni l'alias de producció del pilot: `https://nexlupa-resend-pilot-dyst7zdg8-davidparets-projects.vercel.app/api/status`. Vercel indica `READY`. La comprovació HTTP directa des del navegador automatitzat no s'ha pogut completar; **no confondre estat READY amb prova de resposta HTTP**.
+- Les proves Node/GitHub Actions, incloent `tests/run-premium-resend-vercel-locked.js`, donen **16/16 suites PASS** al workflow https://github.com/DavidParet/Primer-projecte/actions/runs/42385551070.
+- **No s'ha configurat el secret del webhook ni cap clau API al nou preview**: fer-ho ara podria comportar ACK abans d'emmagatzemar i autenticar correus. No s'ha creat cap cua privada ni activat processament continu.
+
+**Pendent per considerar-lo actiu:** persistència xifrada, aïllament i registre de famílies real, attestació de remitents amb proves independents, idempotència transaccional, seguretat anti-replay, política de retenció i secrets allotjats al backend; només llavors provar correu fictici end-to-end i activar-lo.
