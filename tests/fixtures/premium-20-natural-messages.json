@@ -109,7 +109,9 @@
       "authorized": true,
       "receivedAt": "2026-11-16T10:00:00+01:00",
       "text": "Les nenes han de portar el vestuari de ball posat.",
-      "expectedFields": [],
+      "expectedFields": [
+        "material"
+      ],
       "expectedOutcome": "duplicate"
     },
     {
