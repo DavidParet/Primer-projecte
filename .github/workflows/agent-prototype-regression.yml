@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   synthetic-agent-tests:
-    name: Ten offline regression suites
+    name: Offline agent regression suites
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
