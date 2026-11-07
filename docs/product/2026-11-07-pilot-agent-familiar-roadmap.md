@@ -36,7 +36,7 @@ La pregunta de valor és: «Quin era l'últim dia per pagar?». També:
 - **Criteri de pas:** cap invenció de terminis; no confondre hora d'arribada amb inici; no afirmar «pagat» sense evidència.
 
 ### 2 — Pilot de canals autoritzats i fitxa viva
-- Gmail: connectar via OAuth amb permisos mínims; identificar només correus pertinents d'una activitat voluntàriament seleccionada.
+- **Correu com a primer canal:** cada família reenvia des del seu Gmail/Outlook personal a una adreça receptora pròpia de NEXLUPA, que resol identitat i activitat de manera segura; **no cal OAuth Gmail per al reenviament**. Connexió directa Gmail amb OAuth opcional en una fase posterior, amb permisos mínims. Distingir clarament compte receptor de NEXLUPA de la bústia personal de cada família.
 - WhatsApp: començar per reenviament autoritzat al canal de recepció oficial quan estigui configurat; alternativament, compartir manualment una còpia sense dades personals per test.
 - Convergència: correu oficial i WhatsApp informal alimenten **la mateixa** activitat, amb font i hora de cada canvi.
 - No crear un registre de documents de menors a GitHub: només fixtures sintètics o anonimitzats aprovats.
@@ -74,3 +74,10 @@ La pregunta de valor és: «Quin era l'últim dia per pagar?». També:
 ## Proper lliurable tècnic
 **Agent de preguntes que recupera fonts i identifica terminis/horaris amb missatges ficticis en llenguatge natural, no amb interpretacions artificials ja emplenades.**
 Aquest és el pont entre els tests de lògica actuals i una beta real amb Gmail, WhatsApp i Calendar.
+
+
+## Flux principal de correu, validat conceptualment amb l'usuari
+- Gmail/Outlook **de la família** → «Reenviar» a **adreça de recepció NEXLUPA** → identificar la família de manera segura → vincular automàticament a la fitxa «Ball» → consolidar amb WhatsApp → proposta/actualització autoritzada de Google Calendar.
+- Per evitar barrejar famílies, cada família ha de tenir un destinatari identificable i no endevinable (o un sistema de verificació equivalent). El remitent de correu, per si sol, no és una prova suficient.
+- Una bústia d'entrada compartida de Gmail només és una opció per a un pilot; en producció pot caldre un servei de correu entrant amb aliases i webhook, controls de fitxers adjunts i spam.
+- **No s'ha configurat cap correu receptor ni s'ha creat cap integració real.**
