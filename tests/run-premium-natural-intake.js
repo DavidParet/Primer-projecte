@@ -1,0 +1,63 @@
+'use strict';
+/* node tests/run-premium-natural-intake.js — synthetic regression */
+const assert=require('node:assert/strict');
+const f=require('./fixtures/premium-20-natural-messages.json');
+const {dateFrom,parseText,ingestText,run}=require('../lib/premium-natural-intake');
+assert.equal(f.synthetic,true);
+assert.equal(f.messages.length,20);
+const result=run(f);
+const s=result.state;
+result.entries.forEach((entry,i)=>{
+  const expected=f.messages[i],label='message '+(i+1)+' '+expected.messageId;
+  assert.equal(entry.outcome,expected.expectedOutcome,label+' outcome');
+  assert.deepEqual(entry.interpretation.facts.map(x=>x.field),expected.expectedFields,label+' fields');
+});
+assert.equal(result.metrics.received,20);
+assert.equal(result.metrics.accepted,18);
+assert.equal(result.metrics.ignored,1);
+assert.equal(result.metrics.duplicate,1);
+assert.equal(result.metrics.factsCreated,5);
+assert.equal(result.metrics.factsReconfirmed,6);
+assert.equal(result.metrics.needsReview,3);
+assert.equal(result.metrics.questionsAnswered,8);
+assert.equal(result.metrics.questionsTotal,10);
+assert.equal(result.metrics.calendarProposals,1);
+assert.deepEqual(Object.keys(s.events),['festival-001']);
+assert.equal(s.events['festival-001'].calendarEventId,'gcal-TEST-existing');
+assert.equal(s.events['festival-001'].facts.start.value,'2026-11-21T17:00:00+01:00');
+assert.equal(s.events['festival-001'].facts.arrival.value,'2026-11-21T16:15:00+01:00');
+assert.equal(s.events['festival-001'].facts.paymentDeadline.value,'2026-11-18');
+assert.equal(s.events['festival-001'].facts.start.sourceIds.length,3);
+assert.equal(s.events['festival-001'].facts.material.sourceIds.length,2);
+assert.ok(s.reviews.some(x=>x.reason==='low-confidence'));
+assert.ok(s.reviews.some(x=>x.reason==='conflicting-sources'));
+assert.ok(s.reviews.some(x=>x.reason==='different-event-needs-linking'));
+assert.equal(result.calendarPlans[0].operation,'update-proposal');
+assert.equal(result.calendarPlans[0].needsUserApproval,true);
+assert.equal(result.calendarPlans[0].externalWritePerformed,false);
+assert.equal(result.calendarPlans[0].calendarEventId,'gcal-TEST-existing');
+const find=q=>result.qa.find(x=>x.question===q);
+assert.ok(find('Fins quan hem de pagar?').text.includes('18 de novembre'));
+assert.deepEqual(find('Fins quan hem de pagar?').sources.map(x=>x.id),['mail-03','wa-07','mail-20']);
+assert.equal(find('Ja està pagat?').known,false);
+assert.ok(find('Ja està pagat?').text.includes('comprovant'));
+assert.ok(find('A quina hora comença el festival?').pendingReview);
+assert.ok(find("A quina hora hem d'arribar?").pendingReview);
+assert.equal(find('Què passa amb la sortida?').known,false);
+assert.ok(find('Què passa amb la sortida?').sources.some(x=>x.id==='mail-18'));
+assert.ok(find('On és el festival?').sources.some(x=>x.channel==='gmail'));
+assert.ok(find('Què hem de portar?').sources.some(x=>x.channel==='whatsapp'));
+assert.equal(dateFrom('31 de febrer de 2026',2026),null);
+assert.equal(dateFrom('18/11/2026',2026),'2026-11-18');
+assert.deepEqual(parseText("S'ha cancel·lat el festival?",undefined).facts,[]);
+const rejected=ingestText(s,{
+ activityId:s.activityId,channel:'whatsapp',authorized:false,
+ messageId:'private',text:'Festival el 29/11 a les 21:00'
+});
+assert.equal(rejected.outcome,'ignored');
+assert.equal(rejected.state.events['festival-001'].facts.start.value,'2026-11-21T17:00:00+01:00');
+console.log('PASS — 20/20 synthetic messages matched expected classifications');
+console.log('PASS — one activity, one Calendar update proposal, zero real writes');
+console.log('PASS — 8/10 questions answered with known facts, two explicitly unknown');
+console.log('PASS — three uncertain/conflicting items require human review');
+console.log('LIMIT — rule-based parser; no actual LLM, WhatsApp or Gmail integration');
