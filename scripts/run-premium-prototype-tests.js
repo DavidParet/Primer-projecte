@@ -14,6 +14,7 @@ const suites=[
   'tests/run-premium-ai-extractor.js',
   'tests/run-premium-ai-answerer.js',
   'tests/run-premium-forwarded-email.js',
+  'tests/run-premium-mailgun-route.js',
   'tests/run-premium-family-inbox.js'
 ];
 let failed=0;
