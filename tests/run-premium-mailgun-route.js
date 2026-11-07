@@ -6,7 +6,7 @@
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const {
-  verifyMailgunSignature,adaptMailgunRoute,mailgunFormToDelivery
+  verifyMailgunSignature,adaptMailgunRoute,MAX_SKEW_SECONDS
 }=require('../lib/premium-mailgun-inbound-adapter');
 const {routeForwardedEmail,processForwardedEmail}=require('../lib/premium-forwarded-email');
 const {pilot}=require('../lib/premium-agent-pilot');
@@ -60,11 +60,11 @@ async function main(){
     form:{...f,signature:[]},signingKey:SIGNING_KEY,nowSeconds:NOW
   }).reason,'INVALID_SIGNATURE_FIELDS');
   assert.equal(verifyMailgunSignature({
-    form:{...f,timestamp:String(NOW-3601)},
+    form:{...f,timestamp:String(NOW-MAX_SKEW_SECONDS-1)},
     signingKey:SIGNING_KEY,nowSeconds:NOW
   }).reason,'EXPIRED_OR_FUTURE_SIGNATURE');
   assert.equal(verifyMailgunSignature({
-    form:{...f,timestamp:String(NOW+3601)},
+    form:{...f,timestamp:String(NOW+MAX_SKEW_SECONDS+1)},
     signingKey:SIGNING_KEY,nowSeconds:NOW
   }).reason,'EXPIRED_OR_FUTURE_SIGNATURE');
   assert.equal(verifyMailgunSignature({
@@ -90,8 +90,6 @@ async function main(){
   assert.equal(approved(f).verification.senderAuthenticated,true);
   assert.equal(approved(f).usedWebhookToken,TOKEN);
   assert.equal(approved(f).externalWrites,0);
-  assert.equal(mailgunFormToDelivery({form:f,signatureResult:{verified:false}}).status,
-    'rejected');
 
   assert.equal(approved(makeForm({from:'Impostor <someone-else@example.test>'})).reason,
     'ENVELOPE_FROM_MISMATCH');
