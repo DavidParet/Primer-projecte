@@ -12,7 +12,8 @@ const suites=[
   'tests/run-premium-agent-pilot.js',
   'tests/run-premium-natural-intake.js',
   'tests/run-premium-ai-extractor.js',
-  'tests/run-premium-ai-answerer.js'
+  'tests/run-premium-ai-answerer.js',
+  'tests/run-premium-forwarded-email.js'
 ];
 let failed=0;
 for(const test of suites){
