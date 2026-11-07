@@ -23,3 +23,16 @@ Quan existeixi l'adreça real:
 4. Només si cal, verificar `entrada.nexlupa.app` amb MX **del subdomini `entrada`** a Namecheap, sense canviar MX del domini arrel ni Zoho.
 
 **Precaució:** La integració actual amb GitHub té proves sintètiques satisfactòries, però cap flux de correu real end-to-end. La connexió de ChatGPT al compte Resend no equival a connexió desplegada del motor NEXLUPA.
+
+## PROVA REAL DE RECEPCIÓ SUPERADA — 7 novembre 2026, 15:55 h (Madrid)
+Captura autenticada de Resend: `<anything>@pibnolee.resend.app`. Adreça real emprada: **`pilot-nexlupa@pibnolee.resend.app`**.
+
+- Gmail connectat va enviar **un correu de prova totalment fictici** amb assumpte `NEXLUPA PILOT — prova fictícia de recepció i extracció`; missatge Gmail `1a1b681c11245029`.
+- Resend `list_received_emails`: **1 correu rebut**, ID de recepció `3fef615e-dedf-43ec-8034-7a0a6e305607`, hora `2026-11-07T14:55:24.671Z`.
+- Resend `get_received_email`: **cos de text recuperat complet** via API autenticada, i metadades From/To/Subject coherents.
+- El missatge inventat parla de l'activitat «Ball», un assaig el **17/11/2026 a les 18:00** i un termini fictici d'autorització el **18/11/2026**. Això és contingut de prova, **no un esdeveniment real** i no s'ha creat al Calendar.
+- **Cap canvi DNS** ni a Zoho, cap dada real d'infants, cap activació pública.
+
+**Abast demostrable:** Gmail real → Resend temporal real → consulta API autenticada i recuperació del cos real. **Encara no demostra** Resend → webhook NEXLUPA → classificació/extracció real automàtica → fitxa persistent. Les 13 bateries de tests del motor només proven el component d'integració **amb proveïdor i IA simulats**. El subdomini `entrada.nexlupa.app` continua `not_started` i no cal tocar-lo fins que l'experiment ho requereixi.
+
+**Criteri actualitzat:** Utilitzar l'adreça temporal real i seguir amb una prova d'integració de recepció sense tocar els MX del domini corporatiu; no confondre prova d'entrada real amb producte operatiu.
