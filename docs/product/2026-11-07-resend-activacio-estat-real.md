@@ -36,3 +36,16 @@ Captura autenticada de Resend: `<anything>@pibnolee.resend.app`. Adreça real em
 **Abast demostrable:** Gmail real → Resend temporal real → consulta API autenticada i recuperació del cos real. **Encara no demostra** Resend → webhook NEXLUPA → classificació/extracció real automàtica → fitxa persistent. Les 13 bateries de tests del motor només proven el component d'integració **amb proveïdor i IA simulats**. El subdomini `entrada.nexlupa.app` continua `not_started` i no cal tocar-lo fins que l'experiment ho requereixi.
 
 **Criteri actualitzat:** Utilitzar l'adreça temporal real i seguir amb una prova d'integració de recepció sense tocar els MX del domini corporatiu; no confondre prova d'entrada real amb producte operatiu.
+
+
+## Pont intern Resend → fitxa familiar: afegit i provat
+**Commit de proves:** `fa61e3672e5ae879ca7040387da3c947810ad9ff` · **GitHub Actions:** https://github.com/DavidParet/Primer-projecte/actions/runs/42384519515 · **14/14 suites PASS**.
+
+- Afegit `lib/premium-resend-poll-worker.js`, interfície per `resend.emails.receiving.list()` i `receiving.get(id)` que alimenta `processForwardedEmail` del motor existent, **sense cap webhook ni endpoint públic**.
+- Afegit `tests/run-premium-resend-poll-worker.js`: catorzena suite amb API i IA simulades. Comprova recuperació, classificació de fitxa, termini amb font, deduplicació, incidències API, verificació de remitent independent, bloqueig entre famílies i cap escriptura de Calendar.
+- Integrada la prova al `scripts/run-premium-prototype-tests.js`; execució real de Node a GitHub Actions **superada**.
+- La connexió de ChatGPT a Resend ja havia verificat **un correu real rebut i recuperat** a `pilot-nexlupa@pibnolee.resend.app` (apartat anterior).
+- **No és encara un sistema automàtic:** el worker de `lib/` no s'executa amb un compte Resend real ni està programat; no hi ha clau API en secret manager, registre de famílies operatiu, persistència xifrada ni política real de comprovació d'identitat del remitent. `attestSender` falla tancat per defecte i les credencials de Resend no s'han de copiar a GitHub ni als xats.
+- Per la connexió de producció cal backend independent amb secrets, processament segur i consentiment; no activar amb missatges escolars reals fins a tenir-ho.
+
+**Decisió de seguretat:** branques de prova exclusivament; `main`, web, Zoho, Namecheap, Calendar, tarifes i serveis públics, intactes.
