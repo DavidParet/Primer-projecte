@@ -49,3 +49,18 @@ Captura autenticada de Resend: `<anything>@pibnolee.resend.app`. Adreça real em
 - Per la connexió de producció cal backend independent amb secrets, processament segur i consentiment; no activar amb missatges escolars reals fins a tenir-ho.
 
 **Decisió de seguretat:** branques de prova exclusivament; `main`, web, Zoho, Namecheap, Calendar, tarifes i serveis públics, intactes.
+
+
+## Receptor HTTPS de prova aïllat — prova real completada (7/11/2026)
+- Creat un projecte Vercel **independent** `nexlupa-resend-pilot`, ID `prj_SVHJJbNZk2kf6l4XNy1m6RCbGus4`. Sense connexió Git automàtica, cap domini `nexlupa.app` i cap impacte sobre el projecte web `primer-projecte`. El desplegament usa la destinació `production` **només del projecte pilot independent**, no pas la web corporativa.
+- Endpoint: `https://nexlupa-resend-pilot-davidparets-projects.vercel.app/api/webhook`; desplegament confirmat **READY**: `dpl_2dv3WQeLT7SBd63Fbtsbp3PR1cjv`.
+- Components revisats al repositori de desenvolupament: `pilot/resend-webhook/api/webhook.js` i `pilot/resend-webhook/lib/verify-svix.js`. Implementació Node nativa, verificació Svix del **cos sense reserialitzar**, HMAC SHA-256 amb comparació de temps constant, finestra de 5 minuts, mida màxima del payload i error tancat quan falta la clau.
+- Webhook configurat al Resend real per **`email.received`**, ID `99ee8d6e-94e1-41ae-a9ef-e0a7408afa81`. Està habilitat.
+- Secret retornat en crear el webhook i copiat directament a **variable xifrada** `RESEND_WEBHOOK_SECRET` al projecte Vercel pilot. **El valor secret NO està en cap fitxer, document ni missatge**. S'ha redeplegat el projecte perquè l'entorn el carregui.
+- Segona prova real: Gmail va enviar un correu **completament fictici** a `pilot-nexlupa@pibnolee.resend.app`, rebut per Resend el 7/11 a les **15:18:00 UTC**, ID `dc589854-515d-451a-a1c4-9b57bff249f6`.
+- Resend va registrar un esdeveniment `email.received` al webhook, **estat `success`**, ID `msg_3LmgVaFegd5o5qbEXUZXjn66pp9`, i la consulta d'intents confirma **1 enviament, HTTP 204**, 7/11 a les **15:18:01 UTC**. Queda acreditat el circuit real Gmail → Resend → webhook Vercel.
+- GitHub Actions valida la suite nova de signatures `tests/run-premium-resend-webhook.js`, **15/15 proves** en verd: https://github.com/DavidParet/Primer-projecte/actions/runs/42385430810
+- **Limitacions deliberades:** el webhook NO descarrega el correu, NO classifica famílies, NO envia dades a IA, NO desa fitxes, NO altera Calendar i NO envia res. No disposa de `RESEND_API_KEY`. Les proves del motor complet encara usen proveïdor i model simulats.
+- Següent fase abans de qualsevol tractament de correus reals: API key de lectura guardada en secrets sense publicar-la; acreditació de remetents independent dels headers `From`; bústia/cua xifrada i idempotent, separació entre famílies, política de conservació i consentiment; provar pipeline amb missatges ficticis de punta a punta. **No activar públicament encara**.
+
+**Conclusió verificable:** recepció real + notificació signada al servidor real **OK**; processament intel·ligent automàtic i estat persistent **PENDENT**.
