@@ -74,7 +74,8 @@ async function main(){
  assert.equal(forwarded({subject:'Fwd: Circular general',
   textPlain:'Avui no hi ha novetats.'}).reason,'ACTIVITY_NOT_FOUND');
  assert.equal(forwarded({attachments:[{name:'circular.pdf'}]}).reason,'ATTACHMENTS_NOT_PROCESSED');
- assert.equal(forwarded({textPlain:'a'.repeat(25001)}).reason,'INVALID_MESSAGE');
+ assert.equal(forwarded({textPlain:'a'.repeat(8001)}).reason,'INVALID_MESSAGE');
+ assert.equal(forwarded({attachments:{name:'untrusted.pdf'}}).reason,'INVALID_ATTACHMENT_METADATA');
  assert.equal(forwarded({receivedAt:'wrong date'}).reason,'INVALID_MESSAGE');
  assert.equal(forwarded({subject:'Fwd: Futbol',textPlain:'Partit de futbol.'}).reason,'ACTIVITY_NOT_FOUND');
  assert.equal(forwarded({envelopeSender:'GUARDIAN-A@EXAMPLE.TEST',
