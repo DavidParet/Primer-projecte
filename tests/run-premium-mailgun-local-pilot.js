@@ -91,26 +91,26 @@ async function main(){
     const newTokenSameText=await ask(server,form());
     assert.equal(newTokenSameText.status,'duplicate-content');
     assert.equal(readRecords(dir).length,2);
-    assert.equal(readRecords(dir)[1].payload,null);
+    assert.ok(readRecords(dir).some(r=>r.status==='duplicate-content'&&r.payload===null));
 
     const badSig=await ask(server,form({signature:'0'.repeat(64)}));
     assert.equal(badSig.httpStatus,406);
     assert.equal(badSig.status,'invalid-signature');
     assert.equal(readRecords(dir).length,2);
 
-    const unknownFamily=await ask(server,form({
-      recipient:'someone-else@inbound.example.test'
-    }));
+    const unknownForm=form({recipient:'someone-else@inbound.example.test'});
+    const unknownFamily=await ask(server,unknownForm);
     assert.equal(unknownFamily.status,'needs-review');
-    assert.equal(readRecords(dir).at(-1).payload,null);
+    assert.equal(readRecords(dir).find(r=>r.token===unknownForm.token).payload,null);
 
-    const secondFamily=await ask(server,form({
+    const secondFamilyForm=form({
       recipient:'fam-b@inbound.example.test',
       sender:'parent-b@example.test',
       from:'Parent B <parent-b@example.test>'
-    }));
+    });
+    const secondFamily=await ask(server,secondFamilyForm);
     assert.equal(secondFamily.status,'queued');
-    assert.equal(readRecords(dir).at(-1).familyId,'family-B');
+    assert.equal(readRecords(dir).find(r=>r.token===secondFamilyForm.token).familyId,'family-B');
 
     const ambiguous=await ask(server,form({
       subject:'Circular general', 'body-plain':'Una nova circular sense matèria.'
@@ -140,9 +140,10 @@ async function main(){
     const noProof=createLocalPilot({signingKey:KEY,registry,dataDir:dir});
     await listen(noProof);
     try{
-      const quarantined=await ask(noProof,form());
+      const unverifiedForm=form();
+      const quarantined=await ask(noProof,unverifiedForm);
       assert.equal(quarantined.status,'needs-review');
-      assert.equal(readRecords(dir).at(-1).payload,null);
+      assert.equal(readRecords(dir).find(r=>r.token===unverifiedForm.token).payload,null);
     }finally{await close(noProof)}
     console.log('PASS — native Node localhost HTTP receives signed form, queues sanitized internal message');
     console.log('PASS — per-family routing and separate family-B activity');
