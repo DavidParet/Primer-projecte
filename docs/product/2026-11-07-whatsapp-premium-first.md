@@ -273,7 +273,8 @@ Agent: prepara l'esborrany i l'ofereix per revisar; no l'envia sense autoritzaci
 | Funció | Free | Premium | Agent (nom provisional) |
 | --- | --- | --- | --- |
 | Lectures | 3 al dia (objectiu) | Il·limitades amb ús raonable | Il·limitades amb ús raonable |
-| Gmail connectat amb OAuth | No | Sí | Sí |
+| Correu reenviat a NEXLUPA (sense connectar tota la bústia) | No | Sí | Sí |
+| Connexió directa opcional amb Gmail (OAuth) | No | Per validar | Per validar |
 | Google Calendar connectat amb OAuth | No | Sí | Sí |
 | Fitxes d'activitats | Lectura puntual/manual | Fitxes consultables i actualitzables, assistides per canals autoritzats | Fitxes vives amb major autonomia |
 | Consultes de l'agent | No | Prova limitada, però real, de l'agent contextual | Ús ampli subjecte a ús raonable |
@@ -282,3 +283,34 @@ Agent: prepara l'esborrany i l'ofereix per revisar; no l'envia sense autoritzaci
 
 **Distinció clau:** la diferència no és connectar Gmail i Calendar: aquests ja són Premium. La diferència del pla superior és el volum i sobretot l'**autonomia de l'agent**. No interpretar aquesta proposta com a preus definits, integracions implementades o canvis desplegats.
 **Restricció actual:** no modificar el lloc web, landing, tarifes visibles ni desplegaments sense petició posterior explícita.
+
+
+## DECISIÓ D'ARQUITECTURA — BÚSTIA DE RECEPCIÓ UNIVERSAL NEXLUPA (CORREU REENVIAT)
+**Aclariment explícit de l'usuari:** una família rep una comunicació a la seva adreça de correu personal (Gmail, Outlook, etc.) i **la reenvia al correu receptor de NEXLUPA**. El sistema identifica la família i **associa automàticament el missatge a la fitxa adequada**, com ara «Ball»; les novetats actualitzen la fitxa i proposen/sincronitzen Google Calendar dins dels permisos. **Aquest és el flux de correu principal**, no obligar cada família a connectar tota la seva bústia via OAuth.
+
+### Experiència
+1. La família es registra en NEXLUPA Premium i obté una adreça de reenviament pròpia, per exemple `f-<identificador-aleatori>@entrada.nexlupa.app` (adreça il·lustrativa, **no creada**). També podria exposar una adreça universal amb identificació segura, però és menys robusta per a múltiples famílies.
+2. La família rep una circular al seu correu habitual i prem **Reenviar** a aquesta adreça. No ha d'instal·lar res ni autoritzar accés a tota la bústia.
+3. El servei d'entrada valida l'alias destinatari i la pertinença a la família, gestiona remitent verificat/compte, adjunts, antivirus i límits; **no s'ha de confiar només en un camp «From» fàcilment falsificable**.
+4. El motor associa el correu a la família, classifica l'activitat (Ball, escola, bàsquet...), detecta si és nou, rectificació o duplicat i el vincula a la **fitxa única de l'activitat**. Si hi ha diverses fitxes plausibles, demana confirmació; no inventa el destí.
+5. Cada dada incorpora fragment justificatiu, data i canal `email-forwarded`. Això permet que arribi després un WhatsApp informal sobre el mateix acte i el completi en lloc de crear una fitxa separada.
+6. Si hi ha autorització de Calendar, es prepara l'alta/modificació de l'esdeveniment existent; els casos ambigus o amb impacte demanen aprovació. L'agent respon preguntes basades en les comunicacions realment rebudes.
+7. La família pot decidir més endavant activar **sincronització directa de Gmail per OAuth com a opció addicional**; no és prerequisit per usar el reenviament universal.
+
+### Important per a la implementació
+- La **bústia universal és conceptualment un servei receptor de correu**, no necessàriament un compte Gmail genèric. Una única bústia Gmail pot servir per a un pilot petit si compleix les condicions del proveïdor; a escala caldrà ingesta de correus amb dominis/aliases, verificació i processament fiable.
+- Identitat de família i activitat **separades**: la identitat la resol l'adreça exclusiva/token i els permisos; l'activitat la dedueix el contingut i l'historial. Evitar assignar un correu a una família simplement perquè el remitent sembla conegut.
+- Cal defensar-se de suplantació d'adreces, missatges reenviats per tercers, correu brossa, adjunts perillosos, contingut amb instruccions malicioses i dades de menors; respectar les preferències de retenció i eliminació.
+- El correu no és automàtic abans del reenviament: **el pas manual inicial és reenviar**. Per a usuaris que vulguin evitar-lo, opcionalment una regla de reenviament del seu proveïdor o una futura connexió OAuth pot automatitzar la recepció, amb consentiment.
+- L'oferta de **Gmail i Google Calendar a partir de Premium** continua vigent en el sentit d'integració de correu i calendari; el mecanisme principal inicial de recepció de correu serà el **reenviament**, no OAuth obligatori.
+
+### Proves d'acceptació del pilot
+- Correu enviat des del Gmail personal a l'adreça exclusiva de la família → fitxa «Ball» correcta.
+- Correu enviat des d'Outlook a la mateixa adreça → mateix resultat.
+- Missatge amb curs/activitat ambigua → confirmació i cap classificació automàtica incorrecta.
+- Circular Gmail + rectificació WhatsApp → **una única fitxa, un sol esdeveniment** de Calendar.
+- Segon reenviament del mateix correu → deduplicació i cap tasca duplicada.
+- Alias d'una altra família o correu no autoritzat → cap exposició ni barreja de dades entre comptes.
+- Resposta de l'agent «Quin era l'últim dia per pagar?» cita la circular reenviada i declara si no disposa de comprovant de pagament.
+
+**Estat:** decisió de flux i requisits; no existeixen encara adreces de recepció NEXLUPA, OAuth ni integracions reals.
