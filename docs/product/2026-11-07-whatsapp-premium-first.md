@@ -265,3 +265,20 @@ Agent: prepara l'esborrany i l'ofereix per revisar; no l'envia sense autoritzaci
 «Pregunta com ho faries a un altre pare. NEXLUPA troba la resposta en la informació de la teva família.»
 
 **Estat: requisit de producte pendent d'implementar i provar.**
+
+
+## CORRECCIÓ DE PLANS — GMAIL I GOOGLE CALENDAR INCLOSOS A PREMIUM
+**Decisió de l'usuari (novembre 2026):** la connexió amb Gmail i Google Calendar **ha d'estar disponible des del pla Premium**, no ser exclusiva del pla superior. Els noms dels plans són provisionals, sobretot el tercer.
+
+| Funció | Free | Premium | Agent (nom provisional) |
+| --- | --- | --- | --- |
+| Lectures | 3 al dia (objectiu) | Il·limitades amb ús raonable | Il·limitades amb ús raonable |
+| Gmail connectat amb OAuth | No | Sí | Sí |
+| Google Calendar connectat amb OAuth | No | Sí | Sí |
+| Fitxes d'activitats | Lectura puntual/manual | Fitxes consultables i actualitzables, assistides per canals autoritzats | Fitxes vives amb major autonomia |
+| Consultes de l'agent | No | Prova limitada, però real, de l'agent contextual | Ús ampli subjecte a ús raonable |
+| WhatsApp | Entrada manual | Entrada manual / compartir, per validar | Captura/automatització màxima tècnicament viable i legalment autoritzada, **sense prometre lectura completa de grups privats** |
+| Gestió proactiva | No | Limitada, definida pels permisos | Agent de seguiment, alertes i gestions autoritzades |
+
+**Distinció clau:** la diferència no és connectar Gmail i Calendar: aquests ja són Premium. La diferència del pla superior és el volum i sobretot l'**autonomia de l'agent**. No interpretar aquesta proposta com a preus definits, integracions implementades o canvis desplegats.
+**Restricció actual:** no modificar el lloc web, landing, tarifes visibles ni desplegaments sense petició posterior explícita.
