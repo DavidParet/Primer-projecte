@@ -8,7 +8,8 @@ Preparar l'entrada oficial de missatges reenviats voluntàriament per les famíl
 - api/whatsapp-webhook.js: endpoint Vercel amb verificació Meta hub.mode, hub.verify_token, hub.challenge.
 - lib/whatsapp/webhook-security.js: signatura obligatòria X-Hub-Signature-256 amb HMAC-SHA256 dels bytes originals i comparació temporalment segura; límit 256 KiB.
 - Rebuig de peticions sense configuració, amb token incorrecte, sense signatura, amb JSON invàlid o massa grans.
-- tests/whatsapp-webhook.test.js: proves amb dades de ficció; cap missatge real ni clau al repositori.
+- lib/whatsapp/delivery-normalizer.js: interpreta text i referències multimèdia dels POST signats, ignora estats de lliurament i duplicats del lot; qualsevol família/grup/consentiment queda pendent de verificació externa.
+- tests/whatsapp-webhook.test.js i tests/whatsapp-delivery-normalizer.test.js: proves amb dades de ficció; cap missatge real ni clau al repositori.
 - CI independent dins .github/workflows/whatsapp-webhook-tests.yml.
 
 ## Configuració futura (NO activada)
@@ -34,7 +35,8 @@ No s'han modificat les variables d'entorn de Vercel, no s'ha connectat Meta, no 
 10. Política documentada de tractament de dades de menors i tercers, control d'accés, retenció i eliminació.
 
 ## Proves i acceptació
-- node --test tests/whatsapp-webhook.test.js (només biblioteca estàndard de Node.js 22).
+- node --test tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js (només biblioteca estàndard de Node.js 22).
+- GitHub Actions: suite passada al commit c07072ea414bb5f83eb3e3b01c78d1309d63200f; el mòdul encara no s'ha provat amb Meta real.
 - Test de l'entorn real de Vercel encara pendent. La documentació de Vercel exposa req.body com un getter de parseig lazy; aquest webhook mai accedeix a req.body, i llegeix el flux RAW. Cal validar-ho amb vercel dev o un preview abans de connectar Meta.
 - S'han de veure POST sense signatura -> 403; POST vàlid -> 503 (fins tenir cua); GET sense token vàlid -> 403; GET vàlid -> challenge exacte.
 
@@ -46,3 +48,8 @@ No s'han modificat les variables d'entorn de Vercel, no s'ha connectat Meta, no 
 - Fase 1, parser + fitxes vives: PR #5, independent i encara esborrany.
 - Fase 2, webhook de verificació: branca feat/whatsapp-webhook-verification-v1, independent i sense canvis a main.
 - Fase 3, emmagatzematge i enviament/recepció real: NO implementada.
+
+## Coordinació amb la resta del projecte
+- PR #3 (reparació Vercel): encara pendent; la validació de Vercel de la PR #6 falla per la configuració de rutes antiga de main. No duplicar aquesta reparació aquí.
+- PR #4 (agent familiar): ja disposa del pipeline d'activitats i del canal WhatsApp en el seu contracte; connectar-lo només després d'identificar família i activitat amb consentiment, i de garantir persistència idempotent.
+- PR #5 (parser d'exports) i #6 (webhook oficial) no estan fusionades, ni disponibles a l'aplicació pública.
