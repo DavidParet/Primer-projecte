@@ -102,7 +102,7 @@ END $$;
 
 BEGIN;
 -- This SELECT and mutation must share the exact same transaction/connection.
-DO $
+DO $$
 DECLARE locked_role text;
 BEGIN
  SELECT role INTO locked_role
@@ -114,7 +114,7 @@ BEGIN
  IF NOT FOUND OR locked_role <> 'admin' THEN
    RAISE EXCEPTION 'Revoker cannot lock verified administrator membership';
  END IF;
-END $;
+END $$;
 
 UPDATE public.nex_whatsapp_sender_authorizations
 SET revoked_at=now()
