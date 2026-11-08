@@ -12,6 +12,7 @@ on:
       - 'tests/whatsapp-verified-ingestion.test.js'
       - 'tests/whatsapp-consent-revocation.test.js'
       - 'tests/whatsapp-tenant-security.test.js'
+      - 'tests/sql/whatsapp-family-rls-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -25,3 +26,31 @@ jobs:
         with:
           node-version: 22
       - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+
+  two-family-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-not-a-real-secret
+          POSTGRES_DB: whatsapp_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d whatsapp_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-not-a-real-secret
+      PGDATABASE: whatsapp_ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run synthetic two-family RLS test (never Neon)
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-family-rls-smoke.sql
