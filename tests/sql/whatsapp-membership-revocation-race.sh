@@ -25,7 +25,11 @@ holder=$!
 # Wait for the row lock to be established rather than racing a fixed delay.
 seen=false
 for i in $(seq 1 40); do
-  if grep -qx 'member' "$holder_log"; then seen=true; break; fi
+  waiting="$(psql -v ON_ERROR_STOP=1 -qAtc \
+    \"SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE
+      application_name='nex_ci_auth_holder' AND state='active'
+      AND wait_event='PgSleep')\")"
+  if [[ "$waiting" == 't' ]]; then seen=true; break; fi
   if ! kill -0 "$holder" 2>/dev/null; then break; fi
   sleep 0.1
 done
