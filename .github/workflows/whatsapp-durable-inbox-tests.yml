@@ -9,6 +9,7 @@ on:
       - 'lib/whatsapp/retention-worker.js'
       - 'lib/whatsapp/retention-lock.js'
       - 'lib/whatsapp/retention-scheduler.js'
+      - 'lib/whatsapp/family-authorization.js'
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
@@ -18,6 +19,7 @@ on:
       - 'tests/whatsapp-retention-worker.test.js'
       - 'tests/whatsapp-retention-lock.test.js'
       - 'tests/whatsapp-retention-scheduler.test.js'
+      - 'tests/whatsapp-family-authorization.test.js'
       - '.github/workflows/whatsapp-retention-schedule.yml'
       - 'tests/sql/whatsapp-family-rls-smoke.sql'
       - 'tests/sql/whatsapp-durable-schema-smoke.sql'
@@ -38,7 +40,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
