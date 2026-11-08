@@ -28,6 +28,19 @@ function dbMock(){
         attempts:0,state:'received',lease_token:null});
       return {rowCount:1,rows:[{queue_id:queueId}]};
     }
+    if(sql.includes('FROM expired') && sql.includes("state='failed'")){
+      assert.ok(sql.includes('lease_until < now()'));
+      assert.ok(sql.includes('FOR UPDATE SKIP LOCKED'));
+      const [maxAttempts,limit]=params;
+      const expired=[...entries.values()].filter(r=>
+        r.state==='processing'&&r.attempts>=maxAttempts).slice(0,limit);
+      for(const row of expired){
+        row.state='failed';
+        row.lease_token=null;
+      }
+      return {rowCount:expired.length,
+        rows:expired.map(r=>({queue_id:r.queue_id}))};
+    }
     if(sql.includes('FOR UPDATE SKIP LOCKED')){
       assert.ok(sql.includes("state='processing'"));
       assert.ok(sql.includes('lease_token=$2::uuid'));
@@ -93,6 +106,21 @@ async function main(){
   assert.equal(mock.entries.get(inserted.queueId).state,'failed');
   assert.equal(mock.queries.filter(q=>q.sql.includes('FOR UPDATE SKIP LOCKED')).length,3);
   assert.ok(mock.queries.every(q=>q.params instanceof Array));
+  // A worker can crash after its final attempt; the expired last lease must
+  // be swept to 'failed' so that it never remains 'processing' indefinitely.
+  const row=mock.entries.get(inserted.queueId);
+  row.state='processing';
+  row.attempts=2;
+  row.lease_token=crypto.randomUUID();
+  const reaped=await store.reapExhausted({maxAttempts:2,limit:10});
+  assert.equal(reaped.failed,1);
+  assert.equal(row.state,'failed');
+  assert.equal(row.lease_token,null);
+  assert.equal((await store.reapExhausted({maxAttempts:2})).failed,0);
+  await assert.rejects(()=>store.reapExhausted({maxAttempts:0}),
+    /INVALID_MAX_ATTEMPTS/);
+  await assert.rejects(()=>store.reapExhausted({limit:5000}),
+    /INVALID_REAP_LIMIT/);
   await assert.rejects(()=>store.insertIfAbsent({id:'wrong',envelope:claim.envelope}),
     /INVALID_QUEUE_ID/);
   await assert.rejects(()=>store.claimOne({leaseSeconds:3}),/INVALID_LEASE_SECONDS/);
@@ -113,7 +141,7 @@ async function main(){
     envelope:claim.envelope}),/DATABASE_QUEUE_ID_MISMATCH/);
   console.log('PASS — parameterized, idempotent PostgreSQL INSERT; ciphertext only');
   console.log('PASS — SKIP LOCKED claim and UUID-fenced lease prevent stale-worker ACK');
-  console.log('PASS — bounded retry and terminal failed state at maximum attempts');
+  console.log('PASS — bounded retries and reaping of expired maximum-attempt worker leases');
   console.log('PASS — unavailable/inconsistent DB and unsafe inputs fail closed');
   console.log('LIMIT — SQL query behavior mocked; real Postgres migration pending');
 }
