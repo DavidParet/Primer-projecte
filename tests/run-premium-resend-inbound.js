@@ -27,10 +27,12 @@ const headers={id:'msg-synthetic',timestamp:'1794042000',signature:'v1,simulated
 const secret='whsec_SyntheticSecretForUnitTestsOnly';
 function fakeResend({retrieved=received,invalidSignature=false,apiError=false}={}){
   const calls={verify:0,get:0};
-  return {calls,webhooks:{verify({payload,headers:heads,webhookSecret}){
+  return {calls,webhooks:{verify({payload,headers:heads,secret:providedSecret}){
     calls.verify++;
-    if(invalidSignature||payload!==raw||webhookSecret!==secret||
-      heads.id!==headers.id||heads.signature!==headers.signature)
+    if(invalidSignature||payload!==raw||providedSecret!==secret||
+      heads['svix-id']!==headers.id||
+      heads['svix-timestamp']!==headers.timestamp||
+      heads['svix-signature']!==headers.signature)
       throw Error('SIMULATED_SIGNATURE_FAILURE');
     return JSON.parse(payload);
   }},emails:{receiving:{get:async id=>{
