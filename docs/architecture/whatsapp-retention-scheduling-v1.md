@@ -10,7 +10,7 @@
 
 ## Activation requirements (not implemented)
 
-1. Approve a separate dedicated non-owner PostgreSQL maintenance role and minimal table grants, in an isolated Neon validation branch before production.
+1. Approve a separate dedicated non-owner PostgreSQL maintenance role and minimal SELECT+DELETE table grants, in an isolated Neon validation branch before production. A disposable PostgreSQL 17 CI job now verifies real RLS and these restricted grants, but Neon itself remains unchanged.
 2. Attach credentials through a protected secret store, not source code, issue comments or logs. Establish separate access from Resend and family-facing queries.
 3. Define monitored operational failures, an external alert channel, alert recipient, and retry/lock strategy. Successful count reporting must not replace failure alerting.
 4. Implement the trusted scheduler runner that obtains DB credentials, initializes a pool, invokes the bounded worker, and closes it even when execution fails.
@@ -23,6 +23,7 @@
 - [x] Worker and unit tests staged in PR.
 - [x] Scheduled placeholder checks the disabled gate only.
 - [x] Fail-closed default has no DB initialization.
+- [x] Disposable PostgreSQL role/RLS and expired-only deletion tested in GitHub Actions #51.
 - [ ] Separate least-privilege Neon role.
 - [ ] Authenticated, approved execution identity and runtime adapter.
 - [ ] Operational alerting and on-call runbook.
