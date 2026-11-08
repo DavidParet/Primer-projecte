@@ -26,8 +26,8 @@ test('Fitxa viva: agrupa per família, grup i activitat; conserva correcció i e
   assert.equal(c.fields.materials.value,'aigua i carmanyola');
   assert.equal(c.fields.payment_amount.needsReview,true);
   assert.equal(c.requiresReview,true);
-  assert.equal(JSON.stringify(c).includes('08:00'),false);
-  assert.equal(JSON.stringify(c).includes('11:00'),false);
+  assert.equal(JSON.stringify(c).includes('"b1"'),false);
+  assert.equal(JSON.stringify(c).includes('"a6"'),false);
 });
 
 test('Consultes: confirmat, contradicció pendent i camp desconegut', () => {
