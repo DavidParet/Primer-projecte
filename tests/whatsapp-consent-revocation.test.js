@@ -32,7 +32,7 @@ function mock({updateCount=1, failDelete=false}={}) {
 }
 test('revocation deletes linked content and commits in one transaction',async()=>{
   const m=mock();
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
   assert.deepEqual(await revoke(input()),{state:'revoked',deletedMessages:2});
   assert.deepEqual(m.queries.map(x=>x.sql==='BEGIN'?'BEGIN':x.sql==='COMMIT'?'COMMIT':
     x.sql.startsWith('UPDATE')?'UPDATE':'DELETE'),['BEGIN','UPDATE','DELETE','COMMIT']);
@@ -43,7 +43,7 @@ test('revocation deletes linked content and commits in one transaction',async()=
 test('wrong-family administrator never reaches database',async()=>{
   const m=mock();
   const revoke=createConsentRevoker({db:m.db,senderHmacKey:key});
-  await assert.rejects(revoke(input({actor:{authenticated:true,canManageFamily:true,familyId:otherFamily}})),/verified family/);
+  await assert.rejects(revoke(input({familyId:otherFamily,actor:{authenticated:true,canManageFamily:true,familyId:otherFamily}})),/verified family/);
   assert.equal(m.queries.length,0);
 });
 test('unverified administrator never reaches database',async()=>{
@@ -67,4 +67,16 @@ test('delete failure rolls back revocation',async()=>{
   assert.equal(m.queries.at(-1).sql,'ROLLBACK');
   assert.equal(m.queries.some(x=>x.sql==='COMMIT'),false);
   assert.equal(m.releases,1);
+});
+
+test('missing trusted authorization callback is rejected',()=>{
+  const m=mock();
+  assert.throws(()=>createConsentRevoker({db:m.db,senderHmacKey:key}),/Trusted family authorization/);
+});
+test('authorization service failure blocks all database access',async()=>{
+  const m=mock();
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,
+    authorizeFamily:async()=>{throw Error('identity provider offline');}});
+  await assert.rejects(revoke(input()),/identity provider offline/);
+  assert.equal(m.queries.length,0);
 });
