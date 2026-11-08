@@ -1,0 +1,21 @@
+name: WhatsApp durable inbox tests
+on:
+  pull_request:
+    paths:
+      - 'lib/whatsapp/durable-inbox.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
+      - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
+      - 'tests/whatsapp-durable-inbox.test.js'
+      - '.github/workflows/whatsapp-durable-inbox-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  durable-inbox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
