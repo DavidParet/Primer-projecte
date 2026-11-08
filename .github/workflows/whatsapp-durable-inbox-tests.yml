@@ -4,10 +4,12 @@ on:
     paths:
       - 'lib/whatsapp/durable-inbox.js'
       - 'lib/whatsapp/verified-ingestion.js'
+      - 'lib/whatsapp/revoke-consent.js'
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-verified-ingestion.test.js'
+      - 'tests/whatsapp-consent-revocation.test.js'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -20,4 +22,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
