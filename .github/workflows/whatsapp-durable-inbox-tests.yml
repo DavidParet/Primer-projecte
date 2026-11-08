@@ -34,6 +34,7 @@ on:
       - 'tests/sql/whatsapp-real-tables-rls-isolation.sql'
       - 'tests/sql/whatsapp-family-membership-contract.sql'
       - 'tests/sql/whatsapp-membership-revocation-race.sh'
+      - 'tests/sql/whatsapp-consent-service-role-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -102,3 +103,7 @@ jobs:
       - name: Verify membership revoke waits behind active transaction authorization
         run: |
           bash tests/sql/whatsapp-membership-revocation-race.sh
+
+      - name: Test purpose-scoped consent revocation role with RLS
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-consent-service-role-smoke.sql
