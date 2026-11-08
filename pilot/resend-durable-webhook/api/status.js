@@ -24,9 +24,9 @@ module.exports=async function handler(req,res){
       query_timeout:4000
     });
     await client.connect();
-    const result=await client.query('SELECT 1 AS ok');
-    if(result.rowCount!==1||result.rows[0].ok!==1)
-      throw Error('DB_PING_MISMATCH');
+    const {checkQueueDbHealth}=require('../../../lib/premium-resend-db-health');
+    if(!(await checkQueueDbHealth(client)))
+      throw Error('QUEUE_DB_ROLE_OR_SCHEMA_MISMATCH');
     res.statusCode=200;res.end(JSON.stringify({ready:true,scope:'isolated-db-only'}));
   }catch(_err){
     res.statusCode=503;res.end(JSON.stringify({ready:false}));
