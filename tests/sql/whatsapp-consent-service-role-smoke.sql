@@ -102,11 +102,19 @@ END $$;
 
 BEGIN;
 -- This SELECT and mutation must share the exact same transaction/connection.
-SELECT role FROM public.nex_ci_family_memberships
+DO $
+DECLARE locked_role text;
+BEGIN
+ SELECT role INTO locked_role
+ FROM public.nex_ci_family_memberships
  WHERE user_id='account-a'
  AND family_id='11111111-1111-4111-8111-111111111111'
  AND role IN ('owner','admin') AND status='active' AND revoked_at IS NULL
  FOR SHARE;
+ IF NOT FOUND OR locked_role <> 'admin' THEN
+   RAISE EXCEPTION 'Revoker cannot lock verified administrator membership';
+ END IF;
+END $;
 
 UPDATE public.nex_whatsapp_sender_authorizations
 SET revoked_at=now()
@@ -114,13 +122,15 @@ WHERE family_id='11111111-1111-4111-8111-111111111111'
  AND business_account_id='444444444'
  AND phone_number_id='333333333'
  AND sender_digest=decode(repeat('ee',32),'hex')
- AND revoked_at IS NULL;
+ AND revoked_at IS NULL
+RETURNING authorization_id \gset
 
 DELETE FROM public.nex_whatsapp_inbound
 WHERE family_id='11111111-1111-4111-8111-111111111111'
  AND business_account_id='444444444'
  AND phone_number_id='333333333'
- AND sender_digest=decode(repeat('ee',32),'hex');
+ AND sender_digest=decode(repeat('ee',32),'hex')
+RETURNING inbound_id \gset
 
 COMMIT;
 RESET ROLE;
