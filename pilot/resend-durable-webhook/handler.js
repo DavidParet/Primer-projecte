@@ -16,7 +16,7 @@ const {receiveVerifiedResendMetadata}=
 function response(status,code){
   return {statusCode:status,headers:{'Cache-Control':'no-store',
     'X-Content-Type-Options':'nosniff','Content-Type':'application/json'},
-    body:JSON.stringify({code})};
+    body:status===204?'':JSON.stringify({code})};
 }
 function normalizedHeaders(rawHeaders={}){
   if(!rawHeaders||typeof rawHeaders!=='object')return {};
