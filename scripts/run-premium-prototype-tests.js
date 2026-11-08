@@ -21,6 +21,7 @@ const suites=[
   'tests/run-premium-email-sender-policy.js',
   'tests/run-premium-resend-inbound.js',
   'tests/run-premium-resend-chain.js',
+  'tests/run-premium-resend-secure-queue.js',
   'tests/run-premium-resend-poll-worker.js',
   'tests/run-premium-resend-vercel-locked.js',
   'tests/run-premium-resend-webhook.js',
