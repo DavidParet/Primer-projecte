@@ -24,6 +24,7 @@ const suites=[
   'tests/run-premium-resend-secure-queue.js',
   'tests/run-premium-resend-verified-intake.js',
   'tests/run-premium-resend-postgres-store.js',
+  'tests/run-premium-resend-durable-webhook.js',
   'tests/run-premium-resend-poll-worker.js',
   'tests/run-premium-resend-vercel-locked.js',
   'tests/run-premium-resend-webhook.js',
