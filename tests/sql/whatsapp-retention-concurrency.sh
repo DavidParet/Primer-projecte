@@ -11,7 +11,7 @@ holder_pid=$!
 # Wait until the lock is actually acquired, avoiding a flaky fixed delay.
 acquired="false"
 for i in $(seq 1 30); do
-  if grep -q '^$' "$lock_session_file" && psql -Atqc "SELECT EXISTS (SELECT 1 FROM pg_locks WHERE locktype='advisory' AND classid=716200 AND objid=1 AND granted)" | grep -qx 't'; then
+  if psql -Atqc "SELECT EXISTS (SELECT 1 FROM pg_locks WHERE locktype='advisory' AND classid=716200 AND objid=1 AND granted)" | grep -qx 't'; then
     acquired="true"
     break
   fi
