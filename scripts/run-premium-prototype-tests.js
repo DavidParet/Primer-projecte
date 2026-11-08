@@ -26,6 +26,7 @@ const suites=[
   'tests/run-premium-resend-postgres-store.js',
   'tests/run-premium-resend-durable-webhook.js',
   'tests/run-premium-resend-vercel-durable-route.js',
+  'tests/run-premium-resend-db-health.js',
   'tests/run-premium-resend-poll-worker.js',
   'tests/run-premium-resend-vercel-locked.js',
   'tests/run-premium-resend-webhook.js',
