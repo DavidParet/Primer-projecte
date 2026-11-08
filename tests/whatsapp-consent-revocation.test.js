@@ -35,7 +35,7 @@ test('revocation deletes linked content and commits in one transaction',async()=
   const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
   assert.deepEqual(await revoke(input()),{state:'revoked',deletedMessages:2});
   assert.deepEqual(m.queries.map(x=>x.sql==='BEGIN'?'BEGIN':x.sql==='COMMIT'?'COMMIT':
-    x.sql.startsWith('UPDATE')?'UPDATE':'DELETE'),['BEGIN','UPDATE','DELETE','COMMIT']);
+    x.sql.trimStart().startsWith('UPDATE')?'UPDATE':'DELETE'),['BEGIN','UPDATE','DELETE','COMMIT']);
   assert.equal(m.queries[1].values[4].length,32);
   assert.equal(m.queries.flatMap(x=>x.values||[]).includes('34600000000'),false);
   assert.equal(m.releases,1);
