@@ -32,7 +32,8 @@ function mock({updateCount=1, failDelete=false}={}) {
 }
 test('revocation deletes linked content and commits in one transaction',async()=>{
   const m=mock();
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId,
+    authorizeFamilyTransaction:async ({familyId:target})=>target===familyId});
   assert.deepEqual(await revoke(input()),{state:'revoked',deletedMessages:2});
   assert.deepEqual(m.queries.map(x=>x.sql==='BEGIN'?'BEGIN':x.sql==='COMMIT'?'COMMIT':
     x.sql.trimStart().startsWith('UPDATE')?'UPDATE':'DELETE'),['BEGIN','UPDATE','DELETE','COMMIT']);
@@ -42,19 +43,21 @@ test('revocation deletes linked content and commits in one transaction',async()=
 });
 test('wrong-family administrator never reaches database',async()=>{
   const m=mock();
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId,
+    authorizeFamilyTransaction:async ({familyId:target})=>target===familyId});
   await assert.rejects(revoke(input({familyId:otherFamily,actor:{authenticated:true,canManageFamily:true,familyId:otherFamily}})),/verified family/);
   assert.equal(m.queries.length,0);
 });
 test('unverified administrator never reaches database',async()=>{
   const m=mock();
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async()=>false});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async()=>false,authorizeFamilyTransaction:async()=>false});
   await assert.rejects(revoke(input({actor:{authenticated:true,canManageFamily:true,familyId}})),/verified family/);
   assert.equal(m.queries.length,0);
 });
 test('inactive or foreign grant never deletes messages',async()=>{
   const m=mock({updateCount:0});
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId,
+    authorizeFamilyTransaction:async ({familyId:target})=>target===familyId});
   assert.deepEqual(await revoke(input()),{state:'not_active'});
   assert.equal(m.queries.some(x=>x.sql.includes('DELETE FROM')),false);
   assert.equal(m.queries.at(-1).sql,'ROLLBACK');
@@ -62,21 +65,58 @@ test('inactive or foreign grant never deletes messages',async()=>{
 });
 test('delete failure rolls back revocation',async()=>{
   const m=mock({failDelete:true});
-  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId});
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,authorizeFamily:async ({familyId:target})=>target===familyId,
+    authorizeFamilyTransaction:async ({familyId:target})=>target===familyId});
   await assert.rejects(revoke(input()),/delete failed/);
   assert.equal(m.queries.at(-1).sql,'ROLLBACK');
   assert.equal(m.queries.some(x=>x.sql==='COMMIT'),false);
   assert.equal(m.releases,1);
 });
 
-test('missing trusted authorization callback is rejected',()=>{
+test('missing trusted authorization callbacks are rejected',()=>{
   const m=mock();
   assert.throws(()=>createConsentRevoker({db:m.db,senderHmacKey:key}),/Trusted family authorization/);
 });
 test('authorization service failure blocks all database access',async()=>{
   const m=mock();
   const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,
-    authorizeFamily:async()=>{throw Error('identity provider offline');}});
+    authorizeFamily:async()=>{throw Error('identity provider offline');},
+    authorizeFamilyTransaction:async()=>true});
   await assert.rejects(revoke(input()),/identity provider offline/);
   assert.equal(m.queries.length,0);
+});
+
+test('previously authorized user revoked before transaction cannot change consent',async()=>{
+  const m=mock();let checked=false;
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,
+    authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async({client,action})=>{
+      checked=true;
+      assert.equal(action,'revoke_whatsapp_consent');
+      assert.equal(typeof client.query,'function');
+      return false;
+    }
+  });
+  await assert.rejects(revoke(input()),/current locked family authorization/);
+  assert.equal(checked,true);
+  assert.deepEqual(m.queries.map(x=>x.sql),['BEGIN','ROLLBACK']);
+  assert.equal(m.releases,1);
+});
+
+test('in-transaction authorization lookup failure rolls back without any writes',async()=>{
+  const m=mock();
+  const revoke=createConsentRevoker({db:m.db,senderHmacKey:key,
+    authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async()=>{throw Error('membership database unavailable');}
+  });
+  await assert.rejects(revoke(input()),/membership database unavailable/);
+  assert.deepEqual(m.queries.map(x=>x.sql),['BEGIN','ROLLBACK']);
+  assert.equal(m.releases,1);
+});
+
+test('transactional authorization callback is mandatory even when initial auth exists',()=>{
+  const m=mock();
+  assert.throws(()=>createConsentRevoker({
+    db:m.db,senderHmacKey:key,authorizeFamily:async()=>true
+  }),/in-transaction family authorization/);
 });
