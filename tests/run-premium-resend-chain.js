@@ -99,7 +99,7 @@ async function main(){
   assert.equal(tampered.provider.calls.get,0);
   assert.equal(tampered.client.calls.length,0);
 
-  const blockedSender=await run({authenticateForwarder:undefined});
+  const blockedSender=await run({authenticateForwarder:async()=>false});
   assert.equal(blockedSender.result.reason,'SENDER_AUTHENTICATION_PENDING');
   assert.equal(blockedSender.provider.calls.get,0);
   assert.equal(blockedSender.client.calls.length,0);
