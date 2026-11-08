@@ -37,7 +37,7 @@ test('another worker holding lock is signalled busy without invoking callback',a
   assert.equal(f.stats().released,1);
 });
 test('unexpected lock output and worker failure roll back then release',async()=>{
-  for(const result of [null,undefined]) {
+  for(const result of [null,'unexpected']) {
     const f=fixture(result);
     await assert.rejects(withRetentionLock(f.pool,async()=>{}),/Unknown retention lock result/);
     assert.deepEqual(f.calls,['BEGIN',LOCK_SQL,'ROLLBACK']);
