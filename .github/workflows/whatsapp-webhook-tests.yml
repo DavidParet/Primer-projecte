@@ -8,6 +8,10 @@ on:
       - 'api/whatsapp-webhook.js'
       - 'lib/whatsapp/webhook-security.js'
       - 'tests/whatsapp-webhook.test.js'
+      - 'tests/whatsapp-delivery-normalizer.test.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
+      - 'tests/whatsapp-delivery-normalizer.test.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
       - '.github/workflows/whatsapp-webhook-tests.yml'
   pull_request:
     paths:
@@ -31,4 +35,4 @@ jobs:
         with:
           node-version: 22
       - name: Run fail-closed webhook tests
-        run: node --test tests/whatsapp-webhook.test.js
+        run: node --test tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
