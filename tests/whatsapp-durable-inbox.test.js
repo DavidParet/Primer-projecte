@@ -143,3 +143,21 @@ test('expiration worker exposes only deletion count',async()=>{
   assert.deepEqual(await inbox(db).purgeExpired(),{deleted:3});
   assert.match(db.calls[0].sql,/expires_at <= NOW/);
 });
+
+
+test('invalid later message in batch cannot cause an earlier database write',async()=>{
+  const db=mockDb(), store=inbox(db);
+  const payload={object:'whatsapp_business_account',entry:[{
+    id:'123456789',changes:[{field:'messages',value:{
+      metadata:{phone_number_id:'987654321'},
+      messages:[
+        {id:'wamid.valid-first',from:'34600000000',
+          timestamp:'1794150000',type:'text',text:{body:'Avís vàlid'}},
+        {id:'wamid.invalid-second',from:'34600000000',
+          timestamp:'1794150000',type:'text',text:{body:'x'.repeat(MAX_TEXT_CHARS+1)}}
+      ]
+    }}]
+  }]};
+  await assert.rejects(store.persistVerifiedBatch(payload),/requires review|oversized/);
+  assert.equal(db.calls.length,0);
+});
