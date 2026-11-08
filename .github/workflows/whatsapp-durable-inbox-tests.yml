@@ -14,6 +14,7 @@ on:
       - 'tests/whatsapp-tenant-security.test.js'
       - 'tests/sql/whatsapp-family-rls-smoke.sql'
       - 'tests/sql/whatsapp-durable-schema-smoke.sql'
+      - 'tests/sql/whatsapp-consent-expiry-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -61,3 +62,6 @@ jobs:
       - name: Verify deduplication, revocation and rollback with real PostgreSQL
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-durable-schema-smoke.sql
+      - name: Reject expired and future consent; physically purge expired messages
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-consent-expiry-smoke.sql
