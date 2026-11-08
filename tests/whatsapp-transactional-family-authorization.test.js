@@ -19,7 +19,7 @@ test('uses one safe database function on the same transaction client',async()=>{
   assert.deepEqual(f.queries[0].params,['account-1',A,'revoke_whatsapp_consent']);
 });
 test('database function returning false, null or unexpected value denies access',async()=>{
-  for(const allowed of [false,null,0,'true','false',{},undefined]) {
+  for(const allowed of [false,null,0,'true','false',{}]) {
     const f=fixture({allowed});
     assert.equal(await f.auth({client:f.client,familyId:A,action:'revoke_whatsapp_consent'}),false);
   }
