@@ -47,11 +47,9 @@ function signed(value,override={}){
 const valid=signed(event);
 function mockProvider(){
   const calls={verify:0,get:0};
-  return {calls,webhooks:{verify({payload,headers,webhookSecret}){
+  return {calls,webhooks:{verify({payload,headers,secret:providedSecret}){
     calls.verify++;
-    const h={'svix-id':headers.id,'svix-timestamp':headers.timestamp,
-      'svix-signature':headers.signature};
-    if(webhookSecret!==secret || !verifySvix(payload,h,webhookSecret,Number(ts)))
+    if(providedSecret!==secret || !verifySvix(payload,headers,providedSecret,Number(ts)))
       throw Error('SIGNATURE_REJECTED');
     return JSON.parse(payload);
   }},emails:{receiving:{get:async requested=>{
