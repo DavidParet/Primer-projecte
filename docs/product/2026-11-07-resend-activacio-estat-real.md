@@ -2,6 +2,21 @@
 **Data:** 7 novembre 2026 · **Àmbit:** pilot intern exclusivament. **No desplegar a producció**.
 **Branca:** `product/whatsapp-premium-20261107`; PR #4 en esborrany.
 
+## ESTAT VIGENT — 8 novembre 2026 (preval sobre les fotografies històriques d'aquest document)
+**Domini de recepció** `entrada.nexlupa.app`: **VERIFIED** a Resend (`DKIM: verified`; `MX: verified`), regió UE. La web i l'MX del domini arrel continuen separats.
+
+**Prova de correu real, contingut fictici**: Gmail → `pilot@entrada.nexlupa.app` → Resend: missatge `ce88e8c0-af25-4cb6-b472-c485acd1a6f2`, rebut el **08/11/2026 a les 17:42:35 UTC**. El text complet s'ha recuperat mitjançant el connector Resend. Conté **Ball**, assaig fictici **19/11/2026 17:00** i termini fictici **18/11/2026**; no fer-ne cap cita real.
+
+**Webhook**: Resend ha notificat `email.received` (ID `msg_3LpnDOzEk6zKpv73iFb2NCRz9WJ`), estat **success**, **un intent HTTP 204** del pilot Vercel (08/11/2026 17:42:36 UTC). Aquest receptor **verifica i confirma** la notificació, però **no descarrega ni interpreta el missatge automàticament**, no persisteix fitxes ni escriu Calendar.
+
+**Secrets**: auditoria actual sense revelar valors: el projecte aïllat Vercel **té `RESEND_WEBHOOK_SECRET` xifrat per a production**, però **no té `RESEND_API_KEY`**. L'afirmació antiga de «0 variables» més avall era una fotografia històrica i **no és vigent**.
+
+**Adaptador SDK**: corregit el 08/11 el contracte de `resend.webhooks.verify` per transmetre `headers:{'svix-id', 'svix-timestamp', 'svix-signature'}` i `secret` com a paràmetre. Tests adaptats al mateix contracte. CI: https://github.com/DavidParet/Primer-projecte/actions/runs/42506398690 (**passa**). Això és un test sintètic del codi, no una prova amb SDK real.
+
+**No operatiu encara:** processament automàtic de correus al backend, autenticació independent dels remitents, base de dades xifrada i transaccional, gestió de consentiment/retenció, registre real de famílies i agents amb IA real. Cap correu escolar real ni acció Calendar autoritzada. `main` i web pública intactes.
+
+---
+
 ## Fets verificats al compte connectat
 - Connexió de ChatGPT amb Resend autoritzada i consultes reals d'API executades.
 - Domini **`entrada.nexlupa.app`** creat a Resend, identificador `395bc642-cf3a-4306-8942-f8100fcdcf36`.
