@@ -161,3 +161,65 @@ test('invalid later message in batch cannot cause an earlier database write',asy
   await assert.rejects(store.persistVerifiedBatch(payload),/requires review|oversized/);
   assert.equal(db.calls.length,0);
 });
+
+
+function twoMessagePayload() {
+  return {object:'whatsapp_business_account',entry:[{
+    id:'123456789',changes:[{field:'messages',value:{
+      metadata:{phone_number_id:'987654321'},
+      messages:[
+        {id:'wamid.tx-first',from:'34600000000',timestamp:'1794150000',
+          type:'text',text:{body:'Primer missatge'}},
+        {id:'wamid.tx-second',from:'34600000000',timestamp:'1794150001',
+          type:'text',text:{body:'Segon missatge'}}
+      ]
+    }}]
+  }]};
+}
+
+test('multiple messages require a dedicated transactional connection',async()=>{
+  const db=mockDb();
+  await assert.rejects(inbox(db).persistVerifiedBatch(twoMessagePayload()),/transactional/);
+  assert.equal(db.calls.length,0);
+});
+
+test('successful multi-message batch commits once and releases connection',async()=>{
+  const queries=[];
+  let released=0;
+  const client={
+    async query(sql) {
+      queries.push(sql);
+      if (sql==='BEGIN'||sql==='COMMIT'||sql==='ROLLBACK') return {};
+      return {rows:[{state:'stored'}]};
+    },
+    release() {released++;}
+  };
+  const db={query:async()=>{throw Error('Pool query not allowed');},connect:async()=>client};
+  assert.deepEqual(await inbox(db).persistVerifiedBatch(twoMessagePayload()),{
+    stored:2,duplicate:0,unlinked:0,unsupported:0
+  });
+  assert.equal(queries[0],'BEGIN');
+  assert.equal(queries.at(-1),'COMMIT');
+  assert.equal(queries.filter(sql=>sql.includes('INSERT INTO nex_whatsapp_inbound')).length,2);
+  assert.equal(queries.includes('ROLLBACK'),false);
+  assert.equal(released,1);
+});
+
+test('failed second message rolls back entire batch and releases connection',async()=>{
+  const queries=[];
+  let released=0, inserts=0;
+  const client={
+    async query(sql) {
+      queries.push(sql);
+      if (sql==='BEGIN'||sql==='COMMIT'||sql==='ROLLBACK') return {};
+      if (++inserts===2) throw Error('second insert failed');
+      return {rows:[{state:'stored'}]};
+    },
+    release() {released++;}
+  };
+  const db={query:async()=>{throw Error('Pool query not allowed');},connect:async()=>client};
+  await assert.rejects(inbox(db).persistVerifiedBatch(twoMessagePayload()),/second insert failed/);
+  assert.deepEqual([queries[0],queries.at(-1)],['BEGIN','ROLLBACK']);
+  assert.equal(queries.includes('COMMIT'),false);
+  assert.equal(released,1);
+});
