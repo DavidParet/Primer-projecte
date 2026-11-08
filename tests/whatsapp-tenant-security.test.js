@@ -53,3 +53,17 @@ test('unavailable database or malformed catalog metadata never passes',async()=>
   assert.equal(evaluateIsolation({roles:[],tables:[],policies:[]}).ready,false);
   await assert.rejects(inspectIsolation({}),/query adapter/);
 });
+
+
+test('public or trivially permissive policies never pass the structural gate',()=>{
+  const variants=[
+    {...policies[0],roles:['public']},
+    {...policies[0],qual:'true'},
+    {...policies[0],with_check:' ( true ) '}
+  ];
+  for (const variant of variants) {
+    const result=evaluateIsolation({roles:role,tables,policies:[variant,policies[1]]});
+    assert.equal(result.ready,false);
+    assert.ok(result.reasons.some(s=>s.includes('globally permissive')));
+  }
+});
