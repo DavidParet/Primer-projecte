@@ -28,6 +28,17 @@ function dbMock(){
         attempts:0,state:'received',lease_token:null});
       return {rowCount:1,rows:[{queue_id:queueId}]};
     }
+    if(sql.includes('DELETE FROM') && sql.includes('USING expired')){
+      assert.ok(sql.includes("state IN ('done','needs_review','failed')"));
+      assert.ok(sql.includes('FOR UPDATE SKIP LOCKED'));
+      const [olderThanDays,limit]=params;
+      assert.ok(olderThanDays>=1);
+      const eligible=[...entries.values()].filter(r=>
+        ['done','needs_review','failed'].includes(r.state)).slice(0,limit);
+      for(const row of eligible)entries.delete(row.queue_id);
+      return {rowCount:eligible.length,
+        rows:eligible.map(r=>({queue_id:r.queue_id}))};
+    }
     if(sql.includes('FROM expired') && sql.includes("state='failed'")){
       assert.ok(sql.includes('lease_until < now()'));
       assert.ok(sql.includes('FOR UPDATE SKIP LOCKED'));
@@ -121,6 +132,19 @@ async function main(){
     /INVALID_MAX_ATTEMPTS/);
   await assert.rejects(()=>store.reapExhausted({limit:5000}),
     /INVALID_REAP_LIMIT/);
+  // Cleanup affects only finished, review, or failed messages; live items
+  // must stay in the durable queue until they can be handled safely.
+  const activeId='c'.repeat(64);
+  mock.entries.set(activeId,{queue_id:activeId,state:'received',
+    attempts:0,encrypted_envelope:value,lease_token:null});
+  const purged=await store.purgeTerminal({olderThanDays:30,limit:10});
+  assert.equal(purged.deleted,1);
+  assert.equal(mock.entries.size,1);
+  assert.equal(mock.entries.get(activeId).state,'received');
+  await assert.rejects(()=>store.purgeTerminal({olderThanDays:0}),
+    /INVALID_RETENTION_DAYS/);
+  await assert.rejects(()=>store.purgeTerminal({limit:5000}),
+    /INVALID_PURGE_LIMIT/);
   await assert.rejects(()=>store.insertIfAbsent({id:'wrong',envelope:claim.envelope}),
     /INVALID_QUEUE_ID/);
   await assert.rejects(()=>store.claimOne({leaseSeconds:3}),/INVALID_LEASE_SECONDS/);
@@ -142,6 +166,7 @@ async function main(){
   console.log('PASS — parameterized, idempotent PostgreSQL INSERT; ciphertext only');
   console.log('PASS — SKIP LOCKED claim and UUID-fenced lease prevent stale-worker ACK');
   console.log('PASS — bounded retries and reaping of expired maximum-attempt worker leases');
+  console.log('PASS — terminal-only retention purge does not delete pending emails');
   console.log('PASS — unavailable/inconsistent DB and unsafe inputs fail closed');
   console.log('LIMIT — SQL query behavior mocked; real Postgres migration pending');
 }
