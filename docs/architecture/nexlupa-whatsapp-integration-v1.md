@@ -1,7 +1,7 @@
 # NexLupa — WhatsApp: arquitectura de la prova pilot (v1)
 **Data:** 2026-11-08  
 **Estat:** prova tècnica aïllada; no és una integració real activada  
-**Àmbit:** 1 família, 1 grup d'extraescolars, 8 missatges ficticis.
+**Àmbit:** missatges ficticis d'extraescolars, comprovacions de grups i famílies diferents; cap conversa real ni credencials.
 
 ## 1. Resultat que volem
 Una família rep missatges desordenats, canvis d'hora, terminis, materials i preguntes repetides en un grup escolar. NexLupa ha de crear una **fitxa viva per activitat**, amb dades contrastables, fonts i canvis, consultable amb preguntes naturals:
@@ -44,12 +44,16 @@ WhatsApp reenviat / text compartit / captura / Gmail → ingesta autoritzada →
 ## 5. Què aporta aquest PR
 - lib/whatsapp/pilot.js: parseWhatsAppExport() admet els formats comuns Android i iOS en català/castellà/anglès (export de text), amb missatges multilínia, pseudònims P1/P2, límit de mida, identificadors i multimèdia no llegida marcada pendent. No consulta internet ni guarda dades.
 - reconcileFacts(): reconciliació determinista amb deduplicació per sourceId, historial de canvis i marques de revisió.
-- tests/whatsapp-pilot.test.js: proves sintètiques per als casos principals.
+- lib/whatsapp/activity.js: listActivityCards() prepara fitxes vives aïllades per família/grup/activitat i getActivityFact() retorna valor, fonts i estat (confirmat, pendent, cancel·lat o desconegut).
+- tests/whatsapp-pilot.test.js i tests/whatsapp-activity.test.js: 11 comprovacions sintètiques de parser, deduplicació, correccions, consultes i aïllament per família.
+- .github/workflows/whatsapp-pilot-tests.yml: execució automàtica de Node en propostes de canvis al mòdul.
 - Execució local: node --test tests/whatsapp-pilot.test.js.
 
 **No inclou:** connexió amb Meta, recepció webhook, autenticació d'usuaris, reconeixement automàtic de grup, fitxes persistents, IA d'extracció del fil, tractament real d'àudios/imatges, subscripcions Premium, actualització real de Calendar. Això requereix les fases següents.
 
 ## 6. Pilots i criteris d'acceptació
+
+Validació local de 11 comprovacions de lògica en un executor JavaScript aïllat amb substitut de la funció de hash criptogràfic. La comprovació nativa amb Node queda delegada a GitHub Actions; no confondre les dues.
 1. 8 missatges sintètics d'un grup amb soroll, confirmacions, import i data, materials, duplicats i una hora corregida.
 2. El sistema conserva la data i hora **corregides** quan la font declara explícitament que és una rectificació.
 3. No duplica accions, pagaments ni esdeveniments repetits.
@@ -65,8 +69,8 @@ WhatsApp reenviat / text compartit / captura / Gmail → ingesta autoritzada →
 - Abans d'activar serveis externs: verificar política de tractament, webhooks, signatura, logs sense text personal, idempotència i límits per usuari.
 - Cap credencial en codi ni al navegador.
 
-## 8. Properes fases — no implementades
-**Fase A:** definir el contracte de fitxa viva, proves de reconciliació amb 8 missatges i detecció d'actualitzacions reals.
+## 8. Estat i properes fases
+**Fase A — nucli local completat:** contracte de fitxa viva, proves de reconciliació i consulta de camps amb fonts. Pendent la validació nativa de CI de GitHub i l'extracció automàtica amb IA a partir d'un fil complet.
 
 **Fase B:** verificar i configurar número Meta WhatsApp Business Platform per missatges 1:1; webhook autenticat i recepció segura.
 
