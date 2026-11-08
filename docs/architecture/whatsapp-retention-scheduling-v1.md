@@ -38,3 +38,11 @@
 - Mock-backed tests cover lock acquisition, contention, rollback on errors, and connection release; this primitive is **not yet connected** to `runRetentionJob` or tested for concurrent real PostgreSQL sessions.
 - A future integration must run the entire bounded purge within the same transaction/client, verify the restricted maintenance role on that connection, commit before reporting success, and alert reliably on errors. Never run `pool.query()` on an arbitrary connection while relying on transaction-level locking.
 - Neon branch audit on 2026-11-08 verified the isolated WhatsApp validation branch exists, but the dedicated `nexlupa_whatsapp_retention` role is absent. No role changes or production changes were made.
+
+## TTP 220 — integration on the preview branch
+
+- `runRetentionJob` now acquires one transaction-scoped advisory lock on a dedicated PostgreSQL connection, checks the exact maintenance role on that same connection, and performs all bounded purge batches before committing.
+- A competing runner returns `busy` without performing deletion. Failures roll back the entire transaction. The monitor receives `completed` only after the transaction has committed.
+- If monitoring fails after commit, the caller receives an error without claiming that committed deletions were rolled back. Operations must reconcile monitoring delivery and retry safely.
+- The separate disposable PostgreSQL CI smoke test now exercises contention across two live connections. This is not proof that the intended maintenance role exists in Neon.
+- The schedule is still a no-database disabled placeholder, and no Neon access or secrets were configured.
