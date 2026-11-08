@@ -83,7 +83,7 @@ test('Aïllament multitenant: la mateixa activitat de dues famílies no es barre
 });
 
 test('Formats d’hora 12 h, valors invàlids i cancel·lació explícita', () => {
-  const parsed = parseWhatsAppExport('[08/11/2026, 6:02 PM] Escola: Hola\\n[08/11/2026, 12:00 AM] Escola: Demà');
+  const parsed = parseWhatsAppExport('[08/11/2026, 6:02 PM] Escola: Hola\n[08/11/2026, 12:00 AM] Escola: Demà');
   assert.deepEqual(parsed.messages.map(m => m.at),['2026-11-08T18:02:00','2026-11-08T00:00:00']);
   assert.equal(parseWhatsAppExport('08/11/2026, 25:00 - Escola: Hora incorrecta').messages.length,0);
   const base = { familyId:'familia-a', groupId:'escola',topic:'colònies',field:'status',confidence:'explicit' };
