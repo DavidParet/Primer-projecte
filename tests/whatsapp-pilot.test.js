@@ -45,7 +45,7 @@ test('Límits i capçaleres invàlides', () => {
 });
 
 test('Correccions substitueixen; contradiccions sense correcció demanen revisió; duplicats no es dupliquen', () => {
-  const base = { groupId:'extraescolar', topic:'sortida',field:'time', confidence:'explicit' };
+  const base = { familyId:'familia-a', groupId:'extraescolar', topic:'sortida',field:'time', confidence:'explicit' };
   const data = [
     { ...base, value:'09:00', at:'2026-11-08T18:02:00',sourceId:'m1', operation:'set' },
     { ...base, value:'09:00', at:'2026-11-08T18:02:00',sourceId:'m1', operation:'set' },
@@ -61,10 +61,36 @@ test('Correccions substitueixen; contradiccions sense correcció demanen revisi�
 
 test('Manté separats dos grups i no dona per cert un fet incert', () => {
   const result = reconcileFacts([
-    { groupId:'escola', topic:'sortida',field:'date',value:'2026-11-11',at:'2026-11-08T10:00:00',sourceId:'a',confidence:'explicit' },
-    { groupId:'bàsquet',topic:'sortida',field:'date',value:'2026-11-12',at:'2026-11-08T10:01:00',sourceId:'b',confidence:'explicit' },
-    { groupId:'escola', topic:'sortida',field:'date',value:'2026-11-13',at:'2026-11-08T10:02:00',sourceId:'c',confidence:'uncertain' }
+    { familyId:'familia-a', groupId:'escola', topic:'sortida',field:'date',value:'2026-11-11',at:'2026-11-08T10:00:00',sourceId:'a',confidence:'explicit' },
+    { familyId:'familia-a', groupId:'bàsquet',topic:'sortida',field:'date',value:'2026-11-12',at:'2026-11-08T10:01:00',sourceId:'b',confidence:'explicit' },
+    { familyId:'familia-a', groupId:'escola', topic:'sortida',field:'date',value:'2026-11-13',at:'2026-11-08T10:02:00',sourceId:'c',confidence:'uncertain' }
   ]);
   assert.equal(result.length, 2);
   assert.equal(result[0].value,'2026-11-11');
+});
+
+test('Aïllament multitenant: la mateixa activitat de dues famílies no es barreja', () => {
+  const common = { groupId: 'escola', topic:'colònies', field:'time',confidence:'explicit' };
+  const data = [
+    { ...common, familyId:'familia-a', value:'08:30', at:'2026-11-08T10:00:00', sourceId:'a1' },
+    { ...common, familyId:'familia-b', value:'09:15', at:'2026-11-08T10:01:00', sourceId:'b1' },
+    { ...common, value:'11:00', at:'2026-11-08T10:02:00', sourceId:'no-tenant' }
+  ];
+  const results = reconcileFacts(data);
+  assert.equal(results.length,2);
+  assert.equal(results.find(r => r.familyId === 'familia-a').value,'08:30');
+  assert.equal(results.find(r => r.familyId === 'familia-b').value,'09:15');
+});
+
+test('Formats d’hora 12 h, valors invàlids i cancel·lació explícita', () => {
+  const parsed = parseWhatsAppExport('[08/11/2026, 6:02 PM] Escola: Hola\\n[08/11/2026, 12:00 AM] Escola: Demà');
+  assert.deepEqual(parsed.messages.map(m => m.at),['2026-11-08T18:02:00','2026-11-08T00:00:00']);
+  assert.equal(parseWhatsAppExport('08/11/2026, 25:00 - Escola: Hora incorrecta').messages.length,0);
+  const base = { familyId:'familia-a', groupId:'escola',topic:'colònies',field:'status',confidence:'explicit' };
+  const [cancelled] = reconcileFacts([
+    { ...base, value:'confirmat', at:'2026-11-08T10:00:00', sourceId:'e1',operation:'set' },
+    { ...base, at:'2026-11-08T11:00:00', sourceId:'e2',operation:'cancel' }
+  ]);
+  assert.equal(cancelled.status,'cancelled');
+  assert.equal(cancelled.value,null);
 });
