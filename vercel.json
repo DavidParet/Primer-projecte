@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node scripts/inject-version.js",
+  "buildCommand": "node scripts/inject-version.js && node scripts/build-static.js",
   "headers": [
     {
       "source": "/(.*)",
@@ -19,5 +19,6 @@
         }
       ]
     }
-  ]
+  ],
+  "outputDirectory": "public"
 }
