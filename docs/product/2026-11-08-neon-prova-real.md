@@ -24,3 +24,13 @@
 3. Guardar `DATABASE_URL`, `RESEND_WEBHOOK_SECRET` i una clau AES-256-GCM pròpia al secret manager del pilot. No escriure mai cap secret a GitHub ni al xat.
 4. Desplegar ruta que utilitzi el receptor amb cua durable. Inicialment **sense processar correus ni Calendar**.
 5. Validar amb un correu completament inventat que l'HTTP 204 només es produeix després del commit, que els reintents no dupliquen i que les dades personals no apareixen en registres.
+
+
+## Progrés posterior — connexió parcial Vercel → Neon (8 novembre, vespre)
+- Creat a Neon el rol `nexlupa_resend_ingest` amb **read_write limitat a la base `nexlupa_pilot` i l'esquema `nexlupa_pilot`**, sense privilegis CREATE a la base. Verificat amb una consulta real executada amb aquest rol: `schema_usage=true`, `queue_rw=true`, `can_create_database_objects=false`.
+- Configurats com a secrets xifrats al projecte Vercel **separat** `nexlupa-resend-pilot`: `DATABASE_URL`, `RESEND_QUEUE_ENCRYPTION_KEY`. Les mateixes dues variables s'han afegit al seu entorn de **preview**, juntament amb `RESEND_PILOT_RECIPIENT=pilot@entrada.nexlupa.app`. **Cap valor secret s'inclou a GitHub**.
+- `RESEND_WEBHOOK_SECRET` continua configurat **només a production** del projecte pilot; no s'ha afegit a preview. Per tant, el receptor nou a preview **rebutja** missatges fins que s'habilitin deliberadament proves controlades. El webhook Resend vigent de production encara apunta al receptor anterior que només acusa recepció, sense desar el cos.
+- Codi nou: `pilot/resend-durable-webhook/api/webhook.js` i `api/status.js`, a la branca de proves. Receptor amb configuració obligatòria, PostgreSQL de mínim privilegi i confirmació 204 només si la inserció transaccional té èxit. El `status` només comprova `SELECT 1`, no llegeix dades familiars.
+- Desplegament Vercel **PREVIEW** `dpl_7gPDYNjLxxkuxJ7hzYHW7p1qs5A8`, `READY`, URL tècnica `https://nexlupa-resend-pilot-lq3n6540z-davidparets-projects.vercel.app`. `READY` confirma el build, **NO** la connexió HTTP en execució: la comprovació externa de `/api/status` no ha estat accessible a l'eina web, i per això **no es pot afirmar que la connexió Vercel→Neon s'hagi comprovat de punta a punta**.
+- Prova de seguretat de la ruta amb secrets absents a GitHub CI: `tests/run-premium-resend-vercel-durable-route.js`, **22/22 suites PASS** https://github.com/DavidParet/Primer-projecte/actions/runs/42511374704.
+- **Encara pendent:** prova HTTP del preview a `/api/status`, proves amb el receptor + PostgreSQL real i signatura Resend en un entorn segur, autenticació real de remitents i consentiment familiar. `main`, `nexlupa.app`, Zoho, DNS i Google Calendar no modificats.
