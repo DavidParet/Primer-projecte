@@ -15,7 +15,7 @@ Do not automatically import group history. A user can manually forward messages 
 6. `expired`: do not ingest after `valid_until`; re-consent is required.
 
 ## Required protections before implementing activation
-- Authenticated family administrator and authorization to manage the target `family_id`.
+- Authenticated family administrator and authorization to manage the target `family_id`. The revocation module now requires an injected **trusted** `authorizeFamily({familyId, action})` callback; this callback MUST be backed by the authenticated server session and trusted membership lookup, never by client-provided actor flags. The production identity adapter has not been connected.
 - Verified control of sender number via short-lived one-time proof, throttling and attempt counters.
 - Idempotent consent transitions; a concurrent revoke must win over an inbound insert. Use row locking or another DB-enforced mechanism after threat-model review.
 - A unique active mapping of one sender to one family on each business number; migration between families requires explicit revocation and re-enrollment.
@@ -36,4 +36,4 @@ Do not automatically import group history. A user can manually forward messages 
 - A consent audit does not leak personal message content, telephone numbers or secrets.
 - Tests run against a separate Neon branch using non-personal synthetic fixtures.
 
-**Status:** architecture checklist only; no claim that enrollment, deletion or tenant access controls are implemented.
+**Status:** the isolated PR contains an internal transactional revocation primitive with a required authorization callback. No real identity adapter, enrollment, consent proof, audit storage, public endpoint or tenant access controls are implemented. Test results and SQL race behavior still need verification.
