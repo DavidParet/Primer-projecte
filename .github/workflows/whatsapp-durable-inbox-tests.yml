@@ -24,6 +24,7 @@ on:
       - 'tests/sql/whatsapp-consent-expiry-smoke.sql'
       - 'tests/sql/whatsapp-retention-batches-smoke.sql'
       - 'tests/sql/whatsapp-retention-restricted-role-smoke.sql'
+      - 'tests/sql/whatsapp-retention-concurrency.sh'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -80,3 +81,6 @@ jobs:
       - name: Validate real RLS and limited SELECT-DELETE maintenance role
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-retention-restricted-role-smoke.sql
+      - name: Test advisory lock contention with two PostgreSQL connections
+        run: |
+          bash tests/sql/whatsapp-retention-concurrency.sh
