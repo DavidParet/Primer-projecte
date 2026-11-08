@@ -26,9 +26,9 @@ holder=$!
 seen=false
 for i in $(seq 1 40); do
   waiting="$(psql -v ON_ERROR_STOP=1 -qAtc \
-    \"SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE
+    "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE
       application_name='nex_ci_auth_holder' AND state='active'
-      AND wait_event='PgSleep')\")"
+      AND wait_event='PgSleep')")"
   if [[ "$waiting" == 't' ]]; then seen=true; break; fi
   if ! kill -0 "$holder" 2>/dev/null; then break; fi
   sleep 0.1
