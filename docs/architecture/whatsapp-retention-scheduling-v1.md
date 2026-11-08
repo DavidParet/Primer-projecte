@@ -31,3 +31,10 @@
 - [ ] Explicit production deployment decision.
 
 **No live WhatsApp message purge has been scheduled or activated.**
+
+## TTP 219 concurrency primitive (staged, not wired)
+
+- `lib/whatsapp/retention-lock.js` now implements a transaction-scoped advisory lock on one dedicated PostgreSQL connection, with explicit `busy`, `ROLLBACK` and `COMMIT` behavior.
+- Mock-backed tests cover lock acquisition, contention, rollback on errors, and connection release; this primitive is **not yet connected** to `runRetentionJob` or tested for concurrent real PostgreSQL sessions.
+- A future integration must run the entire bounded purge within the same transaction/client, verify the restricted maintenance role on that connection, commit before reporting success, and alert reliably on errors. Never run `pool.query()` on an arbitrary connection while relying on transaction-level locking.
+- Neon branch audit on 2026-11-08 verified the isolated WhatsApp validation branch exists, but the dedicated `nexlupa_whatsapp_retention` role is absent. No role changes or production changes were made.
