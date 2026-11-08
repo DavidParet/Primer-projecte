@@ -27,7 +27,8 @@ test('deletes bounded batches, reports only counts and stops on partial batch',a
   });
   assert.deepEqual(f.queries.map(q=>q.values),[[2],[2]]);
   assert.equal(f.queries[0].sql,PURGE_BATCH_SQL);
-  assert.match(f.queries[0].sql,/SKIP LOCKED/);
+  assert.doesNotMatch(f.queries[0].sql,/FOR UPDATE|SKIP LOCKED/);
+  assert.match(f.queries[0].sql,/DELETE FROM nex_whatsapp_inbound/);
   assert.deepEqual(f.events,[{status:'completed',deleted:3,batches:2,mayHaveMore:false}]);
 });
 test('full final batch conservatively marks that records may remain',async()=>{
