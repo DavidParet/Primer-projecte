@@ -1,0 +1,54 @@
+name: Gmail pilot — isolated tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'api/gmail/**'
+      - 'lib/gmail/**'
+      - 'tests/gmail-*.test.cjs'
+      - 'package.json'
+      - '.github/workflows/gmail-pilot-tests.yml'
+  push:
+    branches:
+      - 'feature/gmail-readonly-pilot-*'
+    paths:
+      - 'api/gmail/**'
+      - 'lib/gmail/**'
+      - 'tests/gmail-*.test.cjs'
+      - 'package.json'
+      - '.github/workflows/gmail-pilot-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  gmail-pilot:
+    name: Gmail — offline safety suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      VERCEL_ENV: production
+      GMAIL_PILOT_ENABLED: 'false'
+      GOOGLE_CLIENT_ID: ''
+      GOOGLE_CLIENT_SECRET: ''
+      GMAIL_PILOT_DATABASE_URL: ''
+    steps:
+      - name: Checkout (no credentials retained)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check Gmail source syntax
+        run: |
+          for f in lib/gmail/*.cjs api/gmail/*.js api/gmail/pilot/*.js tests/gmail-*.test.cjs; do
+            node --check "$f"
+          done
+      - name: Run Gmail safety and authentication tests (no external accounts)
+        run: node --test tests/gmail-*.test.cjs
