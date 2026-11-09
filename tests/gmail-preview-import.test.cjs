@@ -133,3 +133,29 @@ test('a provider error fails closed without returning partial previews',async()=
   const mock=mockGmail([textMail('msg1')],[{id:'msg1'},{id:'missing'}]);
   await assert.rejects(previewLabeledMail(input({fetchImpl:mock.fetchImpl})),/upstream_request_failed/);
 });
+
+test('auto-discovers NEXLUPA_PILOT from Gmail before reading the labeled message', async () => {
+  const calls=[];
+  const fetchImpl=async (url,opts)=>{
+    const p=new URL(url).pathname;
+    calls.push(p);
+    if(p.endsWith('/labels'))return {ok:true,json:async()=>({
+      labels:[{name:'NEXLUPA_PILOT',id:'Label_123',type:'user'}]
+    })};
+    if(p.endsWith('/messages'))return {ok:true,json:async()=>({messages:[{id:'msg1'}]})};
+    return {ok:true,json:async()=>textMail('msg1')};
+  };
+  const value=await previewLabeledMail(input({pilotLabelId:undefined,fetchImpl}));
+  assert.equal(value.reviewedMessages,1);
+  assert.equal(calls.length,3);
+  assert.ok(calls[0].endsWith('/labels'));
+});
+test('without NEXLUPA_PILOT label no message is read',async()=>{
+  const calls=[];
+  const fetchImpl=async(url)=>{
+    calls.push(url);
+    return {ok:true,json:async()=>({labels:[]})};
+  };
+  await assert.rejects(previewLabeledMail(input({pilotLabelId:undefined,fetchImpl})),/pilot_label_missing/);
+  assert.equal(calls.length,1);
+});
