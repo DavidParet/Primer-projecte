@@ -15,7 +15,7 @@ function db(rowCount=1,deletedCount=3) {
   const calls=[];
   return {calls,async query(sql,values){
     calls.push({sql,values});
-    if (sql.includes('WITH revoked AS')) return {rows:[{
+    if (sql.includes('WITH target AS') && sql.includes('), revoked AS (') && sql.includes('), deleted AS (')) return {rows:[{
       revoked_count:rowCount,deleted_count:rowCount?deletedCount:0
     }]};
     return {rowCount};
