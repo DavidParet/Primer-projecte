@@ -152,6 +152,13 @@ test('family operations reject unsafe GET by default; explicit read-only use is 
   assert.equal(await binder.authorizeFamily({
     familyId:A,action:'read_whatsapp_messages'
   }),true);
+  assert.equal(await binder.authorizeFamily({
+    familyId:A,action:'enroll_whatsapp_sender'
+  }),false);
+  assert.equal(await binder.authorizeFamily({
+    familyId:A,action:'revoke_whatsapp_consent'
+  }),false);
+  assert.equal(typeof binder.authorizeFamilyTransaction,'undefined');
   assert.equal(f.seen.length>=2,true);
 });
 
