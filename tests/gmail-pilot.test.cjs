@@ -128,3 +128,43 @@ test('missing, duplicated, or forged pilot label cannot grant mailbox access', a
     }),/pilot_label_missing/);
   }
 });
+
+test('rejects a MIME message with plain text plus a sibling attachment',async()=>{
+  const mail={
+    id:'abc1',labelIds:['Label_123'],sizeEstimate:150,
+    payload:{mimeType:'multipart/mixed',parts:[
+      {mimeType:'text/plain',body:{data:Buffer.from('visible').toString('base64url')}},
+      {mimeType:'application/pdf',filename:'private.pdf',body:{attachmentId:'attachment_123'}}
+    ]}
+  };
+  await assert.rejects(lib.readTextMessage({
+    accessToken:token,messageId:'abc1',labelId:'Label_123',fetchImpl:mock(mail)
+  }),/message_not_eligible/);
+});
+test('rejects hidden attachment in deeply nested MIME sibling',async()=>{
+  const mail={
+    id:'abc1',labelIds:['Label_123'],sizeEstimate:150,
+    payload:{mimeType:'multipart/mixed',parts:[
+      {mimeType:'multipart/alternative',parts:[
+        {mimeType:'text/plain',body:{data:Buffer.from('visible').toString('base64url')}}
+      ]},
+      {mimeType:'multipart/related',parts:[
+        {mimeType:'image/png',body:{attachmentId:'hidden-image'}}
+      ]}
+    ]}
+  };
+  await assert.rejects(lib.readTextMessage({
+    accessToken:token,messageId:'abc1',labelId:'Label_123',fetchImpl:mock(mail)
+  }),/message_not_eligible/);
+});
+test('rejects pathological MIME depth and malformed parts',async()=>{
+  const deep={mimeType:'text/plain',body:{data:'aGVsbG8'}};
+  let nested=deep;
+  for(let i=0;i<10;i++)nested={mimeType:'multipart/mixed',parts:[nested]};
+  for(const payload of [nested,{mimeType:'multipart/mixed',parts:'bad'}]){
+    await assert.rejects(lib.readTextMessage({
+      accessToken:token,messageId:'abc1',labelId:'Label_123',
+      fetchImpl:mock({id:'abc1',labelIds:['Label_123'],sizeEstimate:50,payload})
+    }),/message_not_eligible/);
+  }
+});
