@@ -22,7 +22,7 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 - `lib/gmail/oauth-flow.cjs`: només és invocable des del servidor i exigeix una sessió de família autenticada, la comprovació del consentiment, `state` d'un sol ús de 4 minuts, PKCE i verificació de l'adreça de Google.
 - `lib/gmail/neon-intent-store.cjs`: guarda i consumeix l'estat mitjançant funcions SQL parametritzades. No pot accedir directament a les taules.
 - La branca separada de Neon ja conté les funcions de prova `store_gmail_pilot_state` i `consume_gmail_pilot_state`; s'han comprovat els duplicats, consentiments revocats i usos repetits. **No estan desplegades en producció.**
-- **87 proves executades i superades** en un entorn independent, sense dades reals: `node --test tests/gmail-*.test.cjs`.
+- **94 proves executades i superades** en un entorn independent, sense dades reals: `node --test tests/gmail-*.test.cjs`.
 
 **Important:** aquests mòduls no creen cap endpoint HTTP accessible. L'autenticació de famílies real encara no existeix i els secrets de Google no estan configurats.
 
@@ -60,7 +60,7 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 - Mòdul lib/gmail/preview-import.cjs: consulta un màxim de 3 missatges únicament d'una etiqueta autoritzada, valida consentiment abans i després, descarta continguts no compatibles i retorna una previsualització per a revisió manual. No crida cap IA ni escriu a Neon, Gmail o Calendar.
 - Secrets i configuració de Neon guardats exclusivament a Vercel preview del projecte independent de proves.
 
-**Proves:** 87/87 superades en sandbox independent. Neon rebutja un usuari no vinculat a cap família.
+**Proves:** 94/94 superades en sandbox independent. Neon rebutja un usuari no vinculat a cap família.
 
 **Bloqueig de desplegament:** Vercel retorna 402, codi api-deployments-free-per-day, per haver superat el límit diari de desplegaments per API. El preflight nou NO està desplegat. No s'ha modificat cap pla, factura, domini ni producció.
 
@@ -80,7 +80,7 @@ La prova amb el simulador de Gmail ha validat aquest ordre: sessió familiar ver
 - Cada previsualització conté la procedència Gmail, una empremta estable de compte i missatge, l'assumpte i un extracte literal. No inventa imports ni dates, ni genera accions automàtiques.
 - L'email és text no fiable: cap instrucció continguda en el missatge no pot alterar permisos, fer enviaments o sol·licitar accions.
 - Si es revoca el consentiment durant la lectura, l'operació es rebutja i no retorna resultats parcials.
-- **87/87 proves superades** (Node test, dades simulades) incloent 15 proves específiques d'importació.
+- **94/94 proves superades** (Node test, dades simulades) incloent 15 proves específiques d'importació.
 - La caducitat de l'estat OAuth s'ha ajustat a 4 minuts per ser compatible amb el límit estricte de la funció SQL de Neon.
 
 **Encara no fa extracció semàntica amb IA ni crea fitxes persistents.** Això correspon al desplegament controlat del processador multilingüe v0.9, amb revisió humana i comprovacions d'evidències.
@@ -95,7 +95,7 @@ La prova amb el simulador de Gmail ha validat aquest ordre: sessió familiar ver
 - `lib/gmail/pilot.cjs`: identificació automàtica d'una etiqueta d'usuari amb nom exacte `NEXLUPA_PILOT`; sense aquesta etiqueta, no es llegeix cap missatge. La previsualització es limita a **tres** missatges i no modifica dades.
 - `tests/gmail-browser-oauth.test.cjs`, `tests/gmail-browser-intent-store.test.cjs` i `tests/gmail-http-guard.test.cjs`: comprovació del retorn, vinculació al navegador, rebuig de tokens i estats invàlids, eliminació de galeta i bloqueig de la producció.
 
-**Proves executades:** 87/87 correctes en sandbox Node, amb HTTP i respostes Google/Gmail simulades. S'ha validat a Neon que la nova RPC denega estats desconeguts i galetes incorrectes, i que els usuaris sense pertinença familiar no poden iniciar l'autorització.
+**Proves executades:** 94/94 correctes en sandbox Node, amb HTTP i respostes Google/Gmail simulades. S'ha validat a Neon que la nova RPC denega estats desconeguts i galetes incorrectes, i que els usuaris sense pertinença familiar no poden iniciar l'autorització.
 
 **No confondre codi preparat amb integració activa:** encara falten el client OAuth de Google Cloud, el desplegament en una preview estable, un compte pilot verificat i la prova final amb consentiment real. Sense això, la ruta de connexió falla de manera segura i no llegeix Gmail.
 
@@ -104,3 +104,10 @@ La prova amb el simulador de Gmail ha validat aquest ordre: sessió familiar ver
 `VERCEL_ENV=preview`, `GMAIL_PILOT_ENABLED=true`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GMAIL_PILOT_REDIRECT_URI=https://<domini-preview-estable>/api/gmail/pilot/callback`, `GMAIL_PILOT_DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`.
 
 `GOOGLE_CLIENT_SECRET` i la cadena de connexió a PostgreSQL s'han de desar només com a secrets xifrats de Vercel; mai a GitHub. El domini d'inici i el retorn OAuth han de coincidir exactament per protegir la galeta `__Host-`. No activar el commutador fins que una persona autoritzada hagi aprovat el compte de prova, els permisos i la pantalla de consentiment.
+
+## Seguiment de la primera prova integrada
+
+- Nova bateria `tests/gmail-full-pilot-flow.test.cjs`: recorregut amb OAuth i Gmail simulats, dues notificacions escolars, consentiment revocat, etiqueta absent, reutilització del retorn i contingut no fiable.
+- GitHub Actions ha executat correctament **94/94 tests** sobre la branca. No s'ha cridat Gmail real.
+- Procediment exacte, passos Google Cloud i criteris d'acceptació a [`docs/integrations/gmail-pilot-runbook.md`](./gmail-pilot-runbook.md).
+- A Vercel s'ha fixat explícitament `GMAIL_PILOT_ENABLED=false`, **només a preview**, per impedir qualsevol inici OAuth accidental fins al vistiplau del pilot.
