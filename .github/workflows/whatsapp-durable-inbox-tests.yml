@@ -25,6 +25,7 @@ on:
       - 'lib/whatsapp/verified-server-session.js'
       - 'lib/whatsapp/canonical-verified-session.js'
       - 'lib/whatsapp/neon-auth-server-session.js'
+      - 'lib/whatsapp/pilot-auth-bff.js'
       - 'lib/whatsapp/signed-revocation-permit.js'
       - 'lib/whatsapp/signed-consent-revoker.js'
       - 'lib/whatsapp/rotating-revocation-permit.js'
@@ -53,6 +54,7 @@ on:
       - 'tests/whatsapp-verified-server-session.test.js'
       - 'tests/whatsapp-canonical-verified-session.test.js'
       - 'tests/whatsapp-neon-auth-server-session.test.js'
+      - 'tests/whatsapp-pilot-auth-bff.test.js'
       - 'tests/whatsapp-two-family-authenticated-flow.test.js'
       - 'tests/whatsapp-signed-consent-revoker.test.js'
       - 'tests/whatsapp-rotating-keyring.test.js'
@@ -60,6 +62,10 @@ on:
       - 'tests/whatsapp-credential-scan.test.js'
       - 'scripts/security/check-tracked-credentials.js'
       - 'scripts/whatsapp-pilot-preflight.js'
+      - 'scripts/build-static.js'
+      - 'api/pilot-auth.js'
+      - 'pilot-auth/index.html'
+      - 'pilot-auth/script.js'
       - '.gitignore'
       - '.claude/settings.local.json'
       - '.github/workflows/whatsapp-retention-schedule.yml'
@@ -98,7 +104,7 @@ jobs:
         run: node scripts/security/check-tracked-credentials.js
       - name: Verify WhatsApp pilot remains disabled and audit missing config without secrets
         run: node scripts/whatsapp-pilot-preflight.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-neon-auth-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-neon-auth-server-session.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
