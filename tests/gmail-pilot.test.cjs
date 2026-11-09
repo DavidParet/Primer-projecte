@@ -100,3 +100,31 @@ test('rejects a message not carrying the required pilot label', async () => {
   await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123',
     fetchImpl: mock({ id: 'abc1', labelIds: ['INBOX'], sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } }) }), /message_outside_pilot_label/);
 });
+
+test('discovers the exact dedicated user label without reading any messages', async () => {
+  const calls = [];
+  const id = await lib.findPilotLabelId({ accessToken: token, fetchImpl: async (url, opts) => {
+    calls.push({url,opts});
+    return {ok:true,json:async()=>({labels:[
+      {id:'INBOX',name:'INBOX',type:'system'},
+      {id:'Label_a1',name:'NEXLUPA_PILOT',type:'user'}
+    ]})};
+  }});
+  assert.equal(id,'Label_a1');
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].opts.method,'GET');
+  assert.ok(calls[0].url.includes('/users/me/labels'));
+});
+test('missing, duplicated, or forged pilot label cannot grant mailbox access', async () => {
+  for (const labels of [
+    [],
+    [{id:'Label_a1',name:'Other Label',type:'user'}],
+    [{id:'Label_a1',name:'NEXLUPA_PILOT',type:'system'}],
+    [{id:'Label_a1',name:'NEXLUPA_PILOT',type:'user'},{id:'Label_a2',name:'NEXLUPA_PILOT',type:'user'}]
+  ]) {
+    await assert.rejects(lib.findPilotLabelId({
+      accessToken:token,
+      fetchImpl:async()=>({ok:true,json:async()=>({labels})})
+    }),/pilot_label_missing/);
+  }
+});
