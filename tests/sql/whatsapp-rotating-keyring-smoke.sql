@@ -152,6 +152,19 @@ SELECT encode(public.hmac(convert_to(concat_ws('|',
  :'old_exp',:'old_nonce'),'UTF8'),
  decode(repeat('a8',32),'hex'),'sha256'),'hex') AS old_signature \gset
 
+-- A separate OLD permit is deliberately left unused; its rejection
+-- after grace-window expiry cannot be confused with nonce replay denial.
+SELECT authorization_id AS grace_auth FROM public.nex_whatsapp_sender_authorizations
+ WHERE business_account_id='733330003' \gset
+SELECT (floor(extract(epoch from clock_timestamp()))::bigint+60) AS grace_exp,
+ gen_random_uuid()::text AS grace_nonce \gset
+SELECT encode(public.hmac(convert_to(concat_ws('|',
+ 'NEXLUPA-WA-REVOKE-2','key-old','account-a',
+ '11111111-1111-4111-8111-111111111111',
+ :'grace_auth','733330003','833330003',repeat('c3',32),
+ :'grace_exp',:'grace_nonce'),'UTF8'),
+ decode(repeat('a8',32),'hex'),'sha256'),'hex') AS grace_signature \gset
+
 -- Planned rotation: stop issuing with OLD, allow verification of outstanding
 -- short-lived permits for at most 90 seconds, start issuing NEW.
 BEGIN;
@@ -268,8 +281,8 @@ UPDATE public.nex_ci_revocation_keyring_v2
 SET ROLE nex_ci_consent_revoker;
 SELECT (public.nex_ci_revoke_whatsapp_with_rotating_permit(
  'key-old','account-a','11111111-1111-4111-8111-111111111111',
- :'old_auth','733330001','833330001',decode(repeat('c1',32),'hex'),
- :'old_exp',gen_random_uuid(),decode(:'old_signature','hex')
+ :'grace_auth','733330003','833330003',decode(repeat('c3',32),'hex'),
+ :'grace_exp',:'grace_nonce'::uuid,decode(:'grace_signature','hex')
 )->>'state'='rejected') AS denied \gset
 \if :denied
 \else
@@ -285,8 +298,12 @@ BEGIN
  OR NOT EXISTS(SELECT 1 FROM public.nex_whatsapp_inbound
     WHERE provider_message_id='wamid.ttp233.compromised-a')
  THEN RAISE EXCEPTION 'Key rotation changed incorrect family data'; END IF;
- IF (SELECT count(*) FROM public.nex_ci_revocation_permit_uses
-  WHERE nonce IN (:'old_nonce'::uuid,:'new_nonce'::uuid))<>2
- THEN RAISE EXCEPTION 'Nonce use ledger lost two valid entries'; END IF;
 END $$;
+SELECT (SELECT count(*) FROM public.nex_ci_revocation_permit_uses
+ WHERE nonce IN (:'old_nonce'::uuid,:'new_nonce'::uuid))=2 AS ledger_ok \gset
+\if :ledger_ok
+\else
+ \echo 'Nonce ledger lost valid rotating-key entries'
+ \quit 1
+\endif
 SELECT 'TTP233 planned rotation, emergency revoke, and replay isolation passed' AS result;
