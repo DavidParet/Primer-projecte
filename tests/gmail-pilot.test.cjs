@@ -65,8 +65,8 @@ test('rejects excessive list count and newline access token', async () => {
   await assert.rejects(lib.listLabelMessageIds({ accessToken: 'bad\r\ntoken', labelId: 'Label_1' }), /invalid_access_token/);
 });
 test('reads only plain text message with bounded content', async () => {
-  const mail = await lib.readTextMessage({ accessToken: token, messageId: 'abc1',
-    fetchImpl: mock({ id: 'abc1', sizeEstimate: 99, threadId: 'thread1', payload: { mimeType: 'multipart/alternative', headers: [
+  const mail = await lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+    fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 99, threadId: 'thread1', payload: { mimeType: 'multipart/alternative', headers: [
       { name: 'Subject', value: 'Sortida escolar' }, { name: 'From', value: 'Escola <school@example.com>' }],
       parts: [{ mimeType: 'text/html', body: { data: Buffer.from('<b>html</b>').toString('base64url') } },
         { mimeType: 'text/plain', body: { data: Buffer.from('Excursió el 15 de març').toString('base64url') } }] } }) });
@@ -75,23 +75,28 @@ test('reads only plain text message with bounded content', async () => {
   assert.equal(mail.threadId, 'thread1');
 });
 test('rejects HTML-only body', async () => {
-  await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1',
-    fetchImpl: mock({ id: 'abc1', sizeEstimate: 30, payload: { mimeType: 'text/html', body: { data: 'aGVsbG8' } } }) }), /plain_text_required/);
+  await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+    fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30, payload: { mimeType: 'text/html', body: { data: 'aGVsbG8' } } }) }), /plain_text_required/);
 });
 test('rejects large email, attachments and mismatched identifiers', async () => {
   for (const data of [
-    { id: 'abc1', sizeEstimate: 101000, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } },
-    { id: 'abc1', sizeEstimate: 30, payload: { mimeType: 'text/plain', filename: 's.txt', body: { data: 'aGVsbG8' } } },
-    { id: 'other', sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } },
+    { id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 101000, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } },
+    { id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30, payload: { mimeType: 'text/plain', filename: 's.txt', body: { data: 'aGVsbG8' } } },
+    { id: 'other', labelIds: ['Label_123'], sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } },
   ]) {
-    await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1', fetchImpl: mock(data) }));
+    await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123', fetchImpl: mock(data) }));
   }
 });
 test('read endpoint never uses write verbs', async () => {
   let method;
-  await lib.readTextMessage({ accessToken: token, messageId: 'abc1', fetchImpl: async (_url, options) => {
+  await lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123', fetchImpl: async (_url, options) => {
     method = options.method;
-    return { ok: true, json: async () => ({ id: 'abc1', sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } }) };
+    return { ok: true, json: async () => ({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } }) };
   } });
   assert.equal(method, 'GET');
+});
+
+test('rejects a message not carrying the required pilot label', async () => {
+  await assert.rejects(lib.readTextMessage({ accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+    fetchImpl: mock({ id: 'abc1', labelIds: ['INBOX'], sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } }) }), /message_outside_pilot_label/);
 });
