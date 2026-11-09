@@ -29,6 +29,7 @@ on:
       - 'tests/whatsapp-transactional-family-authorization.test.js'
       - 'tests/whatsapp-request-identity-binding.test.js'
       - 'tests/whatsapp-verified-server-session.test.js'
+      - 'tests/whatsapp-two-family-authenticated-flow.test.js'
       - 'tests/whatsapp-credential-scan.test.js'
       - 'scripts/security/check-tracked-credentials.js'
       - '.gitignore'
@@ -45,6 +46,7 @@ on:
       - 'tests/sql/whatsapp-membership-revocation-race.sh'
       - 'tests/sql/whatsapp-consent-service-role-smoke.sql'
       - 'tests/sql/whatsapp-locked-membership-function-smoke.sql'
+      - 'tests/sql/whatsapp-two-family-authorized-revocation.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -59,7 +61,7 @@ jobs:
           node-version: 22
       - name: Block tracked Vercel credentials without exposing secret values
         run: node scripts/security/check-tracked-credentials.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
@@ -122,3 +124,6 @@ jobs:
       - name: Deny direct membership writes and verify restricted lock function
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-locked-membership-function-smoke.sql
+      - name: Verify two independently managed families and SQL consent isolation
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-two-family-authorized-revocation.sql
