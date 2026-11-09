@@ -167,6 +167,20 @@ INSERT INTO public.nex_whatsapp_inbound(
   decode(repeat('b2',32),'hex'),now(),decode(repeat('03',12),'hex'),
   decode(repeat('04',16),'hex'),decode('0b','hex'),now()+interval '2 days');
 
+-- A legitimate-looking permit for the ordinary B member must still fail
+-- the membership role check inside PostgreSQL, even with a valid signature.
+SELECT authorization_id AS member_auth_id
+ FROM public.nex_whatsapp_sender_authorizations
+ WHERE business_account_id='777770002' \gset
+SELECT (floor(extract(epoch from clock_timestamp()))::bigint+60)
+ AS member_exp, gen_random_uuid()::text AS member_nonce \gset
+SELECT encode(public.hmac(convert_to(concat_ws('|',
+  'NEXLUPA-WA-REVOKE-1','account-b',
+  '22222222-2222-4222-8222-222222222222',
+  :'member_auth_id','777770002','888880002',repeat('b2',32),
+  :'member_exp',:'member_nonce'),'UTF8'),
+  decode(repeat('a7',32),'hex'),'sha256'),'hex') AS member_signature \gset
+
 -- CI privileged signer only: issue one scoped A permit with known test key.
 SELECT authorization_id AS auth_id FROM public.nex_whatsapp_sender_authorizations
  WHERE business_account_id='777770001' \gset
@@ -193,6 +207,8 @@ BEGIN
     'public.nex_ci_revocation_signer_key','SELECT')
   OR has_table_privilege(current_user,
     'public.nex_ci_revocation_permit_uses','SELECT')
+  OR has_function_privilege(current_user,
+    'public.nex_authorize_family_locked(text,uuid,text)','EXECUTE')
  THEN RAISE EXCEPTION 'Runtime can bypass signed operation boundary'; END IF;
  BEGIN
    UPDATE public.nex_whatsapp_sender_authorizations SET revoked_at=now()
@@ -209,6 +225,18 @@ BEGIN
    RAISE EXCEPTION 'Runtime read private signing key';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
 END $$;
+
+-- A validly signed permit from a non-administrator must be refused.
+SELECT (public.nex_ci_revoke_whatsapp_with_permit(
+ 'account-b','22222222-2222-4222-8222-222222222222',:'member_auth_id',
+ '777770002','888880002',decode(repeat('b2',32),'hex'),
+ :'member_exp',:'member_nonce'::uuid,decode(:'member_signature','hex')
+)->>'state' = 'rejected') AS denied \gset
+\if :denied
+\else
+ \echo 'Ordinary family B member used a signed revocation permit'
+ \quit 1
+\endif
 
 -- A stolen DB credential alone cannot sign a new permit.
 SELECT (public.nex_ci_revoke_whatsapp_with_permit(
