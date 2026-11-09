@@ -6,7 +6,8 @@ const SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 const redirectUri = 'https://nexlupa-test.example/api/gmail/callback';
 const familyId = '10000000-0000-4000-8000-000000000001';
 const otherFamilyId = '10000000-0000-4000-8000-000000000002';
-const familySession = { kind: 'family-session', verifiedByServer: true, familyId, sessionId: 'session-valid-123' };
+const authUserId = '20000000-0000-4000-8000-000000000001';
+const familySession = { kind: 'family-session', verifiedByServer: true, familyId, authUserId, sessionId: 'session-valid-123' };
 const clientId = 'test.apps.googleusercontent.com', clientSecret = 'test-secret';
 
 function setup() {
@@ -29,7 +30,7 @@ function setup() {
     hasCurrentConsent: async () => consent,
     saveIntent: async intent => { if (intents.has(intent.stateDigest)) throw Error('collision'); intents.set(intent.stateDigest, intent); },
     takeIntent: async digest => { const data = intents.get(digest); intents.delete(digest); return data; },
-    onAuthorized: async d => { approvedCalls++; assert.equal(d.familyId, familyId); assert.equal(d.googleAccount.email, 'pilot@example.com'); assert.equal(d.accessToken, 'opaque-token'); },
+    onAuthorized: async d => { approvedCalls++; assert.equal(d.familyId, familyId); assert.equal(d.authUserId, authUserId); assert.equal(d.googleAccount.email, 'pilot@example.com'); assert.equal(d.accessToken, 'opaque-token'); },
     get approvedCalls() { return approvedCalls; },
     get tokenCalls() { return tokenCalls; },
     get identityCalls() { return identityCalls; },
@@ -53,6 +54,7 @@ test('begin binds secure OAuth flow to an authenticated family session', async (
   assert.equal(ctx.intents.size, 1);
   const stored = [...ctx.intents.values()][0];
   assert.equal(stored.familyId, familyId);
+  assert.equal(stored.authUserId, authUserId);
   assert.notEqual(stored.stateDigest, started.callback.state);
   assert.match(stored.codeVerifier, /^[a-zA-Z0-9_-]{43}$/);
   assert.equal(stored.expiresAt, 1300000);
@@ -138,4 +140,11 @@ test('Google transport errors fail closed', async () => {
   const ctx = setup(), started = await begin(ctx);
   await assert.rejects(complete(ctx, started.callback, { fetchImpl: async () => ({ ok: false }) }), /upstream_request_failed/);
   assert.equal(ctx.approvedCalls, 0);
+});
+
+test('callback from another verified Neon user is rejected', async () => {
+  const ctx = setup(), started = await begin(ctx);
+  const wrong = { ...familySession, authUserId: '20000000-0000-4000-8000-000000000002' };
+  await assert.rejects(complete(ctx, started.callback, { familySession: wrong }), /oauth_state_rejected/);
+  assert.equal(ctx.tokenCalls, 0);
 });
