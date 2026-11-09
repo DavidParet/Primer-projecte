@@ -63,7 +63,7 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 
 ## Verificació existent
 
-- **135/135 proves** automatitzades de codi superades a GitHub Actions, incloent un recorregut complet amb Google OAuth i Gmail **simulats**.
+- **140/140 proves** automatitzades de codi superades a GitHub Actions, incloent un recorregut complet amb Google OAuth i Gmail **simulats**.
 - El workflow de seguretat és `.github/workflows/gmail-pilot-tests.yml`.
 - Desenvolupament en PR #9, en esborrany. Bloqueig de desplegaments Vercel 402 `api-deployments-free-per-day`.
 - **Cap lectura Gmail real encara.**
@@ -83,7 +83,15 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 - `GMAIL_PILOT_DATABASE_URL` es limita estrictament a rol `nexlupa_gmail_auth_preview`, base `nexlupa_pilot` i servidor Neon verificat per TLS `verify-full`.
 - Validació real contra la branca de Neon: rol correcte, sense ús directe de l'esquema de famílies i identitat sintètica no vinculada denegada.
 - `api/gmail/pilot-auth.js` rebutja l'entorn de producció i qualsevol POST de pilot desactivat.
-- Bateria local de seguretat **135/135 correcta** (mock de Google i Gmail); la verificació de base de dades Neon anterior és real.
+- Bateria local de seguretat **140/140 correcta** (mock de Google i Gmail); la verificació de base de dades Neon anterior és real.
 - No s'ha autoritzat cap Gmail ni s'ha desplegat la funcionalitat a la web pública.
 
 **Proposta en desenvolupament:** `chore/gmail-canonical-route-20261109`. Incorporar primer a la branca funcional `feature/gmail-readonly-pilot-20261109`; mai a `main` sense aprovació.
+
+## Comprovació de compilació de Vercel
+
+- S'ha corregit només a la branca Gmail la sintaxi heredada dels patrons de capçaleres de `vercel.json`, mantenint els mateixos temps de memòria cau per HTML, CSS, JS i imatges.
+- Els 10 patrons passen el compilador `path-to-regexp` i **140/140 proves automàtiques** han finalitzat correctament.
+- El nou estat Vercel és de **límit de compilacions del compte (`build-rate-limit`)**, no de sintaxi de rutes. No s'ha modificat el pla ni la producció.
+- La comprovació PostgreSQL real amb rol restringit i TLS estricte ha confirmat: identitat fictícia sense autorització, accés directe a dades familiars denegat.
+- Neteja OAuth a la branca de desenvolupament integrada mitjançant el PR #14. El PR #9 continua en esborrany.
