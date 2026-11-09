@@ -8,6 +8,7 @@ on:
       - 'lib/whatsapp/family-pairing-protocol.js'
       - 'lib/whatsapp/family-pairing-issuer.js'
       - 'lib/whatsapp/meta-pairing-confirmation.js'
+      - 'lib/whatsapp/restricted-family-pairing.js'
       - 'lib/whatsapp/revoke-consent.js'
       - 'lib/whatsapp/tenant-security.js'
       - 'lib/whatsapp/retention-worker.js'
@@ -30,6 +31,7 @@ on:
       - 'tests/whatsapp-verified-ingestion.test.js'
       - 'tests/whatsapp-meta-durable-post-bridge.test.js'
       - 'tests/whatsapp-family-pairing.test.js'
+      - 'tests/whatsapp-restricted-family-pairing.test.js'
       - 'tests/whatsapp-consent-revocation.test.js'
       - 'tests/whatsapp-tenant-security.test.js'
       - 'tests/whatsapp-retention-worker.test.js'
@@ -65,6 +67,7 @@ on:
       - 'tests/sql/whatsapp-rotating-keyring-smoke.sql'
       - 'tests/sql/whatsapp-nonce-retention-smoke.sql'
       - 'tests/sql/whatsapp-family-pairing-smoke.sql'
+      - 'tests/sql/whatsapp-restricted-pairing-service-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -79,7 +82,7 @@ jobs:
           node-version: 22
       - name: Block tracked Vercel credentials without exposing secret values
         run: node scripts/security/check-tracked-credentials.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
@@ -157,3 +160,6 @@ jobs:
       - name: Verify family pairing one-use explicit WhatsApp consent on disposable PG
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-family-pairing-smoke.sql
+      - name: Verify restricted pairing issuer and confirmer DB functions
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-restricted-pairing-service-smoke.sql
