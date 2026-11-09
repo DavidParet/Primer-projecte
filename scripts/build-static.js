@@ -27,6 +27,23 @@ const files = [
   'landing/hero.png'
 ];
 
+// The authentication preview must NOT appear on production web builds.
+// Activation requires a nonproduction Vercel deployment and an EXACT,
+// operator-provisioned *.vercel.app origin. No domain guesses or wildcards.
+function pilotPreviewAllowed(env = process.env) {
+  if(env.VERCEL_ENV !== 'preview' ||
+     env.NEXLUPA_AUTH_PILOT !== 'enabled')return false;
+  try{
+    const u=new URL(env.NEXLUPA_AUTH_PILOT_ORIGIN);
+    return u.protocol==='https:' && u.hostname.endsWith('.vercel.app') &&
+      u.hostname!=='vercel.app' && u.pathname==='/' &&
+      !u.port && !u.search && !u.hash && !u.username && !u.password;
+  }catch{return false;}
+}
+if(pilotPreviewAllowed()) {
+  files.push('pilot-auth/index.html','pilot-auth/script.js');
+}
+
 fs.rmSync(output, { recursive: true, force: true });
 for (const relative of files) {
   const source = path.join(root, relative);
