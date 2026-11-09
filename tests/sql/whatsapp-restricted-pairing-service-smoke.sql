@@ -111,7 +111,7 @@ BEGIN
     p_sender_digest IS NULL OR octet_length(p_sender_digest)<>32 OR
     p_provider_message IS NULL OR
     length(p_provider_message)>262 OR
-    p_provider_message !~ '^wamid[.][A-Za-z0-9._=-]+
+    p_provider_message !~ '^wamid[.][A-Za-z0-9._=-]+$'
  THEN RETURN jsonb_build_object('state','rejected'); END IF;
 
  IF EXISTS (SELECT 1 FROM public.nex_ci_whatsapp_pairing_receipts
