@@ -8,6 +8,7 @@
  * NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL.
  */
 const { Pool } = require('pg');
+const { strictPilotConnectionString } = require('../../lib/gmail/strict-neon-connection.cjs');
 const { createVerifiedFamilyResolver } = require('../../lib/gmail/verified-family.cjs');
 
 let pool;
@@ -19,7 +20,7 @@ function getPool() {
   }
   if (!pool) {
     pool = new Pool({
-      connectionString: process.env.GMAIL_PILOT_DATABASE_URL,
+      connectionString: strictPilotConnectionString(process.env.GMAIL_PILOT_DATABASE_URL),
       ssl: { rejectUnauthorized: true },
       max: 2,
       connectionTimeoutMillis: 4000,
