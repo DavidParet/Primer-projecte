@@ -14,10 +14,10 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 - Sol·licitud dels permisos `openid`, `email` i `https://www.googleapis.com/auth/gmail.readonly`. **Aquest últim és un scope restringit per Google.**
 - Canvi del codi d'autorització per un token temporal; no retorna els tokens de renovació que el proveïdor pogués enviar.
 - Consulta de fins a deu identificadors de missatges per una **etiqueta personalitzada** predefinida, no de tota la safata.
-- Lectura de text pla, sense adjunts ni HTML i amb límits de mida.
+- Lectura de text pla, sense adjunts ni HTML i amb límits de mida; cada missatge es verifica novament perquè contingui l'etiqueta pilot abans de llegir-ne el contingut.
 - Cap acció d'enviament, modificació o persistència de dades familiars.
 
-Proves sense connexions reals: `node --test tests/gmail-pilot.test.cjs`.
+15 proves sense connexions reals: `node --test tests/gmail-pilot.test.cjs`.
 
 ## Requisits que encara falten per obrir la connexió
 
