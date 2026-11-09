@@ -168,3 +168,27 @@ test('rejects pathological MIME depth and malformed parts',async()=>{
     }),/message_not_eligible/);
   }
 });
+
+test('rejects ambiguous duplicate plain-text MIME bodies', async () => {
+  const mail = {
+    id:'abc1',labelIds:['Label_123'],sizeEstimate:200,
+    payload:{mimeType:'multipart/alternative',parts:[
+      {mimeType:'text/plain',body:{data:Buffer.from('Benign text').toString('base64url')}},
+      {mimeType:'text/plain',body:{data:Buffer.from('Conflicting text').toString('base64url')}}
+    ]}
+  };
+  await assert.rejects(lib.readTextMessage({
+    accessToken:token,messageId:'abc1',labelId:'Label_123',fetchImpl:mock(mail)
+  }),/message_not_eligible/);
+});
+test('rejects noncanonical base64url and malformed UTF-8 without replacement characters', async () => {
+  for (const data of ['aGVsbG8=', 'aGVsbG8!', Buffer.from([0xc3,0x28]).toString('base64url')]) {
+    await assert.rejects(lib.readTextMessage({
+      accessToken:token,messageId:'abc1',labelId:'Label_123',
+      fetchImpl:mock({
+        id:'abc1',labelIds:['Label_123'],sizeEstimate:30,
+        payload:{mimeType:'text/plain',body:{data}}
+      })
+    }),/invalid_plain_text|plain_text_required/);
+  }
+});
