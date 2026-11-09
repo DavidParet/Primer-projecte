@@ -145,6 +145,29 @@ BEGIN
 END;
 $f$;
 
+-- Open one more challenge while the admin is valid but do not spend it yet.
+-- It must become unusable if that administrator is later revoked.
+SELECT (floor(extract(epoch from clock_timestamp()))::bigint+55) AS pending_exp,
+ gen_random_uuid()::text AS pending_nonce \gset
+SELECT encode(public.hmac(convert_to(concat_ws('|',
+ 'NEXLUPA-PAIR-ISSUE-1','issue-key-v1','canonical-b',
+ '22222222-2222-4222-8222-222222222222',
+ '766661111','866661111',repeat('ad',32),
+ :'pending_exp',:'pending_nonce'),'UTF8'),
+ decode(repeat('e1',32),'hex'),'sha256'),'hex') AS pending_sig \gset
+SET ROLE nex_ci_pairing_issuer;
+SELECT (public.nex_ci_signed_issue_whatsapp_pairing(
+ 'canonical-b','22222222-2222-4222-8222-222222222222',
+ '766661111','866661111',decode(repeat('ad',32),'hex'),
+ 'issue-key-v1',:'pending_exp',:'pending_nonce'::uuid,
+ decode(:'pending_sig','hex'))->>'state'='created') AS pending_created \gset
+\if :pending_created
+\else
+ \echo 'Pending canonical challenge was not staged'
+ \quit 1
+\endif
+RESET ROLE;
+
 -- Revoking the actual canonical membership now prevents even a correctly
 -- signed new invitation. The old synthetic role must not override it.
 UPDATE public.nex_family_memberships
@@ -172,5 +195,42 @@ SELECT (public.nex_ci_signed_issue_whatsapp_pairing(
  \quit 1
 \endif
 RESET ROLE;
+
+-- A code issued BEFORE revocation does not survive an administrator
+-- losing family rights. A correctly signed Meta-derived confirmation still
+-- cannot enroll the sender once the canonical family membership is revoked.
+SELECT (floor(extract(epoch from clock_timestamp()))::bigint+55) AS late_exp,
+ gen_random_uuid()::text AS late_nonce \gset
+SELECT encode(public.hmac(convert_to(concat_ws('|',
+ 'NEXLUPA-PAIR-CONFIRM-1','confirm-key-v1',
+ '766661111','866661111',repeat('ad',32),repeat('bc',32),
+ 'wamid.ttp245-late',:'late_exp',:'late_nonce'),'UTF8'),
+ decode(repeat('e2',32),'hex'),'sha256'),'hex') AS late_sig \gset
+SET ROLE nex_ci_pairing_confirmer;
+SELECT (public.nex_ci_signed_confirm_whatsapp_pairing(
+ '766661111','866661111',decode(repeat('ad',32),'hex'),
+ decode(repeat('bc',32),'hex'),'wamid.ttp245-late',
+ 'confirm-key-v1',:'late_exp',:'late_nonce'::uuid,
+ decode(:'late_sig','hex'))->>'state'='rejected') AS late_denied \gset
+\if :late_denied
+\else
+ \echo 'Revoked admin left a usable pending family pairing code'
+ \quit 1
+\endif
+RESET ROLE;
+DO $f$
+BEGIN
+ IF EXISTS(
+  SELECT 1 FROM public.nex_whatsapp_sender_authorizations
+  WHERE business_account_id='766661111'
+    AND sender_digest=decode(repeat('bc',32),'hex')
+ ) THEN RAISE EXCEPTION 'Rejected late sender received family consent'; END IF;
+ IF EXISTS(
+  SELECT 1 FROM public.nex_ci_whatsapp_pairing_receipts
+  WHERE business_account_id='766661111'
+    AND provider_message_id='wamid.ttp245-late'
+ ) THEN RAISE EXCEPTION 'Rejected late confirmation received a receipt'; END IF;
+END;
+$f$;
 
 SELECT 'TTP245 canonical family -> signed WhatsApp pairing bridge passed' AS result;
