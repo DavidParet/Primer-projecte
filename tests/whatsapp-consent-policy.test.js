@@ -239,3 +239,18 @@ test('enrollment fails closed when database response cannot prove insert or conf
   assert.deepEqual(await policy({query:async()=>({rowCount:0,rows:[]})}).enroll(enrollment()),
     {state:'already_active_or_receipt_used'});
 });
+
+
+test('revocation rejects ambiguous or malformed aggregate result cardinality',async()=>{
+  const valid={revoked_count:1,deleted_count:0};
+  for (const response of [null,{}, {rows:[]}, {rows:[valid,valid]},
+    {rowCount:0,rows:[valid]}, {rowCount:2,rows:[valid]},
+    {rowCount:'1',rows:[valid]}, {rows:null}]) {
+    await assert.rejects(policy({query:async()=>response}).revoke({
+      session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+    }),/Revocation result not verified/);
+  }
+  assert.deepEqual(await policy({query:async()=>({rowCount:1,rows:[valid]})}).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),{state:'revoked',deletedMessages:0});
+});
