@@ -49,7 +49,7 @@ async function complete(ctx, callback, overrides = {}) {
 }
 test('begin binds secure OAuth flow to an authenticated family session', async () => {
   const ctx = setup(), started = await begin(ctx, { clock: () => 1000000 });
-  assert.equal(started.expiresInSeconds, 300);
+  assert.equal(started.expiresInSeconds, 240);
   assert.match(started.authorizationUrl, /^https:\/\/accounts.google.com/);
   assert.equal(ctx.intents.size, 1);
   const stored = [...ctx.intents.values()][0];
@@ -57,7 +57,7 @@ test('begin binds secure OAuth flow to an authenticated family session', async (
   assert.equal(stored.authUserId, authUserId);
   assert.notEqual(stored.stateDigest, started.callback.state);
   assert.match(stored.codeVerifier, /^[a-zA-Z0-9_-]{43}$/);
-  assert.equal(stored.expiresAt, 1300000);
+  assert.equal(stored.expiresAt, 1240000);
 });
 test('begin rejects browser-supplied or missing identity', async () => {
   const ctx = setup();
