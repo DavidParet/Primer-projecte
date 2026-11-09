@@ -1,0 +1,717 @@
+{
+  "version": "1",
+  "synthetic": true,
+  "description": "Cas sintètic de comunitat de teatre amb 20 subgrups. NEXLUPA Premium ha d'identificar què afecta la família del Grup 7; no són notificacions reals ni proves superades.",
+  "family_context": {
+    "activity": "Teatre",
+    "subgroup": "Grup 7",
+    "calendar_connected": true
+  },
+  "expected_totals": {
+    "relevant": 10,
+    "review": 3,
+    "ignore": 87
+  },
+  "messages": [
+    {
+      "id": "W001",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "CANVI: Grup 7 — l'assaig de dijous passa a divendres a les 18:00.",
+      "expected": "relevant",
+      "action": "calendar_change"
+    },
+    {
+      "id": "W002",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 7: porteu samarreta negra per a l'assaig de demà.",
+      "expected": "relevant",
+      "action": "task"
+    },
+    {
+      "id": "W003",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 7: cal lliurar l'autorització abans del 15 de novembre.",
+      "expected": "relevant",
+      "action": "deadline"
+    },
+    {
+      "id": "W004",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 7: actuació dissabte a les 17:00 al teatre municipal.",
+      "expected": "relevant",
+      "action": "event"
+    },
+    {
+      "id": "W005",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Recordatori: els alumnes del Grup 7 han de confirmar assistència.",
+      "expected": "relevant",
+      "action": "task"
+    },
+    {
+      "id": "W006",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "ATENCIÓ A TOTES LES FAMÍLIES: el teatre estarà tancat dilluns.",
+      "expected": "relevant",
+      "action": "alert"
+    },
+    {
+      "id": "W007",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Informació general: reunió de famílies dimarts a les 19:00.",
+      "expected": "relevant",
+      "action": "event"
+    },
+    {
+      "id": "W008",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "TOTS ELS GRUPS: el festival serà dissabte 21 de novembre.",
+      "expected": "relevant",
+      "action": "event"
+    },
+    {
+      "id": "W009",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Recordatori per a tota l'escola: actualitzeu el formulari de contacte.",
+      "expected": "relevant",
+      "action": "task"
+    },
+    {
+      "id": "W010",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Comunicació general: horari especial d'accés a l'edifici.",
+      "expected": "relevant",
+      "action": "info"
+    },
+    {
+      "id": "W011",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Els de dijous a les 18:00 passeu al grup de divendres; confirmeu-ho amb coordinació.",
+      "expected": "review",
+      "action": "confirm_group"
+    },
+    {
+      "id": "W012",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Avís pels més grans: porteu vestuari de l'actuació; no s'especifica número de grup.",
+      "expected": "review",
+      "action": "confirm_group"
+    },
+    {
+      "id": "W013",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "El grup que assaja a l'aula gran no farà classe divendres.",
+      "expected": "review",
+      "action": "confirm_group"
+    },
+    {
+      "id": "W014",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 1: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W015",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 2: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W016",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 3: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W017",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 4: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W018",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 5: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W019",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 6: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W020",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 8: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W021",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 9: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W022",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 10: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W023",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 11: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W024",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 12: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W025",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 13: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W026",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 14: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W027",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 15: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W028",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 16: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W029",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 17: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W030",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 18: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W031",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 19: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W032",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 20: dimecres porteu una llibreta per a la sessió.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W033",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 1: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W034",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 2: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W035",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 3: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W036",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 4: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W037",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 5: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W038",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 6: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W039",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 8: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W040",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 9: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W041",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 10: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W042",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 11: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W043",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 12: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W044",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 13: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W045",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 14: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W046",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 15: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W047",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 16: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W048",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 17: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W049",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 18: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W050",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 19: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W051",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "GRUP 20: canvi d'horari de l'assaig a les 17:30.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W052",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 1: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W053",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 2: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W054",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 3: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W055",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 4: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W056",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 5: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W057",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 6: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W058",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 8: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W059",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 9: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W060",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 10: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W061",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 11: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W062",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 12: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W063",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 13: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W064",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 14: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W065",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 15: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W066",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 16: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W067",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 17: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W068",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 18: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W069",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 19: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W070",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 20: s'obre el termini d'inscripció a l'obra.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W071",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 1: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W072",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 2: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W073",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 3: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W074",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 4: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W075",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 5: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W076",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 6: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W077",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 8: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W078",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 9: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W079",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 10: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W080",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 11: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W081",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 12: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W082",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 13: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W083",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 14: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W084",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 15: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W085",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 16: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W086",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 17: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W087",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 18: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W088",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 19: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W089",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 20: les famílies han de confirmar l'assistència.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W090",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 1: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W091",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 2: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W092",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 3: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W093",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 4: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W094",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 5: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W095",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 6: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W096",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 8: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W097",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 9: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W098",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 10: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W099",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 11: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    },
+    {
+      "id": "W100",
+      "source": "Comunitat Teatre — Anuncis",
+      "text": "Grup 12: reunió informativa prevista per dissabte.",
+      "expected": "ignore",
+      "action": "none"
+    }
+  ]
+}

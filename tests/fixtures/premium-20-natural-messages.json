@@ -1,0 +1,252 @@
+{
+  "description": "20 missatges originals sintètics en català per validar el pilot d'una sola extraescolar: Gmail + WhatsApp. Cap compte real connectat.",
+  "synthetic": true,
+  "preStructuredInput": false,
+  "activity": {
+    "id": "ball-pilot",
+    "name": "Ball",
+    "calendarEventId": "gcal-TEST-existing",
+    "year": 2026
+  },
+  "messages": [
+    {
+      "messageId": "mail-01",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "Circular de Ball: el festival de ball serà dissabte 21 de novembre a les 17.00 h al Teatre Municipal.",
+      "expectedFields": [
+        "start",
+        "venue"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-02",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "Gràcies per l'avís!",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-03",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "El termini per pagar el festival acaba el 18 de novembre de 2026.",
+      "expectedFields": [
+        "paymentDeadline"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-04",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "Recordeu que cal arribar a les 16:15 h, no a les 17 h.",
+      "expectedFields": [
+        "arrival"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-05",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-15T10:00:00+01:00",
+      "text": "Les nenes han de portar el vestuari de ball posat.",
+      "expectedFields": [
+        "material"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-06",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-15T10:00:00+01:00",
+      "text": "Confirmem que el festival de ball comença a les 17:00 h.",
+      "expectedFields": [
+        "start"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-07",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-15T10:00:00+01:00",
+      "text": "Darrer dia per pagar: 18/11/2026. No ho deixeu pel final.",
+      "expectedFields": [
+        "paymentDeadline"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-08",
+      "channel": "whatsapp",
+      "activityId": "futbol",
+      "authorized": true,
+      "receivedAt": "2026-11-15T10:00:00+01:00",
+      "text": "A la classe de futbol repartiran samarretes.",
+      "expectedFields": [],
+      "expectedOutcome": "ignored"
+    },
+    {
+      "messageId": "wa-05",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-16T10:00:00+01:00",
+      "text": "Les nenes han de portar el vestuari de ball posat.",
+      "expectedFields": [
+        "material"
+      ],
+      "expectedOutcome": "duplicate"
+    },
+    {
+      "messageId": "wa-10",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-16T10:00:00+01:00",
+      "text": "Potser haurem d'arribar a les 16:00 h. Encara no està confirmat.",
+      "expectedFields": [
+        "arrival"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-11",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-16T10:00:00+01:00",
+      "text": "Correcció: el festival de ball comença a les 18:00 h.",
+      "expectedFields": [
+        "start"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-12",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-16T10:00:00+01:00",
+      "text": "Porteu el vestuari de ball posat, si us plau.",
+      "expectedFields": [
+        "material"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-13",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-17T10:00:00+01:00",
+      "text": "Per qualsevol dubte responeu aquest correu.",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-14",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-17T10:00:00+01:00",
+      "text": "El festival de ball és dissabte 21/11 a les 17:00.",
+      "expectedFields": [
+        "start"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-15",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-17T10:00:00+01:00",
+      "text": "L'activitat de ball s'ha cancel·lat?",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-16",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-17T10:00:00+01:00",
+      "text": "Us informarem de possibles canvis més endavant.",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-17",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-18T10:00:00+01:00",
+      "text": "Ja he pagat la quota, gràcies.",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-18",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-18T10:00:00+01:00",
+      "text": "La sortida del grup serà el 28 de novembre a les 09:00.",
+      "expectedFields": [],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "wa-19",
+      "channel": "whatsapp",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-18T10:00:00+01:00",
+      "text": "El festival serà al Teatre Municipal.",
+      "expectedFields": [
+        "venue"
+      ],
+      "expectedOutcome": "processed"
+    },
+    {
+      "messageId": "mail-20",
+      "channel": "gmail",
+      "activityId": "ball-pilot",
+      "authorized": true,
+      "receivedAt": "2026-11-18T10:00:00+01:00",
+      "text": "Recordem que l'últim dia per pagar el ball és el 18/11.",
+      "expectedFields": [
+        "paymentDeadline"
+      ],
+      "expectedOutcome": "processed"
+    }
+  ],
+  "questions": [
+    "Quin dia és el festival de ball?",
+    "A quina hora hem d'arribar?",
+    "A quina hora comença el festival?",
+    "Què hem de portar?",
+    "Fins quan hem de pagar?",
+    "Ja està pagat?",
+    "Ho tenim al calendari?",
+    "On és el festival?",
+    "Hi ha hagut canvis d'horari?",
+    "Què passa amb la sortida?"
+  ]
+}

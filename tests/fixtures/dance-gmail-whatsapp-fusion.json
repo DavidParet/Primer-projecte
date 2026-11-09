@@ -1,0 +1,116 @@
+{
+  "name": "ball-gmail-whatsapp-single-activity",
+  "synthetic": true,
+  "status": "acceptance-specification-not-an-executed-integration",
+  "description": "One family dance activity receives formal email plus informal WhatsApp. Fuse without overwriting distinct event times or duplicating Calendar.",
+  "activity": {
+    "id": "dance-001",
+    "name": "Ball",
+    "timezone": "Europe/Madrid"
+  },
+  "messages": [
+    {
+      "id": "gmail-001",
+      "channel": "gmail",
+      "receivedAt": "2026-11-14T10:00:00+01:00",
+      "text": "Circular: Festival de ball dissabte 21 de novembre a les 17:00 al Teatre Municipal.",
+      "interpretation": {
+        "type": "event",
+        "eventId": "festival-001",
+        "start": "2026-11-21T17:00:00+01:00",
+        "venue": "Teatre Municipal"
+      }
+    },
+    {
+      "id": "wa-001",
+      "channel": "whatsapp-forwarded",
+      "receivedAt": "2026-11-15T12:10:00+01:00",
+      "text": "Recordeu que les nenes han d'arribar a les 16:15, ja vestides.",
+      "interpretation": {
+        "type": "event-logistics",
+        "eventId": "festival-001",
+        "arrival": "2026-11-21T16:15:00+01:00",
+        "material": "Vestuari de ball posat"
+      }
+    },
+    {
+      "id": "wa-002",
+      "channel": "whatsapp-forwarded",
+      "receivedAt": "2026-11-15T12:15:00+01:00",
+      "text": "Per cert, el festival comença a les 17:00 al Teatre Municipal.",
+      "interpretation": {
+        "type": "duplicate-event-details",
+        "eventId": "festival-001",
+        "start": "2026-11-21T17:00:00+01:00",
+        "venue": "Teatre Municipal"
+      }
+    },
+    {
+      "id": "wa-003",
+      "channel": "whatsapp-forwarded",
+      "receivedAt": "2026-11-16T18:00:00+01:00",
+      "text": "Ens veiem a les 16:00, potser s'avança l'hora.",
+      "interpretation": {
+        "type": "ambiguous-conflict",
+        "eventId": "festival-001",
+        "arrival": "2026-11-21T16:00:00+01:00",
+        "needsReview": true
+      }
+    }
+  ],
+  "expected": {
+    "eventCount": 1,
+    "calendarEventId": "persistent-calendar-id",
+    "event": {
+      "id": "festival-001",
+      "start": "2026-11-21T17:00:00+01:00",
+      "arrival": "2026-11-21T16:15:00+01:00",
+      "venue": "Teatre Municipal",
+      "material": [
+        "Vestuari de ball posat"
+      ]
+    },
+    "sourcesByField": {
+      "start": [
+        "gmail-001",
+        "wa-002"
+      ],
+      "arrival": [
+        "wa-001"
+      ],
+      "venue": [
+        "gmail-001",
+        "wa-002"
+      ],
+      "material": [
+        "wa-001"
+      ]
+    },
+    "duplicateEvents": 0,
+    "pendingReview": [
+      "wa-003"
+    ],
+    "queries": [
+      {
+        "question": "A quina hora comença el festival?",
+        "answer": "17:00",
+        "source": "gmail-001"
+      },
+      {
+        "question": "A quina hora hem d'arribar?",
+        "answer": "16:15 (pendent de verificar possible canvi posterior)",
+        "source": "wa-001;wa-003"
+      },
+      {
+        "question": "Què han de portar?",
+        "answer": "El vestuari de ball ja posat",
+        "source": "wa-001"
+      }
+    ]
+  },
+  "caveats": [
+    "WhatsApp messages are simulated as user-forwarded messages; monitoring all private group chats is not available via standard official Business API.",
+    "No real Gmail, WhatsApp or Google Calendar interaction was executed.",
+    "No claim of functional AI recognition; the interpretations are supplied as test expectations."
+  ]
+}
