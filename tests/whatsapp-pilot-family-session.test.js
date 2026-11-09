@@ -141,6 +141,20 @@ test('unauthorized host, wrong origin and a GET mutation are rejected before pro
   assert.equal(f.calls.length,0);
 });
 
+test('family operations reject unsafe GET by default; explicit read-only use is separate',async()=>{
+  const f=fixture();
+  const req={...request(),method:'GET',headers:{...request().headers}};
+  assert.throws(()=>f.factory(req),/Untrusted pilot request origin/);
+  assert.equal(f.seen.length,0);
+  // Read-only introspection may be explicitly selected, but does not
+  // downgrade the default access policy for family mutations.
+  const binder=await f.factory(req,{mutation:false})();
+  assert.equal(await binder.authorizeFamily({
+    familyId:A,action:'read_whatsapp_messages'
+  }),true);
+  assert.equal(f.seen.length>=2,true);
+});
+
 test('missing, malformed and duplicate host cookies never contact provider',()=>{
   const f=fixture();
   const good=request();
