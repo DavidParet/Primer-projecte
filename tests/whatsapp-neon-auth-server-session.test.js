@@ -82,6 +82,39 @@ test('pinned Neon Auth URL must be HTTPS, exactly get-session, no redirects',()=
   }),/share origin/);
 });
 
+test('actual Neon branch base URL resolves to /auth/get-session and pins issuer',async()=>{
+  const neonBase='https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/nexlupa_pilot/auth';
+  const expected=neonBase+'/get-session?disableCookieCache=true';
+  assert.equal(sessionEndpoint(neonBase).href,neonBase+'/get-session');
+  const calls=[];
+  const verify=createNeonAuthSessionVerifier({
+    sessionUrl:neonBase,issuer:neonBase,audience,
+    now:()=>NOW,fetchImpl:async(url,options)=>{
+      calls.push({url,options});
+      return response(fakeSession());
+    }
+  });
+  const actual=await verify(request());
+  assert.equal(actual.subject,'external-a');
+  assert.equal(actual.issuer,neonBase);
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].url,expected);
+  assert.equal(calls[0].options.headers.Cookie,COOKIE_A);
+  assert.throws(()=>createNeonAuthSessionVerifier({
+    sessionUrl:neonBase,
+    issuer:'https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/otherdb/auth',
+    audience,fetchImpl:async()=>response(fakeSession())
+  }),/exact Neon branch/);
+  for(const bad of [
+    neonBase+'/get-session',
+    neonBase+'/?next=evil',
+    'https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/nexlupa_pilot/auth/../auth',
+    'https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/nexlupa_pilot/auth/other'
+  ]) {
+    if(!bad.includes('/../'))assert.throws(()=>sessionEndpoint(bad));
+  }
+});
+
 test('forward exactly one approved opaque session cookie; never unrelated data',()=>{
   assert.equal(isolateSessionCookie('trace=hi; '+COOKIE_A+'; analytics=test'),
     COOKIE_A);
