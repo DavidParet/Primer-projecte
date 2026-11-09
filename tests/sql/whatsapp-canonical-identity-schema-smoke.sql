@@ -193,4 +193,51 @@ SELECT NOT EXISTS(SELECT 1 FROM public.nex_ci_active_family_membership(
 \endif
 RESET ROLE;
 
+-- The request-bound pairing signer must not receive a bare role from
+-- an untrusted account. Re-check under a lock with canonical lifecycle rules.
+SET ROLE nex_ci_canonical_identity_owner;
+DO $audit$
+BEGIN
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-a','11111111-1111-4111-8111-111111111111',
+   'enroll_whatsapp_sender') IS DISTINCT FROM TRUE
+ THEN RAISE EXCEPTION 'Active family owner failed locked enrollment'; END IF;
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-b','22222222-2222-4222-8222-222222222222',
+   'enroll_whatsapp_sender') IS DISTINCT FROM TRUE
+ THEN RAISE EXCEPTION 'Active admin failed locked enrollment'; END IF;
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-b','11111111-1111-4111-8111-111111111111',
+   'read_whatsapp_messages') IS DISTINCT FROM FALSE
+ THEN RAISE EXCEPTION 'Revoked member still authorized'; END IF;
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-disabled','11111111-1111-4111-8111-111111111111',
+   'enroll_whatsapp_sender') IS DISTINCT FROM FALSE
+ THEN RAISE EXCEPTION 'Disabled user bypassed locked policy'; END IF;
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-a','33333333-3333-4333-8333-333333333333',
+   'enroll_whatsapp_sender') IS DISTINCT FROM FALSE
+ THEN RAISE EXCEPTION 'Archived family bypassed locked policy'; END IF;
+ IF public.nex_ci_authorize_canonical_family_locked(
+   'canonical-a','11111111-1111-4111-8111-111111111111',
+   'unexpected_action') IS DISTINCT FROM FALSE
+ THEN RAISE EXCEPTION 'Unknown operation accepted'; END IF;
+ IF has_column_privilege(current_user,
+   'public.nex_family_memberships','role','UPDATE') OR
+   has_column_privilege(current_user,
+   'public.nex_family_memberships','status','UPDATE')
+ THEN RAISE EXCEPTION 'Locking owner can modify sensitive family roles'; END IF;
+END;
+$audit$;
+RESET ROLE;
+SET ROLE nex_ci_canonical_identity_runtime;
+DO $audit$
+BEGIN
+ IF has_function_privilege(current_user,
+  'public.nex_ci_authorize_canonical_family_locked(text,uuid,text)','EXECUTE')
+ THEN RAISE EXCEPTION 'Ordinary identity reader can invoke privileged lock'; END IF;
+END;
+$audit$;
+RESET ROLE;
+
 SELECT 'TTP240 canonical identity and family RLS checks passed' AS result;
