@@ -165,7 +165,7 @@ BEGIN
 -- A trusted, audited onboarding/identity-link lifecycle is still required.
 SELECT 'TTP240 canonical schema staged on disposable PostgreSQL only' AS result;
 
-    OR p_family IS NULL OR
+    OR p_family IS NULL OR p_action IS NULL OR
     p_action NOT IN ('enroll_whatsapp_sender',
                     'revoke_whatsapp_consent',
                     'read_whatsapp_messages')
