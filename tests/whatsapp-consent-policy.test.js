@@ -11,9 +11,15 @@ const businessAccountId='9999900000', phoneNumberId='8888800000';
 const challengeId='synthetic_one_time_code_123';
 const consentVersion='pilot-v1';
 const consentReceiptId='synthetic_receipt_token_123456';
-function db(rowCount=1) {
+function db(rowCount=1,deletedCount=3) {
   const calls=[];
-  return {calls,async query(sql,values){calls.push({sql,values});return {rowCount};}};
+  return {calls,async query(sql,values){
+    calls.push({sql,values});
+    if (sql.includes('WITH revoked AS')) return {rows:[{
+      revoked_count:rowCount,deleted_count:rowCount?deletedCount:0
+    }]};
+    return {rowCount};
+  }};
 }
 function policy(database, overrides={}) {
   return makeConsentPolicy({
@@ -98,17 +104,20 @@ test('revocation requires authenticated family and is scope-limited',async()=>{
   const database=db();
   assert.deepEqual(await policy(database).revoke({
     session:{synthetic:true},businessAccountId,phoneNumberId,senderWaId:SENDER
-  }),{state:'revoked'});
+  }),{state:'revoked',deletedMessages:3});
   const {sql,values}=database.calls[0];
   assert.match(sql,/family_id=\$4/);
   assert.match(sql,/revoked_at IS NULL/);
+  assert.match(sql,/DELETE FROM nex_whatsapp_inbound/);
+  assert.match(sql,/inbound.family_id=revoked.family_id/);
+  assert.match(sql,/inbound.sender_digest=revoked.sender_digest/);
   assert.equal(values[3],FAMILY);
   assert.equal(values.includes(SENDER),false);
 });
 test('no revocation result is not reported as success',async()=>{
   assert.deepEqual(await policy(db(0)).revoke({
     session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
-  }),{state:'not_found'});
+  }),{state:'not_found',deletedMessages:0});
 });
 test('revocation rejects invalid caller and sender before SQL',async()=>{
   const database=db();
@@ -178,4 +187,28 @@ test('trusted receipt verifier receives constrained context and scope',async()=>
   assert.deepEqual(Object.fromEntries(Object.entries(received).filter(([k])=>k!=='session')),
     {receiptId:consentReceiptId,challengeId,familyId:FAMILY,businessAccountId,
       phoneNumberId,scope:'incoming_text',version:consentVersion});
+});
+
+test('revocation deletes retained messages for exact tenant and sender only',async()=>{
+  const database=db(1,12);
+  const result=await policy(database).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  });
+  assert.deepEqual(result,{state:'revoked',deletedMessages:12});
+  const {sql,values}=database.calls[0];
+  assert.match(sql,/WITH revoked AS/);
+  assert.match(sql,/DELETE FROM nex_whatsapp_inbound AS inbound/);
+  for (const column of ['family_id','business_account_id','phone_number_id','sender_digest']) {
+    assert.ok(sql.includes('inbound.'+column+'=revoked.'+column));
+  }
+  assert.equal(values[3],FAMILY);
+  assert.equal(values.includes(SENDER),false);
+});
+test('revocation fails closed if DB cannot attest both operations',async()=>{
+  for (const rows of [[],[{revoked_count:1}], [{revoked_count:2,deleted_count:0}],
+    [{revoked_count:1,deleted_count:-1}],[{revoked_count:'1',deleted_count:0}]]) {
+    await assert.rejects(policy({query:async()=>({rows})}).revoke({
+      session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+    }),/Revocation result not verified/);
+  }
 });
