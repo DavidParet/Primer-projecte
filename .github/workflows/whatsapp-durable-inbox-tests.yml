@@ -80,6 +80,7 @@ on:
       - 'tests/sql/whatsapp-retention-restricted-role-smoke.sql'
       - 'tests/sql/whatsapp-retention-concurrency.sh'
       - 'tests/sql/whatsapp-real-tables-rls-isolation.sql'
+      - 'tests/sql/whatsapp-schema-default-deny-smoke.sql'
       - 'tests/sql/whatsapp-family-membership-contract.sql'
       - 'tests/sql/whatsapp-membership-revocation-race.sh'
       - 'tests/sql/whatsapp-consent-service-role-smoke.sql'
@@ -141,6 +142,9 @@ jobs:
       - name: Apply prototype WhatsApp migration only in disposable CI Postgres
         run: |
           psql -v ON_ERROR_STOP=1 -f db/migrations/20261108_whatsapp_durable_inbox.sql
+      - name: Prove WhatsApp tables start FORCE RLS and default-deny before consent policies
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-schema-default-deny-smoke.sql
       - name: Verify deduplication, revocation and rollback with real PostgreSQL
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-durable-schema-smoke.sql
