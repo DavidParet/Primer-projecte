@@ -19,6 +19,7 @@ on:
       - 'lib/whatsapp/signed-consent-revoker.js'
       - 'lib/whatsapp/rotating-revocation-permit.js'
       - 'lib/whatsapp/rotating-signed-consent-revoker.js'
+      - 'lib/whatsapp/nonce-retention.js'
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
@@ -36,6 +37,7 @@ on:
       - 'tests/whatsapp-two-family-authenticated-flow.test.js'
       - 'tests/whatsapp-signed-consent-revoker.test.js'
       - 'tests/whatsapp-rotating-keyring.test.js'
+      - 'tests/whatsapp-nonce-retention.test.js'
       - 'tests/whatsapp-credential-scan.test.js'
       - 'scripts/security/check-tracked-credentials.js'
       - '.gitignore'
@@ -55,6 +57,7 @@ on:
       - 'tests/sql/whatsapp-two-family-authorized-revocation.sql'
       - 'tests/sql/whatsapp-signed-revocation-service-smoke.sql'
       - 'tests/sql/whatsapp-rotating-keyring-smoke.sql'
+      - 'tests/sql/whatsapp-nonce-retention-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -69,7 +72,7 @@ jobs:
           node-version: 22
       - name: Block tracked Vercel credentials without exposing secret values
         run: node scripts/security/check-tracked-credentials.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
@@ -141,3 +144,6 @@ jobs:
       - name: Rotate signing keys and revoke compromised key in disposable PostgreSQL
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-rotating-keyring-smoke.sql
+      - name: Safely purge expired signed-permit nonces under restricted RLS
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-nonce-retention-smoke.sql
