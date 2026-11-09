@@ -127,7 +127,7 @@ test('session is verified remotely on EVERY check, without client headers',async
 
 test('session token, user claims and unknown headers cannot be presented alone',async()=>{
   const f=server();
-  assert.equal(await f.getSession(request(undefined)),null);
+  assert.equal(await f.getSession(request(null)),null);
   assert.equal(await f.getSession({headers:{authorization:'Bearer forged-jwt'}}),null);
   assert.equal(await f.getSession({body:{session:fakeSession()}}),null);
   assert.equal(f.calls.length,0);
