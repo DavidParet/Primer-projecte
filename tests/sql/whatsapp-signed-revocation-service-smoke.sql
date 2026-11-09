@@ -205,56 +205,56 @@ BEGIN
    RAISE EXCEPTION 'Direct cross-family deletion unexpectedly permitted';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  BEGIN
-   SELECT 1 FROM public.nex_ci_revocation_signer_key LIMIT 1;
+   PERFORM 1 FROM public.nex_ci_revocation_signer_key LIMIT 1;
    RAISE EXCEPTION 'Runtime read private signing key';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
 END $$;
 
 -- A stolen DB credential alone cannot sign a new permit.
-SELECT public.nex_ci_revoke_whatsapp_with_permit(
+SELECT (public.nex_ci_revoke_whatsapp_with_permit(
  'account-a','11111111-1111-4111-8111-111111111111',:'auth_id',
  '777770001','888880001',decode(repeat('b1',32),'hex'),
- :'exp',:'nonce'::uuid,decode(repeat('00',32),'hex')) AS result \gset
-\if :{?result}
+ :'exp',:'nonce'::uuid,decode(repeat('00',32),'hex'))->>'state'
+ = 'rejected') AS denied \gset
+\if :denied
 \else
-  \echo 'No outcome from invalid signature'
-  \quit 1
-\endif
-\if :'{result}' == '{"state": "rejected"}'
-\else
-  \echo 'Invalid signature was not rejected'
-  \quit 1
+ \echo 'Invalid signature was not rejected'
+ \quit 1
 \endif
 
 -- Copying signed A permit but substituting B's family must fail.
-SELECT public.nex_ci_revoke_whatsapp_with_permit(
+SELECT (public.nex_ci_revoke_whatsapp_with_permit(
  'account-a','22222222-2222-4222-8222-222222222222',:'auth_id',
  '777770001','888880001',decode(repeat('b1',32),'hex'),
- :'exp',:'nonce'::uuid,decode(:'signature','hex')) AS result \gset
-\if :'{result}' == '{"state": "rejected"}'
+ :'exp',:'nonce'::uuid,decode(:'signature','hex'))->>'state'
+ = 'rejected') AS denied \gset
+\if :denied
 \else
-  \echo 'Tampered family ID accepted'
-  \quit 1
+ \echo 'Tampered family ID accepted'
+ \quit 1
 \endif
 
 BEGIN;
-SELECT public.nex_ci_revoke_whatsapp_with_permit(
+SELECT ((result->>'state' = 'revoked') AND
+ (result->>'deletedMessages')::integer = 1) AS accepted
+FROM (SELECT public.nex_ci_revoke_whatsapp_with_permit(
  'account-a','11111111-1111-4111-8111-111111111111',:'auth_id',
  '777770001','888880001',decode(repeat('b1',32),'hex'),
- :'exp',:'nonce'::uuid,decode(:'signature','hex')) AS result \gset
+ :'exp',:'nonce'::uuid,decode(:'signature','hex')) AS result) signed_revoke \gset
 COMMIT;
-\if :'{result}' == '{"state": "revoked", "deletedMessages": 1}'
+\if :accepted
 \else
-  \echo 'Valid signed A revocation failed'
-  \quit 1
+ \echo 'Valid signed A revocation failed'
+ \quit 1
 \endif
 
 -- Single-use permit must not be usable again.
-SELECT public.nex_ci_revoke_whatsapp_with_permit(
+SELECT (public.nex_ci_revoke_whatsapp_with_permit(
  'account-a','11111111-1111-4111-8111-111111111111',:'auth_id',
  '777770001','888880001',decode(repeat('b1',32),'hex'),
- :'exp',:'nonce'::uuid,decode(:'signature','hex')) AS result \gset
-\if :'{result}' == '{"state": "rejected"}'
+ :'exp',:'nonce'::uuid,decode(:'signature','hex'))->>'state'
+ = 'rejected') AS denied \gset
+\if :denied
 \else
  \echo 'Permit replay accepted'
  \quit 1
