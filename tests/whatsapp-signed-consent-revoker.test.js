@@ -97,12 +97,6 @@ test('signed flow only calls one restricted function and commits',async()=>{
 });
 
 test('wrong family and member role never open database transaction',async()=>{
-  for(const f of [fixture(),fixture({role:'member'})]){
-    const input=f===null?null:{...validInput};
-    if(f!==null){ // separate conditions below
-      if(f===undefined)throw Error('fixture missing');
-    }
-  }
   const foreign=fixture();
   await assert.rejects(foreign.revoke({...validInput,familyId:B,
     actor:{authenticated:true,role:'owner',familyId:B}}),/administrator/);
