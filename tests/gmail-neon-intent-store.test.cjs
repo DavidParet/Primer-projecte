@@ -65,7 +65,7 @@ test('rejects invalid consume result shapes or unvalidated PKCE verifier', async
   ] }));
   await assert.rejects(db.takeIntent(sample.stateDigest, {authUserId:sample.authUserId,familyId:sample.familyId,sessionBinding:sample.sessionBinding}), /invalid_oauth_consumed_intent/);
   const duplicate = makeNeonIntentStore(async () => ({ rows: [{}, {}] }));
-  await assert.rejects(duplicate.takeIntent(sample.stateDigest), /invalid_oauth_consume_result/);
+  await assert.rejects(duplicate.takeIntent(sample.stateDigest, {authUserId:sample.authUserId,familyId:sample.familyId,sessionBinding:sample.sessionBinding}), /invalid_oauth_consume_result/);
 });
 
 test('database intent consumption requires a verified subject, family and session binding', async () => {
