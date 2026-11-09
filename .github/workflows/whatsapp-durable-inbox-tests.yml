@@ -23,6 +23,7 @@ on:
       - 'lib/whatsapp/request-identity-binding.js'
       - 'lib/whatsapp/request-bound-consent-revoker.js'
       - 'lib/whatsapp/verified-server-session.js'
+      - 'lib/whatsapp/canonical-verified-session.js'
       - 'lib/whatsapp/signed-revocation-permit.js'
       - 'lib/whatsapp/signed-consent-revoker.js'
       - 'lib/whatsapp/rotating-revocation-permit.js'
@@ -30,6 +31,7 @@ on:
       - 'lib/whatsapp/nonce-retention.js'
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
+      - 'db/migrations/20261109_nexlupa_canonical_identity_staged.sql'
       - 'db/checks/whatsapp-pilot-release-gate-readonly.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-verified-ingestion.test.js'
@@ -48,6 +50,7 @@ on:
       - 'tests/whatsapp-transactional-family-authorization.test.js'
       - 'tests/whatsapp-request-identity-binding.test.js'
       - 'tests/whatsapp-verified-server-session.test.js'
+      - 'tests/whatsapp-canonical-verified-session.test.js'
       - 'tests/whatsapp-two-family-authenticated-flow.test.js'
       - 'tests/whatsapp-signed-consent-revoker.test.js'
       - 'tests/whatsapp-rotating-keyring.test.js'
@@ -76,6 +79,7 @@ on:
       - 'tests/sql/whatsapp-family-pairing-smoke.sql'
       - 'tests/sql/whatsapp-restricted-pairing-service-smoke.sql'
       - 'tests/sql/whatsapp-signed-pairing-service-smoke.sql'
+      - 'tests/sql/whatsapp-canonical-identity-schema-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -92,7 +96,7 @@ jobs:
         run: node scripts/security/check-tracked-credentials.js
       - name: Verify WhatsApp pilot remains disabled and audit missing config without secrets
         run: node scripts/whatsapp-pilot-preflight.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
@@ -176,6 +180,12 @@ jobs:
       - name: Reject unsigned pairing and forged Meta confirmation using restricted roles
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-pairing-service-smoke.sql
+      - name: Stage canonical family/identity schema in disposable PostgreSQL only
+        run: |
+          psql -v ON_ERROR_STOP=1 -f db/migrations/20261109_nexlupa_canonical_identity_staged.sql
+      - name: Verify canonical IdP-subject mapping, user disable and family permissions
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-canonical-identity-schema-smoke.sql
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
