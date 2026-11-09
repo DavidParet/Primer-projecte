@@ -15,7 +15,8 @@ const AUTH='https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/nexlupa_pilot/
 const SESSION='CI-SYNTHETIC-OPAQUE-SESSION-TOKEN-1234567890';
 const enabled=Object.freeze({
   VERCEL_ENV:'preview',NEXLUPA_AUTH_PILOT:'enabled',
-  NEXLUPA_AUTH_PILOT_ORIGIN:ORIGIN,NEXLUPA_AUTH_BASE_URL:AUTH
+  NEXLUPA_AUTH_PILOT_ORIGIN:ORIGIN,NEXLUPA_AUTH_BASE_URL:AUTH,
+  NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'fake-provider-user'
 });
 
 function request(method='GET',options={}){
@@ -90,7 +91,11 @@ test('production, wrong preview and unconfigured instances cannot open auth prox
   {...enabled,NEXLUPA_AUTH_PILOT_ORIGIN:'https://app.nexlupa.app'},
   {...enabled,NEXLUPA_AUTH_BASE_URL:'http://localhost/auth'},
   {...enabled,NEXLUPA_AUTH_BASE_URL:'https://evil.example.test/db/auth'},
-  {...enabled,NEXLUPA_AUTH_BASE_URL:'https://ep-fake.neonauth.attacker.invalid/db/auth'}
+  {...enabled,NEXLUPA_AUTH_BASE_URL:'https://ep-fake.neonauth.attacker.invalid/db/auth'},
+  {...enabled,NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:''},
+  {...enabled,NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'fake-provider-user,fake-provider-user'},
+  {...enabled,NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'invalid subject'},
+  {...enabled,NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'bad'}
  ]){
   assert.equal(validatePilotConfig(env),null);
   const h=createPilotAuthHandler({env,fetchImpl:f.fetchImpl,now:()=>NOW});
@@ -101,6 +106,27 @@ test('production, wrong preview and unconfigured instances cannot open auth prox
   assert.equal(result.result.state,'not_found');
  }
  assert.equal(f.calls.length,0);
+});
+
+test('only explicitly allowlisted verified IdP subjects may use pilot login',async()=>{
+ const outsider={...session(),
+  user:{id:'not-on-test-list',email:'not-a-real-user@example.test'},
+  session:{...session().session,userId:'not-on-test-list'}
+ };
+ const f=mockProvider({sessionData:outsider});
+ const h=createPilotAuthHandler({env:enabled,fetchImpl:f.fetchImpl,now:()=>NOW});
+ const denied=await run(h,request('POST',{
+  body:{action:'sign_in',email:'ci@example.test',password:'ci-test-password'}
+ }));
+ assert.equal(denied.statusCode,403);
+ assert.deepEqual(denied.result,{state:'pilot_access_denied'});
+ assert.equal(denied.headers['set-cookie'],undefined);
+ assert.equal(f.calls.length,2);
+ const local=encodePilotSession('better-auth.session_token='+SESSION);
+ const existing=await run(h,request('GET',{cookie:PILOT_COOKIE+'='+local}));
+ assert.equal(existing.statusCode,200);
+ assert.deepEqual(existing.result,{state:'signed_out'});
+ assert.match(existing.headers['set-cookie'],/Max-Age=0/);
 });
 
 test('pilot requires an exact Vercel preview host and matching POST origin',async()=>{
