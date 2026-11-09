@@ -1,0 +1,8 @@
+# Prevent re-committing machine-local credentials and development secrets.
+.claude/settings.local.json
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
