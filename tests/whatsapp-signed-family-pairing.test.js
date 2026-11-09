@@ -147,6 +147,51 @@ test('changed verified session denies a new permit',async()=>{
  assert.equal(f.queries.length,0);
 });
 
+test('signer delay cannot authorize a session revoked after key lookup',async()=>{
+ const f=fakeDb();
+ let revoked=false;
+ const issuer=createSignedFamilyPairingIssuer({
+  db:f.db,pairingHmacKey,now:()=>now,
+  getAuthenticatedSession:async()=>revoked?
+    {...session,revoked:true}:session,
+  getMembership:async({userId,familyId})=>({
+   userId,familyId,role:'admin',active:true,revoked:false
+  }),
+  getActiveSigningKey:async purpose=>{
+   assert.equal(purpose,'issue');
+   revoked=true;
+   return {purpose:'issue',state:'active',
+    keyId:'issue-key-v1',keyBase64:issuerKey};
+  }
+ });
+ await assert.rejects(issuer({
+  familyId:A,businessAccountId:biz,phoneNumberId:phone
+ }),/Verified request session changed after signing/);
+ assert.equal(f.queries.length,0);
+});
+
+test('switching user after async signing cannot create family pairing',async()=>{
+ const f=fakeDb();
+ let swapped=false;
+ const issuer=createSignedFamilyPairingIssuer({
+  db:f.db,pairingHmacKey,now:()=>now,
+  getAuthenticatedSession:async()=>swapped?
+   {...session,userId:'account-b',sessionId:'trusted-b'}:session,
+  getMembership:async({userId,familyId})=>({
+   userId,familyId,role:'admin',active:true,revoked:false
+  }),
+  getActiveSigningKey:async purpose=>{
+   swapped=true;
+   return {purpose:'issue',state:'active',
+    keyId:'issue-key-v1',keyBase64:issuerKey};
+  }
+ });
+ await assert.rejects(issuer({
+  familyId:A,businessAccountId:biz,phoneNumberId:phone
+ }),/Verified request session changed after signing/);
+ assert.equal(f.queries.length,0);
+});
+
 test('Meta signature must be verified before confirmation permit is signed',async()=>{
  const f=fakeDb(),k=keyResolver(),confirm=confirmer(f,k);
  const {raw,signature}=signedMeta();
