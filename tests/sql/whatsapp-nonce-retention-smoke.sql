@@ -212,7 +212,7 @@ SELECT count(*)=0 AS protected
 \endif
 RESET ROLE;
 
-DO $
+DO $$
 BEGIN
  IF NOT EXISTS(SELECT 1 FROM public.nex_whatsapp_inbound
    WHERE provider_message_id='wamid.ttp233.compromised-a')
