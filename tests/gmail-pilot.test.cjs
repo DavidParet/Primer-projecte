@@ -192,3 +192,29 @@ test('rejects noncanonical base64url and malformed UTF-8 without replacement cha
     }),/invalid_plain_text|plain_text_required/);
   }
 });
+
+test('deduplicates repeated Gmail message IDs while preserving first-seen order', async () => {
+  const result = await lib.listLabelMessageIds({
+    accessToken: token, labelId: 'Label_123', maxResults: 5,
+    fetchImpl: mock({ messages: [
+      { id: 'first', threadId: 'thread1' },
+      { id: 'first', threadId: 'thread2' },
+      { id: 'second', threadId: 'thread3' }
+    ] })
+  });
+  assert.deepEqual(result, [
+    { id: 'first', threadId: 'thread1' },
+    { id: 'second', threadId: 'thread3' }
+  ]);
+});
+test('rejects malformed Gmail listing rather than silently skipping entries', async () => {
+  for (const messages of [
+    [{ id: 'valid' }, { id: 'bad id' }],
+    [{ id: 'valid', threadId: 'bad thread' }],
+    [null]
+  ]) {
+    await assert.rejects(lib.listLabelMessageIds({
+      accessToken: token, labelId: 'Label_123', fetchImpl: mock({ messages })
+    }), /invalid_gmail_list/);
+  }
+});
