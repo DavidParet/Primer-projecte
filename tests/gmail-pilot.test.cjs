@@ -218,3 +218,13 @@ test('rejects malformed Gmail listing rather than silently skipping entries', as
     }), /invalid_gmail_list/);
   }
 });
+
+test('rejects negative size and malformed Gmail thread IDs', async () => {
+  for (const overrides of [{ sizeEstimate: -1 }, { threadId: 'invalid thread' }, { threadId: 42 }]) {
+    await assert.rejects(lib.readTextMessage({
+      accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+      fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30,
+        payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } }, ...overrides })
+    }), /message_not_eligible/);
+  }
+});
