@@ -18,7 +18,7 @@ function db(rowCount=1,deletedCount=3) {
     if (sql.includes('WITH target AS') && sql.includes('), revoked AS (') && sql.includes('), deleted AS (')) return {rows:[{
       revoked_count:rowCount,deleted_count:rowCount?deletedCount:0
     }]};
-    return {rowCount};
+    return {rowCount,rows:rowCount===1?[{authorization_id:'00000000-0000-4000-8000-000000000099'}]:[]};
   }};
 }
 function policy(database, overrides={}) {
@@ -228,11 +228,14 @@ test('repeat revocation still purges retained messages without reporting fresh c
 
 test('enrollment fails closed when database response cannot prove insert or conflict',async()=>{
   for (const result of [null,{}, {rowCount:-1}, {rowCount:2},
-    {rowCount:'1'}, {rowCount:NaN}]) {
+    {rowCount:'1'}, {rowCount:NaN}, {rowCount:1},
+    {rowCount:1,rows:[]}, {rowCount:1,rows:[{}]},
+    {rowCount:1,rows:[{authorization_id:'not-a-uuid'}]},
+    {rowCount:0,rows:[{authorization_id:'00000000-0000-4000-8000-000000000099'}]}]) {
     const database={query:async()=>result};
     await assert.rejects(policy(database).enroll(enrollment()),
       /Enrollment result not verified/);
   }
-  assert.deepEqual(await policy({query:async()=>({rowCount:0})}).enroll(enrollment()),
+  assert.deepEqual(await policy({query:async()=>({rowCount:0,rows:[]})}).enroll(enrollment()),
     {state:'already_active_or_receipt_used'});
 });
