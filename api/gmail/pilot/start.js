@@ -3,6 +3,7 @@
 /** Initiates one voluntary Gmail OAuth flow for a server-verified family. */
 const { beginBrowserOAuth } = require('../../../lib/gmail/browser-oauth.cjs');
 const server = require('../../../lib/gmail/private-server.cjs');
+const { validatePilotStartRequest }=require('../../../lib/gmail/http-guards.cjs');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -15,21 +16,12 @@ module.exports = async function handler(req, res) {
   }
   try {
     const { clientId, redirectUri, origin } = server.config();
-    // A signed JWT is mandatory and cross-origin initiations are denied.
-    if (req.headers?.origin !== origin ||
-        req.headers?.host?.toLowerCase() !== new URL(origin).host.toLowerCase()) {
-      return res.status(403).json({ error:'origin_not_allowed' });
-    }
-    const length = Number(req.headers?.['content-length'] || 0);
-    if (!Number.isSafeInteger(length) || length > 512 ||
-        !req.body || typeof req.body !== 'object' || Array.isArray(req.body) ||
-        Object.keys(req.body).length !== 1 || typeof req.body.familyId !== 'string') {
-      return res.status(400).json({ error:'invalid_request' });
-    }
+    const guarded=validatePilotStartRequest(req,origin);
+    if (!guarded.ok) return res.status(guarded.status).json({error:guarded.error});
     const verify = await server.verifiedFamily();
     const familySession = await verify({
       authorization: req.headers?.authorization,
-      requestedFamilyId: req.body.familyId
+      requestedFamilyId: guarded.familyId
     });
     const started = await beginBrowserOAuth({
       familySession, clientId, redirectUri,

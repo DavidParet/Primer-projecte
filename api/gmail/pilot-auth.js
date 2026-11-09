@@ -8,6 +8,7 @@
  * NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL.
  */
 const { Pool } = require('pg');
+const { strictPilotConnectionString } = require('../../lib/gmail/strict-neon-connection.cjs');
 const { createVerifiedFamilyResolver } = require('../../lib/gmail/verified-family.cjs');
 
 let pool;
@@ -19,7 +20,7 @@ function getPool() {
   }
   if (!pool) {
     pool = new Pool({
-      connectionString: process.env.GMAIL_PILOT_DATABASE_URL,
+      connectionString: strictPilotConnectionString(process.env.GMAIL_PILOT_DATABASE_URL),
       ssl: { rejectUnauthorized: true },
       max: 2,
       connectionTimeoutMillis: 4000,
@@ -44,6 +45,16 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+  // This endpoint is for isolated preview validation; the public application
+  // must never expose family-membership probes, even if environment variables
+  // are accidentally copied to production.
+  if (process.env.VERCEL_ENV !== 'preview') {
+    return res.status(503).json({ready:false,error:'pilot_disabled'});
+  }
+  if (req.method === 'POST' && process.env.GMAIL_PILOT_ENABLED !== 'true') {
+    return res.status(503).json({authorized:false,error:'pilot_disabled'});
+  }
 
   if (req.method === 'GET') {
     try {
