@@ -142,6 +142,57 @@ GRANT EXECUTE ON FUNCTION
   public.nex_ci_active_family_membership(text,uuid)
   TO nex_ci_canonical_identity_runtime;
 
+-- Read-and-row-lock authorization for operations such as sender enrollment.
+-- The function owner only obtains UPDATE on non-sensitive updated_at for
+-- PostgreSQL SELECT ... FOR SHARE row locking; it cannot change role/status.
+GRANT UPDATE(updated_at) ON public.nex_family_memberships
+  TO nex_ci_canonical_identity_owner;
+CREATE POLICY nex_ci_identity_owner_members_lock
+  ON public.nex_family_memberships FOR UPDATE
+  TO nex_ci_canonical_identity_owner
+  USING (status='active' AND revoked_at IS NULL)
+  WITH CHECK (status='active' AND revoked_at IS NULL);
+
+CREATE FUNCTION public.nex_ci_authorize_canonical_family_locked(
+  p_user text,p_family uuid,p_action text
+)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER
+SET search_path=pg_catalog,public
+AS $body$
+DECLARE selected_role text;
+BEGIN
+  IF p_user IS NULL OR p_user !~ '^[A-Za-z0-9_-]{1,128}
+-- A trusted, audited onboarding/identity-link lifecycle is still required.
+SELECT 'TTP240 canonical schema staged on disposable PostgreSQL only' AS result;
+
+    OR p_family IS NULL OR
+    p_action NOT IN ('enroll_whatsapp_sender',
+                    'revoke_whatsapp_consent',
+                    'read_whatsapp_messages')
+  THEN RETURN FALSE; END IF;
+  SELECT m.role INTO selected_role
+    FROM public.nex_family_memberships m
+    JOIN public.nex_users u ON u.user_id=m.user_id
+    JOIN public.nex_families f ON f.family_id=m.family_id
+    WHERE m.user_id=p_user AND m.family_id=p_family
+      AND m.status='active' AND m.revoked_at IS NULL
+      AND u.disabled_at IS NULL AND f.archived_at IS NULL
+    FOR SHARE OF m;
+  IF NOT FOUND THEN RETURN FALSE; END IF;
+  IF p_action='read_whatsapp_messages' THEN
+    RETURN selected_role IN ('owner','admin','member');
+  END IF;
+  RETURN selected_role IN ('owner','admin');
+END;
+$body$;
+ALTER FUNCTION public.nex_ci_authorize_canonical_family_locked(text,uuid,text)
+  OWNER TO nex_ci_canonical_identity_owner;
+REVOKE ALL ON FUNCTION
+  public.nex_ci_authorize_canonical_family_locked(text,uuid,text)
+  FROM PUBLIC;
+-- No EXECUTE granted to the ordinary canonical lookup runtime.
+-- Only a reviewed trusted operation owner may call this function.
+
 -- No automatically registered users, identities, families or memberships.
 -- A trusted, audited onboarding/identity-link lifecycle is still required.
 SELECT 'TTP240 canonical schema staged on disposable PostgreSQL only' AS result;
