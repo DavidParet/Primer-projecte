@@ -225,3 +225,14 @@ test('repeat revocation still purges retained messages without reporting fresh c
   assert.match(database.calls[0].sql,/USING target/);
   assert.match(database.calls[0].sql,/scope='incoming_text'/);
 });
+
+test('enrollment fails closed when database response cannot prove insert or conflict',async()=>{
+  for (const result of [null,{}, {rowCount:-1}, {rowCount:2},
+    {rowCount:'1'}, {rowCount:NaN}]) {
+    const database={query:async()=>result};
+    await assert.rejects(policy(database).enroll(enrollment()),
+      /Enrollment result not verified/);
+  }
+  assert.deepEqual(await policy({query:async()=>({rowCount:0})}).enroll(enrollment()),
+    {state:'already_active_or_receipt_used'});
+});
