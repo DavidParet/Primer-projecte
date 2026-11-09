@@ -20,7 +20,7 @@ function fixture({acquired=true,counts=[2,1],role=permittedRole,failAt=null,
       if(sql==='BEGIN'||sql==='COMMIT'||sql==='ROLLBACK')return {};
       if(sql===NONCE_PURGE_LOCK_SQL)return {rows:[{acquired}]};
       if(sql===NONCE_ROLE_SQL)return {rows:[role]};
-      if(sql===NONCE_PURGE_SQL)return {rowCount:counts[index++]??0};
+      if(sql===NONCE_PURGE_SQL)return {rowCount:index<counts.length?counts[index++]:0};
       throw Error('Unexpected query');
     },
     release(){released++;}
