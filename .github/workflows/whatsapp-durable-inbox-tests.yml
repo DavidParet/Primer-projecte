@@ -92,6 +92,7 @@ on:
       - 'tests/sql/whatsapp-restricted-pairing-service-smoke.sql'
       - 'tests/sql/whatsapp-signed-pairing-service-smoke.sql'
       - 'tests/sql/whatsapp-canonical-identity-schema-smoke.sql'
+      - 'tests/sql/whatsapp-canonical-pairing-bridge-smoke.sql'
       - '.github/workflows/whatsapp-durable-inbox-tests.yml'
   workflow_dispatch:
 permissions:
@@ -198,6 +199,9 @@ jobs:
       - name: Verify canonical IdP-subject mapping, user disable and family permissions
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-canonical-identity-schema-smoke.sql
+      - name: Verify canonical family admin authorizes real signed pairing path
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-canonical-pairing-bridge-smoke.sql
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
