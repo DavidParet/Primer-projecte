@@ -19,10 +19,10 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 
 ### Vinculació segura i estat d'un únic ús
 
-- `lib/gmail/oauth-flow.cjs`: només és invocable des del servidor i exigeix una sessió de família autenticada, la comprovació del consentiment, `state` d'un sol ús de 5 minuts, PKCE i verificació de l'adreça de Google.
+- `lib/gmail/oauth-flow.cjs`: només és invocable des del servidor i exigeix una sessió de família autenticada, la comprovació del consentiment, `state` d'un sol ús de 4 minuts, PKCE i verificació de l'adreça de Google.
 - `lib/gmail/neon-intent-store.cjs`: guarda i consumeix l'estat mitjançant funcions SQL parametritzades. No pot accedir directament a les taules.
 - La branca separada de Neon ja conté les funcions de prova `store_gmail_pilot_state` i `consume_gmail_pilot_state`; s'han comprovat els duplicats, consentiments revocats i usos repetits. **No estan desplegades en producció.**
-- **48 proves executades i superades** en un entorn independent, sense dades reals: `node --test tests/gmail-*.test.cjs`.
+- **63 proves executades i superades** en un entorn independent, sense dades reals: `node --test tests/gmail-*.test.cjs`.
 
 **Important:** aquests mòduls no creen cap endpoint HTTP accessible. L'autenticació de famílies real encara no existeix i els secrets de Google no estan configurats.
 
@@ -57,9 +57,10 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 - Rol nexlupa_gmail_auth_preview: permisos limitats a funcions RPC, sense accés directe a les taules de famílies.
 - Mòdul lib/gmail/verified-family.cjs: validació criptogràfica EdDSA contra JWKS, issuer fixat, expiració i rol, més comprovació de membres a Neon.
 - API api/gmail/pilot-auth.js: preflight autenticat, no inicia OAuth i no llegeix Gmail.
+- Mòdul lib/gmail/preview-import.cjs: consulta un màxim de 3 missatges únicament d'una etiqueta autoritzada, valida consentiment abans i després, descarta continguts no compatibles i retorna una previsualització per a revisió manual. No crida cap IA ni escriu a Neon, Gmail o Calendar.
 - Secrets i configuració de Neon guardats exclusivament a Vercel preview del projecte independent de proves.
 
-**Proves:** 48/48 superades en sandbox independent. Neon rebutja un usuari no vinculat a cap família.
+**Proves:** 63/63 superades en sandbox independent. Neon rebutja un usuari no vinculat a cap família.
 
 **Bloqueig de desplegament:** Vercel retorna 402, codi api-deployments-free-per-day, per haver superat el límit diari de desplegaments per API. El preflight nou NO està desplegat. No s'ha modificat cap pla, factura, domini ni producció.
 
@@ -70,3 +71,16 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 3. Configurar el client OAuth de Google Cloud, Gmail API i un redirect HTTPS exacte. Cap credencial en aquest repositori.
 4. Afegir els endpoints start i callback, amb cookie efímera segura i comprovació de sessió, usuari, família i consentiment.
 5. Fer una importació explícita amb correus ficticis marcats en una etiqueta pilot, sense lectura general de la bústia.
+
+## Primer circuit de lectura sense efectes
+
+La prova amb el simulador de Gmail ha validat aquest ordre: sessió familiar verificable → consentiment vigent → llista de màxim 3 missatges d'una etiqueta personalitzada → lectura de text pla, comprovant novament l'etiqueta → consentiment revalidat → previsualització pendent de revisió manual.
+
+- La funció **no s'exposa com un endpoint HTTP**. Només la pot cridar l'orquestrador privat després del retorn OAuth Google verificat.
+- Cada previsualització conté la procedència Gmail, una empremta estable de compte i missatge, l'assumpte i un extracte literal. No inventa imports ni dates, ni genera accions automàtiques.
+- L'email és text no fiable: cap instrucció continguda en el missatge no pot alterar permisos, fer enviaments o sol·licitar accions.
+- Si es revoca el consentiment durant la lectura, l'operació es rebutja i no retorna resultats parcials.
+- **63/63 proves superades** (Node test, dades simulades) incloent 15 proves específiques d'importació.
+- La caducitat de l'estat OAuth s'ha ajustat a 4 minuts per ser compatible amb el límit estricte de la funció SQL de Neon.
+
+**Encara no fa extracció semàntica amb IA ni crea fitxes persistents.** Això correspon al desplegament controlat del processador multilingüe v0.9, amb revisió humana i comprovacions d'evidències.
