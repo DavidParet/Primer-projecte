@@ -17,14 +17,21 @@ El fitxer `lib/gmail/pilot.cjs` implementa:
 - Lectura de text pla, sense adjunts ni HTML i amb límits de mida; cada missatge es verifica novament perquè contingui l'etiqueta pilot abans de llegir-ne el contingut.
 - Cap acció d'enviament, modificació o persistència de dades familiars.
 
-15 proves sense connexions reals: `node --test tests/gmail-pilot.test.cjs`.
+### Vinculació segura i estat d'un únic ús
+
+- `lib/gmail/oauth-flow.cjs`: només és invocable des del servidor i exigeix una sessió de família autenticada, la comprovació del consentiment, `state` d'un sol ús de 5 minuts, PKCE i verificació de l'adreça de Google.
+- `lib/gmail/neon-intent-store.cjs`: guarda i consumeix l'estat mitjançant funcions SQL parametritzades. No pot accedir directament a les taules.
+- La branca separada de Neon ja conté les funcions de prova `store_gmail_pilot_state` i `consume_gmail_pilot_state`; s'han comprovat els duplicats, consentiments revocats i usos repetits. **No estan desplegades en producció.**
+- **36 proves executades i superades** en un entorn independent, sense dades reals: `node --test tests/gmail-*.test.cjs`.
+
+**Important:** aquests mòduls no creen cap endpoint HTTP accessible. L'autenticació de famílies real encara no existeix i els secrets de Google no estan configurats.
 
 ## Requisits que encara falten per obrir la connexió
 
 1. **Autenticació de famílies dins NexLupa.** El repositori actual no acredita encara la identitat de la família per vincular-hi un compte Google. El paràmetre `state` d'OAuth no substitueix aquesta autenticació.
 2. **Google Cloud:** registrar l'aplicació de NexLupa, activar Gmail API i crear el client OAuth de tipus web, amb URI de retorn HTTPS exacta i pantalla de consentiment en mode de prova.
 3. **Secrets:** incorporar `GOOGLE_CLIENT_ID` i `GOOGLE_CLIENT_SECRET` al magatzem de secrets de Vercel, mai al repositori, fitxers públics o missatges de xat.
-4. **Retorn OAuth segur:** sessió de servidor vinculada a la família i `state` + `code_verifier` d'un únic ús amb caducitat; comprovació del compte Google autoritzat i consentiment; no mostrar tokens al navegador.
+4. **Retorn OAuth segur:** integrar els mòduls ja provats amb l'autenticació real de família i un magatzem persistent de sessions; no acceptar identitats o permisos rebuts directament del navegador. No mostrar tokens al navegador.
 5. **Etiqueta controlada:** etiquetar manualment uns missatges ficticis amb `NEXLUPA_PILOT`. Fer una única importació explícita; cap vigilància permanent ni lectura general de la bústia.
 6. **Privacitat comercial:** preparar política de dades, retenció/revocació i verificació de Google abans de donar accés a famílies reals. Google classifica `gmail.readonly` com a permís restringit i l'avaluació de seguretat pot ser necessària quan se'n transmeten o desen dades en servidors.
 
