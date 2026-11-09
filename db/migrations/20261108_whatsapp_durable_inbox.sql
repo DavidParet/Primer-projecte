@@ -46,5 +46,15 @@ CREATE INDEX IF NOT EXISTS nex_whatsapp_inbound_expiration
 CREATE INDEX IF NOT EXISTS nex_whatsapp_inbound_family
   ON nex_whatsapp_inbound (family_id, received_at);
 
+-- Fail closed immediately upon schema creation: before restricted service
+-- functions and reviewed tenant policies exist, all non-BYPASSRLS roles
+-- (including the table owner, because of FORCE) are denied by default.
+-- WARNING: ALTER TABLE IF-NOT-EXISTS is NOT a reviewed live migration;
+-- applying this staged file to existing Neon tables would change access.
+ALTER TABLE public.nex_whatsapp_inbound ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nex_whatsapp_inbound FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.nex_whatsapp_sender_authorizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nex_whatsapp_sender_authorizations FORCE ROW LEVEL SECURITY;
+
 -- No cross-family public read APIs. Authenticated tenant access and DB grants
 -- still need separate implementation and review before any real deployment.
