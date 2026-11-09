@@ -27,7 +27,8 @@ const tokenB='CI-REQUEST-BOUND-SESSION-TOKEN-B-111111111';
 const env={
  VERCEL_ENV:'preview',NEXLUPA_AUTH_PILOT:'enabled',
  NEXLUPA_AUTH_PILOT_ORIGIN:ORIGIN,NEXLUPA_AUTH_BASE_URL:AUTH,
- NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'external-a,external-b'
+ NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'external-a,external-b',
+ WHATSAPP_WABA_ID:business,WHATSAPP_PHONE_NUMBER_ID:phone
 };
 function request(token=tokenA,overrides={}){
  return {
@@ -151,6 +152,36 @@ test('two independently authenticated users cannot cross family privilege bounda
  assert.equal(f.pairCalls.filter(x=>x.sql===SIGNED_PAIR_ISSUE_SQL).length,1);
  assert.equal(f.pairCalls.find(x=>x.sql===SIGNED_PAIR_ISSUE_SQL).args[0],
   'canonical-b');
+});
+
+test('configured official business IDs reject browser-selected Meta destinations',async()=>{
+ const f=fixture(),issuer=f.factory(request());
+ assert.throws(()=>issuer({
+  familyId:A,businessAccountId:'999998888',phoneNumberId:phone
+ }),/destination not authorized/);
+ assert.throws(()=>issuer({
+  familyId:A,businessAccountId:business,phoneNumberId:'999998888'
+ }),/destination not authorized/);
+ assert.equal(f.pairCalls.length,0);
+ assert.equal(f.idCalls.length,0);
+ const legitimate=await issuer({familyId:A});
+ assert.match(legitimate.code,CODE_PATTERN);
+ assert.deepEqual(f.pairCalls[1].args.slice(2,4),[business,phone]);
+});
+
+test('missing configured official WhatsApp IDs prevent pairing factory setup',()=>{
+ const f=fixture();
+ for(const bad of [
+  {...env,WHATSAPP_WABA_ID:undefined},
+  {...env,WHATSAPP_PHONE_NUMBER_ID:''},
+  {...env,WHATSAPP_WABA_ID:'not-numeric'}
+ ]){
+  assert.throws(()=>createPilotPairingIssuerFactory({
+   env:bad,identityDb:{query:async()=>({rows:[]})},
+   pairingDb:{connect:async()=>({})},
+   pairingHmacKey:pairKey,getActiveSigningKey:async()=>null
+  }),/Trusted pilot WhatsApp business identity required/);
+ }
 });
 
 test('forged browser role, missing session and wrong origin never issue',async()=>{
