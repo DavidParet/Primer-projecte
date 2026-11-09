@@ -45,6 +45,16 @@ module.exports = async function handler(req, res) {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
+  // This endpoint is for isolated preview validation; the public application
+  // must never expose family-membership probes, even if environment variables
+  // are accidentally copied to production.
+  if (process.env.VERCEL_ENV !== 'preview') {
+    return res.status(503).json({ready:false,error:'pilot_disabled'});
+  }
+  if (req.method === 'POST' && process.env.GMAIL_PILOT_ENABLED !== 'true') {
+    return res.status(503).json({authorized:false,error:'pilot_disabled'});
+  }
+
   if (req.method === 'GET') {
     try {
       const db = getPool();
