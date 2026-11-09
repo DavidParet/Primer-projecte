@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <title>NexLupa · Accés al pilot (proves)</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#080d16;color:#eef3fa}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,#192637 0%,#080d16 63%)}
+    main{width:min(100%,460px);border:1px solid #2b394d;border-radius:22px;padding:clamp(24px,6vw,42px);background:#111b29;box-shadow:0 24px 60px #0006}
+    .brand{font-size:23px;font-weight:850;letter-spacing:-.05em}.brand strong{color:#ffbd37}
+    .eyebrow{color:#ffcf65;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;margin-top:28px}
+    h1{font-size:clamp(24px,5vw,30px);letter-spacing:-.035em;line-height:1.15;margin:10px 0}
+    p{font-size:14px;line-height:1.6;color:#b9c7d7}
+    label{font-size:13px;font-weight:700;display:block;margin:22px 0 8px}
+    input{display:block;width:100%;background:#0b1420;border:1px solid #43566d;border-radius:11px;color:#fff;font:inherit;font-size:16px;padding:13px 14px}
+    input:focus-visible,button:focus-visible{outline:3px solid #ffc35e;outline-offset:2px}
+    button{width:100%;margin-top:25px;border:0;border-radius:13px;background:#ffc248;color:#121212;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.48;cursor:not-allowed}
+    #signout{background:transparent;color:#ffce69;border:1px solid #7a6742}
+    .info{margin-top:24px;padding:13px 15px;border:1px solid #34465c;border-radius:12px;color:#ccd9e8;font-size:13px;line-height:1.6}
+    .hidden{display:none}
+    .subtle{color:#91a4b9;font-size:12px;margin-top:24px}
+    #status{min-height:26px}
+  </style>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main>
+    <div class="brand">nex<strong>Lupa</strong></div>
+    <div class="eyebrow">Entorn de proves · accés restringit</div>
+    <h1>Inicia sessió al pilot</h1>
+    <p>Aquesta pàgina és exclusiva per a comptes de prova autoritzats. Encara no activa WhatsApp ni vincula cap família.</p>
+    <p id="status" role="status" aria-live="polite">Comprovant la disponibilitat de l'accés...</p>
+    <form id="login" class="hidden" autocomplete="on">
+      <label for="email">Correu electrònic</label>
+      <input id="email" name="email" type="email" autocomplete="username" inputmode="email" required maxlength="254">
+      <label for="password">Contrasenya</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="512">
+      <button id="signin" type="submit">Entrar al pilot</button>
+    </form>
+    <div id="authenticated" class="hidden">
+      <p>La sessió de proves és vàlida. La vinculació de famílies encara no està habilitada.</p>
+      <button id="signout" type="button">Tancar sessió</button>
+    </div>
+    <div class="info">No introduïu contrasenyes de producció. El registre de nous usuaris està desactivat i només es permeten comptes de prova autoritzats.</div>
+    <p class="subtle">Pilot intern · Sense accés a grups de WhatsApp · Sense dades familiars reals</p>
+  </main>
+</body>
+</html>
