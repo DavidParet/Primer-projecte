@@ -109,8 +109,8 @@ test('revocation requires authenticated family and is scope-limited',async()=>{
   assert.match(sql,/family_id=\$4/);
   assert.match(sql,/revoked_at IS NULL/);
   assert.match(sql,/DELETE FROM nex_whatsapp_inbound/);
-  assert.match(sql,/inbound.family_id=revoked.family_id/);
-  assert.match(sql,/inbound.sender_digest=revoked.sender_digest/);
+  assert.match(sql,/inbound.family_id=target.family_id/);
+  assert.match(sql,/inbound.sender_digest=target.sender_digest/);
   assert.equal(values[3],FAMILY);
   assert.equal(values.includes(SENDER),false);
 });
@@ -196,10 +196,11 @@ test('revocation deletes retained messages for exact tenant and sender only',asy
   });
   assert.deepEqual(result,{state:'revoked',deletedMessages:12});
   const {sql,values}=database.calls[0];
-  assert.match(sql,/WITH revoked AS/);
+  assert.match(sql,/WITH target AS/);
+  assert.match(sql,/revoked_at IS NULL/);
   assert.match(sql,/DELETE FROM nex_whatsapp_inbound AS inbound/);
   for (const column of ['family_id','business_account_id','phone_number_id','sender_digest']) {
-    assert.ok(sql.includes('inbound.'+column+'=revoked.'+column));
+    assert.ok(sql.includes('inbound.'+column+'=target.'+column));
   }
   assert.equal(values[3],FAMILY);
   assert.equal(values.includes(SENDER),false);
@@ -211,4 +212,16 @@ test('revocation fails closed if DB cannot attest both operations',async()=>{
       session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
     }),/Revocation result not verified/);
   }
+});
+
+test('repeat revocation still purges retained messages without reporting fresh consent change',async()=>{
+  const database=db(0,0);
+  database.query=async(sql,values)=>{
+    database.calls.push({sql,values});
+    return {rows:[{revoked_count:0,deleted_count:2}]};
+  };
+  const result=await policy(database).revoke({session:{},businessAccountId,phoneNumberId,senderWaId:SENDER});
+  assert.deepEqual(result,{state:'not_found',deletedMessages:2});
+  assert.match(database.calls[0].sql,/USING target/);
+  assert.match(database.calls[0].sql,/scope='incoming_text'/);
 });
