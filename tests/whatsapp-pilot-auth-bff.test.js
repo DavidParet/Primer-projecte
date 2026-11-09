@@ -89,7 +89,8 @@ test('production, wrong preview and unconfigured instances cannot open auth prox
   {...enabled,NEXLUPA_AUTH_PILOT:'disabled'},
   {...enabled,NEXLUPA_AUTH_PILOT_ORIGIN:'https://app.nexlupa.app'},
   {...enabled,NEXLUPA_AUTH_BASE_URL:'http://localhost/auth'},
-  {...enabled,NEXLUPA_AUTH_BASE_URL:'https://evil.example.test/db/auth'}
+  {...enabled,NEXLUPA_AUTH_BASE_URL:'https://evil.example.test/db/auth'},
+  {...enabled,NEXLUPA_AUTH_BASE_URL:'https://ep-fake.neonauth.attacker.invalid/db/auth'}
  ]){
   assert.equal(validatePilotConfig(env),null);
   const h=createPilotAuthHandler({env,fetchImpl:f.fetchImpl,now:()=>NOW});
