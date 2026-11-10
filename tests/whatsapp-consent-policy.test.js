@@ -226,7 +226,7 @@ test('revocation deletes retained messages for exact tenant and sender only',asy
   assert.equal(values.includes(SENDER),false);
 });
 test('revocation fails closed on invalid transaction responses',async()=>{
-  for(const response of [null,{}, {rowCount:2,rows:[{},{}]}, {rowCount:1,rows:[]}]) {
+  for(const response of [null,{}, {rowCount:2,rows:[{}]}, {rowCount:1,rows:[]}]) {
     const database={query:async()=>({}),connect:async()=>({
       async query(sql){if(sql.includes('FOR UPDATE'))return response;return {};},
       release(){}
