@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
       - name: Syntax validation
         run: |
-          node --check lib/forwarding/resend-intake.cjs
+          for f in lib/forwarding/*.cjs; do node --check "$f"; done
           node --check tests/forwarding-intake.test.cjs
       - name: Offline tests (no secrets, Google, Resend or Neon access)
-        run: node --test tests/forwarding-intake.test.cjs
+        run: node --test tests/forwarding-*.test.cjs
