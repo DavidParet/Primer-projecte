@@ -1,0 +1,23 @@
+name: WhatsApp consent policy tests
+
+on:
+  pull_request:
+    paths:
+      - 'lib/whatsapp/consent-policy.js'
+      - 'tests/whatsapp-consent-policy.test.js'
+      - '.github/workflows/whatsapp-consent-policy-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  consent-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test consent and durable inbox policies
+        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
