@@ -290,3 +290,34 @@ test('rejects fractional and unsafe timestamps before writing consent',async()=>
   }
   assert.equal(database.calls.length,0);
 });
+
+test('rejects coercible objects in enrollment and revocation identifiers before SQL',async()=>{
+  const database=db();
+  const fakeId={toString:()=>businessAccountId};
+  const fakeChallenge={toString:()=>challengeId};
+  for (const patch of [
+    {businessAccountId:fakeId},
+    {phoneNumberId:{toString:()=>phoneNumberId}},
+    {challengeId:fakeChallenge},
+    {consentReceiptId:{toString:()=>consentReceiptId}}
+  ]) {
+    await assert.rejects(policy(database).enroll({...enrollment(),...patch}),/Invalid enrollment input/);
+  }
+  await assert.rejects(policy(database).revoke({
+    session:{},businessAccountId:fakeId,phoneNumberId,senderWaId:SENDER
+  }),/Invalid revocation input/);
+  await assert.rejects(policy(database).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:{toString:()=>SENDER}
+  }),/Invalid revocation input/);
+  assert.equal(database.calls.length,0);
+});
+test('rejects coercible sender identifier from phone verifier',async()=>{
+  const database=db();
+  await assert.rejects(policy(database,{
+    verifyEnrollment:async()=>({
+      verified:true,familyId:FAMILY,challengeId,businessAccountId,phoneNumberId,
+      senderWaId:{toString:()=>SENDER},singleUseConsumed:true,expiresAt:Date.now()+60000
+    })
+  }).enroll(enrollment()),/Phone proof not verified/);
+  assert.equal(database.calls.length,0);
+});
