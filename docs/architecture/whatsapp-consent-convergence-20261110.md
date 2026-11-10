@@ -42,3 +42,25 @@ No s'ha implementat encara el pas 4 que combini els dos prototips; el prototip w
 ## Limitació específica després del bloqueig SQL
 
 La nova transacció garanteix una comprovació d'administrador consistent **si** l'adaptador de confiança adquireix el bloqueig real de membres. **Encara no és una transacció única de tot el consentiment**: els verificadors externs de control del número i rebut poden consumir-se abans que la transacció PostgreSQL escrigui l'autorització. Cal una prova i un disseny de consum de comprovants/reptes exactament un cop, amb registre durador i recuperació davant d'errors, dins del futur pairing canònic. No utilitzar aquesta via de demostració com a endpoint públic.
+
+
+## Prototip nou: prova i rebut d'un sol ús en una transacció (TTP atomic, 10/11/2026)
+
+**Validació:** GitHub Actions [#42918745448](https://github.com/DavidParet/Primer-projecte/actions/runs/42918745448), commit `f885cef5`, conclusió `success`. La regressió específica `tests/whatsapp-atomic-consent-enrollment.test.cjs` ha passat en PostgreSQL 16 efímer.
+
+**Implementació interna a PR #15:**
+
+- `db/migrations/20261110_whatsapp_atomic_pairing_evidence_staged.sql`: dues taules per guardar **únicament digests HMAC** de la prova verificada de WhatsApp i del rebut explícit del web. Ambdues vinculen família, compte/número oficial i digest del remitent; el rebut també vincula el digest de la prova i la versió actual del consentiment. `ENABLE/FORCE RLS` i sense política, cap credencial d'usuari ni privilegi públic concedit. **NO és migració aprovada per Neon.**
+- `lib/whatsapp/atomic-consent-enrollment.js`: prova a prova i rebut es bloquegen mitjançant `SELECT ... FOR UPDATE` amb una connexió PostgreSQL dedicada. L'autorització de família es comprova transaccionalment, es comproven les identitats i l'abast de totes les proves, s'insereix una única autorització i es marquen **ambdós justificants consumits a la mateixa transacció**. Si falla una escriptura, un retorn no queda verificat o hi ha duplicat, s'executa `ROLLBACK` i no es consumeix cap justificant.
+- `tests/whatsapp-atomic-consent-enrollment.test.cjs`: proves sintètiques de registre positiu, replay, altra família, caducitat, baixa del permís, fallada entre INSERT i actualització de rebut, recuperació i dues altes simultànies.
+- El mòdul anterior `lib/whatsapp/consent-policy.js` **continua sent un prototip no destinat a endpoints públics**: els seus verificadors externs poden consumir comprovants abans de la transacció, i no ofereix la nova garantia. En una integració real cal **seleccionar el mòdul atòmic**, no activar els dos camins paral·lels.
+
+**Falta imprescindible abans d'un pilot real:**
+
+1. Emissor de proves: el backend de Meta ha de registrar el digest de prova **només després de validar signatura HMAC RAW i confirmar que el missatge procedeix del compte receptor**. No existeix encara el codi de producció que faci aquesta escriptura en la taula nova.
+2. Emissor de rebuts: una sessió d'administrador autenticada de debò ha d'acceptar explícitament condicions i escriure el rebut, vinculat a la mateixa família i prova. Tampoc s'ha connectat.
+3. Rols restringits: les proves actuals executen la migració en un PostgreSQL **efímer amb superusuari CI**; que passin no verifica la seguretat de rols de Neon. Cal funció `SECURITY DEFINER` auditada, `search_path` fixat, comprovació de sessió i permisos amb rol sense `BYPASSRLS`, i prova de permisos negatius.
+4. Caducitat, retenció, exercici de supressió i gestió d'errors/reintents de Meta: polítiques operatives i revisió jurídica/privacitat, especialment per tercers/menors.
+5. No desplegar cap endpoint que accepti missatges com a persistits fins validar el circuit sencer amb dades fictícies, una sessió familiar real i un compte Meta oficial configurat.
+
+**Aquesta CI només prova l'atomicitat del registre de proves ja verificades, no la veracitat de les proves ni la seguretat d'un emissor real.** Els ids de família, número i remitents del test són sintètics. Producció, Resend i Neon no s'han modificat.
