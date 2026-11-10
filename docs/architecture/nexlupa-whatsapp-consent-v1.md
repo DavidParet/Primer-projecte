@@ -27,3 +27,10 @@ Estat: **prototip en branca de GitHub; sense endpoint ni verificació telefònic
 - Prova unitària afegida per impedir que desaparegui el bloqueig SQL. El workflow de consentiment ara inclou `whatsapp-tenant-revocation.test.js` i s'executa també en pushes de la branca de desenvolupament.
 - **Pendent:** una prova de concurrència real amb dues connexions PostgreSQL i missatges ficticis, validació completa de l'INSERT amb el runtime desplegat, permisos mínims i auditoria de l'aïllament. `EXPLAIN` no prova per si sol que no hi hagi curses ni valida el circuit extrem a extrem.
 - **No activar Meta, no fusionar a `main`, no desplegar, no utilitzar dades personals reals.**
+
+## Verificació posterior: concurrència PostgreSQL (2026-11-10)
+- GitHub Actions [#42911226385](https://github.com/DavidParet/Primer-projecte/actions/runs/42911226385): **SUCCESS**. S'han executat els tests de consentiment, safata i revocació, a més del nou test `tests/whatsapp-postgres-concurrency.test.cjs` contra PostgreSQL 16 efímer.
+- Cas A comprovat amb dues connexions reals: l'INSERT bloqueja l'autorització primer, la revocació espera i després elimina el missatge ja confirmat; cap missatge residual.
+- Cas B comprovat amb dues connexions reals: la revocació bloqueja primer, l'INSERT espera i després és classificat `unlinked`; cap missatge residual.
+- Les dues proves fan servir exclusivament identitats i missatges sintètics. Verifiquen aquests dos ordres de bloqueig, **no** tots els interleavings ni l'execució a Vercel/Neon real.
+- **Encara pendent per a la beta:** comprovació amb permisos SQL de mínim privilegi, autenticació i consentiment reals, auditories de retenció, verificació end-to-end de Meta i protecció de tercers/menors. Producció intacta.
