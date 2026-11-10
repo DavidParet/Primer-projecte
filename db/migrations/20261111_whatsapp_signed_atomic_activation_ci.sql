@@ -28,6 +28,11 @@ GRANT SELECT,UPDATE(lock_marker) ON public.nex_ci_atomic_membership_fixture
 CREATE POLICY nex_ci_atomic_member_owner_read
  ON public.nex_ci_atomic_membership_fixture FOR SELECT
  TO nex_ci_atomic_activation_owner USING(true);
+-- PostgreSQL applies UPDATE RLS policy while acquiring a row SHARE lock.
+-- The owner can UPDATE only the harmless lock_marker column, never role.
+CREATE POLICY nex_ci_atomic_member_owner_lock
+ ON public.nex_ci_atomic_membership_fixture FOR UPDATE
+ TO nex_ci_atomic_activation_owner USING(true) WITH CHECK(true);
 
 CREATE TABLE public.nex_ci_atomic_activation_keys (
  key_id text PRIMARY KEY CHECK(key_id ~ '^[a-z][a-z0-9_-]{2,39}$'),
