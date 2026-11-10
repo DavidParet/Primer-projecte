@@ -60,3 +60,13 @@ test('never accepts origin + path injected in the trusted-origin setting',()=>{
   const x=validatePilotStartRequest(req(),'https://pilot.nexlupa.example/?redirect=attacker');
   assert.deepEqual(x,{ok:false,status:503,error:'pilot_not_configured'});
 });
+
+test('rejects ambiguous or coerced HTTP Content-Length before OAuth start',()=>{
+  for(const value of [undefined,null,'',' ','0x3e','6.2','+62','062','62 ','1e2',62,true,['62'],{},'9007199254740993']) {
+    denied({headers:{'content-length':value}},413);
+  }
+});
+test('accepts canonical zero Content-Length only as a numeric wire header',()=>{
+  const q=req();q.headers['content-length']='0';
+  assert.equal(validatePilotStartRequest(q,origin).ok,true);
+});
