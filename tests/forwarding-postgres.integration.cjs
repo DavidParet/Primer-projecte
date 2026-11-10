@@ -8,6 +8,9 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const {Pool}=require('pg');
 const {createHmac}=require('node:crypto');
+const {createServer}=require('node:http');
+const {once}=require('node:events');
+const {makeHttpHandler,ALLOWED_BRANCH}=require('../lib/forwarding/http-handler.cjs');
 const {acceptSignedReceipt}=require('../lib/forwarding/resend-intake.cjs');
 const {createNeonReceiptAdapters,decryptReceiptEnvelope}=require('../lib/forwarding/neon-receipt.cjs');
 
@@ -123,6 +126,55 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       assert.equal(row.queue_id.trim(),outcomes[0].receiptKey);
     });
 
+
+    await t.test('real HTTP POST: signed fictional event persists exactly once, duplicate and forged request blocked',async()=>{
+      const handler=makeHttpHandler({
+        config:{
+          vercelEnv:'preview',gitRef:ALLOWED_BRANCH,
+          enabled:'true',configured:true,webhookSecret:secret
+        },
+        createAdapters:async()=>adapters
+      });
+      const server=createServer((req,res)=>{
+        handler(req,res).catch(()=>{
+          res.statusCode=503;
+          res.end();
+        });
+      });
+      server.listen(0,'127.0.0.1');
+      await once(server,'listening');
+      const addr=server.address();
+      const endpoint='http://127.0.0.1:'+addr.port;
+      try{
+        const health=await fetch(endpoint);
+        assert.equal(health.status,200);
+        assert.equal((await health.json()).configurationPresent,true);
+        const fixture=signedMessage('e21b31b7-d82b-48af-8a5f-749ec74262c3');
+        async function post(headers){
+          return fetch(endpoint,{
+            method:'POST',
+            headers:{...headers,'Content-Type':'application/json'},
+            body:fixture.raw
+          });
+        }
+        const first=await post(fixture.headers);
+        assert.equal(first.status,204);
+        assert.equal(await first.text(),'');
+        const again=await post(fixture.headers);
+        assert.equal(again.status,204);
+        const forged=await post({
+          ...fixture.headers,
+          'svix-signature':'v1,'+Buffer.alloc(32,0).toString('base64')
+        });
+        assert.equal(forged.status,400);
+        assert.deepEqual(await forged.json(),{error:'invalid_webhook'});
+        const count=await admin.query('SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue');
+        assert.equal(count.rows[0].n,2);
+      }finally{
+        await new Promise((resolve,reject)=>server.close(err=>err?reject(err):resolve()));
+      }
+    });
+
     await t.test('explicit revocation blocks new receipts and does not change existing ones',async()=>{
       await admin.query(
         'UPDATE nexlupa_worker_rpc.synthetic_authorizations SET consent_active=false WHERE recipient=$1',
@@ -130,7 +182,7 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       const response=await record('b21b31b7-d82b-48af-8a5f-749ec74262c3',adapters);
       assert.equal(response.status,'not_authorized');
       const count=await admin.query('SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue');
-      assert.equal(count.rows[0].n,1);
+      assert.equal(count.rows[0].n,2);
     });
 
     await t.test('unknown alias cannot read family metadata',async()=>{
