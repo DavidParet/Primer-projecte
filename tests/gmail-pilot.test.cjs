@@ -235,3 +235,18 @@ test('fails closed if Gmail returns more IDs than requested', async () => {
     fetchImpl: mock({ messages: [{ id: 'one' }, { id: 'two' }, { id: 'three' }] })
   }), /invalid_gmail_list/);
 });
+
+test('rejects duplicate or malformed sender and subject headers', async () => {
+  for (const headers of [
+    [{ name: 'From', value: 'first@example.test' }, { name: 'fRoM', value: 'second@example.test' }],
+    [{ name: 'Subject', value: 'safe' }, { name: 'SUBJECT', value: 'conflicting' }],
+    [{ name: 'From', value: { unexpected: 'object' } }],
+    [{ name: 'Subject', value: 42 }]
+  ]) {
+    await assert.rejects(lib.readTextMessage({
+      accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+      fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30,
+        payload: { mimeType: 'text/plain', headers, body: { data: 'aGVsbG8' } } })
+    }), /message_not_eligible/);
+  }
+});
