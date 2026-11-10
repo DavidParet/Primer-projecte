@@ -45,6 +45,7 @@ let pool;
 async function seed(proofId,receiptId,{
   proofFamily=FAMILY_A,receiptFamily=FAMILY_A,
   boundProofId=proofId,expireProof=false,expireReceipt=false,
+  staleVerified=false,staleAccepted=false,futureAccepted=false,
   senderSuffix=proofId
 }={}){
  const senderDigest=createHmac('sha256',pairKey)
@@ -57,7 +58,8 @@ async function seed(proofId,receiptId,{
   '(proof_digest,family_id,business_account_id,phone_number_id,'+
   'sender_digest,verified_at,expires_at) '+
   'VALUES($1,$2,$3,$4,$5,$6,$7)',
-  [proof,proofFamily,BUSINESS,PHONE,senderDigest,new Date(now-5000),
+  [proof,proofFamily,BUSINESS,PHONE,senderDigest,
+   new Date(now-(staleVerified?16*60*1000:5000)),
    new Date(now+(expireProof?-1000:600000))]
  );
  await pool.query(
@@ -68,7 +70,8 @@ async function seed(proofId,receiptId,{
   "VALUES($1,$2,$3,$4,$5,$6,'incoming_text',$7,"+
   "'account-web-consent',$8,$9)",
   [receipt,proofDigest(boundProofId),receiptFamily,BUSINESS,PHONE,
-   senderDigest,VERSION,new Date(now-2000),
+   senderDigest,VERSION,
+   new Date(now+(staleAccepted?-16*60*1000:futureAccepted?60000:-2000)),
    new Date(now+(expireReceipt?-1000:600000))]
  );
  return {proof,receipt,senderDigest};
@@ -119,6 +122,37 @@ test('atomic DB evidence: positive, retry, mismatches, expiry, rollback and conc
   assert.deepEqual(await activate(envelope('ci_expired_phone_00003','ci_expired_receipt_00003')),
     {state:'rejected'});
   assert.deepEqual(await state(expired),
+    {proofConsumed:false,receiptConsumed:false,authorizations:0});
+
+  const stalePhone=await seed('ci_stale_phone_00008','ci_stale_receipt_00008',
+    {staleVerified:true});
+  assert.deepEqual(await activate(envelope('ci_stale_phone_00008','ci_stale_receipt_00008')),
+    {state:'rejected'});
+  assert.deepEqual(await state(stalePhone),
+    {proofConsumed:false,receiptConsumed:false,authorizations:0});
+
+  const future=await seed('ci_future_phone_00009','ci_future_receipt_00009',
+    {futureAccepted:true});
+  assert.deepEqual(await activate(envelope('ci_future_phone_00009','ci_future_receipt_00009')),
+    {state:'rejected'});
+  assert.deepEqual(await state(future),
+    {proofConsumed:false,receiptConsumed:false,authorizations:0});
+
+  const staleReceipt=await seed('ci_old_phone_00010','ci_old_receipt_00010',
+    {staleAccepted:true});
+  assert.deepEqual(await activate(envelope('ci_old_phone_00010','ci_old_receipt_00010')),
+    {state:'rejected'});
+  assert.deepEqual(await state(staleReceipt),
+    {proofConsumed:false,receiptConsumed:false,authorizations:0});
+
+  // A genuine receipt cannot be attached to an unrelated signed proof.
+  const mismatched=await seed('ci_mix_phone_00011','ci_mix_receipt_00011');
+  const another=await seed('ci_mix_phone_00012','ci_mix_receipt_00012');
+  await pool.query('UPDATE public.nex_whatsapp_explicit_receipt_proofs '+
+    'SET proof_digest=$1 WHERE receipt_digest=$2',[another.proof,mismatched.receipt]);
+  assert.deepEqual(await activate(envelope('ci_mix_phone_00011','ci_mix_receipt_00011')),
+    {state:'rejected'});
+  assert.deepEqual(await state(mismatched),
     {proofConsumed:false,receiptConsumed:false,authorizations:0});
 
   const forbidden=await seed('ci_denied_phone_00004','ci_denied_receipt_00004');
