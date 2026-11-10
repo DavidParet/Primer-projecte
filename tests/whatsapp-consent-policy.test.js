@@ -486,3 +486,70 @@ test('unconfigured administrator callbacks fail closed at construction',()=>{
     authorizeFamilyTransaction:async()=>true}),
     /Missing trusted server adapter/);
 });
+
+
+test('enrollment refuses admin removed in the same DB transaction, before INSERT',async()=>{
+  const sqls=[];let released=0;
+  const client={async query(sql){
+    sqls.push(sql);
+    if(sql.startsWith('INSERT INTO'))throw Error('Unauthorized INSERT');
+    return {};
+  },release(){released++;}};
+  const database={query:async()=>{throw Error('Never use pool.query for enrollment');},
+    connect:async()=>client};
+  const trusted=policy(database,{
+    authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async({client:locked,familyId,action})=>{
+      assert.equal(locked,client);
+      assert.equal(familyId,FAMILY);
+      assert.equal(action,'enroll_whatsapp_sender');
+      return false;
+    }
+  });
+  await assert.rejects(trusted.enroll(enrollment()),/Current locked family administrator required/);
+  assert.deepEqual(sqls,['BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED','ROLLBACK']);
+  assert.equal(released,1);
+});
+
+test('enrollment failure rolls back with no success claim and releases connection',async()=>{
+  const sqls=[];let released=0;
+  const database={query:async()=>{throw Error('Never use pool.query for enrollment');},
+    connect:async()=>({async query(sql){
+      sqls.push(sql);
+      if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
+        throw Error('synthetic database outage');
+      return {};
+    },release(){released++;}})};
+  await assert.rejects(policy(database).enroll(enrollment()),/synthetic database outage/);
+  assert.deepEqual(sqls.slice(0,2),['BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED']);
+  assert.equal(sqls.at(-1),'ROLLBACK');
+  assert.equal(sqls.includes('COMMIT'),false);
+  assert.equal(released,1);
+});
+
+test('enrollment cannot use a pool without a dedicated transaction connection',async()=>{
+  const database={query:async()=>{throw Error('Never insert via pool.query');}};
+  await assert.rejects(policy(database).enroll(enrollment()),/dedicated transactional PostgreSQL connection/);
+});
+
+test('enrollment refuses phone proof that expires while waiting for membership lock',async()=>{
+  const sqls=[];
+  const database={query:async()=>{throw Error('No direct writes');},
+    connect:async()=>({async query(sql){
+      sqls.push(sql);
+      if(sql.startsWith('INSERT INTO'))throw Error('Expired proof inserted');
+      return {};
+    },release(){}})};
+  await assert.rejects(policy(database,{
+    verifyEnrollment:async()=>({
+      verified:true,familyId:FAMILY,challengeId,businessAccountId,phoneNumberId,
+      senderWaId:SENDER,singleUseConsumed:true,expiresAt:Date.now()+75
+    }),
+    authorizeFamilyTransaction:async()=>{
+      await new Promise(resolve=>setTimeout(resolve,120));
+      return true;
+    }
+  }).enroll(enrollment()),/Phone proof expired before locked write/);
+  assert.equal(sqls.includes('COMMIT'),false);
+  assert.equal(sqls.at(-1),'ROLLBACK');
+});
