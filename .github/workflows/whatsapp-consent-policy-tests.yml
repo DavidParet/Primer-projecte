@@ -1,0 +1,54 @@
+name: WhatsApp consent policy tests
+
+on:
+  push:
+    branches:
+      - 'feat/whatsapp-consent-policy-v1'
+    paths:
+      - 'lib/whatsapp/**'
+      - 'tests/whatsapp-*.test.js'
+      - 'tests/whatsapp-*.test.cjs'
+      - '.github/workflows/whatsapp-consent-policy-tests.yml'
+  pull_request:
+    paths:
+      - 'lib/whatsapp/consent-policy.js'
+      - 'lib/whatsapp/durable-inbox.js'
+      - 'tests/whatsapp-consent-policy.test.js'
+      - 'tests/whatsapp-tenant-revocation.test.js'
+      - 'tests/whatsapp-durable-inbox.test.js'
+      - 'tests/whatsapp-postgres-concurrency.test.cjs'
+      - '.github/workflows/whatsapp-consent-policy-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  consent-policy:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-test-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test consent and durable inbox policies
+        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-tenant-revocation.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - name: PostgreSQL two-connection concurrency regression
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:synthetic-test-only@127.0.0.1:5432/postgres
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts pg@8
+          node --test tests/whatsapp-postgres-concurrency.test.cjs
