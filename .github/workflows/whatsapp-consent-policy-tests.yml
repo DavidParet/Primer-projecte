@@ -23,6 +23,7 @@ on:
       - 'tests/whatsapp-atomic-consent-rls.test.cjs'
       - 'tests/whatsapp-signed-atomic-activation.test.cjs'
       - 'tests/whatsapp-signed-atomic-consent-client.test.js'
+      - 'tests/whatsapp-pilot-atomic-consent.test.js'
       - 'db/migrations/20261111_whatsapp_signed_atomic_activation_ci.sql'
       - 'db/migrations/20261110_whatsapp_atomic_pairing_evidence_staged.sql'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
@@ -55,7 +56,7 @@ jobs:
       - name: Test consent and durable inbox policies
         run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-tenant-revocation.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
       - name: Verify request-bound signed atomic client
-        run: node --test tests/whatsapp-signed-atomic-consent-client.test.js
+        run: node --test tests/whatsapp-signed-atomic-consent-client.test.js tests/whatsapp-pilot-atomic-consent.test.js
       - name: Cross-check signed Meta pairing and canonical family identity regressions
         run: node --test tests/whatsapp-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-request-identity-binding.test.js
       - name: PostgreSQL two-connection concurrency regression
