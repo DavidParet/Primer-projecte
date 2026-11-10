@@ -7,6 +7,7 @@
 - PR #7 (`feat/whatsapp-durable-inbox-v1`): vinculació des de missatge entrant signat per Meta, codi d'un sol ús, operacions signades, proves amb identitat familiar canònica fictícia, control de permisos i model d'esborrat/retenció. El codi és **intern** i les taules/rols `nex_ci_*` són només per a CI.
 - PR #8: proveïdor separat de prova del número i comprovant de consentiment web explícit. La migració `20261109_whatsapp_explicit_consent_receipt.sql` preserva el resum HMAC del comprovant i impedeix reutilitzar-lo.
 - PR #15: els dos prototips es revisen sobre una sola branca basada en la PR #7 avançada, sense substituir els seus mòduls. A `lib/whatsapp/consent-policy.js`, la via antiga ara exigeix `authorizeFamily` per a alta i baixa; l'alta torna a comprovar permisos després dels adaptadors asíncrons; la baixa exigeix `authorizeFamilyTransaction` per verificar/immobilitzar la pertinència administrativa dins de la transacció.
+- Reforç posterior: l'alta també exigeix una connexió PostgreSQL dedicada amb `BEGIN` i `READ COMMITTED`; comprova permisos amb `authorizeFamilyTransaction` sota bloqueig de fila, revisa la validesa de les proves després de qualsevol espera, i només llavors fa l'INSERT i `COMMIT`. Error o pèrdua de permisos = `ROLLBACK`. La prova de cursa de membres és sintètica i comprova que una baixa d'administrador concurrent impedeix l'alta.
 - Prova `tests/whatsapp-consent-sql-lifecycle.test.cjs`: PostgreSQL 16 efímer, dues famílies fictícies, rebut únic, xifrat, duplicats, baixa i purga, nova alta.
 - GitHub Actions [#42915391895](https://github.com/DavidParet/Primer-projecte/actions/runs/42915391895): **SUCCESS**; executa també regressions de pairing Meta signat, identitat canònica, revocació i concurrència SQL amb dues connexions.
 - L'estat de CI confirma només aquests tests sintètics. Cap prova demostra que un usuari real pugui iniciar sessió, consentir o enviar missatges al sistema.
@@ -37,3 +38,7 @@ No s'ha implementat encara el pas 4 que combini els dos prototips; el prototip w
 - [ ] Proves E2E supervisades amb dades fictícies i decisions explícites abans de qualsevol ús real.
 
 **Prioritat immediata:** prova del pairing canònic i del comprovant únic en PostgreSQL/Neon aïllat amb rol limitat i evidència de CI; evitar més mòduls redundants. La connexió en viu de Meta està bloquejada fins a validar identitat, permisos i privacitat.
+
+## Limitació específica després del bloqueig SQL
+
+La nova transacció garanteix una comprovació d'administrador consistent **si** l'adaptador de confiança adquireix el bloqueig real de membres. **Encara no és una transacció única de tot el consentiment**: els verificadors externs de control del número i rebut poden consumir-se abans que la transacció PostgreSQL escrigui l'autorització. Cal una prova i un disseny de consum de comprovants/reptes exactament un cop, amb registre durador i recuperació davant d'errors, dins del futur pairing canònic. No utilitzar aquesta via de demostració com a endpoint públic.
