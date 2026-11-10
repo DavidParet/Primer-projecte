@@ -9,6 +9,12 @@ const {join}=require('node:path');
 const {Pool}=require('pg');
 const {createSignedAtomicConsentClient}=
  require('../lib/whatsapp/signed-atomic-consent-client');
+const {createPilotAtomicConsentFactory}=
+ require('../lib/whatsapp/pilot-atomic-consent');
+const {PILOT_COOKIE,encodePilotSession}=
+ require('../lib/whatsapp/pilot-auth-bff');
+const {CONSENT_VERSION}=
+ require('../lib/whatsapp/family-pairing-protocol');
 
 const dbUrl=process.env.WHATSAPP_TEST_DATABASE_URL;
 const ROLE='nex_ci_atomic_activation_runtime';
@@ -37,7 +43,7 @@ function makeIds(suffix){
  return {proof:randomBytes(32),receipt:randomBytes(32),
   sender:randomBytes(32),suffix};
 }
-async function seed(pool,ids,{family=A,sender=ids.sender}={}){
+async function seed(pool,ids,{family=A,sender=ids.sender,version=VERSION}={}){
  await pool.query('INSERT INTO public.nex_whatsapp_verified_phone_proofs '+
   '(proof_digest,family_id,business_account_id,phone_number_id,sender_digest,'+
   "verified_at,expires_at) VALUES ($1,$2,$3,$4,$5,clock_timestamp(),"+
@@ -46,9 +52,9 @@ async function seed(pool,ids,{family=A,sender=ids.sender}={}){
  await pool.query('INSERT INTO public.nex_whatsapp_explicit_receipt_proofs '+
   '(receipt_digest,proof_digest,family_id,business_account_id,phone_number_id,'+
   'sender_digest,scope,consent_version,source,accepted_at,expires_at) '+
-  "VALUES($1,$2,$3,$4,$5,$6,'incoming_text','ci-signed-1',"+
+  "VALUES($1,$2,$3,$4,$5,$6,'incoming_text',$7,"+
   "'account-web-consent',clock_timestamp(),clock_timestamp()+interval '10 minutes')",
-  [ids.receipt,ids.proof,family,BIZ,PHONE,sender]);
+  [ids.receipt,ids.proof,family,BIZ,PHONE,sender,version]);
 }
 async function rows(pool,ids){
  const c=await pool.query('SELECT COUNT(*)::int AS n FROM '+
@@ -313,6 +319,106 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
     {count:0,proofUsed:false,receiptUsed:false});
   await pool.query("UPDATE public.nex_family_memberships SET revoked_at=NULL,"+
     "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",[USER,A]);
+
+  // End-to-end synthetic pilot boundary:
+  // Fake verified Neon Auth session -> real restricted canonical identity
+  // reader -> REAL canonical family lock -> signed restricted atomic RPC.
+  // No network, Meta, family data or deployed Vercel route.
+  const previewOrigin='https://nexlupa-atomic-ci.vercel.app';
+  const previewAuth='https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/neondb/auth';
+  const previewSubject='external-atomic-pilot-1';
+  const previewToken='CI-ATOMIC-PILOT-SESSION-000000000000';
+  const pilotChallengeId='ci_preview_verified_phone_00001';
+  const pilotReceiptId='ci_preview_explicit_receipt_00001';
+  const pilotProofKey=randomBytes(32),pilotReceiptKey=randomBytes(32);
+  const pilotEvidence={
+    proof:createHmac('sha256',pilotProofKey)
+      .update('nexlupa:phone-proof:v1:').update(pilotChallengeId).digest(),
+    receipt:createHmac('sha256',pilotReceiptKey)
+      .update('nexlupa:consent-receipt:v1:').update(pilotReceiptId).digest(),
+    sender:randomBytes(32)
+  };
+  await seed(pool,pilotEvidence,{version:CONSENT_VERSION});
+  await pool.query('INSERT INTO public.nex_idp_identity_links '+
+    '(issuer,subject,user_id) VALUES($1,$2,$3)',
+    [previewAuth,previewSubject,USER]);
+  const identityReader=await pool.connect();
+  try{
+    await identityReader.query('SET ROLE nex_ci_canonical_identity_runtime');
+    await assert.rejects(identityReader.query('SELECT * FROM public.nex_users'),
+      e=>e.code==='42501');
+    const baseTime=Date.now();
+    let fetched=0;
+    const fakeSessionFetch=async(url,options)=>{
+      fetched++;
+      assert.equal(url,previewAuth+'/get-session?disableCookieCache=true');
+      assert.equal(options.headers.Cookie,
+        'better-auth.session_token='+previewToken);
+      return {status:200,headers:{get:x=>x==='content-type'?
+        'application/json':null},
+       text:async()=>JSON.stringify({
+        user:{id:previewSubject},
+        session:{id:'ci-verified-session-1',userId:previewSubject,
+          createdAt:new Date(baseTime-60000).toISOString(),
+          expiresAt:new Date(baseTime+60000).toISOString()}
+       })
+      };
+    };
+    const previewFactory=createPilotAtomicConsentFactory({
+      env:{
+        VERCEL_ENV:'preview',NEXLUPA_AUTH_PILOT:'enabled',
+        NEXLUPA_AUTH_PILOT_ORIGIN:previewOrigin,
+        NEXLUPA_AUTH_BASE_URL:previewAuth,
+        NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:previewSubject,
+        WHATSAPP_WABA_ID:BIZ,WHATSAPP_PHONE_NUMBER_ID:PHONE
+      },
+      identityDb:{query:(sql,args)=>identityReader.query(sql,args)},
+      activationDb:{connect:async()=>({
+        query:(sql,args)=>runtime1.query(sql,args),release(){}
+      })},
+      proofHmacKey:pilotProofKey.toString('base64'),
+      receiptHmacKey:pilotReceiptKey.toString('base64'),
+      getActiveSigningKey:async purpose=>({
+        purpose,state:'active',keyId:KEY_ID,
+        keyBase64:key.toString('base64')
+      }),
+      fetchImpl:fakeSessionFetch,now:()=>baseTime
+    });
+    const previewRequest={
+      method:'POST',
+      headers:{
+        host:'nexlupa-atomic-ci.vercel.app',
+        'x-forwarded-proto':'https',
+        origin:previewOrigin,'sec-fetch-site':'same-origin',
+        cookie:PILOT_COOKIE+'='+encodePilotSession(
+          'better-auth.session_token='+previewToken)
+      },body:{userId:'nonexistent-admin',role:'owner',familyId:B}
+    };
+    const previewActivate=previewFactory(previewRequest);
+    const previewInput={familyId:A,challengeId:pilotChallengeId,
+      consentReceiptId:pilotReceiptId,
+      userId:'nonexistent-admin',role:'owner'};
+    assert.deepEqual(await previewActivate(previewInput),{state:'enrolled'});
+    assert.deepEqual(await rows(pool,pilotEvidence),
+      {count:1,proofUsed:true,receiptUsed:true});
+    assert.ok(fetched>=3,'real preview adapter must recheck IdP session');
+    assert.deepEqual(await previewActivate(previewInput),{state:'rejected'});
+    // Identity-link revocation defeats a still-valid browser cookie.
+    const pilotRevoked=makeIds('idp-link-revocation');
+    await seed(pool,pilotRevoked,{version:CONSENT_VERSION});
+    await pool.query('UPDATE public.nex_idp_identity_links SET '+
+      'revoked_at=clock_timestamp() WHERE issuer=$1 AND subject=$2',
+      [previewAuth,previewSubject]);
+    await assert.rejects(previewActivate({
+      ...previewInput,challengeId:'unused_new_challenge_123',
+      consentReceiptId:'unused_new_receipt_123'
+    }),/verified active server session/i);
+    assert.deepEqual(await rows(pool,pilotRevoked),
+      {count:0,proofUsed:false,receiptUsed:false});
+  }finally{
+    await identityReader.query('RESET ROLE');
+    identityReader.release();
+  }
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
