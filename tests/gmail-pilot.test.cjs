@@ -228,3 +228,10 @@ test('rejects negative size and malformed Gmail thread IDs', async () => {
     }), /message_not_eligible/);
   }
 });
+
+test('fails closed if Gmail returns more IDs than requested', async () => {
+  await assert.rejects(lib.listLabelMessageIds({
+    accessToken: token, labelId: 'Label_123', maxResults: 2,
+    fetchImpl: mock({ messages: [{ id: 'one' }, { id: 'two' }, { id: 'three' }] })
+  }), /invalid_gmail_list/);
+});
