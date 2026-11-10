@@ -78,6 +78,38 @@ test('valid signed event is acknowledged only after durable message write',async
   assert.equal(response.headers['cache-control'],'no-store');
 });
 
+test('never ACKs a signed batch if persistence reports fewer messages than delivered',async()=>{
+  const two=JSON.parse(envelope);
+  two.entry[0].changes[0].value.messages.push({
+    ...two.entry[0].changes[0].value.messages[0],
+    id:'wamid.synthetic-second-message'
+  });
+  const body=JSON.stringify(two);
+  const partial=handler({counts:{stored:1,duplicate:0,unlinked:0,unsupported:0}});
+  const response=await send(partial.post,body);
+  assert.equal(response.code,503);
+  assert.equal(response.headers['retry-after'],'60');
+  assert.equal(partial.calls(),1);
+  const complete=handler({counts:{stored:1,duplicate:1,unlinked:0,unsupported:0}});
+  assert.equal((await send(complete.post,body)).code,200);
+});
+
+test('never ACKs a signed batch with malformed or truncated messages',async()=>{
+  const malformed=JSON.parse(envelope);
+  malformed.entry[0].changes[0].value.messages.push({
+    ...malformed.entry[0].changes[0].value.messages[0],
+    id:'invalid-message-id'
+  });
+  const f=handler();
+  assert.equal((await send(f.post,JSON.stringify(malformed))).code,503);
+  const tooMany=JSON.parse(envelope);
+  tooMany.entry[0].changes[0].value.messages=Array.from({length:51},(_,i)=>({
+    ...tooMany.entry[0].changes[0].value.messages[0],
+    id:'wamid.synthetic-'+i
+  }));
+  assert.equal((await send(f.post,JSON.stringify(tooMany))).code,503);
+});
+
 test('already persisted duplicate can be acknowledged idempotently',async()=>{
   const f=handler({counts:{stored:0,duplicate:1,unlinked:0,unsupported:0}});
   assert.equal((await send(f.post)).code,200);
