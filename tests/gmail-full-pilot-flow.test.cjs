@@ -166,3 +166,35 @@ test('untrusted instructions from messages remain ordinary excerpts, never actio
   assert.equal(h.output.sideEffects.gmailWrites,false);
   assert.equal(h.output.sideEffects.aiCalls,false);
 });
+
+test('end to end synthetic Gmail -> family review board -> human decision, with no durable effects',async()=>{
+  const {createEphemeralReviewBoard}=require('../lib/gmail/ephemeral-review-board.cjs');
+  const h=harness(),startResult=await start(h);
+  await callback(h,startResult);
+  const board=createEphemeralReviewBoard();
+  const write=await board.ingest({
+    familySession,preview:h.output,checkCurrentFamilyConsent:h.checkCurrentFamilyConsent
+  });
+  assert.deepEqual(write,{added:2,duplicates:0,total:2,mode:'ephemeral_review_only'});
+  const cards=await board.list({familySession,checkCurrentFamilyConsent:h.checkCurrentFamilyConsent});
+  assert.equal(cards.length,2);
+  assert.equal(cards[0].category,'school_event');
+  assert.equal(cards[0].dateText,'el dia 14 de març');
+  assert.equal(cards[1].category,'payment');
+  assert.equal(cards[1].dateText,'abans del 15 de maig');
+  assert.ok(cards.every(c=>c.dateNeedsReview&&c.status==='pending_review'));
+  const ack=await board.decide({
+    familySession,sourceEventHash:cards[0].sourceEventHash,decision:'reviewed',
+    checkCurrentFamilyConsent:h.checkCurrentFamilyConsent
+  });
+  assert.equal(ack.status,'reviewed');
+  const reread=await board.list({familySession,checkCurrentFamilyConsent:h.checkCurrentFamilyConsent});
+  assert.deepEqual(reread.map(c=>c.status),['reviewed','pending_review']);
+  // This demo board lives in-process only. There is no write to Neon, Calendar,
+  // Gmail or a model; only the temporary OAuth intent was stored by the harness.
+  assert.equal(h.getStats().databaseWrites,1);
+  assert.equal(h.getStats().gmailWrites,0);
+  assert.deepEqual(h.output.sideEffects,{
+    databaseWrites:false,gmailWrites:false,calendarWrites:false,aiCalls:false
+  });
+});
