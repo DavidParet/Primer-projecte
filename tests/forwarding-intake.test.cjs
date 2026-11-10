@@ -177,3 +177,30 @@ test('oversized webhook never passes signature verification',async()=>{
  const raw='a'.repeat(16385);
  assert.equal(verifySvix(raw,signature(raw),secret,now),false);
 });
+
+
+test('official Resend email.received shape accepts only metadata of a text-only fictional email',async()=>{
+ const raw=JSON.stringify({
+   type:'email.received',
+   created_at:'2026-11-11T00:00:00.000Z',
+   data:{
+     email_id:emailId,
+     created_at:'2026-11-11T00:00:00.000Z',
+     from:'Fake School <school@example.invalid>',
+     to:[recipient],
+     bcc:[],cc:[],
+     message_id:'<fake-notice-001@example.invalid>',
+     subject:'School note: fictional activity',
+     attachments:[]
+   }
+ });
+ const b=backend();
+ const result=await acceptSignedReceipt(input(raw,b));
+ assert.equal(result.status,'queued');
+ assert.equal(b.store.size,1);
+ const row=[...b.store.values()][0];
+ assert.equal(row.emailId,emailId);
+ assert.equal(row.recipient,recipient);
+ assert.ok(!Object.prototype.hasOwnProperty.call(row,'subject'));
+ assert.doesNotMatch(JSON.stringify(row),/Fake School|fictional activity|message_id/);
+});
