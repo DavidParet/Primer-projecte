@@ -27,6 +27,8 @@ function policy(db, familyId, senderWaId) {
     db, senderHmacKey, currentConsentVersion: 'ci-consent-v1',
     // Synthetic trusted-server adapters: not a production IdP/phone service.
     resolveAuthenticatedFamily: async () => familyId,
+    authorizeFamily: async () => true, // CI-only trusted synthetic administrator
+    authorizeFamilyTransaction: async () => true, // CI-only; not an IdP
     verifyEnrollment: async ctx => ({
       verified: true, familyId: ctx.familyId,
       challengeId: ctx.challengeId,
