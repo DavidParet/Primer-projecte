@@ -123,8 +123,22 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 - `GET /api/gmail/pilot-auth` → **503** (`pilot_not_ready`): no hi ha el preflight de base de dades preparat.
 - Les respostes són JSON amb `Cache-Control: no-store`. **No s'ha comprovat cap lectura real de Gmail**.
 
-**Variables Vercel:** en revisar els noms de variables de tot el projecte, la branca Gmail només té `GMAIL_PILOT_ENABLED` de forma explícita. No hi ha cap configuració visible de `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GMAIL_PILOT_REDIRECT_URI`, `GMAIL_PILOT_DATABASE_URL`, `NEON_AUTH_BASE_URL` ni `NEON_AUTH_JWKS_URL`. No s'han recuperat ni exposat secrets, ni s'ha activat el pilot.
+**Variables Vercel (estat històric de la revisió):** en aquell moment la branca Gmail només tenia `GMAIL_PILOT_ENABLED=false`. La preparació posterior d'aquesta mateixa nit ha configurat tres variables addicionals exclusives de la branca de preview (vegeu l'actualització següent). Google Cloud i la base de dades restringida continuen pendents. Cap compte Gmail real connectat a NexLupa.
 
 **Resend i Neon:** subdomini receptor verificat, recepció activada. El webhook d'alias estable continua actiu. A `nexlupa_pilot.resend_inbox_queue` de la base pilot s'han observat només comptadors d'estat: **1 `done`, 1 `received`** (mostres de proves anteriors; això **no prova** processament automàtic complet). No s'ha llegit `encrypted_envelope` ni cap contingut de missatges.
 
 **Pròxim bloqueig real:** preparar projecte i client OAuth a Google Cloud, identitat familiar pilot i secrets de preview; després validar en una nova preview l'estat operatiu amb dades fictícies i consentiment. Manteniu `GMAIL_PILOT_ENABLED=false` fins aleshores. Producció de NexLupa intacta.
+
+
+### Configuració operativa següent — 10/11/2026
+
+- **Branca Gmail de Vercel, només preview:** s'han creat les variables protegides `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL` i `GMAIL_PILOT_REDIRECT_URI`. Els dos primers valors deriven de Neon Auth **de la branca aïllada** `resend-worker-consent-validation-20261108`; el retorn OAuth utilitza l'alias HTTPS estable de preview `primer-projecte-git-feature-gmail-r-42096a-davidparets-projects.vercel.app/api/gmail/pilot/callback`.
+- **Commutador:** `GMAIL_PILOT_ENABLED` continua desactivat. No modificar-lo abans de l'autorització expressa del pilot, els secrets Google i les comprovacions finals.
+- **Connexió PostgreSQL restringida:** `GMAIL_PILOT_DATABASE_URL` **no configurada**; l'obtenció automàtica de la URL del rol dedicat no ha produït un valor verificable. No s'ha desat cap connexió no validada.
+- **Google Cloud:** `GOOGLE_CLIENT_ID` i `GOOGLE_CLIENT_SECRET` encara pendents. El URI anterior s'ha de registrar idèntic a la consola Google Cloud; la variable a Vercel per si sola no n'atorga permís.
+- **Gmail de preparació:** s'ha creat l'etiqueta `NEXLUPA_PILOT` al compte de Gmail connectat a l'assistent i se n'ha verificat el recompte **0 missatges**. Això **no** és un OAuth de NexLupa ni concedeix a l'app accés a Gmail; no s'ha llegit ni mogut cap correu.
+- **Comprovador realista:** `scripts/probe-gmail-preview.cjs` diferencia rutes `guarded_not_ready`, `configured_readiness` i `unverified`, exigint tant estat HTTP com cos JSON esperat, sense guardar ni mostrar cap contingut de correus o credencials.
+- **Proves de codi:** GitHub Actions [execució 42914181756](https://github.com/DavidParet/Primer-projecte/actions/runs/42914181756), **177/177 superades**, 0 errors, al commit `8e5dd487a8f057c4caa6f5633e41ca9990f145ef`.
+- **Producció:** cap modificació ni habilitació de lectura Gmail. Les variables noves requereixen una nova preview per ser efectives al runtime; l'existència de variables no equival a una validació de connexió real.
+
+**Fita pendent per poder connectar el Gmail real:** client OAuth propi a Google Cloud, credencials segures i compte pilot familiar verificat a Neon; després preparar la URL PostgreSQL de rol restringit i executar una prova consentida amb 1–3 missatges ficticis.
