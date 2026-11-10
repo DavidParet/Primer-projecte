@@ -19,6 +19,8 @@ on:
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-postgres-concurrency.test.cjs'
       - 'tests/whatsapp-consent-sql-lifecycle.test.cjs'
+      - 'tests/whatsapp-atomic-consent-enrollment.test.cjs'
+      - 'db/migrations/20261110_whatsapp_atomic_pairing_evidence_staged.sql'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
   workflow_dispatch:
 
@@ -57,3 +59,4 @@ jobs:
           npm install --no-save --no-package-lock --ignore-scripts pg@8
           node --test tests/whatsapp-postgres-concurrency.test.cjs
           node --test tests/whatsapp-consent-sql-lifecycle.test.cjs
+          node --test tests/whatsapp-atomic-consent-enrollment.test.cjs
