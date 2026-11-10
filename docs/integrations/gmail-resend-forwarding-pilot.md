@@ -25,7 +25,8 @@
 
 - [ ] Identitat de família pilot verificada a Neon i consentiment explícit registrat.
 - [ ] Alias aleatori associat a família amb `resolve_authorized_recipient` i revocació funcional. Sense alias no es pot atribuir cap correu a una família.
-- [ ] Verificar en PostgreSQL **real** el format xifrat de l'adaptador de cua i la concurrència/idempotència, confirmar compatibilitat amb el worker i limitar la taxa. La comprovació offline 22/22 no substitueix aquesta validació.
+- [x] Comprovar en PostgreSQL real la deduplicació seqüencial amb una família i consentiment ficticis, sense deixar registres.
+- [ ] Verificar concurrència real PostgreSQL, la compatibilitat de l'embolcall AES-256-GCM amb el worker, revocació concurrent i limitació de taxa; les 34 proves offline i la prova SQL seqüencial no substitueixen aquestes verificacions.
 - [x] Ruta HTTP de preview **implementada en codi**, separada del webhook estable; signatura comprovada abans d'inicialitzar PostgreSQL; cap resposta amb dades privades. **Encara pendent: desplegament i prova HTTP en Vercel**.
 - [ ] Confirmació de l'adreça a Gmail i filtre selectiu definit amb revisió humana; sense reenviament global.
 - [ ] Prova de 1–3 correus **inventats**, sense dades personals ni de menors: un accepted/queued, un duplicate, un no autoritzat i revocació.
@@ -54,7 +55,9 @@
 - `GRANT USAGE ON SCHEMA nexlupa_worker_rpc` i `GRANT EXECUTE ON FUNCTION nexlupa_worker_rpc.resolve_authorized_recipient(text)`, sense altres EXECUTE ni accés directe a taules familiars.
 - Execució amb credencials del **rol destinatari real**: destinatari fictici no autoritzat retorna `NULL`. L'INSERT SQL complet amb el mateix destinatari retorna `outcome='revoked'`. No genera fila: `unexpected_receipts=0`.
 - L'indicador de la cua no ha variat: `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`.
-- La prova positiva amb alias + consentiment sintètic i la concurrència d'INSERT encara **no s'han executat** sobre PostgreSQL; són condicions de validació prèvies al pilot real.
+- **Prova positiva seqüencial executada a PostgreSQL real:** família, alias i consentiment ficticis creats sota SAVEPOINT; primera recepció `inserted`, segona idèntica `duplicate`, i `ROLLBACK TO SAVEPOINT` verificat: 0 famílies, aliases i rebuts ficticis restants. L'execució de la prova positiva s'ha fet amb el rol propietari necessari per crear les fixtures, **no** amb el rol receptor de webhook. Aquest darrer ha passat la prova real negativa de permisos i alias desconegut.
+- **Prova de consentiment revocat executada:** amb una fixture 100% fictícia de consentiment amb `revoked_at` informat, `resolve_authorized_recipient` ha retornat `NULL`; després de rollback queden 0 consentiments ficticis.
+- La **concurrència d'INSERT**, la revocació simultània amb una recepció i la compatibilitat amb el desxifrat del worker **encara no s'han executat** sobre PostgreSQL, i continuen pendents abans del pilot real.
 
 **Codi HTTP preview afegit, però encara NO desplegat en la darrera revisió:**
 - `api/forwarding/pilot-webhook.js` i `lib/forwarding/{http-handler,runtime}.cjs` posen el processament darrere de triple condició: Vercel `preview`, branca exacta de pilot i `FORWARDING_PILOT_ENABLED=true`. Producció sempre inhabilitada.
