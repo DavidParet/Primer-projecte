@@ -338,3 +338,17 @@ test('does not write when phone proof expires during async consent verification'
   }).enroll(enrollment()),/Phone proof expired before write/);
   assert.equal(database.calls.length,0);
 });
+
+
+test('rejects coercible family identities in both enrollment and revocation',async()=>{
+  const database=db();
+  const forgedFamily={toString:()=>FAMILY};
+  const instance=policy(database,{
+    resolveAuthenticatedFamily:async()=>forgedFamily
+  });
+  await assert.rejects(instance.enroll(enrollment()),/Unauthenticated family/);
+  await assert.rejects(instance.revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),/Unauthenticated family/);
+  assert.equal(database.calls.length,0);
+});
