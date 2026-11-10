@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'feat/whatsapp-consent-policy-v1'
+      - 'feat/whatsapp-consent-integration-review-20261110'
     paths:
       - 'lib/whatsapp/**'
       - 'tests/whatsapp-*.test.js'
