@@ -1,6 +1,6 @@
 # NexLupa · Primer pilot Gmail → Resend (sense OAuth restringit)
 
-**Estat de treball 10/11/2026:** desenvolupament aïllat, PR #16 en draft. NO enviar ni reenviar correus reals fins que la família pilot, el consentiment i el pipeline d'entrada s'hagin verificat. La producció de NexLupa no incorpora aquest mòdul.
+**Estat de treball 11/11/2026:** desenvolupament aïllat, PR #16 en draft. NO enviar ni reenviar correus reals fins que la família pilot, el consentiment i el pipeline d'entrada s'hagin verificat. La producció de NexLupa no incorpora aquest mòdul.
 
 ## Circuit objectiu
 
@@ -18,7 +18,7 @@
 - El codi del receptor estable `nexlupa-resend-pilot` actual només fa verificació criptogràfica. NO equival a ingestió de contingut en NexLupa.
 - Neon, branca aïllada `resend-worker-consent-validation-20261108`: `intake_bridge_health()` retorna `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`. No s'han llegit dades de missatges.
 - Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Ja existeix el codi HTTP aïllat del pilot, però sense desplegament verificat del commit més recent i sense secrets, associacions o correus reals.
-- Tests de `tests/forwarding-*.test.cjs` i GitHub Actions `forwarding-intake-tests.yml`: **34/34 correctes**, última execució #42922613403, sense Gmail, Resend ni Neon durant les proves automatitzades; les consultes a Neon real es documenten més avall.
+- Tests offline i PostgreSQL disposable sota GitHub Actions: **39/39 correctes**, última execució #42924900121. Inclou 35 proves offline i 4 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
 - Preview de Vercel del commit `f1edf3002886849c051df99f1c834ad59a161779`: **READY**. Per eliminar l'error de patrons de rutes del `main` s'han adaptat `vercel.json` i `scripts/build-static.js` de la branca Gmail verificada. Aquest solapament s'ha de resoldre abans de fusionar cap PR.
 
 ## Portes pendents abans del pilot amb correus ficticis
@@ -26,7 +26,9 @@
 - [ ] Identitat de família pilot verificada a Neon i consentiment explícit registrat.
 - [ ] Alias aleatori associat a família amb `resolve_authorized_recipient` i revocació funcional. Sense alias no es pot atribuir cap correu a una família.
 - [x] Comprovar en PostgreSQL real la deduplicació seqüencial amb una família i consentiment ficticis, sense deixar registres.
-- [ ] Verificar concurrència real PostgreSQL, la compatibilitat de l'embolcall AES-256-GCM amb el worker, revocació concurrent i limitació de taxa; les 34 proves offline i la prova SQL seqüencial no substitueixen aquestes verificacions.
+- [x] Verificar concurrència de 12 reentregues simultànies amb PostgreSQL 16 temporal i un rol de base de dades restringit: 1 alta, 11 duplicats, 1 únic rebut.
+- [x] Verificar en CI el desxifrat AES-256-GCM amb AAD lligat a `queue_id` i el rebuig de ciphertext manipulat, fila intercanviada i clau incorrecta. El worker definitiu encara no està connectat.
+- [ ] Verificar revocació **simultània** amb una inserció en trànsit i limitar la taxa; el test només confirma revocacions ja confirmades abans d'un nou intent.
 - [x] Ruta HTTP de preview **implementada en codi**, separada del webhook estable; signatura comprovada abans d'inicialitzar PostgreSQL; cap resposta amb dades privades. **Encara pendent: desplegament i prova HTTP en Vercel**.
 - [ ] Confirmació de l'adreça a Gmail i filtre selectiu definit amb revisió humana; sense reenviament global.
 - [ ] Prova de 1–3 correus **inventats**, sense dades personals ni de menors: un accepted/queued, un duplicate, un no autoritzat i revocació.
@@ -46,7 +48,7 @@
 
 ### Darrera comprovació CI
 
-[GitHub Actions run 42922613403](https://github.com/DavidParet/Primer-projecte/actions/runs/42922613403): **34 tests, 34 pass, 0 fail**, més instal·lació correcta de dependències `pg` i comprovació d'importació del nou endpoint. Inclou revocació, deduplicació, cua xifrada de metadades, signatura Svix, proves HTTP i bloqueig de producció. Sense accés a Gmail, Resend ni Neon a CI; la producció continua sense integració Gmail.
+[GitHub Actions run 42924900121](https://github.com/DavidParet/Primer-projecte/actions/runs/42924900121): **39 tests, 39 pass, 0 fail** (35 offline i 4 PostgreSQL real efímer), més instal·lació correcta del driver `pg` i importació de l'endpoint. Test de 12 reentregues simultànies, autorització amb rol restringit, revocació, xifrat AES-256-GCM amb integritat associada a la fila, signatures i barreres HTTP. Sense comptes reals ni missatges de Gmail o Resend a CI.
 
 
 ### Validació tècnica del 11/11/2026
@@ -68,3 +70,14 @@
 **Bloqueig de desplegament:** un intent explícit de previsualització de l'últim commit ha retornat **HTTP 402**, recurs `api-deployments-free-per-day` (límit diari de més de 100 despl.). El darrer desplegament `READY` visible era d'un commit anterior a l'endpoint nou. No s'ha fet cap actualització de pla, càrrec, promoció ni fusió de PR; no afirmar verificació HTTP del nou endpoint fins que Vercel ho permeti.
 
 **Fites encara no completades:** provar INSERT positiu i idempotència/revocació amb fixtures aïllats i consentits, validar endpoint de preview HTTP, crear vincle alias-família de prova, configurar exclusivament el reenviament selectiu amb verificació de Gmail i completar el flux fins a fitxa de revisió. La recepció real a Resend continua separada de l'API nova.
+
+
+### Actualització 11/11/2026 — proves concurrents i preparació de Vercel
+
+- S'ha afegit `tests/forwarding-postgres.integration.cjs` amb un **PostgreSQL 16 efímer** desplegat dins GitHub Actions (no és Neon ni una base de dades familiar real). 12 crides signades simultànies al mateix correu fictici han retornat **1 `queued` i 11 `duplicate`**, amb exactament una fila al servidor. També s'ha provat la revocació prèvia al nou intent i la impossibilitat de consultar directament la taula d'autorització amb el rol restringit.
+- `lib/forwarding/neon-receipt.cjs` utilitza ara **AAD = queue_id** a AES-256-GCM i exposa un descodificador server-side que rebutja ciphertext manipulat, claus errònies o intents de moure el contingut xifrat a un altre identificador. El format ha superat proves de xifrat/desxifrat tant offline com al PostgreSQL efímer.
+- Variables Vercel exclusives de la branca de preview: `FORWARDING_PILOT_DATABASE_URL` (**sensitive**, rol `nexlupa_resend_ingest` limitat a la branca Neon de validació i `sslmode=verify-full`), i `FORWARDING_PILOT_ENABLED=false`. No s'han creat els secrets de verificació del nou webhook ni d'encriptació per a l'execució real, i no s'ha apuntat cap webhook actiu a aquesta ruta.
+- **Verificació HTTP d'una previsualització automàtica anterior:** `GET /api/forwarding/pilot-webhook` ha retornat **HTTP 200**, amb `configurationPresent:false`, `databaseConnectivityVerified:false`, `metadataReceiptsEnabled:false` i `productionEnabled:false`. Això confirma que la ruta es publica i funciona **desactivada**, però no que la versió de xifrat més recent ja s'hagi desplegat ni que la connexió PostgreSQL sigui funcional en Vercel.
+- Els últims commits de prova no tenen desplegament Vercel verificat per la quota de desplegaments. El CI funciona de manera independent. Encara cal un test HTTP POST amb signatura real del pilot, connexió de la cua a Neon amb alias i consentiment explícit i prova de revocació concurrent.
+
+**Important:** proves de concurrència en PostgreSQL local de CI i deduplicació seqüencial a Neon **no equivalen** a una prova completa sota múltiples instàncies Vercel amb correus reals. No promoure el PR ni activar el pilot abans d'aquesta validació.
