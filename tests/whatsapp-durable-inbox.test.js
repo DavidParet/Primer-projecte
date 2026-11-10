@@ -223,3 +223,43 @@ test('failed second message rolls back entire batch and releases connection',asy
   assert.equal(queries.includes('COMMIT'),false);
   assert.equal(released,1);
 });
+
+test('mixed authorized and unlinked batch rolls back without committing partial family data',async()=>{
+  const queries=[];
+  let released=0, inserts=0;
+  const client={
+    async query(sql) {
+      queries.push(sql);
+      if (['BEGIN','COMMIT','ROLLBACK'].includes(sql)) return {};
+      return {rows:[{state:++inserts===1?'stored':'unlinked'}]};
+    },
+    release(){released++;}
+  };
+  const db={query:async()=>{throw Error('pool query forbidden');},connect:async()=>client};
+  await assert.rejects(
+    inbox(db).persistVerifiedBatch(twoMessagePayload()),
+    /authorization review/
+  );
+  assert.equal(inserts,2);
+  assert.equal(queries[0],'BEGIN');
+  assert.equal(queries.at(-1),'ROLLBACK');
+  assert.equal(queries.includes('COMMIT'),false);
+  assert.equal(released,1);
+});
+
+test('authorized duplicate plus unlinked message also rolls back',async()=>{
+  const queries=[];
+  let inserts=0;
+  const client={
+    async query(sql){
+      queries.push(sql);
+      if (['BEGIN','COMMIT','ROLLBACK'].includes(sql)) return {};
+      return {rows:[{state:++inserts===1?'duplicate':'unlinked'}]};
+    },
+    release(){}
+  };
+  const db={query:async()=>{throw Error('pool query forbidden');},connect:async()=>client};
+  await assert.rejects(inbox(db).persistVerifiedBatch(twoMessagePayload()),/authorization review/);
+  assert.equal(queries.includes('COMMIT'),false);
+  assert.equal(queries.at(-1),'ROLLBACK');
+});
