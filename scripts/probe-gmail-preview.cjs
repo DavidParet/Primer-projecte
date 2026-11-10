@@ -22,16 +22,16 @@ async function probe(raw, fetchImpl=globalThis.fetch){
       const type=response.headers.get('content-type')||'';
       // Authentication walls are not an application HTTP pass.
       const protectedByVercel=response.status===401||response.status===403;
-      const expected=path.endsWith('/start')?405:null;
+      const expected=path.endsWith('/start')?405:path.endsWith('/callback')?400:200;
       const result={path,status:response.status,
         contentType:type.split(';')[0],protectedByVercel,
-        methodGuardVerified:expected===null?null:response.status===expected};
+        expectedStatus:expected,routeVerified:response.status===expected};
       results.push(result);
     }finally{clearTimeout(timeout);}
   }
   return {preview:url.origin,results,
-    fullyVerified:results.some(x=>x.methodGuardVerified===true) &&
-      results.every(x=>!x.protectedByVercel && x.contentType==='application/json')};
+    fullyVerified:results.length===3 &&
+      results.every(x=>x.routeVerified && !x.protectedByVercel && x.contentType==='application/json')};
 }
 if(require.main===module){
   probe(process.argv[2]).then(result=>{
