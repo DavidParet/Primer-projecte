@@ -63,8 +63,10 @@ test('requires trusted external adapters and strong HMAC key',()=>{
 test('enrolls only a phone proved by trusted single-use verifier',async()=>{
   const database=db();
   assert.deepEqual(await policy(database).enroll(enrollment()),{state:'enrolled'});
-  assert.equal(database.calls.length,1);
-  const {sql,values}=database.calls[0];
+  assert.deepEqual(database.calls.map(({sql})=>sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations')?'INSERT':sql),[
+    'BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED',database.calls[2].sql,'COMMIT'
+  ]);
+  const {sql,values}=database.calls.find(c=>c.sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'));
   assert.match(sql,/ON CONFLICT DO NOTHING/);
   assert.equal(values[3],FAMILY);
   assert.equal(values[2].length,32);
@@ -192,7 +194,7 @@ test('server policy version is mandatory and independent of client input',async(
   assert.throws(()=>policy(database,{currentConsentVersion:null}),/consent version/);
   const input={...enrollment(),consentVersion:'forged-client-v3'};
   assert.deepEqual(await policy(database).enroll(input),{state:'enrolled'});
-  assert.equal(database.calls[0].values[4],consentVersion);
+  assert.equal(database.calls.find(c=>c.sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations')).values[4],consentVersion);
 });
 test('trusted receipt verifier receives constrained context and scope',async()=>{
   const database=db();
@@ -266,11 +268,21 @@ test('enrollment fails closed when database response cannot prove insert or conf
     {rowCount:1,rows:[{authorization_id:'0'}]},
     {rowCount:1,rows:[{authorization_id:'9223372036854775808'}]},
     {rowCount:0,rows:[{authorization_id:'1'}]}]) {
-    const database={query:async()=>result};
+    const database={query:async()=>{throw Error('Pool-level insert not permitted');},
+      connect:async()=>({release(){},async query(sql){
+        if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))return result;
+        return {};
+      }})};
     await assert.rejects(policy(database).enroll(enrollment()),
       /Enrollment result not verified/);
   }
-  assert.deepEqual(await policy({query:async()=>({rowCount:0,rows:[]})}).enroll(enrollment()),
+  const conflictDb={query:async()=>{throw Error('Pool-level insert not permitted');},
+    connect:async()=>({release(){},async query(sql){
+      if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
+        return {rowCount:0,rows:[]};
+      return {};
+    }})};
+  assert.deepEqual(await policy(conflictDb).enroll(enrollment()),
     {state:'already_active_or_receipt_used'});
 });
 
