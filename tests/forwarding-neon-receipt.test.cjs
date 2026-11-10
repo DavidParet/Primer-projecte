@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {createNeonReceiptAdapters,INSERT_SQL}=
+const {createNeonReceiptAdapters,decryptReceiptEnvelope,INSERT_SQL}=
   require('../lib/forwarding/neon-receipt.cjs');
 const {acceptSignedReceipt}=require('../lib/forwarding/resend-intake.cjs');
 const {createHmac}=require('node:crypto');
@@ -123,4 +123,31 @@ test('end-to-end database revocation never creates accepted receipt',async()=>{
   enqueueReceipt:x.enqueueReceipt
  });
  assert.deepEqual(result,{status:'not_authorized'});
+});
+ 
+test('encrypted receipt round-trips only with matching key and queue identity',async()=>{
+ const adapter=adapters();
+ await adapter.enqueueReceipt({receiptKey,familyId,emailId,recipient});
+ const envelope=adapter.calls[0].params[1];
+ const decoded=decryptReceiptEnvelope({
+   receiptKey,encryptedEnvelope:envelope,encryptionKeyHex:key
+ });
+ assert.deepEqual(decoded,{
+   v:1,kind:'resend_metadata_receipt',
+   receiptKey,emailId,recipient,familyId
+ });
+ // AES-GCM additional authenticated data binds the envelope to its row.
+ assert.throws(()=>decryptReceiptEnvelope({
+   receiptKey:'b'.repeat(64),encryptedEnvelope:envelope,encryptionKeyHex:key
+ }),/invalid_receipt_envelope/);
+ assert.throws(()=>decryptReceiptEnvelope({
+   receiptKey,encryptedEnvelope:envelope,encryptionKeyHex:'ff'.repeat(32)
+ }),/invalid_receipt_envelope/);
+ const tampered=envelope.slice(0,-1)+(envelope.endsWith('A')?'B':'A');
+ assert.throws(()=>decryptReceiptEnvelope({
+   receiptKey,encryptedEnvelope:tampered,encryptionKeyHex:key
+ }),/invalid_receipt_envelope/);
+ assert.throws(()=>decryptReceiptEnvelope({
+   receiptKey,encryptedEnvelope:'v2'+envelope.slice(2),encryptionKeyHex:key
+ }),/invalid_receipt_envelope/);
 });
