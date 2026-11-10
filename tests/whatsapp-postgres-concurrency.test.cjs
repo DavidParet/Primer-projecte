@@ -67,6 +67,8 @@ test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out'
     const policy=makeConsentPolicy({db:pool,senderHmacKey:HMAC_KEY.toString('base64'),
       currentConsentVersion:'test-v1',
       resolveAuthenticatedFamily:async()=>FAMILY_A,
+      authorizeFamily:async()=>true,
+      authorizeFamilyTransaction:async()=>true,
       verifyEnrollment:async()=>{throw Error('unused');},
       verifyExplicitConsent:async()=>{throw Error('unused');}});
     const revocation={session:{synthetic:true},businessAccountId:ACCOUNT,
