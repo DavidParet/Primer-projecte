@@ -1,0 +1,38 @@
+name: WhatsApp webhook security tests
+
+on:
+  push:
+    branches:
+      - feat/whatsapp-webhook-verification-v1
+    paths:
+      - 'api/whatsapp-webhook.js'
+      - 'lib/whatsapp/webhook-security.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
+      - 'tests/whatsapp-webhook.test.js'
+      - 'tests/whatsapp-delivery-normalizer.test.js'
+      - '.github/workflows/whatsapp-webhook-tests.yml'
+  pull_request:
+    paths:
+      - 'api/whatsapp-webhook.js'
+      - 'lib/whatsapp/webhook-security.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
+      - 'tests/whatsapp-webhook.test.js'
+      - 'tests/whatsapp-delivery-normalizer.test.js'
+      - '.github/workflows/whatsapp-webhook-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  webhook-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch branch
+        uses: actions/checkout@v4
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run fail-closed webhook tests
+        run: node --test tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
