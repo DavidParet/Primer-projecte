@@ -64,7 +64,7 @@ test('enrolls only a phone proved by trusted single-use verifier',async()=>{
   const database=db();
   assert.deepEqual(await policy(database).enroll(enrollment()),{state:'enrolled'});
   assert.deepEqual(database.calls.map(({sql})=>sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations')?'INSERT':sql),[
-    'BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED',database.calls[2].sql,'COMMIT'
+    'BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED','INSERT','COMMIT'
   ]);
   const {sql,values}=database.calls.find(c=>c.sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'));
   assert.match(sql,/ON CONFLICT DO NOTHING/);
