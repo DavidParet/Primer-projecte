@@ -7,6 +7,8 @@ const {randomBytes,randomUUID,createHmac}=require('node:crypto');
 const {readFileSync}=require('node:fs');
 const {join}=require('node:path');
 const {Pool}=require('pg');
+const {createSignedAtomicConsentClient}=
+ require('../lib/whatsapp/signed-atomic-consent-client');
 
 const dbUrl=process.env.WHATSAPP_TEST_DATABASE_URL;
 const ROLE='nex_ci_atomic_activation_runtime';
@@ -150,6 +152,42 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   assert.deepEqual(responses.map(x=>x.rows[0].result.state).sort(),
    ['enrolled','rejected']);
   assert.deepEqual(await rows(pool,concurrent),{count:1,proofUsed:true,receiptUsed:true});
+
+  // Complete JS -> restricted SQL integration on the same actual PG16 role.
+  const challengeId='ci_verified_phone_proof_20261111';
+  const receiptId='ci_explicit_web_receipt_20261111';
+  const proofKey=randomBytes(32),receiptKey=randomBytes(32);
+  const full={
+   proof:createHmac('sha256',proofKey)
+    .update('nexlupa:phone-proof:v1:').update(challengeId).digest(),
+   receipt:createHmac('sha256',receiptKey)
+    .update('nexlupa:consent-receipt:v1:').update(receiptId).digest(),
+   sender:randomBytes(32)
+  };
+  await seed(pool,full);
+  const signedClient=createSignedAtomicConsentClient({
+   db:{connect:async()=>({query:(sql,args)=>runtime1.query(sql,args),
+      release(){/* runtime1 remains dedicated to this synthetic suite */}})},
+   proofHmacKey:proofKey.toString('base64'),
+   receiptHmacKey:receiptKey.toString('base64'),
+   consentVersion:VERSION,
+   bindVerifiedRequest:async()=>({
+    authorizeFamily:async({familyId,action})=>
+      familyId===A&&action==='enroll_whatsapp_sender',
+    getVerifiedPrincipal:async()=>({
+      userId:'synthetic-admin',sessionId:'synthetic-verified-session'
+    })
+   }),
+   getActiveSigningKey:async purpose=>({
+    purpose,state:'active',keyId:KEY_ID,keyBase64:key.toString('base64')
+   })
+  });
+  const fullRequest={familyId:A,businessAccountId:BIZ,phoneNumberId:PHONE,
+    challengeId,consentReceiptId:receiptId};
+  assert.deepEqual(await signedClient(fullRequest),{state:'enrolled'});
+  assert.deepEqual(await rows(pool,full),
+    {count:1,proofUsed:true,receiptUsed:true});
+  assert.deepEqual(await signedClient(fullRequest),{state:'rejected'});
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
