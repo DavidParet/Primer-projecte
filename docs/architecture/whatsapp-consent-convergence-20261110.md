@@ -64,3 +64,14 @@ La nova transacció garanteix una comprovació d'administrador consistent **si**
 5. No desplegar cap endpoint que accepti missatges com a persistits fins validar el circuit sencer amb dades fictícies, una sessió familiar real i un compte Meta oficial configurat.
 
 **Aquesta CI només prova l'atomicitat del registre de proves ja verificades, no la veracitat de les proves ni la seguretat d'un emissor real.** Els ids de família, número i remitents del test són sintètics. Producció, Resend i Neon no s'han modificat.
+
+
+## Validació addicional de seguretat (10/11/2026)
+
+- `lib/whatsapp/atomic-consent-enrollment.js` només admet proves i rebuts amb data de verificació/acceptació **no futura ni anterior a 15 minuts** respecte del rellotge de PostgreSQL, a més de la caducitat. No es pot allargar unilateralment un `expires_at` d'una prova antiga i fer-la útil.
+- La prova PostgreSQL `tests/whatsapp-atomic-consent-enrollment.test.cjs` també cobreix proves antigues, rebuts amb data futura, rebuts antics i la substitució fraudulenta del vincle entre rebut i prova.
+- La prova `tests/whatsapp-atomic-consent-rls.test.cjs` crea **només en el PostgreSQL efímer de CI** un rol `NOSUPERUSER NOBYPASSRLS NOINHERIT`. Encara que rebi permisos explícits SELECT i INSERT sobre les taules, les polítiques de denegació per defecte l'impedeixen llegir registres i crear-ne. No disposa de SELECT sobre autoritzacions.
+- Resultat verificat: [GitHub Actions #42919346721](https://github.com/DavidParet/Primer-projecte/actions/runs/42919346721), **SUCCESS**. Inclou les regressions prèvies, el nou circuit atòmic, proves de dates i prova de rol restringit.
+- **Limitació:** aquesta prova confirma l'aïllament `default deny` per a un rol sense privilegis. No valida encara una funció productiva `SECURITY DEFINER` ni un rol limitat autoritzat a escriure els justificants de forma segura a Neon. Els emissors reals de prova Meta i rebut web **continuen sense connectar**.
+
+L'únic resultat apte per a aprovació actual és **codi i proves en branca draft**, no l'activació del pilot real.
