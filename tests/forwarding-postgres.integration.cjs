@@ -7,9 +7,9 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {Pool}=require('pg');
-const {createHmac,createDecipheriv}=require('node:crypto');
+const {createHmac}=require('node:crypto');
 const {acceptSignedReceipt}=require('../lib/forwarding/resend-intake.cjs');
-const {createNeonReceiptAdapters}=require('../lib/forwarding/neon-receipt.cjs');
+const {createNeonReceiptAdapters,decryptReceiptEnvelope}=require('../lib/forwarding/neon-receipt.cjs');
 
 const url=process.env.FORWARDING_CI_PG_URL;
 if(!url)throw new Error('run_only_with_disposable_postgres_service');
@@ -39,16 +39,6 @@ function record(emailId,adapters){
     resolveAuthorizedRecipient:adapters.resolveAuthorizedRecipient,
     enqueueReceipt:adapters.enqueueReceipt
   });
-}
-function decryptEnvelope(envelope){
-  const [version,iv,tag,ciphertext]=envelope.split('.');
-  assert.equal(version,'v1');
-  const dec=createDecipheriv('aes-256-gcm',Buffer.from(encryptionKeyHex,'hex'),
-    Buffer.from(iv,'base64url'));
-  dec.setAuthTag(Buffer.from(tag,'base64url'));
-  return JSON.parse(Buffer.concat([
-    dec.update(Buffer.from(ciphertext,'base64url')),dec.final()
-  ]).toString('utf8'));
 }
 async function setup(admin){
   await admin.query(`
@@ -116,7 +106,16 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       const row=q.rows[0];
       assert.match(row.encrypted_envelope,/^v1\./);
       assert.doesNotMatch(row.encrypted_envelope,/school|Fake|family|example\.invalid/);
-      const decoded=decryptEnvelope(row.encrypted_envelope);
+      const decoded=decryptReceiptEnvelope({
+        receiptKey:row.queue_id.trim(),
+        encryptedEnvelope:row.encrypted_envelope,
+        encryptionKeyHex
+      });
+      assert.throws(()=>decryptReceiptEnvelope({
+        receiptKey:'f'.repeat(64),
+        encryptedEnvelope:row.encrypted_envelope,
+        encryptionKeyHex
+      }),/invalid_receipt_envelope/);
       assert.equal(decoded.familyId,familyId);
       assert.equal(decoded.emailId,emailId);
       assert.equal(decoded.recipient,recipient);
