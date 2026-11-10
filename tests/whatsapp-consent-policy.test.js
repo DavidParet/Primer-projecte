@@ -32,6 +32,8 @@ function policy(database, overrides={}) {
   return makeConsentPolicy({
     db:database,senderHmacKey:key.toString('base64'),
     resolveAuthenticatedFamily:async()=>FAMILY,
+    authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async()=>true,
     currentConsentVersion:consentVersion,
     verifyExplicitConsent:async()=>({
       verified:true,receiptId:consentReceiptId,challengeId,
@@ -54,7 +56,8 @@ test('requires trusted external adapters and strong HMAC key',()=>{
   assert.throws(()=>makeConsentPolicy({
     db:db(),senderHmacKey:'x',
     resolveAuthenticatedFamily:async()=>FAMILY,verifyEnrollment:async()=>({}),
-    verifyExplicitConsent:async()=>({}),currentConsentVersion:consentVersion
+    verifyExplicitConsent:async()=>({}),authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async()=>true,currentConsentVersion:consentVersion
   }),/32-byte/);
 });
 test('enrolls only a phone proved by trusted single-use verifier',async()=>{
