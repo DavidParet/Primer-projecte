@@ -408,3 +408,69 @@ test('revocation fails closed if no dedicated transaction connection is availabl
     session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
   }),/dedicated transactional/);
 });
+
+
+test('a valid family UUID without a current admin permission never enrolls or revokes',async()=>{
+  const database=db();
+  const denied=policy(database,{authorizeFamily:async()=>false});
+  await assert.rejects(denied.enroll(enrollment()),/Current family administrator required/);
+  await assert.rejects(denied.revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),/Current family administrator required/);
+  assert.equal(database.calls.length,0);
+});
+
+test('enrollment rechecks administrator after awaiting independent proof and consent',async()=>{
+  const database=db();
+  let checks=0;
+  await assert.rejects(policy(database,{
+    authorizeFamily:async({familyId,action})=>{
+      assert.equal(familyId,FAMILY);
+      assert.equal(action,'enroll_whatsapp_sender');
+      return ++checks===1;
+    }
+  }).enroll(enrollment()),/permission expired before write/);
+  assert.equal(checks,2);
+  assert.equal(database.calls.length,0);
+});
+
+test('revocation must confirm administrator membership within the SQL transaction',async()=>{
+  const database=db();
+  let inTxn=0;
+  await assert.rejects(policy(database,{
+    authorizeFamily:async({familyId,action})=>{
+      assert.equal(familyId,FAMILY);
+      assert.equal(action,'revoke_whatsapp_consent');
+      return true;
+    },
+    authorizeFamilyTransaction:async({client,familyId,action})=>{
+      assert.equal(typeof client.query,'function');
+      assert.equal(familyId,FAMILY);
+      assert.equal(action,'revoke_whatsapp_consent');
+      inTxn++;
+      return false;
+    }
+  }).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),/Current locked family administrator required/);
+  assert.equal(inTxn,1);
+  assert.deepEqual(database.calls.map(c=>c.sql),[
+    'BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED','ROLLBACK'
+  ]);
+});
+
+test('unconfigured administrator callbacks fail closed at construction',()=>{
+  const common={
+    db:db(),senderHmacKey:key.toString('base64'),
+    currentConsentVersion:consentVersion,
+    resolveAuthenticatedFamily:async()=>FAMILY,
+    verifyEnrollment:async()=>({}),
+    verifyExplicitConsent:async()=>({})
+  };
+  assert.throws(()=>makeConsentPolicy(common),/Missing trusted server adapter/);
+  assert.throws(()=>makeConsentPolicy({...common,authorizeFamily:async()=>true}),
+    /Missing trusted server adapter/);
+  assert.throws(()=>makeConsentPolicy({...common,
+    authorizeFamilyTransaction:async()=>true}),
+    /Missing trusted server adapter/);
+});
