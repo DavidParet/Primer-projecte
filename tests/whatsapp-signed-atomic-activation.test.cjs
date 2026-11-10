@@ -72,12 +72,24 @@ test('signed limited-role activation: deny direct access, verify signatures, one
    '20261108_whatsapp_durable_inbox.sql',
    '20261109_whatsapp_explicit_consent_receipt.sql',
    '20261110_whatsapp_atomic_pairing_evidence_staged.sql',
+   '20261109_nexlupa_canonical_identity_staged.sql',
    '20261111_whatsapp_signed_atomic_activation_ci.sql'
-  ])await pool.query(readFileSync(join(__dirname,'../db/migrations',migration),'utf8'));
+  ]) {
+   // TTP240 canonical identity migration is a psql script; node-postgres
+   // executes the SQL portion only (psql backslash commands are client-only).
+   const migrationSql=readFileSync(join(__dirname,'../db/migrations',migration),'utf8')
+     .split('\n').filter(line=>!line.startsWith('\\')).join('\n');
+   await pool.query(migrationSql);
+  }
   await pool.query('INSERT INTO public.nex_ci_atomic_activation_keys '+
    '(key_id,key_data,state) VALUES($1,$2,$3)',[KEY_ID,key,'active']);
-  await pool.query('INSERT INTO public.nex_ci_atomic_membership_fixture '+
-    '(user_id,family_id,role,active) VALUES($1,$2,$3,true)',[USER,A,'admin']);
+  // Canonical, staged TTP240 tables -- NO synthetic membership copy.
+  await pool.query('INSERT INTO public.nex_users(user_id) VALUES($1)',[USER]);
+  await pool.query('INSERT INTO public.nex_families(family_id,display_name) '+
+    'VALUES($1,$2)',[A,'CI atomic consent family']);
+  await pool.query('INSERT INTO public.nex_family_memberships '+
+    '(user_id,family_id,role,status) VALUES($1,$2,$3,$4)',
+    [USER,A,'admin','active']);
 
   runtime1=await pool.connect();
   await runtime1.query('SET ROLE '+ROLE);
@@ -85,7 +97,8 @@ test('signed limited-role activation: deny direct access, verify signatures, one
   for(const table of [
    'nex_whatsapp_verified_phone_proofs',
    'nex_whatsapp_explicit_receipt_proofs',
-   'nex_ci_atomic_activation_keys','nex_ci_atomic_membership_fixture',
+   'nex_ci_atomic_activation_keys','nex_family_memberships',
+   'nex_users','nex_families',
    'nex_whatsapp_sender_authorizations',
    'nex_ci_atomic_activation_nonces']){
    await assert.rejects(runtime1.query('SELECT * FROM public.'+table+' LIMIT 1'),
@@ -196,18 +209,18 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   // A still-valid signed permit never overrides a removed administrator.
   const member=makeIds('removed-membership');
   await seed(pool,member);
-  await pool.query("UPDATE public.nex_ci_atomic_membership_fixture SET role='member' "+
+  await pool.query("UPDATE public.nex_family_memberships SET role='member' "+
    'WHERE user_id=$1 AND family_id=$2',[USER,A]);
   assert.deepEqual((await runtime1.query(SQL,permit(member))).rows[0].result,
     {state:'rejected'});
   assert.deepEqual(await rows(pool,member),
     {count:0,proofUsed:false,receiptUsed:false});
-  await pool.query("UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+  await pool.query("UPDATE public.nex_family_memberships SET role='admin' "+
     'WHERE user_id=$1 AND family_id=$2',[USER,A]);
 
   // The restricted runtime must NEVER be able to grant itself a family role.
   await assert.rejects(runtime1.query(
-    "UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+    "UPDATE public.nex_family_memberships SET role='admin' "+
     "WHERE user_id=$1 AND family_id=$2",[USER,A]),e=>e.code==='42501');
 
   // Signed permits for a non-member must fail even if the phone and receipt
@@ -230,7 +243,7 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   try{
     await adminTx.query('BEGIN');adminTxOpen=true;
     await adminTx.query(
-      "UPDATE public.nex_ci_atomic_membership_fixture SET role='member' "+
+      "UPDATE public.nex_family_memberships SET role='member' "+
       "WHERE user_id=$1 AND family_id=$2",[USER,A]);
     pending=runtime1.query(SQL,permit(racingAdmin));
     let blocked=false;
@@ -253,9 +266,53 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
     if(pending)await pending.catch(()=>{});
     adminTx.release();
     await pool.query(
-      "UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+      "UPDATE public.nex_family_memberships SET role='admin' "+
       "WHERE user_id=$1 AND family_id=$2",[USER,A]);
   }
+
+  // The canonical identity policy (TTP240), not a parallel fixture,
+  // rejects suspended memberships, disabled users and archived families.
+  const suspended=makeIds('suspended');
+  await seed(pool,suspended);
+  await pool.query("UPDATE public.nex_family_memberships SET status='suspended',"+
+    "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",[USER,A]);
+  assert.deepEqual((await runtime1.query(SQL,permit(suspended))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,suspended),
+    {count:0,proofUsed:false,receiptUsed:false});
+  await pool.query("UPDATE public.nex_family_memberships SET status='active',"+
+    "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",[USER,A]);
+
+  const disabled=makeIds('disabled-user');
+  await seed(pool,disabled);
+  await pool.query('UPDATE public.nex_users SET disabled_at=clock_timestamp() '+
+    'WHERE user_id=$1',[USER]);
+  assert.deepEqual((await runtime1.query(SQL,permit(disabled))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,disabled),
+    {count:0,proofUsed:false,receiptUsed:false});
+  await pool.query('UPDATE public.nex_users SET disabled_at=NULL WHERE user_id=$1',[USER]);
+
+  const archived=makeIds('archived-family');
+  await seed(pool,archived);
+  await pool.query('UPDATE public.nex_families SET archived_at=clock_timestamp() '+
+    'WHERE family_id=$1',[A]);
+  assert.deepEqual((await runtime1.query(SQL,permit(archived))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,archived),
+    {count:0,proofUsed:false,receiptUsed:false});
+  await pool.query('UPDATE public.nex_families SET archived_at=NULL WHERE family_id=$1',[A]);
+
+  const revokedMember=makeIds('revoked-canonical-member');
+  await seed(pool,revokedMember);
+  await pool.query("UPDATE public.nex_family_memberships SET revoked_at=clock_timestamp(),"+
+    "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",[USER,A]);
+  assert.deepEqual((await runtime1.query(SQL,permit(revokedMember))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,revokedMember),
+    {count:0,proofUsed:false,receiptUsed:false});
+  await pool.query("UPDATE public.nex_family_memberships SET revoked_at=NULL,"+
+    "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",[USER,A]);
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
