@@ -33,7 +33,7 @@ function policy(database, overrides={}) {
       singleUseConsumed:true,acceptedAt:Date.now()-1000
     }),
     verifyEnrollment:async()=>({
-      verified:true,familyId:FAMILY,senderWaId:SENDER,
+      verified:true,familyId:FAMILY,challengeId,businessAccountId,phoneNumberId,senderWaId:SENDER,
       singleUseConsumed:true,expiresAt:Date.now()+60000
     }),
     ...overrides
@@ -77,7 +77,7 @@ test('fails closed on unauthenticated user',async()=>{
 test('fails closed on foreign family proof',async()=>{
   const database=db();
   await assert.rejects(policy(database,{
-    verifyEnrollment:async()=>({verified:true,familyId:OTHER,senderWaId:SENDER,
+    verifyEnrollment:async()=>({verified:true,familyId:OTHER,challengeId,businessAccountId,phoneNumberId,senderWaId:SENDER,
       singleUseConsumed:true,expiresAt:Date.now()+60000})
   }).enroll(enrollment()),/not verified/);
   assert.equal(database.calls.length,0);
@@ -89,11 +89,24 @@ test('rejects unconsumed/expired/too long proof',async()=>{
     {expiresAt:Date.now()-1000},
     {expiresAt:Date.now()+3600000}
   ]) {
-    const proof={verified:true,familyId:FAMILY,senderWaId:SENDER,
+    const proof={verified:true,familyId:FAMILY,challengeId,businessAccountId,phoneNumberId,senderWaId:SENDER,
       singleUseConsumed:true,expiresAt:Date.now()+60000,...patch};
     await assert.rejects(policy(database,{
       verifyEnrollment:async()=>proof
     }).enroll(enrollment()),/not verified/);
+  }
+  assert.equal(database.calls.length,0);
+});
+test('phone proof is bound to the exact challenge and business number',async()=>{
+  const database=db();
+  const valid={verified:true,familyId:FAMILY,challengeId,businessAccountId,
+    phoneNumberId,senderWaId:SENDER,singleUseConsumed:true,expiresAt:Date.now()+60000};
+  for (const patch of [{challengeId:'other_challenge_123456'},
+    {businessAccountId:'1111100000'},{phoneNumberId:'2222200000'},
+    {challengeId:undefined},{businessAccountId:undefined},{phoneNumberId:undefined}]) {
+    await assert.rejects(policy(database,{
+      verifyEnrollment:async()=>({...valid,...patch})
+    }).enroll(enrollment()),/Phone proof not verified/);
   }
   assert.equal(database.calls.length,0);
 });
@@ -260,7 +273,7 @@ test('rejects fractional and unsafe timestamps before writing consent',async()=>
   for (const expiresAt of [Date.now()+60000.5, Number.MAX_SAFE_INTEGER+1, NaN]) {
     await assert.rejects(policy(database,{
       verifyEnrollment:async()=>({
-        verified:true,familyId:FAMILY,senderWaId:SENDER,
+        verified:true,familyId:FAMILY,challengeId,businessAccountId,phoneNumberId,senderWaId:SENDER,
         singleUseConsumed:true,expiresAt
       })
     }).enroll(enrollment()),/Phone proof not verified/);
