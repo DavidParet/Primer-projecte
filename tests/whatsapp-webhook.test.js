@@ -6,7 +6,7 @@ const { Readable } = require('node:stream');
 const { createHmac } = require('node:crypto');
 const handler = require('../api/whatsapp-webhook');
 const {
-  MAX_BODY_BYTES, BodyTooLargeError, readRawBody, verifyToken, verifyMetaSignature
+  MAX_BODY_BYTES, BodyTooLargeError, InvalidBodyLengthError, readRawBody, verifyToken, verifyMetaSignature
 } = require('../lib/whatsapp/webhook-security');
 
 const ORIGINAL_ENV = {
@@ -162,4 +162,22 @@ test('POST signat mai no retorna HTTP 2xx sense cua duradora implementada', asyn
   assert.equal(r.code,503);
   assert.equal(JSON.stringify(r.body).includes('Missatge fictici'),false);
   assert.equal(r.headers['retry-after'],'60');
+});
+
+
+test('rejects malformed and mismatched Content-Length without trusting framing',async()=>{
+  configured();
+  const body='{"object":"whatsapp_business_account","entry":[]}';
+  const valid={'content-type':'application/json','x-hub-signature-256':signed(body)};
+  for (const length of ['-1','01','1.5','NaN','9007199254740992','abc']) {
+    await assert.rejects(readRawBody(Object.assign(Readable.from([Buffer.from(body)]),{
+      headers:{'content-length':length}
+    })),InvalidBodyLengthError);
+    assert.equal((await invoke({method:'POST',body,headers:{...valid,'content-length':length}})).code,400);
+  }
+  for (const length of ['0',String(Buffer.byteLength(body)-1),String(Buffer.byteLength(body)+1)]) {
+    assert.equal((await invoke({method:'POST',body,headers:{...valid,'content-length':length}})).code,400);
+  }
+  assert.equal((await invoke({method:'POST',body,headers:{...valid,
+    'content-length':String(Buffer.byteLength(body))}})).code,503);
 });
