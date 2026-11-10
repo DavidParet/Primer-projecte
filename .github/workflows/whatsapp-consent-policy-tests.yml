@@ -1,6 +1,13 @@
 name: WhatsApp consent policy tests
 
 on:
+  push:
+    branches:
+      - 'feat/whatsapp-consent-policy-v1'
+    paths:
+      - 'lib/whatsapp/**'
+      - 'tests/whatsapp-*.test.js'
+      - '.github/workflows/whatsapp-consent-policy-tests.yml'
   pull_request:
     paths:
       - 'lib/whatsapp/consent-policy.js'
