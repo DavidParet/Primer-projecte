@@ -17,8 +17,8 @@
 - Resend: `entrada.nexlupa.app` verificat, `Receiving: enabled`, `Sending: disabled`. Un únic webhook estable `email.received` habilitat; el webhook de preview duplicat s'ha desactivat.
 - El codi del receptor estable `nexlupa-resend-pilot` actual només fa verificació criptogràfica. NO equival a ingestió de contingut en NexLupa.
 - Neon, branca aïllada `resend-worker-consent-validation-20261108`: `intake_bridge_health()` retorna `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`. No s'han llegit dades de missatges.
-- Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Encara no existeix cap connector HTTP del pilot end-to-end.
-- Tests `tests/forwarding-intake.test.cjs` + `tests/forwarding-neon-receipt.test.cjs` i GitHub Actions `forwarding-intake-tests.yml`: **22/22 correctes**, execució #42920286787, sense connexions externes ni secrets.
+- Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Ja existeix el codi HTTP aïllat del pilot, però sense desplegament verificat del commit més recent i sense secrets, associacions o correus reals.
+- Tests de `tests/forwarding-*.test.cjs` i GitHub Actions `forwarding-intake-tests.yml`: **34/34 correctes**, última execució #42922613403, sense Gmail, Resend ni Neon durant les proves automatitzades; les consultes a Neon real es documenten més avall.
 - Preview de Vercel del commit `f1edf3002886849c051df99f1c834ad59a161779`: **READY**. Per eliminar l'error de patrons de rutes del `main` s'han adaptat `vercel.json` i `scripts/build-static.js` de la branca Gmail verificada. Aquest solapament s'ha de resoldre abans de fusionar cap PR.
 
 ## Portes pendents abans del pilot amb correus ficticis
@@ -26,7 +26,7 @@
 - [ ] Identitat de família pilot verificada a Neon i consentiment explícit registrat.
 - [ ] Alias aleatori associat a família amb `resolve_authorized_recipient` i revocació funcional. Sense alias no es pot atribuir cap correu a una família.
 - [ ] Verificar en PostgreSQL **real** el format xifrat de l'adaptador de cua i la concurrència/idempotència, confirmar compatibilitat amb el worker i limitar la taxa. La comprovació offline 22/22 no substitueix aquesta validació.
-- [ ] Ruta HTTP de preview separada del webhook estable; verificador de signatures integrat, cap resposta amb dades privades.
+- [x] Ruta HTTP de preview **implementada en codi**, separada del webhook estable; signatura comprovada abans d'inicialitzar PostgreSQL; cap resposta amb dades privades. **Encara pendent: desplegament i prova HTTP en Vercel**.
 - [ ] Confirmació de l'adreça a Gmail i filtre selectiu definit amb revisió humana; sense reenviament global.
 - [ ] Prova de 1–3 correus **inventats**, sense dades personals ni de menors: un accepted/queued, un duplicate, un no autoritzat i revocació.
 - [ ] Comparar recepció amb fitxes en revisió i comprovar zero enviaments/Calendar. No publicar a `main` sense aprovació.
@@ -41,8 +41,27 @@
 
 ### Barrera tècnica observada — permisos del rol de recepció
 
-A la branca Neon de validació, la consulta de privilegis ha confirmat que el rol `nexlupa_resend_ingest` pot fer INSERT i SELECT a `nexlupa_pilot.resend_inbox_queue`, però **no pot executar** `nexlupa_worker_rpc.resolve_authorized_recipient(text)` ni té USAGE a l'esquema RPC. Aquest és un bloqueig real per connectar l'adaptador de forma segura. La funció SQL aplica alias actiu, família activa/pilot i consentiment `resend_forward/read_school_mail` no revocat. **No s'han concedit permisos nous**; qualsevol GRANT ha de limitar-se a aquesta funció concreta i provar-se a la branca aïllada abans de continuar.
+**Històric:** el rol `nexlupa_resend_ingest` inicialment no tenia USAGE de l'esquema RPC ni EXECUTE de `resolve_authorized_recipient(text)`. **Actualització 11/11/2026:** s'han concedit només aquests dos permisos, exclusivament a la branca **no principal** de Neon `resend-worker-consent-validation-20261108`. Comprovació posterior: és l'única de les 13 funcions RPC executable per aquest rol; continua sense USAGE directe a l'esquema de dades familiars. La funció aplica alias actiu, família pilot/activa i consentiment `resend_forward/read_school_mail` no revocat. Cap permís nou a la branca primària.
 
 ### Darrera comprovació CI
 
-[GitHub Actions run 42920286787](https://github.com/DavidParet/Primer-projecte/actions/runs/42920286787): **22 tests, 22 pass, 0 fail**, incloent revocació a l'INSERT atòmic, deduplicació, xifrat de metadades, contingut no fiable, firma Svix i URLs no autoritzades. Sense accés a comptes reals. La producció continua sense integració Gmail.
+[GitHub Actions run 42922613403](https://github.com/DavidParet/Primer-projecte/actions/runs/42922613403): **34 tests, 34 pass, 0 fail**, més instal·lació correcta de dependències `pg` i comprovació d'importació del nou endpoint. Inclou revocació, deduplicació, cua xifrada de metadades, signatura Svix, proves HTTP i bloqueig de producció. Sense accés a Gmail, Resend ni Neon a CI; la producció continua sense integració Gmail.
+
+
+### Validació tècnica del 11/11/2026
+
+**Neon real, branca aïllada i rol `nexlupa_resend_ingest`:** 
+- `GRANT USAGE ON SCHEMA nexlupa_worker_rpc` i `GRANT EXECUTE ON FUNCTION nexlupa_worker_rpc.resolve_authorized_recipient(text)`, sense altres EXECUTE ni accés directe a taules familiars.
+- Execució amb credencials del **rol destinatari real**: destinatari fictici no autoritzat retorna `NULL`. L'INSERT SQL complet amb el mateix destinatari retorna `outcome='revoked'`. No genera fila: `unexpected_receipts=0`.
+- L'indicador de la cua no ha variat: `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`.
+- La prova positiva amb alias + consentiment sintètic i la concurrència d'INSERT encara **no s'han executat** sobre PostgreSQL; són condicions de validació prèvies al pilot real.
+
+**Codi HTTP preview afegit, però encara NO desplegat en la darrera revisió:**
+- `api/forwarding/pilot-webhook.js` i `lib/forwarding/{http-handler,runtime}.cjs` posen el processament darrere de triple condició: Vercel `preview`, branca exacta de pilot i `FORWARDING_PILOT_ENABLED=true`. Producció sempre inhabilitada.
+- `FORWARDING_PILOT_ENABLED=false` s'ha desat explícitament a les variables de Vercel **només per a aquesta branca**. No s'ha creat cap secret de Resend ni cap encaminament de webhook a la nova ruta.
+- El GET de supervisió només indica configuració, **no afirma una connexió real a Neon**. El POST compara la signatura abans de preparar la connexió PostgreSQL. Els errors transitoris responen 503 per permetre reintents; els rebuts rebutjats s'acusen sense filtració de contingut.
+- `package.json` ara inclou el connector PostgreSQL `pg` i GitHub Actions verifica la càrrega del mòdul Vercel.
+
+**Bloqueig de desplegament:** un intent explícit de previsualització de l'últim commit ha retornat **HTTP 402**, recurs `api-deployments-free-per-day` (límit diari de més de 100 despl.). El darrer desplegament `READY` visible era d'un commit anterior a l'endpoint nou. No s'ha fet cap actualització de pla, càrrec, promoció ni fusió de PR; no afirmar verificació HTTP del nou endpoint fins que Vercel ho permeti.
+
+**Fites encara no completades:** provar INSERT positiu i idempotència/revocació amb fixtures aïllats i consentits, validar endpoint de preview HTTP, crear vincle alias-família de prova, configurar exclusivament el reenviament selectiu amb verificació de Gmail i completar el flux fins a fitxa de revisió. La recepció real a Resend continua separada de l'API nova.
