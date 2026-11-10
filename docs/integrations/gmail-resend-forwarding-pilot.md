@@ -18,7 +18,7 @@
 - El codi del receptor estable `nexlupa-resend-pilot` actual només fa verificació criptogràfica. NO equival a ingestió de contingut en NexLupa.
 - Neon, branca aïllada `resend-worker-consent-validation-20261108`: `intake_bridge_health()` retorna `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`. No s'han llegit dades de missatges.
 - Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Ja existeix el codi HTTP aïllat del pilot, però sense desplegament verificat del commit més recent i sense secrets, associacions o correus reals.
-- Tests offline i PostgreSQL disposable sota GitHub Actions: **41/41 correctes**, última execució #42926206952. Inclou 36 proves offline i 5 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
+- Tests offline i PostgreSQL disposable sota GitHub Actions: **52/52 correctes**, última execució #42927400232. Inclou 47 proves offline i 5 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
 - Preview de Vercel del commit `f1edf3002886849c051df99f1c834ad59a161779`: **READY**. Per eliminar l'error de patrons de rutes del `main` s'han adaptat `vercel.json` i `scripts/build-static.js` de la branca Gmail verificada. Aquest solapament s'ha de resoldre abans de fusionar cap PR.
 
 ## Portes pendents abans del pilot amb correus ficticis
@@ -85,7 +85,7 @@
 
 ### Validació 11/11/2026 — contracte Resend i HTTP real en CI
 
-- **41/41 proves superades, 0 errors** a [GitHub Actions #42926206952](https://github.com/DavidParet/Primer-projecte/actions/runs/42926206952): 36 proves offline i 5 amb PostgreSQL 16 temporal.
+- **52/52 proves superades, 0 errors** a [GitHub Actions #42926206952](https://github.com/DavidParet/Primer-projecte/actions/runs/42926206952): 36 proves offline i 5 amb PostgreSQL 16 temporal.
 - Contrastat el contracte `email.received` amb l'[exemple oficial de Resend](https://resend.com/features/webhooks): el payload inclou `data.email_id`, `to[]`, `from`, `subject`, `message_id` i `attachments[]`. S'ha afegit una prova amb aquesta estructura completa. El mòdul pilot **només accepta** un destinatari i zero adjunts, i enregistra exclusivament metadades imprescindibles, mai `from`, `subject` o cos.
 - **HTTP POST end-to-end en CI**, no un mock de funció: un servidor HTTP efímer ha rebut un esdeveniment fictici amb signatura Svix vàlida i l'ha inserit a PostgreSQL amb rol limitat (HTTP 204); reintent ha retornat 204 sense crear duplicat; signatura falsa ha retornat HTTP 400. Tot sense accedir a Resend, Gmail ni Neon reals.
 - En secrets de Vercel exclusius del preview d'aquesta branca, `FORWARDING_PILOT_DATABASE_URL` i `FORWARDING_PILOT_ENCRYPTION_KEY` consten com a `sensitive`. La clau de xifrat del pilot s'ha creat amb entropia criptogràfica i no s'ha imprès. `FORWARDING_PILOT_ENABLED=false` es manté verificat.
@@ -93,3 +93,17 @@
 - **No donar aquesta fase per completada:** falta provar el nou desplegament HTTP a Vercel amb el secret de webhook adequat, el consentiment d'una família pilot i el reenviament selectiu verificat de Gmail; mantenir tallada la recepció real fins que aquestes comprovacions passin. També cal testar revocació que coincideixi temporalment amb una inserció.
 
 Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per la nova ruta i no s'ha fet cap fusió a `main`.
+
+
+### Actualització 11/11/2026 — barrera de lectura i revisió humana
+
+- Creat `lib/forwarding/review-gate.cjs` (**encara no connectat a un worker productiu**) com a segon control independent de la recepció del webhook.
+- El mòdul desxifra el rebut de metadades del servidor, comprova la correspondència exacta **àlies → família → consentiment vigent** i **només després** permet que l'adaptador cridi `Resend Receiving GET` per obtenir el contingut.
+- Si el consentiment no hi és, **0 consultes a Resend**. Si és revocat mentre es recupera el correu, descarta el text abans de produir cap proposta de revisió.
+- El pilot exigeix remitents aprovats per adreça exacta, un sol missatge de text pla, zero adjunts, una mida limitada i cap canvi automàtic. El cos de correu es marca `untrustedContent:true` i `requiresHumanApproval:true`; **no s'envia a cap model ni es genera cap acció en nom de la família**.
+- **Limitació de seguretat:** validar el camp `From` contra una llista no prova per si sol l'autenticitat del remitent. Abans de connectar correus reals, caldrà revisar autenticació i procedència via capçaleres verificables i la política de reenviament, amb aprovació humana sempre.
+- Les proves han detectat una ambigüitat del nom visible de remitent (`nom@domini <altra@domini>`); corregida amb un parser que rebutja aquestes formes i les capçaleres amb salts de línia.
+- [GitHub Actions #42927400232](https://github.com/DavidParet/Primer-projecte/actions/runs/42927400232): **52/52 proves, 0 errors** (47 offline + 5 PostgreSQL efímer), incloses revocació abans/durant la recuperació de contingut i protecció contra instruccions dins de correus inventats.
+- Vercel conserva `FORWARDING_PILOT_ENABLED=false`. No s'ha configurat el secret de signatura d'un nou webhook ni una clau d'API Resend de lectura per al nou worker; aquest codi no pot llegir missatges reals per si sol.
+
+**Proper obstacle real:** verificació del desplegament de la versió més recent, sender allowlist autoritzada per una família pilot, autenticació de font i consentiment explícit, seguit de la prova amb correus inventats i revisió humana.
