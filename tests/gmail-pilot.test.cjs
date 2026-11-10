@@ -288,3 +288,13 @@ test('rejects numeric thread IDs in both Gmail list and message response', async
       sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } })
   }), /message_not_eligible/);
 });
+
+test('rejects fractional, nonnumeric and nonfinite Gmail size estimates', async () => {
+  for (const sizeEstimate of [12.5, '30', null, NaN, Infinity]) {
+    await assert.rejects(lib.readTextMessage({
+      accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+      fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate,
+        payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } })
+    }), /message_not_eligible/);
+  }
+});
