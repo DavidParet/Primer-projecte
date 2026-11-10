@@ -12,7 +12,23 @@ GRANT USAGE ON SCHEMA public TO
 -- CI analogue of the canonical family membership model.
 -- NOT a migration for real nex_family_memberships.
 CREATE TABLE public.nex_ci_atomic_membership_fixture (
- user_id text NOT NULL CHECK(user_id ~ '^[A-Za-z0-9_-]{1,128}
+ user_id text NOT NULL CHECK(length(user_id) BETWEEN 1 AND 128),
+ family_id uuid NOT NULL,
+ role text NOT NULL CHECK(role IN ('owner','admin','member')),
+ active boolean NOT NULL,
+ revoked_at timestamptz,
+ PRIMARY KEY(user_id,family_id)
+);
+REVOKE ALL ON public.nex_ci_atomic_membership_fixture FROM PUBLIC;
+ALTER TABLE public.nex_ci_atomic_membership_fixture ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nex_ci_atomic_membership_fixture FORCE ROW LEVEL SECURITY;
+GRANT SELECT ON public.nex_ci_atomic_membership_fixture
+ TO nex_ci_atomic_activation_owner;
+CREATE POLICY nex_ci_atomic_member_owner_read
+ ON public.nex_ci_atomic_membership_fixture FOR SELECT
+ TO nex_ci_atomic_activation_owner USING(true);
+
+CREATE TABLE public.nex_ci_atomic_activation_keys (
  key_id text PRIMARY KEY CHECK(key_id ~ '^[a-z][a-z0-9_-]{2,39}$'),
  key_data bytea NOT NULL CHECK(octet_length(key_data)=32),
  state text NOT NULL CHECK(state IN('active','revoked'))
@@ -91,7 +107,9 @@ DECLARE
  v_used uuid; v_auth bigint; v_count integer;
 BEGIN
  v_epoch=floor(extract(epoch from clock_timestamp()))::bigint;
- IF p_user IS NULL OR p_user !~ '^[A-Za-z0-9_-]{1,128}
+ IF p_user IS NULL OR length(p_user) NOT BETWEEN 1 AND 128 OR
+    p_user ~ '[^A-Za-z0-9_-]' OR
+    p_family IS NULL OR p_business IS NULL OR
    p_business !~ '^[0-9]{5,30}$' OR
    p_phone IS NULL OR p_phone !~ '^[0-9]{5,30}$' OR
    p_proof IS NULL OR octet_length(p_proof)<>32 OR
