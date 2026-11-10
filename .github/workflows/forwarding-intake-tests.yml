@@ -1,0 +1,38 @@
+name: Gmail forwarding → Resend · isolated safety suite
+
+on:
+  push:
+    branches:
+      - 'feature/gmail-resend-forwarding-pilot-*'
+    paths:
+      - 'lib/forwarding/**'
+      - 'tests/forwarding-*.test.cjs'
+      - '.github/workflows/forwarding-intake-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/forwarding/**'
+      - 'tests/forwarding-*.test.cjs'
+      - '.github/workflows/forwarding-intake-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-forwarding:
+    name: Forwarding metadata-only, offline tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validation
+        run: |
+          node --check lib/forwarding/resend-intake.cjs
+          node --check tests/forwarding-intake.test.cjs
+      - name: Offline tests (no secrets, Google, Resend or Neon access)
+        run: node --test tests/forwarding-intake.test.cjs
