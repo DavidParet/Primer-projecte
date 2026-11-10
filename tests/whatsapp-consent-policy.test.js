@@ -24,7 +24,7 @@ function db(rowCount=1,deletedCount=3) {
       const n=rowCount?deletedCount:0;
       return {rowCount:n,rows:Array.from({length:n},(_,i)=>({inbound_id:String(i)}))};
     }
-    return {rowCount,rows:rowCount===1?[{authorization_id:'00000000-0000-4000-8000-000000000099'}]:[]};
+    return {rowCount,rows:rowCount===1?[{authorization_id:'1'}]:[]};
   };
   return {calls,query,connect:async()=>({query,release(){}})};
 }
@@ -256,8 +256,13 @@ test('enrollment fails closed when database response cannot prove insert or conf
   for (const result of [null,{}, {rowCount:-1}, {rowCount:2},
     {rowCount:'1'}, {rowCount:NaN}, {rowCount:1},
     {rowCount:1,rows:[]}, {rowCount:1,rows:[{}]},
-    {rowCount:1,rows:[{authorization_id:'not-a-uuid'}]},
-    {rowCount:0,rows:[{authorization_id:'00000000-0000-4000-8000-000000000099'}]}]) {
+    {rowCount:1,rows:[{authorization_id:'not-a-bigint'}]},
+    {rowCount:1,rows:[{authorization_id:'00000000-0000-4000-8000-000000000099'}]},
+    {rowCount:1,rows:[{authorization_id:1}]},
+    {rowCount:1,rows:[{authorization_id:{toString:()=> '1'}}]},
+    {rowCount:1,rows:[{authorization_id:'0'}]},
+    {rowCount:1,rows:[{authorization_id:'9223372036854775808'}]},
+    {rowCount:0,rows:[{authorization_id:'1'}]}]) {
     const database={query:async()=>result};
     await assert.rejects(policy(database).enroll(enrollment()),
       /Enrollment result not verified/);
