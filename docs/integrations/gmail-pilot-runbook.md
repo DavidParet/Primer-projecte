@@ -1,6 +1,6 @@
 # NEXLUPA · Posada en marxa del primer Gmail pilot
 
-**Estat:** document preparat; **no hi ha cap compte Gmail real connectat, cap credencial de Google configurada ni cap flux publicat**. Manteniu desactivat `GMAIL_PILOT_ENABLED` fins que tots els controls estiguin validats.
+**Estat (10/11/2026):** codi de pilot només a la branca de previsualització, sense compte Gmail real connectat i sense credencials OAuth Google. `GMAIL_PILOT_ENABLED=false` s'ha configurat explícitament a Vercel per a aquesta branca. La web pública no s'ha alterat. Manteniu desactivat `GMAIL_PILOT_ENABLED` fins que tots els controls estiguin validats.
 
 ## Decisió d'abast
 
@@ -65,7 +65,7 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 
 - **140/140 proves** automatitzades de codi superades a GitHub Actions, incloent un recorregut complet amb Google OAuth i Gmail **simulats**.
 - El workflow de seguretat és `.github/workflows/gmail-pilot-tests.yml`.
-- Desenvolupament en PR #9, en esborrany. Bloqueig de desplegaments Vercel 402 `api-deployments-free-per-day`.
+- Desenvolupament en PR #9, en esborrany. El bloqueig antic de compilació Vercel ja no és l'estat actual: els darrers desplegaments de preview consten `READY`, però això **no** valida l'HTTP, l'OAuth ni cap lectura real.
 - **Cap lectura Gmail real encara.**
 
 ## Enllaços de referència
@@ -95,3 +95,19 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 - El nou estat Vercel és de **límit de compilacions del compte (`build-rate-limit`)**, no de sintaxi de rutes. No s'ha modificat el pla ni la producció.
 - La comprovació PostgreSQL real amb rol restringit i TLS estricte ha confirmat: identitat fictícia sense autorització, accés directe a dades familiars denegat.
 - Neteja OAuth a la branca de desenvolupament integrada mitjançant el PR #14. El PR #9 continua en esborrany.
+
+## Estat operatiu verificat — 10/11/2026, vespre
+
+- **Preview de branca estable:** `https://primer-projecte-git-feature-gmail-r-42096a-davidparets-projects.vercel.app` (alias automàtic de Vercel apuntant al desplegament `READY`, commit `4debe6ee28d7cfa36dc2e2955ab0077ef2b412af`).
+- **Accés a preview protegit per Vercel Authentication** (`all_except_custom_domains`). Des d'un navegador no autenticat, la ruta OAuth no es pot donar per funcional. Una compilació `READY` no prova l'accés HTTP: les peticions externes als tres endpoints no han estat verificables des de l'entorn de revisió.
+- **Control de seguretat explicitat:** variable `GMAIL_PILOT_ENABLED=false` amb `target=preview` i `gitBranch=feature/gmail-readonly-pilot-20261109`, creada a Vercel. No afecta producció ni la branca WhatsApp. Els nous valors d'entorn s'apliquen en un desplegament posterior; no considerar-los actius en desplegaments antics.
+- **Credencials Google OAuth:** encara no hi ha `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` ni `GMAIL_PILOT_REDIRECT_URI` en la configuració del projecte Gmail. No provar OAuth fins a tenir un domini HTTPS de prova autoritzat que permeti el retorn del navegador i, si escau, el bypass legítim de protecció amb les garanties necessàries.
+- **Via de producte paral·lela:** recepció voluntària per reenviament Gmail cap al subdomini `entrada.nexlupa.app` amb Resend (treball desenvolupat en el pilot d'entrada), separada de l'OAuth restringit. Abans d'obrir a famílies: validar remitents autoritzats, atribució segura a família, consentiment, deduplicació i revisió humana; mai executar ordres contingudes en correus.
+- **Restricció de Google:** `gmail.readonly` és un scope restringit. L'ús comercial amb dades d'usuaris necessita analitzar verificació d'OAuth i requisits de security assessment, potencialment anual. Documentació oficial: https://developers.google.com/workspace/gmail/api/auth/scopes i https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification .
+
+### Ordre de les pròximes comprovacions
+
+1. Confirmar el funcionament HTTP real sota l'autenticació de preview, sense secrets ni cookies en els logs.
+2. Decidir la via del primer pilot: reenviament voluntari sense OAuth restringit o Gmail API amb Google Cloud i consentiment explícit.
+3. Si s'escull Gmail API: crear client OAuth Web i una identitat pilot autoritzada en Neon, mantenint el pilot desactivat fins a superar totes les comprovacions.
+4. Fer una lectura de fins a tres missatges ficticis sota `NEXLUPA_PILOT`, sense persistència ni Calendar. Qualsevol habilitació real requereix aprovació.
