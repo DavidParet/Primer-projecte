@@ -321,3 +321,20 @@ test('rejects coercible sender identifier from phone verifier',async()=>{
   }).enroll(enrollment()),/Phone proof not verified/);
   assert.equal(database.calls.length,0);
 });
+
+test('does not write when phone proof expires during async consent verification',async()=>{
+  const database=db();
+  await assert.rejects(policy(database,{
+    verifyEnrollment:async()=>({verified:true,familyId:FAMILY,challengeId,
+      businessAccountId,phoneNumberId,senderWaId:SENDER,
+      singleUseConsumed:true,expiresAt:Date.now()+40}),
+    verifyExplicitConsent:async()=>{
+      await new Promise(resolve=>setTimeout(resolve,80));
+      return {verified:true,receiptId:consentReceiptId,challengeId,familyId:FAMILY,
+        businessAccountId,phoneNumberId,senderWaId:SENDER,scope:'incoming_text',
+        version:consentVersion,source:'account-web-consent',
+        singleUseConsumed:true,acceptedAt:Date.now()-1000};
+    }
+  }).enroll(enrollment()),/Phone proof expired before write/);
+  assert.equal(database.calls.length,0);
+});
