@@ -254,3 +254,26 @@ test('revocation rejects ambiguous or malformed aggregate result cardinality',as
     session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
   }),{state:'revoked',deletedMessages:0});
 });
+
+test('rejects fractional and unsafe timestamps before writing consent',async()=>{
+  const database=db();
+  for (const expiresAt of [Date.now()+60000.5, Number.MAX_SAFE_INTEGER+1, NaN]) {
+    await assert.rejects(policy(database,{
+      verifyEnrollment:async()=>({
+        verified:true,familyId:FAMILY,senderWaId:SENDER,
+        singleUseConsumed:true,expiresAt
+      })
+    }).enroll(enrollment()),/Phone proof not verified/);
+  }
+  for (const acceptedAt of [Date.now()-1000.5, Number.MAX_SAFE_INTEGER+1, NaN]) {
+    await assert.rejects(policy(database,{
+      verifyExplicitConsent:async()=>({
+        verified:true,receiptId:consentReceiptId,challengeId,
+        familyId:FAMILY,businessAccountId,phoneNumberId,senderWaId:SENDER,
+        scope:'incoming_text',version:consentVersion,source:'account-web-consent',
+        singleUseConsumed:true,acceptedAt
+      })
+    }).enroll(enrollment()),/Explicit consent not verified/);
+  }
+  assert.equal(database.calls.length,0);
+});
