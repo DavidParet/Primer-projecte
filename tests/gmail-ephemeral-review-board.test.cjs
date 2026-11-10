@@ -142,3 +142,24 @@ test('untrusted preview cannot enable side effects, forge server session, or smu
   const json=JSON.stringify(await board.list({familySession:sessionA,checkCurrentFamilyConsent:allow}));
   assert.doesNotMatch(json,/fake-secret|fake-oauth/);
 });
+
+test('Catalan month boundary accepts març but not longer fake month words',async()=>{
+  const board=createEphemeralReviewBoard();
+  const fixture=preview(sessionA.familyId,[
+    draft('d','Sortida','El dia 14 de març, al museu.'),
+    draft('e','Sortida','El dia 14 de marçot, al museu.')
+  ]);
+  await board.ingest(inp(sessionA,fixture));
+  const rows=await board.list({familySession:sessionA,checkCurrentFamilyConsent:allow});
+  assert.equal(rows[0].dateText,'el dia 14 de març');
+  assert.equal(rows[1].dateText,null);
+});
+
+test('revocation purges temporary review items, even if permission is subsequently restored',async()=>{
+  const board=createEphemeralReviewBoard();
+  await board.ingest(inp());
+  await assert.rejects(board.list({
+    familySession:sessionA,checkCurrentFamilyConsent:async()=>false
+  }),/gmail_consent_revoked/);
+  assert.deepEqual(await board.list({familySession:sessionA,checkCurrentFamilyConsent:allow}),[]);
+});
