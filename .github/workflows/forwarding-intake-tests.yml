@@ -6,12 +6,16 @@ on:
       - 'feature/gmail-resend-forwarding-pilot-*'
     paths:
       - 'lib/forwarding/**'
+      - 'api/forwarding/**'
+      - 'package.json'
       - 'tests/forwarding-*.test.cjs'
       - '.github/workflows/forwarding-intake-tests.yml'
   pull_request:
     branches: [main]
     paths:
       - 'lib/forwarding/**'
+      - 'api/forwarding/**'
+      - 'package.json'
       - 'tests/forwarding-*.test.cjs'
       - '.github/workflows/forwarding-intake-tests.yml'
 
@@ -30,6 +34,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install runtime dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify PostgreSQL driver and API route load cleanly
+        run: |
+          node -e "if (typeof require('pg').Pool !== 'function') process.exit(1)"
+          node -e "if (typeof require('./api/forwarding/pilot-webhook.js') !== 'function') process.exit(1)"
       - name: Syntax validation
         run: |
           for f in lib/forwarding/*.cjs; do node --check "$f"; done
