@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'lib/whatsapp/consent-policy.js'
+      - 'lib/whatsapp/durable-inbox.js'
       - 'tests/whatsapp-consent-policy.test.js'
+      - 'tests/whatsapp-tenant-revocation.test.js'
+      - 'tests/whatsapp-durable-inbox.test.js'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
   workflow_dispatch:
 
@@ -20,4 +23,4 @@ jobs:
         with:
           node-version: 22
       - name: Test consent and durable inbox policies
-        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-tenant-revocation.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
