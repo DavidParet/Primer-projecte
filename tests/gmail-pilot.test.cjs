@@ -263,3 +263,28 @@ test('rejects duplicate Gmail IDs with conflicting thread identity', async () =>
     }), /invalid_gmail_list/);
   }
 });
+
+test('rejects numeric and object IDs rather than coercing them to strings', async () => {
+  for (const id of [123, { toString: () => 'valid' }]) {
+    await assert.rejects(lib.listLabelMessageIds({
+      accessToken: token, labelId: 'Label_123',
+      fetchImpl: mock({ messages: [{ id }] })
+    }), /invalid_gmail_list/);
+    await assert.rejects(lib.readTextMessage({
+      accessToken: token, messageId: id, labelId: 'Label_123',
+      fetchImpl: mock({})
+    }), /invalid_message_id/);
+  }
+});
+
+test('rejects numeric thread IDs in both Gmail list and message response', async () => {
+  await assert.rejects(lib.listLabelMessageIds({
+    accessToken: token, labelId: 'Label_123',
+    fetchImpl: mock({ messages: [{ id: 'abc1', threadId: 42 }] })
+  }), /invalid_gmail_list/);
+  await assert.rejects(lib.readTextMessage({
+    accessToken: token, messageId: 'abc1', labelId: 'Label_123',
+    fetchImpl: mock({ id: 'abc1', threadId: 42, labelIds: ['Label_123'],
+      sizeEstimate: 30, payload: { mimeType: 'text/plain', body: { data: 'aGVsbG8' } } })
+  }), /message_not_eligible/);
+});
