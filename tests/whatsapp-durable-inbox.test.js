@@ -141,6 +141,24 @@ test('malformed batch is rejected before database access',async()=>{
   assert.equal(db.calls.length,0);
 });
 
+
+test('mixed valid and invalid webhook batch never persists a partial delivery',async()=>{
+  const db=mockDb(), store=inbox(db);
+  const payload={object:'whatsapp_business_account',entry:[{
+    id:'123456789',changes:[{field:'messages',value:{
+      metadata:{phone_number_id:'987654321'},
+      messages:[
+        {id:'wamid.synthetic-valid-first',from:'34600000000',
+          timestamp:'1794150000',type:'text',text:{body:'Avís fictici'}},
+        {id:'wamid.synthetic-invalid-second',from:'34600000000',
+          timestamp:'1794150000',type:'text',text:{body:'   '}}
+      ]
+    }}]
+  }]};
+  await assert.rejects(store.persistVerifiedBatch(payload),/requires review/);
+  assert.equal(db.calls.length,0);
+});
+
 test('expiration worker exposes only deletion count',async()=>{
   const db=mockDb();
   assert.deepEqual(await inbox(db).purgeExpired(),{deleted:3});
