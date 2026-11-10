@@ -33,6 +33,6 @@ jobs:
       - name: Syntax validation
         run: |
           for f in lib/forwarding/*.cjs; do node --check "$f"; done
-          node --check tests/forwarding-intake.test.cjs
+          for f in tests/forwarding-*.test.cjs api/forwarding/*.js; do node --check "$f"; done
       - name: Offline tests (no secrets, Google, Resend or Neon access)
         run: node --test tests/forwarding-*.test.cjs
