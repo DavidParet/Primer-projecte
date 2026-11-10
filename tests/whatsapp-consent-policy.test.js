@@ -355,7 +355,7 @@ test('rejects coercible family identities in both enrollment and revocation',asy
 test('revocation locks authorization, revokes and purges in separate statements on one connection',async()=>{
   const queries=[];
   let released=false;
-  const database={connect:async()=>({
+  const database={query:async()=>({}),connect:async()=>({
     async query(sql,values){
       queries.push({sql,values});
       if(sql==='BEGIN'||sql==='COMMIT')return {};
@@ -378,7 +378,7 @@ test('revocation locks authorization, revokes and purges in separate statements 
 
 test('revocation rolls back when purge fails and releases the connection',async()=>{
   const queries=[];let released=false;
-  const database={connect:async()=>({
+  const database={query:async()=>({}),connect:async()=>({
     async query(sql){
       queries.push(sql);
       if(sql.includes('FOR UPDATE'))return {rowCount:1,rows:[{authorization_id:'id'}]};
