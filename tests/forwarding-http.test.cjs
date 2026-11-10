@@ -92,7 +92,8 @@ test('GET is inert, redacted and does not touch request body or backend',async()
  assert.equal(req.reads,0);
  assert.equal(track.count,0);
  assert.deepEqual(JSON.parse(res.body),{
-   ready:true,mode:'isolated-forwarding-pilot',
+   configurationPresent:true,databaseConnectivityVerified:false,
+   mode:'isolated-forwarding-pilot',
    emailBodiesFetched:false,metadataReceiptsEnabled:true,
    productionEnabled:false
  });
