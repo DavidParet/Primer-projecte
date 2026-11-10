@@ -363,7 +363,7 @@ test('revocation locks authorization, revokes and purges in separate statements 
   const database={query:async()=>({}),connect:async()=>({
     async query(sql,values){
       queries.push({sql,values});
-      if(sql==='BEGIN'||sql==='COMMIT')return {};
+      if(sql==='BEGIN'||sql==='COMMIT'||sql==='SET TRANSACTION ISOLATION LEVEL READ COMMITTED')return {};
       if(sql.includes('FOR UPDATE'))return {rowCount:1,rows:[{authorization_id:'id'}]};
       if(sql.includes('UPDATE nex_whatsapp_sender_authorizations'))
         return {rowCount:1,rows:[{authorization_id:'id'}]};
@@ -374,9 +374,9 @@ test('revocation locks authorization, revokes and purges in separate statements 
   })};
   const result=await policy(database).revoke({session:{},businessAccountId,phoneNumberId,senderWaId:SENDER});
   assert.deepEqual(result,{state:'revoked',deletedMessages:2});
-  assert.deepEqual(queries.map(q=>q.sql==='BEGIN'?'BEGIN':q.sql==='COMMIT'?'COMMIT':
+  assert.deepEqual(queries.map(q=>q.sql==='BEGIN'?'BEGIN':q.sql==='COMMIT'?'COMMIT':q.sql.startsWith('SET TRANSACTION')?'ISOLATION':
     q.sql.includes('FOR UPDATE')?'LOCK':q.sql.includes('UPDATE nex_whatsapp')?'REVOKE':'PURGE'),
-    ['BEGIN','LOCK','REVOKE','PURGE','COMMIT']);
+    ['BEGIN','ISOLATION','LOCK','REVOKE','PURGE','COMMIT']);
   assert.equal(released,true);
   for(const q of queries.filter(q=>q.values))assert.equal(q.values[3],FAMILY);
 });
