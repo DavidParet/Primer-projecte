@@ -111,3 +111,20 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 2. Decidir la via del primer pilot: reenviament voluntari sense OAuth restringit o Gmail API amb Google Cloud i consentiment explícit.
 3. Si s'escull Gmail API: crear client OAuth Web i una identitat pilot autoritzada en Neon, mantenint el pilot desactivat fins a superar totes les comprovacions.
 4. Fer una lectura de fins a tres missatges ficticis sota `NEXLUPA_PILOT`, sense persistència ni Calendar. Qualsevol habilitació real requereix aprovació.
+
+
+## Auditoria operativa de Gmail + recepció selectiva — 10/11/2026 (22:xx CET)
+
+**Canvi executat fora de GitHub:** s'ha desactivat el webhook Resend de prova que apuntava a un desplegament Vercel efímer `nexlupa-resend-pilot-kvpw2y2cq-davidparets-projects.vercel.app`. Continua **actiu** el webhook `email.received` de l'alias estable de recepció `nexlupa-resend-pilot-davidparets-projects.vercel.app/api/webhook`. Un mateix event `email.received` s'havia lliurat a tots dos (HTTP 204); aquest canvi redueix el risc de duplicar la ingestió. No s'ha modificat ni eliminat cap missatge.
+
+**Evidència actual Vercel Gmail:** PR #9 en draft, commit `0443223411ff4c8ba04490309f616624daa733de`, CI GitHub Actions correcta i darrera preview `READY`. Accés HTTP provat amb el mecanisme d'accés al desplegament protegit:
+- `GET /api/gmail/pilot/start` → **405** (`method_not_allowed`): la ruta existeix i rebutja GET.
+- `GET /api/gmail/pilot/callback` → **503** (`gmail_pilot_unavailable`): ruta disponible però no configurada per a OAuth.
+- `GET /api/gmail/pilot-auth` → **503** (`pilot_not_ready`): no hi ha el preflight de base de dades preparat.
+- Les respostes són JSON amb `Cache-Control: no-store`. **No s'ha comprovat cap lectura real de Gmail**.
+
+**Variables Vercel:** en revisar els noms de variables de tot el projecte, la branca Gmail només té `GMAIL_PILOT_ENABLED` de forma explícita. No hi ha cap configuració visible de `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GMAIL_PILOT_REDIRECT_URI`, `GMAIL_PILOT_DATABASE_URL`, `NEON_AUTH_BASE_URL` ni `NEON_AUTH_JWKS_URL`. No s'han recuperat ni exposat secrets, ni s'ha activat el pilot.
+
+**Resend i Neon:** subdomini receptor verificat, recepció activada. El webhook d'alias estable continua actiu. A `nexlupa_pilot.resend_inbox_queue` de la base pilot s'han observat només comptadors d'estat: **1 `done`, 1 `received`** (mostres de proves anteriors; això **no prova** processament automàtic complet). No s'ha llegit `encrypted_envelope` ni cap contingut de missatges.
+
+**Pròxim bloqueig real:** preparar projecte i client OAuth a Google Cloud, identitat familiar pilot i secrets de preview; després validar en una nova preview l'estat operatiu amb dades fictícies i consentiment. Manteniu `GMAIL_PILOT_ENABLED=false` fins aleshores. Producció de NexLupa intacta.
