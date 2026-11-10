@@ -48,7 +48,7 @@ test('only encrypted text and HMAC digest go to Postgres',async()=>{
   assert.match(sql,/SELECT family_id/);
   // Without this lock, a concurrent revocation may purge before the
   // in-flight insert commits, leaving a retained message after opt-out.
-  assert.match(sql,/FROM nex_whatsapp_sender_authorizations[\\s\\S]*?LIMIT 1\\s+FOR SHARE\\s*\\)/);
+  assert.match(sql,/FROM nex_whatsapp_sender_authorizations[\s\S]*?LIMIT 1\s+FOR SHARE\s*\)/);
   assert.equal(values.length,8);
   assert.equal(values[2].length,32);
   assert.equal(values.some(x=>x===msg.senderWaId),false);
