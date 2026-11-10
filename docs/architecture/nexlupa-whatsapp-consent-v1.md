@@ -21,3 +21,9 @@ Estat: **prototip en branca de GitHub; sense endpoint ni verificació telefònic
 7. Definir protecció de dades de menors/tercers i ús de missatges reenviats. No suposar accés als grups originals.
 
 **NO FUSIONAR, NO DESPLEGAR, NO ENVIAR MISSATGES.** Aquesta PR se superposa a #7 (que ja se superposa a #6).
+## 2026-11-10 · Correcció de cursa entre alta de missatge i revocació
+- `lib/whatsapp/durable-inbox.js` afegeix `FOR SHARE` a la lectura de l'autorització abans de l'INSERT. La revocació fa `FOR UPDATE`, marca la baixa i purga en una segona sentència dins una transacció `READ COMMITTED`.
+- Una comprovació no destructiva `EXPLAIN` a Neon, a la branca aïllada `whatsapp-auth-pilot-validation-20261109`, confirma el node PostgreSQL `LockRows` i l'ús de l'índex `nex_whatsapp_one_active_family` per a la consulta amb `FOR SHARE`.
+- Prova unitària afegida per impedir que desaparegui el bloqueig SQL. El workflow de consentiment ara inclou `whatsapp-tenant-revocation.test.js` i s'executa també en pushes de la branca de desenvolupament.
+- **Pendent:** una prova de concurrència real amb dues connexions PostgreSQL i missatges ficticis, validació completa de l'INSERT amb el runtime desplegat, permisos mínims i auditoria de l'aïllament. `EXPLAIN` no prova per si sol que no hi hagi curses ni valida el circuit extrem a extrem.
+- **No activar Meta, no fusionar a `main`, no desplegar, no utilitzar dades personals reals.**
