@@ -198,7 +198,7 @@ test('deduplicates repeated Gmail message IDs while preserving first-seen order'
     accessToken: token, labelId: 'Label_123', maxResults: 5,
     fetchImpl: mock({ messages: [
       { id: 'first', threadId: 'thread1' },
-      { id: 'first', threadId: 'thread2' },
+      { id: 'first', threadId: 'thread1' },
       { id: 'second', threadId: 'thread3' }
     ] })
   });
@@ -248,5 +248,18 @@ test('rejects duplicate or malformed sender and subject headers', async () => {
       fetchImpl: mock({ id: 'abc1', labelIds: ['Label_123'], sizeEstimate: 30,
         payload: { mimeType: 'text/plain', headers, body: { data: 'aGVsbG8' } } })
     }), /message_not_eligible/);
+  }
+});
+
+
+test('rejects duplicate Gmail IDs with conflicting thread identity', async () => {
+  for (const messages of [
+    [{ id: 'same', threadId: 'threadA' }, { id: 'same', threadId: 'threadB' }],
+    [{ id: 'same' }, { id: 'same', threadId: 'threadA' }]
+  ]) {
+    await assert.rejects(lib.listLabelMessageIds({
+      accessToken: token, labelId: 'Label_123', maxResults: 5,
+      fetchImpl: mock({ messages })
+    }), /invalid_gmail_list/);
   }
 });
