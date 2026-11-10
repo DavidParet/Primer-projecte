@@ -9,30 +9,12 @@ CREATE ROLE nex_ci_atomic_activation_runtime NOLOGIN NOSUPERUSER NOBYPASSRLS NOI
 GRANT USAGE ON SCHEMA public TO
   nex_ci_atomic_activation_owner,nex_ci_atomic_activation_runtime;
 
--- CI analogue of the canonical family membership model.
--- NOT a migration for real nex_family_memberships.
-CREATE TABLE public.nex_ci_atomic_membership_fixture (
- user_id text NOT NULL CHECK(length(user_id) BETWEEN 1 AND 128),
- family_id uuid NOT NULL,
- role text NOT NULL CHECK(role IN ('owner','admin','member')),
- active boolean NOT NULL,
- revoked_at timestamptz,
- lock_marker bigint NOT NULL DEFAULT 0,
- PRIMARY KEY(user_id,family_id)
-);
-REVOKE ALL ON public.nex_ci_atomic_membership_fixture FROM PUBLIC;
-ALTER TABLE public.nex_ci_atomic_membership_fixture ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.nex_ci_atomic_membership_fixture FORCE ROW LEVEL SECURITY;
-GRANT SELECT,UPDATE(lock_marker) ON public.nex_ci_atomic_membership_fixture
+-- Canonical membership schema is installed FIRST in ephemeral CI by TTP240.
+-- This role has EXECUTE on the existing audited, row-locking canonical function,
+-- not table SELECT/UPDATE or a separately maintained synthetic fixture.
+GRANT EXECUTE ON FUNCTION
+ public.nex_ci_authorize_canonical_family_locked(text,uuid,text)
  TO nex_ci_atomic_activation_owner;
-CREATE POLICY nex_ci_atomic_member_owner_read
- ON public.nex_ci_atomic_membership_fixture FOR SELECT
- TO nex_ci_atomic_activation_owner USING(true);
--- PostgreSQL applies UPDATE RLS policy while acquiring a row SHARE lock.
--- The owner can UPDATE only the harmless lock_marker column, never role.
-CREATE POLICY nex_ci_atomic_member_owner_lock
- ON public.nex_ci_atomic_membership_fixture FOR UPDATE
- TO nex_ci_atomic_activation_owner USING(true) WITH CHECK(true);
 
 CREATE TABLE public.nex_ci_atomic_activation_keys (
  key_id text PRIMARY KEY CHECK(key_id ~ '^[a-z][a-z0-9_-]{2,39}$'),
@@ -139,13 +121,14 @@ BEGIN
  IF v_expected<>p_signature THEN
   RETURN jsonb_build_object('state','rejected'); END IF;
 
- -- The membership check happens inside this SAME SQL transaction.
- -- SHARE locking serializes any concurrent admin removal and enrollment.
- PERFORM 1 FROM public.nex_ci_atomic_membership_fixture
- WHERE user_id=p_user AND family_id=p_family
-   AND role IN('owner','admin') AND active=true AND revoked_at IS NULL
- FOR SHARE;
- IF NOT FOUND THEN RETURN jsonb_build_object('state','rejected'); END IF;
+ -- TTP240's canonical SECURITY DEFINER function checks the actual staged
+ -- nex_users, nex_families and nex_family_memberships tables, and holds
+ -- FOR SHARE OF m until this atomic activation transaction finishes.
+ -- It denies disabled users, archived families, suspended/revoked members,
+ -- ordinary family members, and any unrelated family/user pair.
+ IF public.nex_ci_authorize_canonical_family_locked(
+     p_user,p_family,'enroll_whatsapp_sender') IS DISTINCT FROM TRUE
+ THEN RETURN jsonb_build_object('state','rejected'); END IF;
 
  -- The proof and receipt are locked before any authorization is created.
  SELECT * INTO v_proof
