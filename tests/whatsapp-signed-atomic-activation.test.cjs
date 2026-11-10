@@ -205,6 +205,58 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   await pool.query("UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
     'WHERE user_id=$1 AND family_id=$2',[USER,A]);
 
+  // The restricted runtime must NEVER be able to grant itself a family role.
+  await assert.rejects(runtime1.query(
+    "UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+    "WHERE user_id=$1 AND family_id=$2",[USER,A]),e=>e.code==='42501');
+
+  // Signed permits for a non-member must fail even if the phone and receipt
+  // evidence are correct and all other signature fields are valid.
+  const stranger=makeIds('unknown-user');
+  await seed(pool,stranger);
+  assert.deepEqual((await runtime1.query(SQL,
+    permit({...stranger,user:'unknown-account'}))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,stranger),
+    {count:0,proofUsed:false,receiptUsed:false});
+
+  // True two-connection race: the admin revocation holds the canonical row
+  // lock. The signed activation must WAIT for that transaction, then deny.
+  const racingAdmin=makeIds('membership-revoke-race');
+  await seed(pool,racingAdmin);
+  const adminTx=await pool.connect();
+  let adminTxOpen=false;
+  let pending;
+  try{
+    await adminTx.query('BEGIN');adminTxOpen=true;
+    await adminTx.query(
+      "UPDATE public.nex_ci_atomic_membership_fixture SET role='member' "+
+      "WHERE user_id=$1 AND family_id=$2",[USER,A]);
+    pending=runtime1.query(SQL,permit(racingAdmin));
+    let blocked=false;
+    for(let i=0;i<100;i++){
+      const {rows:stats}=await pool.query(
+        "SELECT COUNT(*)::int AS waiting FROM pg_stat_activity "+
+        "WHERE datname=current_database() "+
+        "AND wait_event_type='Lock' AND state='active' "+
+        "AND query LIKE '%nex_ci_signed_activate_atomic_consent%'");
+      if(stats[0].waiting>0){blocked=true;break;}
+      await new Promise(resolve=>setTimeout(resolve,40));
+    }
+    assert.equal(blocked,true,'signed activation must wait for concurrent admin revocation');
+    await adminTx.query('COMMIT');adminTxOpen=false;
+    assert.deepEqual((await pending).rows[0].result,{state:'rejected'});
+    assert.deepEqual(await rows(pool,racingAdmin),
+      {count:0,proofUsed:false,receiptUsed:false});
+  }finally{
+    if(adminTxOpen)await adminTx.query('ROLLBACK');
+    if(pending)await pending.catch(()=>{});
+    adminTx.release();
+    await pool.query(
+      "UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+      "WHERE user_id=$1 AND family_id=$2",[USER,A]);
+  }
+
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
   await seed(pool,revoked);
