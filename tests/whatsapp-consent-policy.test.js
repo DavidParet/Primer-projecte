@@ -63,10 +63,10 @@ test('requires trusted external adapters and strong HMAC key',()=>{
 test('enrolls only a phone proved by trusted single-use verifier',async()=>{
   const database=db();
   assert.deepEqual(await policy(database).enroll(enrollment()),{state:'enrolled'});
-  assert.deepEqual(database.calls.map(({sql})=>sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations')?'INSERT':sql),[
+  assert.deepEqual(database.calls.map(({sql})=>sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations')?'INSERT':sql),[
     'BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED','INSERT','COMMIT'
   ]);
-  const {sql,values}=database.calls.find(c=>c.sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'));
+  const {sql,values}=database.calls.find(c=>c.sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations'));
   assert.match(sql,/ON CONFLICT DO NOTHING/);
   assert.equal(values[3],FAMILY);
   assert.equal(values[2].length,32);
@@ -194,7 +194,7 @@ test('server policy version is mandatory and independent of client input',async(
   assert.throws(()=>policy(database,{currentConsentVersion:null}),/consent version/);
   const input={...enrollment(),consentVersion:'forged-client-v3'};
   assert.deepEqual(await policy(database).enroll(input),{state:'enrolled'});
-  assert.equal(database.calls.find(c=>c.sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations')).values[4],consentVersion);
+  assert.equal(database.calls.find(c=>c.sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations')).values[4],consentVersion);
 });
 test('trusted receipt verifier receives constrained context and scope',async()=>{
   const database=db();
@@ -270,7 +270,7 @@ test('enrollment fails closed when database response cannot prove insert or conf
     {rowCount:0,rows:[{authorization_id:'1'}]}]) {
     const database={query:async()=>{throw Error('Pool-level insert not permitted');},
       connect:async()=>({release(){},async query(sql){
-        if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))return result;
+        if(sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))return result;
         return {};
       }})};
     await assert.rejects(policy(database).enroll(enrollment()),
@@ -278,7 +278,7 @@ test('enrollment fails closed when database response cannot prove insert or conf
   }
   const conflictDb={query:async()=>{throw Error('Pool-level insert not permitted');},
     connect:async()=>({release(){},async query(sql){
-      if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
+      if(sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
         return {rowCount:0,rows:[]};
       return {};
     }})};
@@ -516,7 +516,7 @@ test('enrollment failure rolls back with no success claim and releases connectio
   const database={query:async()=>{throw Error('Never use pool.query for enrollment');},
     connect:async()=>({async query(sql){
       sqls.push(sql);
-      if(sql.startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
+      if(sql.trimStart().startsWith('INSERT INTO nex_whatsapp_sender_authorizations'))
         throw Error('synthetic database outage');
       return {};
     },release(){released++;}})};
