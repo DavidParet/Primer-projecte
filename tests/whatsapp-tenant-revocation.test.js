@@ -39,6 +39,8 @@ test('revoking one family cannot purge another family on shared sender',async()=
     return makeConsentPolicy({db:makeDb(),senderHmacKey:key,
       currentConsentVersion:'pilot-v1',
       resolveAuthenticatedFamily:async()=>family,
+      authorizeFamily:async()=>true,
+      authorizeFamilyTransaction:async()=>true,
       verifyEnrollment:async()=>{throw Error('unused');},
       verifyExplicitConsent:async()=>{throw Error('unused');}});
   }
@@ -67,6 +69,8 @@ test('failed isolation setup rolls back without revoking or purging',async()=>{
   const policy=makeConsentPolicy({db,senderHmacKey:key,
     currentConsentVersion:'pilot-v1',
     resolveAuthenticatedFamily:async()=>FAMILY_A,
+    authorizeFamily:async()=>true,
+    authorizeFamilyTransaction:async()=>true,
     verifyEnrollment:async()=>{},verifyExplicitConsent:async()=>{}});
   await assert.rejects(policy.revoke({session:{},businessAccountId:BUSINESS,
     phoneNumberId:NUMBER,senderWaId:SENDER}),/isolation unavailable/);
