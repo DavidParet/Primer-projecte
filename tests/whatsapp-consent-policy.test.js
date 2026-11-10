@@ -352,3 +352,52 @@ test('rejects coercible family identities in both enrollment and revocation',asy
   }),/Unauthenticated family/);
   assert.equal(database.calls.length,0);
 });
+
+test('revocation locks authorization, revokes and purges in separate statements on one connection',async()=>{
+  const queries=[];
+  let released=false;
+  const database={connect:async()=>({
+    async query(sql,values){
+      queries.push({sql,values});
+      if(sql==='BEGIN'||sql==='COMMIT')return {};
+      if(sql.includes('FOR UPDATE'))return {rowCount:1,rows:[{authorization_id:'id'}]};
+      if(sql.includes('UPDATE nex_whatsapp_sender_authorizations'))
+        return {rowCount:1,rows:[{authorization_id:'id'}]};
+      if(sql.includes('DELETE FROM nex_whatsapp_inbound'))
+        return {rowCount:2,rows:[{inbound_id:'1'},{inbound_id:'2'}]};
+      throw Error('unexpected SQL');
+    },release(){released=true;}
+  })};
+  const result=await policy(database).revoke({session:{},businessAccountId,phoneNumberId,senderWaId:SENDER});
+  assert.deepEqual(result,{state:'revoked',deletedMessages:2});
+  assert.deepEqual(queries.map(q=>q.sql==='BEGIN'?'BEGIN':q.sql==='COMMIT'?'COMMIT':
+    q.sql.includes('FOR UPDATE')?'LOCK':q.sql.includes('UPDATE nex_whatsapp')?'REVOKE':'PURGE'),
+    ['BEGIN','LOCK','REVOKE','PURGE','COMMIT']);
+  assert.equal(released,true);
+  for(const q of queries.filter(q=>q.values))assert.equal(q.values[3],FAMILY);
+});
+
+test('revocation rolls back when purge fails and releases the connection',async()=>{
+  const queries=[];let released=false;
+  const database={connect:async()=>({
+    async query(sql){
+      queries.push(sql);
+      if(sql.includes('FOR UPDATE'))return {rowCount:1,rows:[{authorization_id:'id'}]};
+      if(sql.includes('UPDATE nex_whatsapp_sender_authorizations'))
+        return {rowCount:1,rows:[{authorization_id:'id'}]};
+      if(sql.includes('DELETE FROM nex_whatsapp_inbound'))throw Error('synthetic purge failure');
+      return {};
+    },release(){released=true;}
+  })};
+  await assert.rejects(policy(database).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),/synthetic purge failure/);
+  assert.equal(queries.at(-1),'ROLLBACK');
+  assert.equal(released,true);
+});
+
+test('revocation fails closed if no dedicated transaction connection is available',async()=>{
+  await assert.rejects(policy(db()).revoke({
+    session:{},businessAccountId,phoneNumberId,senderWaId:SENDER
+  }),/dedicated transactional/);
+});
