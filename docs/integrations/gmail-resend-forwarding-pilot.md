@@ -18,7 +18,7 @@
 - El codi del receptor estable `nexlupa-resend-pilot` actual només fa verificació criptogràfica. NO equival a ingestió de contingut en NexLupa.
 - Neon, branca aïllada `resend-worker-consent-validation-20261108`: `intake_bridge_health()` retorna `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`. No s'han llegit dades de missatges.
 - Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Ja existeix el codi HTTP aïllat del pilot, però sense desplegament verificat del commit més recent i sense secrets, associacions o correus reals.
-- Tests offline i PostgreSQL disposable sota GitHub Actions: **39/39 correctes**, última execució #42924900121. Inclou 35 proves offline i 4 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
+- Tests offline i PostgreSQL disposable sota GitHub Actions: **41/41 correctes**, última execució #42926206952. Inclou 36 proves offline i 5 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
 - Preview de Vercel del commit `f1edf3002886849c051df99f1c834ad59a161779`: **READY**. Per eliminar l'error de patrons de rutes del `main` s'han adaptat `vercel.json` i `scripts/build-static.js` de la branca Gmail verificada. Aquest solapament s'ha de resoldre abans de fusionar cap PR.
 
 ## Portes pendents abans del pilot amb correus ficticis
@@ -81,3 +81,15 @@
 - Els últims commits de prova no tenen desplegament Vercel verificat per la quota de desplegaments. El CI funciona de manera independent. Encara cal un test HTTP POST amb signatura real del pilot, connexió de la cua a Neon amb alias i consentiment explícit i prova de revocació concurrent.
 
 **Important:** proves de concurrència en PostgreSQL local de CI i deduplicació seqüencial a Neon **no equivalen** a una prova completa sota múltiples instàncies Vercel amb correus reals. No promoure el PR ni activar el pilot abans d'aquesta validació.
+
+
+### Validació 11/11/2026 — contracte Resend i HTTP real en CI
+
+- **41/41 proves superades, 0 errors** a [GitHub Actions #42926206952](https://github.com/DavidParet/Primer-projecte/actions/runs/42926206952): 36 proves offline i 5 amb PostgreSQL 16 temporal.
+- Contrastat el contracte `email.received` amb l'[exemple oficial de Resend](https://resend.com/features/webhooks): el payload inclou `data.email_id`, `to[]`, `from`, `subject`, `message_id` i `attachments[]`. S'ha afegit una prova amb aquesta estructura completa. El mòdul pilot **només accepta** un destinatari i zero adjunts, i enregistra exclusivament metadades imprescindibles, mai `from`, `subject` o cos.
+- **HTTP POST end-to-end en CI**, no un mock de funció: un servidor HTTP efímer ha rebut un esdeveniment fictici amb signatura Svix vàlida i l'ha inserit a PostgreSQL amb rol limitat (HTTP 204); reintent ha retornat 204 sense crear duplicat; signatura falsa ha retornat HTTP 400. Tot sense accedir a Resend, Gmail ni Neon reals.
+- En secrets de Vercel exclusius del preview d'aquesta branca, `FORWARDING_PILOT_DATABASE_URL` i `FORWARDING_PILOT_ENCRYPTION_KEY` consten com a `sensitive`. La clau de xifrat del pilot s'ha creat amb entropia criptogràfica i no s'ha imprès. `FORWARDING_PILOT_ENABLED=false` es manté verificat.
+- El secret **propi d'un webhook de Resend per a aquest endpoint** encara no està creat ni configurat. El webhook actiu estable NO s'ha redirigit.
+- **No donar aquesta fase per completada:** falta provar el nou desplegament HTTP a Vercel amb el secret de webhook adequat, el consentiment d'una família pilot i el reenviament selectiu verificat de Gmail; mantenir tallada la recepció real fins que aquestes comprovacions passin. També cal testar revocació que coincideixi temporalment amb una inserció.
+
+Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per la nova ruta i no s'ha fet cap fusió a `main`.
