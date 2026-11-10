@@ -15,22 +15,23 @@ const ROLE='nex_ci_atomic_activation_runtime';
 const FN='public.nex_ci_signed_activate_atomic_consent';
 const KEY_ID='synthetic-activation-key';
 const VERSION='ci-signed-1';
+const USER='synthetic-admin';
 const A='a0000000-0000-4000-8000-000000000911';
 const B='b0000000-0000-4000-8000-000000000922';
 const BIZ='9988771122',PHONE='8877661122';
 const key=randomBytes(32);
 const SQL=`SELECT ${FN}(
- $1::uuid,$2,$3,$4::bytea,$5::bytea,$6,$7,$8::bigint,$9::uuid,$10::bytea
+ $1,$2::uuid,$3,$4,$5::bytea,$6::bytea,$7,$8,$9::bigint,$10::uuid,$11::bytea
 ) AS result`;
 
-function permit({family=A,proof,receipt,
+function permit({user=USER,family=A,proof,receipt,
   business=BIZ,phone=PHONE,nonce=randomUUID(),
   expires=Math.floor(Date.now()/1000)+45,signature}){
- const payload=['NEXLUPA-ATOMIC-ACTIVATE-1',KEY_ID,family,
+ const payload=['NEXLUPA-ATOMIC-ACTIVATE-1',KEY_ID,user,family,
    business,phone,proof.toString('hex'),receipt.toString('hex'),
    VERSION,String(expires),nonce].join('|');
  const signed=signature||createHmac('sha256',key).update(payload).digest();
- return [family,business,phone,proof,receipt,VERSION,KEY_ID,expires,nonce,signed];
+ return [user,family,business,phone,proof,receipt,VERSION,KEY_ID,expires,nonce,signed];
 }
 function makeIds(suffix){
  return {proof:randomBytes(32),receipt:randomBytes(32),
@@ -75,6 +76,8 @@ test('signed limited-role activation: deny direct access, verify signatures, one
   ])await pool.query(readFileSync(join(__dirname,'../db/migrations',migration),'utf8'));
   await pool.query('INSERT INTO public.nex_ci_atomic_activation_keys '+
    '(key_id,key_data,state) VALUES($1,$2,$3)',[KEY_ID,key,'active']);
+  await pool.query('INSERT INTO public.nex_ci_atomic_membership_fixture '+
+    '(user_id,family_id,role,active) VALUES($1,$2,$3,true)',[USER,A,'admin']);
 
   runtime1=await pool.connect();
   await runtime1.query('SET ROLE '+ROLE);
@@ -82,7 +85,8 @@ test('signed limited-role activation: deny direct access, verify signatures, one
   for(const table of [
    'nex_whatsapp_verified_phone_proofs',
    'nex_whatsapp_explicit_receipt_proofs',
-   'nex_ci_atomic_activation_keys','nex_whatsapp_sender_authorizations',
+   'nex_ci_atomic_activation_keys','nex_ci_atomic_membership_fixture',
+   'nex_whatsapp_sender_authorizations',
    'nex_ci_atomic_activation_nonces']){
    await assert.rejects(runtime1.query('SELECT * FROM public.'+table+' LIMIT 1'),
     e=>e.code==='42501','runtime SELECT must be denied: '+table);
@@ -105,7 +109,7 @@ test('signed limited-role activation: deny direct access, verify signatures, one
   assert.deepEqual(await rows(pool,signed),{count:1,proofUsed:true,receiptUsed:true});
   assert.deepEqual((await runtime1.query(SQL,good)).rows[0].result,{state:'rejected'});
   const nonces=await pool.query('SELECT COUNT(*)::int AS n FROM '+
-   'public.nex_ci_atomic_activation_nonces WHERE nonce=$1',[good[8]]);
+   'public.nex_ci_atomic_activation_nonces WHERE nonce=$1',[good[9]]);
   assert.equal(nonces.rows[0].n,1);
 
   // Same sender, second fresh receipt: unique active sender guard rejects
@@ -134,7 +138,7 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   await assert.rejects(runtime1.query(SQL,broken),/CI receipt consumption error/);
   assert.deepEqual(await rows(pool,fail),{count:0,proofUsed:false,receiptUsed:false});
   assert.equal((await pool.query('SELECT COUNT(*)::int AS n FROM '+
-   'public.nex_ci_atomic_activation_nonces WHERE nonce=$1',[broken[8]])).rows[0].n,0);
+   'public.nex_ci_atomic_activation_nonces WHERE nonce=$1',[broken[9]])).rows[0].n,0);
   await pool.query('DROP TRIGGER nex_ci_atomic_force_failure ON '+
    'public.nex_whatsapp_explicit_receipt_proofs');
   await pool.query('DROP FUNCTION public.nex_ci_atomic_fail_on_receipt()');
@@ -175,7 +179,7 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
     authorizeFamily:async({familyId,action})=>
       familyId===A&&action==='enroll_whatsapp_sender',
     getVerifiedPrincipal:async()=>({
-      userId:'synthetic-admin',sessionId:'synthetic-verified-session'
+      userId:USER,sessionId:'synthetic-verified-session'
     })
    }),
    getActiveSigningKey:async purpose=>({
@@ -188,6 +192,18 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   assert.deepEqual(await rows(pool,full),
     {count:1,proofUsed:true,receiptUsed:true});
   assert.deepEqual(await signedClient(fullRequest),{state:'rejected'});
+
+  // A still-valid signed permit never overrides a removed administrator.
+  const member=makeIds('removed-membership');
+  await seed(pool,member);
+  await pool.query("UPDATE public.nex_ci_atomic_membership_fixture SET role='member' "+
+   'WHERE user_id=$1 AND family_id=$2',[USER,A]);
+  assert.deepEqual((await runtime1.query(SQL,permit(member))).rows[0].result,
+    {state:'rejected'});
+  assert.deepEqual(await rows(pool,member),
+    {count:0,proofUsed:false,receiptUsed:false});
+  await pool.query("UPDATE public.nex_ci_atomic_membership_fixture SET role='admin' "+
+    'WHERE user_id=$1 AND family_id=$2',[USER,A]);
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
