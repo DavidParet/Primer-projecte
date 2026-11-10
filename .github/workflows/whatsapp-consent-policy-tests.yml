@@ -21,6 +21,8 @@ on:
       - 'tests/whatsapp-consent-sql-lifecycle.test.cjs'
       - 'tests/whatsapp-atomic-consent-enrollment.test.cjs'
       - 'tests/whatsapp-atomic-consent-rls.test.cjs'
+      - 'tests/whatsapp-signed-atomic-activation.test.cjs'
+      - 'db/migrations/20261111_whatsapp_signed_atomic_activation_ci.sql'
       - 'db/migrations/20261110_whatsapp_atomic_pairing_evidence_staged.sql'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
   workflow_dispatch:
@@ -62,3 +64,4 @@ jobs:
           node --test tests/whatsapp-consent-sql-lifecycle.test.cjs
           node --test tests/whatsapp-atomic-consent-enrollment.test.cjs
           node --test tests/whatsapp-atomic-consent-rls.test.cjs
+          node --test tests/whatsapp-signed-atomic-activation.test.cjs
