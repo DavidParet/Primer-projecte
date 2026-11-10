@@ -102,7 +102,7 @@ test('end-to-end signed fixture uses two family RPC checks + one atomic queue st
  assert.equal(x.calls.length,3);
  assert.equal(x.calls[0].sql.startsWith('SELECT'),true);
  assert.equal(x.calls[1].sql.startsWith('SELECT'),true);
- assert.equal(x.calls[2].sql.startsWith('WITH permitted'),true);
+ assert.equal(x.calls[2].sql.trimStart().startsWith('WITH permitted'),true);
  assert.equal(result.receiptKey.length,64);
 });
 
