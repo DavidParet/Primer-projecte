@@ -125,13 +125,13 @@ test('revocation requires authenticated family and is scope-limited',async()=>{
   assert.deepEqual(await policy(database).revoke({
     session:{synthetic:true},businessAccountId,phoneNumberId,senderWaId:SENDER
   }),{state:'revoked',deletedMessages:3});
-  const {sql,values}=database.calls[0];
+  const {sql,values}=database.calls.find(c=>c.sql.includes('UPDATE nex_whatsapp_sender_authorizations'));
   assert.match(sql,/family_id=\$4/);
   assert.match(sql,/revoked_at IS NULL/);
   const purgeSql=database.calls.find(c=>c.sql.includes('DELETE FROM nex_whatsapp_inbound')).sql;
   assert.match(purgeSql,/DELETE FROM nex_whatsapp_inbound/);
-  assert.match(purgeSql,/family_id=\\$4/);
-  assert.match(purgeSql,/sender_digest=\\$3/);
+  assert.ok(purgeSql.includes('family_id=$4'));
+  assert.ok(purgeSql.includes('sender_digest=$3'));
   assert.equal(values[3],FAMILY);
   assert.equal(values.includes(SENDER),false);
 });
@@ -220,7 +220,8 @@ test('revocation deletes retained messages for exact tenant and sender only',asy
   assert.match(sql,/revoked_at IS NULL/);
   const purgeSql=database.calls.find(c=>c.sql.includes('DELETE FROM nex_whatsapp_inbound')).sql;
   for (const [column,parameter] of [['family_id',4],['business_account_id',1],['phone_number_id',2],['sender_digest',3]]) {
-    assert.ok(purgeSql.includes(column+'=
+    assert.ok(purgeSql.includes(column+'=$'+parameter));
+  }
   assert.equal(values[3],FAMILY);
   assert.equal(values.includes(SENDER),false);
 });
