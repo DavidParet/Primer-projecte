@@ -70,23 +70,25 @@ test('only verified family member signs one short-lived activation permit',async
  assert.deepEqual(f.database.queries.map(c=>c.sql===ACTIVATE_SQL?
   'ACTIVATE':c.sql),['BEGIN','ACTIVATE','COMMIT']);
  const args=f.database.queries[1].params;
- assert.deepEqual(args.slice(0,3),[familyId,businessAccountId,phoneNumberId]);
+ assert.deepEqual(args.slice(0,4),
+  [identity.userId,familyId,businessAccountId,phoneNumberId]);
  assert.equal(args[4].length,32);
- assert.equal(args[5],version);assert.equal(args[6],'ci-atomic-key-1');
- assert.equal(args[7],Math.floor(now/1000)+PERMIT_SECONDS);
- assert.equal(args[8].length,36);
- assert.equal(args[9].length,32);
+ assert.equal(args[5].length,32);
+ assert.equal(args[6],version);assert.equal(args[7],'ci-atomic-key-1');
+ assert.equal(args[8],Math.floor(now/1000)+PERMIT_SECONDS);
+ assert.equal(args[9].length,36);
+ assert.equal(args[10].length,32);
  assert.ok(!args.includes(challengeId)&&!args.includes(consentReceiptId));
- assert.deepEqual(args[3],createHmac('sha256',proofKey)
+ assert.deepEqual(args[4],createHmac('sha256',proofKey)
   .update('nexlupa:phone-proof:v1:').update(challengeId).digest());
- assert.deepEqual(args[4],createHmac('sha256',receiptKey)
+ assert.deepEqual(args[5],createHmac('sha256',receiptKey)
   .update('nexlupa:consent-receipt:v1:').update(consentReceiptId).digest());
  const expected=createHmac('sha256',activationKey)
-  .update(formatPermit({keyId:args[6],familyId,
-   businessAccountId,phoneNumberId,proofDigest:args[3],
-   receiptDigest:args[4],consentVersion:version,
-   expiresAt:args[7],nonce:args[8]})).digest();
- assert.deepEqual(args[9],expected);
+  .update(formatPermit({keyId:args[7],userId:identity.userId,familyId,
+   businessAccountId,phoneNumberId,proofDigest:args[4],
+   receiptDigest:args[5],consentVersion:version,
+   expiresAt:args[8],nonce:args[9]})).digest();
+ assert.deepEqual(args[10],expected);
 });
 
 test('role denial before signing opens no database transaction',async()=>{
