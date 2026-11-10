@@ -17,12 +17,13 @@ CREATE TABLE public.nex_ci_atomic_membership_fixture (
  role text NOT NULL CHECK(role IN ('owner','admin','member')),
  active boolean NOT NULL,
  revoked_at timestamptz,
+ lock_marker bigint NOT NULL DEFAULT 0,
  PRIMARY KEY(user_id,family_id)
 );
 REVOKE ALL ON public.nex_ci_atomic_membership_fixture FROM PUBLIC;
 ALTER TABLE public.nex_ci_atomic_membership_fixture ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nex_ci_atomic_membership_fixture FORCE ROW LEVEL SECURITY;
-GRANT SELECT ON public.nex_ci_atomic_membership_fixture
+GRANT SELECT,UPDATE(lock_marker) ON public.nex_ci_atomic_membership_fixture
  TO nex_ci_atomic_activation_owner;
 CREATE POLICY nex_ci_atomic_member_owner_read
  ON public.nex_ci_atomic_membership_fixture FOR SELECT
