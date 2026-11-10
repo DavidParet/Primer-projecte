@@ -1,0 +1,39 @@
+-- NexLupa WhatsApp TTP 210: PROPOSED tenant isolation migration.
+-- REVIEW ONLY. DO NOT APPLY to primary, production or live pilot.
+-- Must be reviewed against actual Neon role privileges and Meta ingestion semantics.
+-- The existing owner nex l u p a_pilot_owner has BYPASSRLS, so it MUST
+-- NEVER be the application runtime connection role.
+--
+-- Pre-apply requirements:
+-- 1) Create independent non-owner, NOINHERIT/NOBYPASSRLS service roles using
+--    the managed Neon role tools and secret manager (no credentials in Git).
+-- 2) Separate a privileged internal ingestion function with audited narrow
+--    EXECUTE permissions from family-facing reads.
+-- 3) Design membership lookup backed by authenticated sessions; NEVER accept
+--    a client-provided family_id as proof.
+-- 4) Test concurrent revocation, ingest, and rollback on a disposable branch.
+-- 5) Confirm all existing legitimate worker queries under restricted roles.
+--
+-- BEGIN REFERENCE (intentionally non-executable documentation)
+-- ALTER TABLE public.nex_whatsapp_inbound ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.nex_whatsapp_inbound FORCE ROW LEVEL SECURITY;
+-- ALTER TABLE public.nex_whatsapp_sender_authorizations ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.nex_whatsapp_sender_authorizations FORCE ROW LEVEL SECURITY;
+--
+-- IMPORTANT: enabling RLS alone is NOT sufficient.
+-- Do not grant broad SELECT/INSERT/UPDATE/DELETE to PUBLIC or an app role.
+-- Do not create USING (true), WITH CHECK (true), or permissive PUBLIC policies.
+-- A single trusted ingestion service should select an authorization and insert
+-- encrypted content atomically, through narrowly scoped audited operations.
+-- A separate family reader must resolve family membership through a trusted
+-- server-side identity provider and prove negative cross-family access.
+-- Revocation/purge should use their own privileged, monitored service identity.
+--
+-- RELEASE GATE (not yet met):
+-- Verify two distinct synthetic family records using separate non-owner sessions.
+-- A can read only A; B can read only B; cross-family changes fail; arbitrary
+-- family identifiers cannot be set via user-controlled SQL GUCs.
+-- Verify revocation races, dedup retries, deletion, and role switching denial.
+-- Do not include raw phone numbers or message text in database logs.
+--
+-- This file intentionally contains NO executable DDL or privilege mutations.

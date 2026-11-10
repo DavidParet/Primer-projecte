@@ -1,0 +1,24 @@
+name: WhatsApp retention schedule (disabled safety gate)
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexlupa-whatsapp-retention-disabled
+  cancel-in-progress: false
+jobs:
+  disabled-retention-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Intentional: even on manual dispatch, this never connects to Neon
+      # and does not receive DB URLs or secrets. Real activation requires
+      # a separate reviewed implementation and dedicated maintenance role.
+      - name: Verify fail-closed retention gate (no database access)
+        run: |
+          node -e "require('./lib/whatsapp/retention-scheduler').runRetentionJob().then(r=>{if(r.status!=='disabled')process.exit(1);console.log('whatsapp retention disabled by default')}).catch(()=>process.exit(1))"
