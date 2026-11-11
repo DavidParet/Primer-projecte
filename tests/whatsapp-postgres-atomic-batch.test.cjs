@@ -30,11 +30,13 @@ test('PostgreSQL: failed second delivery rolls back entire batch, retry stores e
   try{
     await pool.query(readFileSync(join(__dirname,
       '../db/migrations/20261108_whatsapp_durable_inbox.sql'),'utf8'));
+    await pool.query(readFileSync(join(__dirname,
+      '../db/migrations/20261109_whatsapp_explicit_consent_receipt.sql'),'utf8'));
     await pool.query(
       "INSERT INTO nex_whatsapp_sender_authorizations "+
-      "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source) "+
-      "VALUES ($1,$2,$3,$4,'incoming_text','synthetic-v1',NOW(),'synthetic-ci')",
-      [account,phone,createHmac('sha256',hmacKey).update(sender).digest(),family]);
+      "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source,consent_receipt_digest) "+
+      "VALUES ($1,$2,$3,$4,'incoming_text','synthetic-v1',NOW(),'synthetic-ci',$5)",
+      [account,phone,createHmac('sha256',hmacKey).update(sender).digest(),family,randomBytes(32)]);
     const inbox=createDurableInbox({db:pool,senderHmacKey:hmacKey.toString('base64'),
       contentEncryptionKey:randomBytes(32).toString('base64')});
     await pool.query(`CREATE FUNCTION synthetic_reject_second() RETURNS trigger
@@ -75,13 +77,15 @@ test('PostgreSQL: provider ID collision across authorized senders fails closed w
   try {
     await pool.query(readFileSync(join(__dirname,
       '../db/migrations/20261108_whatsapp_durable_inbox.sql'),'utf8'));
+    await pool.query(readFileSync(join(__dirname,
+      '../db/migrations/20261109_whatsapp_explicit_consent_receipt.sql'),'utf8'));
     for (const [index,sender] of senders.entries()) {
       await pool.query(
         "INSERT INTO nex_whatsapp_sender_authorizations "+
-        "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source) "+
-        "VALUES ($1,$2,$3,$4,'incoming_text','synthetic-v1',NOW(),'synthetic-ci')",
+        "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source,consent_receipt_digest) "+
+        "VALUES ($1,$2,$3,$4,'incoming_text','synthetic-v1',NOW(),'synthetic-ci',$5)",
         [account,phone,createHmac('sha256',hmacKey).update(sender).digest(),
-          index===0?familyA:familyB]);
+          index===0?familyA:familyB,randomBytes(32)]);
     }
     const inbox=createDurableInbox({db:pool,senderHmacKey:hmacKey.toString('base64'),
       contentEncryptionKey:randomBytes(32).toString('base64')});
