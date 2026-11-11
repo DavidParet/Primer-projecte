@@ -52,6 +52,9 @@ function run(root,env){
       VERCEL_ENV:'production',
       NEXLUPA_AUTH_PILOT:'enabled',
       NEXLUPA_AUTH_PILOT_ORIGIN:safeOrigin,
+      NEXLUPA_AUTH_BASE_URL:
+        'https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/neondb/auth',
+      NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'test-preview-user-01',
       ...env
     },
     encoding:'utf8',timeout:15000
@@ -85,6 +88,21 @@ test('static build excludes all staging SQL, functions and hidden test files',()
     NEXLUPA_AUTH_PILOT_ORIGIN:'https://attacker.example'}),
     requiredAssets.slice().sort());
 
+  assert.deepEqual(run(root,{VERCEL_ENV:'preview',
+    NEXLUPA_AUTH_PILOT:'enabled',
+    NEXLUPA_AUTH_BASE_URL:''}),requiredAssets.slice().sort());
+  assert.deepEqual(run(root,{VERCEL_ENV:'preview',
+    NEXLUPA_AUTH_PILOT:'enabled',
+    NEXLUPA_AUTH_BASE_URL:'https://attacker.example/auth'}),
+    requiredAssets.slice().sort());
+  assert.deepEqual(run(root,{VERCEL_ENV:'preview',
+    NEXLUPA_AUTH_PILOT:'enabled',
+    NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:''}),
+    requiredAssets.slice().sort());
+  assert.deepEqual(run(root,{VERCEL_ENV:'preview',
+    NEXLUPA_AUTH_PILOT:'enabled',
+    NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'test-preview-user-01,test-preview-user-01'}),
+    requiredAssets.slice().sort());
   const previewFiles=run(root,{VERCEL_ENV:'preview',
     NEXLUPA_AUTH_PILOT:'enabled',NEXLUPA_AUTH_PILOT_ORIGIN:safeOrigin});
   assert.deepEqual(previewFiles,
