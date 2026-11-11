@@ -29,6 +29,8 @@ on:
       - 'tests/whatsapp-pilot-atomic-consent.test.js'
       - 'tests/whatsapp-pilot-family-session.test.js'
       - 'tests/whatsapp-pilot-family-inbox-reader.test.js'
+      - 'tests/whatsapp-signed-inbox-read-permit.test.js'
+      - 'lib/whatsapp/signed-inbox-read-permit.js'
       - 'lib/whatsapp/pilot-family-inbox-reader.js'
       - 'tests/whatsapp-meta-phone-proof-issuer.test.js'
       - 'tests/whatsapp-pilot-web-consent.test.js'
@@ -78,7 +80,7 @@ jobs:
       - name: Verify explicit versioned web consent issuer
         run: node --test tests/whatsapp-pilot-web-consent.test.js
       - name: Cross-check signed Meta pairing and canonical family identity regressions
-        run: node --test tests/whatsapp-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-pilot-family-session.test.js tests/whatsapp-pilot-family-inbox-reader.test.js
+        run: node --test tests/whatsapp-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-pilot-family-session.test.js tests/whatsapp-pilot-family-inbox-reader.test.js tests/whatsapp-signed-inbox-read-permit.test.js
       - name: Verify isolated Neon metadata audit blocks cloned branches and does not authorize SQL
         run: node --test tests/whatsapp-isolated-neon-target-audit.test.js
       - name: Verify preflight always denies unapproved real traffic and redacts secrets
