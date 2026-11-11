@@ -5,6 +5,8 @@
     "build": "node scripts/inject-version.js"
   },
   "dependencies": {
-    "openai": "^4.0.0"
+    "openai": "^4.0.0",
+    "jose": "^6.1.0",
+    "pg": "^8.16.3"
   }
 }
