@@ -104,7 +104,7 @@ test('mismatched provider ID and absent message body fail closed',async()=>{
  assert.equal(x.result.status,'source_not_approved');
  const y=await run({response:email({text:null})});
  assert.equal(y.result.status,'unsupported_content');
- const z=await run({response:{data:{id:emailId,from:'school@example.invalid',attachments:[],subject:'HTML',html:'<a>Only HTML</a>'}}});
+ const z=await run({response:{data:{id:emailId,from:'school@example.invalid',to:[recipient],attachments:[],subject:'HTML',html:'<a>Only HTML</a>'}}});
  assert.equal(z.result.status,'unsupported_content');
 });
 test('provider errors never produce a review candidate or leak content',async()=>{
