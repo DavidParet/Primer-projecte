@@ -31,3 +31,11 @@ test('malformed JSON and malformed persistence result fail closed',async()=>{
  assert.equal((await run(invalid,sign(invalid))).outcome,'rejected');
  await assert.rejects(run(payload,sign(payload)),/Unrecognized persistence result/);
 });
+
+test('signed invalid UTF-8 is rejected without touching persistence', async () => {
+ let calls=0;
+ const run=createVerifiedIngestion({appSecret:secret,inbox:{persistVerifiedBatch:async()=>{calls++;return {stored:1,duplicate:0,unlinked:0,unsupported:0};}}});
+ const bytes=Buffer.from([0x7b,0x22,0x78,0x22,0x3a,0x22,0xc3,0x28,0x22,0x7d]);
+ assert.deepEqual(await run(bytes,sign(bytes)),{outcome:'rejected',reason:'invalid_json'});
+ assert.equal(calls,0);
+});
