@@ -50,7 +50,7 @@ CREATE FUNCTION public.nex_ci_signed_read_family_whatsapp_inbox(
 SET search_path=pg_catalog,public,pg_temp
 AS $body$
 DECLARE
- v_epoch bigint;v_key bytea;v_expected bytea;v_payload text;v_used uuid;
+ v_epoch bigint;v_key bytea;v_expected bytea;v_payload text;v_inserted integer;
 BEGIN
  v_epoch=floor(extract(epoch from clock_timestamp()))::bigint;
  IF p_user IS NULL OR p_user !~ '^[A-Za-z0-9_-]{1,128}$'
@@ -81,9 +81,10 @@ BEGIN
  -- A read permit can be consumed only once. Replays, concurrent duplicates,
  -- expired and revoked-key signatures cannot retrieve ciphertext.
  INSERT INTO public.nex_ci_inbox_read_nonces(nonce,expires_at)
- VALUES(p_nonce,to_timestamp(p_expires))
- ON CONFLICT DO NOTHING RETURNING nonce INTO v_used;
- IF v_used IS NULL THEN RETURN; END IF;
+ VALUES(p_nonce,to_timestamp(p_expires)) ON CONFLICT DO NOTHING;
+ -- ROW_COUNT avoids SELECT/RETURNING privileges on the nonce table.
+ GET DIAGNOSTICS v_inserted=ROW_COUNT;
+ IF v_inserted<>1 THEN RETURN; END IF;
 
  RETURN QUERY
  SELECT i.inbound_id,i.family_id,i.business_account_id,
