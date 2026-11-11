@@ -11,6 +11,10 @@ on:
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
   pull_request:
     paths:
+      - 'db/migrations/20261109_whatsapp_explicit_consent_receipt.sql'
+      - 'lib/whatsapp/webhook-security.js'
+      - 'lib/whatsapp/verified-ingestion.js'
+      - 'tests/whatsapp-delivery-normalizer.test.js'
       - 'lib/whatsapp/consent-policy.js'
       - 'lib/whatsapp/durable-inbox.js'
       - 'lib/whatsapp/verified-ingestion.js'
