@@ -36,13 +36,19 @@ CREATE POLICY nex_ci_web_nonce_insert ON public.nex_ci_web_receipt_operation_non
  expires_at<=clock_timestamp()+interval '60 seconds');
 
 -- Proof identity is read from the verified Meta evidence, not from browser.
-GRANT SELECT ON public.nex_whatsapp_verified_phone_proofs
+-- FOR SHARE requires a table-level UPDATE privilege in PostgreSQL; grant
+-- ONLY consumed_at to the trusted definer owner. The public runtime retains
+-- no DML access, and the definer never edits that column.
+GRANT SELECT,UPDATE(consumed_at) ON public.nex_whatsapp_verified_phone_proofs
  TO nex_ci_web_receipt_owner;
 GRANT SELECT,INSERT ON public.nex_whatsapp_explicit_receipt_proofs
  TO nex_ci_web_receipt_owner;
 CREATE POLICY nex_ci_web_phone_proof_read
  ON public.nex_whatsapp_verified_phone_proofs FOR SELECT
  TO nex_ci_web_receipt_owner USING(true);
+CREATE POLICY nex_ci_web_phone_proof_lock
+ ON public.nex_whatsapp_verified_phone_proofs FOR UPDATE
+ TO nex_ci_web_receipt_owner USING(true) WITH CHECK(true);
 CREATE POLICY nex_ci_web_receipt_read
  ON public.nex_whatsapp_explicit_receipt_proofs FOR SELECT
  TO nex_ci_web_receipt_owner USING(true);
@@ -98,7 +104,8 @@ BEGIN
  WHERE proof_digest=p_proof_digest AND consumed_at IS NULL
    AND expires_at>clock_timestamp()
    AND verified_at<=clock_timestamp()
-   AND verified_at>=clock_timestamp()-interval '15 minutes';
+   AND verified_at>=clock_timestamp()-interval '15 minutes'
+ FOR SHARE;
  IF NOT FOUND OR v_proof.family_id<>p_family OR
    v_proof.business_account_id<>p_business OR
    v_proof.phone_number_id<>p_phone
