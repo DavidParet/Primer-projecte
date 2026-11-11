@@ -31,9 +31,10 @@
 ### Lectura dels avisos del pilot (STAGED ONLY, 12/11/2026)
 
 - Nou mòdul intern `lib/whatsapp/pilot-family-inbox-reader.js`: valida la sessió de pilot, el rol familiar, la paginació i les files retornades; desxifra localment amb AES-256-GCM després de tornar a comprovar autorització i sessió. No retorna remitent, número o grup original.
-- **Encara NO hi ha funció SQL real** `public.nex_ci_read_family_whatsapp_inbox`. És un contracte de lectura que ha de ser implementat i revisat per separat. Una crida actual a Neon fallaria.
-- El RPC futur ha de validar el membre canònic *dins de la mateixa transacció de lectura* i retenir un bloqueig de membre mentre selecciona files, filtrar per `family_id`, expiració i cursor, imposar un màxim de 20, i tenir un rol `EXECUTE` sense drets de lectura directa a les taules.
-- Les proves de la capa JS només fan servir registres xifrats ficticis, incloses dades manipulades i la cancel·lació de permisos. La incorporació d'aquest mòdul no publica API ni aprova cap pilot real.
+- **RPC SQL creat exclusivament per a CI:** `db/migrations/20261112_whatsapp_family_inbox_reader_ci.sql` implementa `public.nex_ci_read_family_whatsapp_inbox` només en un PostgreSQL temporal. **NO s'ha aplicat a Neon**, on la funció continua absent. No s'ha activat cap API de lectura pública.
+- El RPC de CI verifica el membre canònic mitjançant `nex_ci_authorize_canonical_family_locked` i conserva el bloqueig durant la consulta; filtra per `family_id`, expiració i cursor; limita a 20 missatges. El rol runtime té només `EXECUTE` i no pot fer `SELECT` directe a les taules.
+- `tests/sql/whatsapp-family-inbox-reader-rpc-smoke.sql` prova en PostgreSQL 17 dues famílies fictícies, autorització revocada, paginació i denegació dels rols sense permisos. La capa JS continua provant desxifrat AES-GCM, manipulacions i sessió revocada, també amb dades sintètiques.
+- **Bloqueig de seguretat pendent:** el paràmetre SQL `p_user` no verifica per si sol una identitat real. Solament un backend que comprovi criptogràficament la sessió i restringeixi els rols podria invocar aquest RPC; per a Neon cal disseny i auditoria independent d'aquest vincle i de la custòdia de claus. El fitxer `*_ci.sql` no és una migració real ni aprova cap pilot.
 
 ### 2. Vercel preview (NO GO)
 
