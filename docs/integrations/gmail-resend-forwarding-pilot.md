@@ -186,3 +186,17 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - **Pròxima fita estricta:** obtenir primer deployment `READY` de la passarel·la, provar GET públic sense autenticació i POST desactivat, després provar POST fictici signat amb família i consentiment de prova; només després repuntar el webhook **encara desactivat** i considerar-ne l'activació amb autorització i filtratge Gmail selectiu.
 
 **Conclusió:** barrera pública aïllada creada, testada i configurada però encara **no publicada ni activada**. La producció NexLupa i les dades personals continuen fora del pilot.
+
+
+### 11/11/2026 — passarel·la independent validada amb PostgreSQL i 50 proves
+
+**Nova evidència de CI, sense credencials ni correus reals:** [GitHub Actions #42938252720](https://github.com/DavidParet/Primer-projecte/actions/runs/42938252720) finalitzat correctament, **45 proves offline + 5 proves amb PostgreSQL 16 efímer = 50/50 aprovades, 0 errors**.
+
+- Test nou `gateway/tests/postgres.integration.cjs`, executat amb el **codi exacte de `gateway/lib/`**. Crea dades familiars inventades a una base PostgreSQL temporal, i utilitza un rol limitat que **no pot llegir la taula d'autoritzacions**.
+- **12 POST HTTP signats concurrents** amb el mateix `email.received` fictici es dedupliquen en **una única fila xifrada**; el desxifrat amb AAD comprova la família i el destinatari correctes. Cap assumpte ni remitent es guarda a la cua.
+- Signatura falsa: `HTTP 400`, sense inserció. Consentiment revocat o àlies desconegut: `HTTP 204` sense nou rebut ni accés a dades familiars.
+- Les 45 proves aïllades també comproven que el servei OFF rebutja POST sense llegir el cos ni accedir al backend.
+- Configuració d'aquest **projecte nou** ajustada via API Vercel per usar el subdirectori `gateway` i Node.js `22.x`, igual que CI. La resposta de Vercel confirma Node `22.x`, però no exposa el camp `rootDirectory` per una comprovació de lectura posterior; serà necessari verificar que efectivament desplega la ruta `gateway/api/webhook.js` quan la quota permeti un build.
+- **Encara 0 deployments al projecte `nexlupa-forwarding-gateway`** després de l'última consulta. L'automatització puntual `NexLupa · Gateway preview` està programada per al 12/11/2026 a les 02:02 (Europe/Madrid), i farà **com a màxim un intent** si el servei segueix no desplegat. La comprovació de quota Vercel continua pendent.
+
+**Portes que NO han canviat:** `FORWARDING_PILOT_ENABLED=false`, secrets sensibles només a preview, webhook pilot Resend desactivat, cap filtre Gmail, consentiment de família real no registrat i cap merge de PR. **50 proves no equivalen a un webhook de Resend rebut des d'Internet.**
