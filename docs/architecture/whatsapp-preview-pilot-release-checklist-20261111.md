@@ -21,12 +21,19 @@
 
 ### 1. Entorn aïllat Neon (NO GO)
 
-**Inspecció real de només lectura, 11/11/2026:** el projecte `nexlupa-resend-pilot` conté una branca principal amb la cua de Resend i branques descendents amb taules `neon_auth` i de WhatsApp. Les branques existents **no són un entorn inicial buit**. **Projecte sandbox nou creat i verificat:** `nexlupa-whatsapp-consent-sandbox-20261111` (`flat-night-91815247`), PostgreSQL 17, amb la branca arrel `sandbox-empty` (`ready`) i cap taula d'aplicació. L'usuari n'ha autoritzat la creació condicionada a no incrementar el cost; s'ha confirmat Neon Free. El projecte antic ha quedat intacte. Vegeu la [inspecció i estat d'aïllament](./whatsapp-neon-isolation-readonly-audit-20261111.md). **Encara NO s'ha creat una branca preview addicional ni s'ha executat cap migració.**
+**Inspecció real de només lectura, 11/11/2026:** el projecte `nexlupa-resend-pilot` conté una branca principal amb la cua de Resend i branques descendents amb taules `neon_auth` i de WhatsApp. Les branques existents **no són un entorn inicial buit**. **Projecte sandbox nou creat i verificat:** `nexlupa-whatsapp-consent-sandbox-20261111` (`flat-night-91815247`), PostgreSQL 17, amb la branca arrel `sandbox-empty` (`ready`) i cap taula d'aplicació. L'usuari n'ha autoritzat la creació condicionada a no incrementar el cost; s'ha confirmat Neon Free. El projecte antic ha quedat intacte. Vegeu la [inspecció i estat d'aïllament](./whatsapp-neon-isolation-readonly-audit-20261111.md). **Actualització 12/11/2026:** la branca preview `whatsapp-consent-preview-20261111` (`br-aged-rice-b99jb33r`) ja està creada dins el projecte sandbox sense endpoint compute. El pare `sandbox-empty` continuava sense taules d'aplicació quan es va consultar. L'inventari independent de la branca preview no s'ha pogut completar perquè no hi ha endpoint. No s'ha executat cap migració ni SQL de dades; la base Neon principal segueix intacta.
 
 - Confirmar una branca de prova sense còpia de dades familiars, missatges, correus, telèfons ni identificadors reals.
 - Preparar scripts per a preview **diferents** dels `*_ci.sql`; aquells fitxers són exclusius d'un PostgreSQL efímer i contenen rols `nex_ci_*` no aptes per aplicar a Neon real.
 - Revisar migració d'anada i retirada, rol runtime restringit, RLS, `SECURITY DEFINER`, drets sobre seqüències, permisos que poden heretar rols i rotació de claus.
 - Definir proves de rollback i destrucció del conjunt de dades fictícies. No executar sense revisió i aprovació específica.
+
+### Lectura dels avisos del pilot (STAGED ONLY, 12/11/2026)
+
+- Nou mòdul intern `lib/whatsapp/pilot-family-inbox-reader.js`: valida la sessió de pilot, el rol familiar, la paginació i les files retornades; desxifra localment amb AES-256-GCM després de tornar a comprovar autorització i sessió. No retorna remitent, número o grup original.
+- **Encara NO hi ha funció SQL real** `public.nex_ci_read_family_whatsapp_inbox`. És un contracte de lectura que ha de ser implementat i revisat per separat. Una crida actual a Neon fallaria.
+- El RPC futur ha de validar el membre canònic *dins de la mateixa transacció de lectura* i retenir un bloqueig de membre mentre selecciona files, filtrar per `family_id`, expiració i cursor, imposar un màxim de 20, i tenir un rol `EXECUTE` sense drets de lectura directa a les taules.
+- Les proves de la capa JS només fan servir registres xifrats ficticis, incloses dades manipulades i la cancel·lació de permisos. La incorporació d'aquest mòdul no publica API ni aprova cap pilot real.
 
 ### 2. Vercel preview (NO GO)
 
