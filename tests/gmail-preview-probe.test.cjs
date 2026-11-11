@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {probe}=require('../scripts/probe-gmail-preview.cjs');
+const {probe,probeExitCode}=require('../scripts/probe-gmail-preview.cjs');
 const url='https://primer-projecte-7c7ybte0k-davidparets-projects.vercel.app';
 
 function mocked(status,body,contentType='application/json; charset=utf-8'){
@@ -153,4 +153,19 @@ test('partially protected or mixed HTTP responses stay unverified',async()=>{
   assert.equal(result.deploymentProtected,false);
   assert.equal(result.routeReachable,false);
   assert.equal(result.phase,'unverified');
+});
+
+
+test('CLI probe exit codes separate SSO and inactive pilot from unknown errors',async()=>{
+  const tests=[
+    [async()=>mocked(401,null,'text/html'),3,'deployment_protected'],
+    [async target=>disabledResponse(target),4,'guarded_not_ready'],
+    [async target=>fullResponse(target),0,'configured_readiness'],
+    [async()=>mocked(502,{error:'bad_gateway'}),2,'unverified']
+  ];
+  for(const [fetchImpl,expected,phase] of tests){
+    const result=await probe(url,fetchImpl);
+    assert.equal(result.phase,phase);
+    assert.equal(probeExitCode(result),expected);
+  }
 });
