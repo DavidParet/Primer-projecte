@@ -21,15 +21,15 @@
 ### Limitacions pendents imprescindibles
 
 - **No hi ha IdP Neon Auth real connectat en aquest flux.** El test mockeja la resposta externa de la sessió; els usuaris canònics i les famílies són només els registres de PostgreSQL efímer. L'esquema TTP240 encara no s'ha implantat a Neon.
-- **No hi ha cap emissor real de proves de número** vinculat a Meta. El control de signatura RAW de Meta, el repte, les comprovacions WABA/número, la protecció contra duplicats i la vinculació amb el compte familiar encara s'han d'integrar i auditar.
-- **No hi ha emissor real de rebut explícit del web.** L'usuari pilot ha d'acceptar explícitament el consentiment; s'ha de guardar un rebut vinculat a l'evidència telefònica, família, versió i sessió autenticada. Els tests insereixen comprovants sintètics amb el superusuari **només per validar la part SQL**.
+- **Emissor Meta implementat només en el codi de proves:** `lib/whatsapp/meta-phone-proof-issuer.js` verifica l'HMAC de Meta sobre el cos original, el codi de vinculació, l'hora, el compte/número destinació i el replay; `db/migrations/20261111_whatsapp_verified_meta_proof_issuer_ci.sql` restringeix l'operació signada i bloqueja el membre familiar canònic. **No hi ha emissió real des de Meta ni claus de Meta reals.**
+- **Emissor web implementat només en el codi de proves:** `lib/whatsapp/pilot-web-consent.js` exigeix `accepted === true` i la versió exacta del consentiment en una sessió de família autenticada; `db/migrations/20261111_whatsapp_web_receipt_issuer_ci.sql` genera un rebut pseudònim mitjançant SQL signat amb rol restringit. El rebut queda vinculat a una prova telefònica no consumida, bloquejada amb `FOR SHARE`, i té unicitat per prova. **No existeix encara cap interfície web real per acceptar el consentiment ni s'ha desplegat cap emissor.**
 - **Cap secret real ni rol Neon està aprovat.** Falta pla de migració/reversió en branca Neon aïllada, grants mínims, custòdia i rotació de claus, revisió del token Vercel històric i separació d'emissors/activador; no copiar ni executar els rols `nex_ci_*` en producció.
 - **No hi ha WhatsApp HTTP POST ni lectura de grups reals.** Tampoc hi ha UI d'alta ni pilot E2E veritable. Privacy/RGPD, retenció, drets de tercers, menors i operacions d'esborrat/quarantena estan pendents.
 - **Vercel:** una validació preview anterior va quedar limitada per la quota de compilacions. La CI de GitHub **no equival** a preview Vercel aprovada ni a disponibilitat de l'aplicació.
 
 ### Próxima tasca executable
 
-Preparar **emissors verificats i de permisos mínims** per a prova Meta i rebut web; provar-los amb peticions falses i administradors revocats, i preparar una branca de Neon completament aïllada amb els rols canònics revisats. Només després executar E2E amb un usuari pilot real i Meta en mode prova, sense publicació automàtica.
+Revisar els emissors verificats ja implementats en CI (permís mínim, bloquejos i revocacions), preparar un **pla de migració reversible en una branca Neon completament aïllada** i construir la UI d'acceptació i el test de preview amb sessió real de prova i Meta sandbox. Només després executar E2E amb dades fictícies i un compte pilot autoritzat, sense publicació automàtica.
 
 **Guardrail:** mantenir la [PR #15](https://github.com/DavidParet/Primer-projecte/pull/15) com a esborrany: **NO MERGE / NO NEON LIVE / NO META LIVE / NO PRODUCTION**.
 
@@ -37,3 +37,13 @@ Preparar **emissors verificats i de permisos mínims** per a prova Meta i rebut 
 
 - [#42922037989](https://github.com/DavidParet/Primer-projecte/actions/runs/42922037989): rol SQL de runtime restringit, signatura HMAC, rollback i replay.
 - [#42925775895](https://github.com/DavidParet/Primer-projecte/actions/runs/42925775895): primera prova de revocació concurrent sobre una taula de membres CI ara substituïda per l'esquema TTP240.
+
+
+### Noves proves PostgreSQL del circuit complet (11/11/2026)
+
+- [GitHub Actions #42930991895](https://github.com/DavidParet/Primer-projecte/actions/runs/42930991895) — **SUCCESS** després de validar l'emissor de la prova del número amb HMAC RAW de Meta, cursa de registres i revocació de rol.
+- [GitHub Actions #42931790194](https://github.com/DavidParet/Primer-projecte/actions/runs/42931790194) — **SUCCESS** després d'integrar l'emissor web signat i els casos d'acceptació explícita; el test integra Meta simulat → PostgreSQL real (prova verificada) → rebut web → activació signada.
+- [GitHub Actions #42932336209](https://github.com/DavidParet/Primer-projecte/actions/runs/42932336209) — **SUCCESS**: prova de concurrència real en què un consumidor de prova de telèfon bloqueja la fila abans d'emetre el rebut; el rebut espera i rebutja després del consum confirmat.
+- S'ha ampliat el test amb dues peticions web simultànies per la mateixa prova i amb un administrador suspès: s'ha de crear **com a màxim un rebut** i cap rebut després de la suspensió. La prova d'aquesta ampliació s'ha afegit a `tests/whatsapp-signed-atomic-activation.test.cjs`; el resultat de CI s'ha de verificar separadament.
+
+**Límits del resultat:** aquests tests no equivalen a una API de Meta funcionant en viu ni a consentiment obtingut d'un usuari real. Totes les dades, la signatura de Meta, els comptes i les claus són **sintètics**. Les taules/rols prefixats `nex_ci_` només existeixen dins de l'execució de PostgreSQL efímera del test.
