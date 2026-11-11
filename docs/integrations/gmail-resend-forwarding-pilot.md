@@ -120,3 +120,16 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 **Distinció important:** el circuit que s'ha provat va d'HTTP local en CI a un Resend GET simulat. No verifica un enviament real de webhook Resend a Vercel, ni la verificació de l'adreça de reenviament a Gmail. La branca encara no està fusionada, `FORWARDING_PILOT_ENABLED=false` i no s'han llegit correus reals.
 
 **Portes següents:** desplegament de preview del commit revisat, secret propi de webhook de prova sense reutilitzar el secret del receptor estable, consentiment verificat d'una família pilot, comprovació de POST signat contra Vercel i aprovació del filtre selectiu Gmail. La font del correu requerirà més controls d'autenticitat que una llista de remitents `From`.
+
+
+### Actualització 11/11/2026 — leases per al futur worker, encara desconnectats
+
+- Nou `lib/forwarding/worker-lease.cjs`: protocol de **reserva temporal atòmica** `FOR UPDATE SKIP LOCKED` i `UPDATE ... RETURNING`, amb `lease_token` UUID aleatori, caducitat curta, reintents limitats i finalització només si el token i el termini continuen vigents.
+- La reserva exigeix **un rol de worker diferent** del rol receptor `nexlupa_resend_ingest`. Només s'ha simulat aquest rol amb `nexlupa_reviewer_ci` dins del PostgreSQL efímer de GitHub Actions; **no s'han concedit privilegis nous a Neon ni s'ha engegat cap worker en Vercel**.
+- `needs_review` requereix que el codi cridador indiqui que la fitxa de revisió ja està desada; el mòdul de leases no desa cap cos de correu ni crea automàticament una fitxa.
+- Prova amb **12 peticions concurrents i dos rebuts de prova:** cada rebut queda reservat per un únic treballador; un token caducat no pot completar-lo, el nou propietari el pot recuperar, una tasca completada no es pot marcar dos cops i un reintent es programa en el futur.
+- [GitHub Actions #42930973279](https://github.com/DavidParet/Primer-projecte/actions/runs/42930973279): **63/63 proves superades**, 56 offline + 7 PostgreSQL 16 efímer. Sense Resend ni Gmail reals.
+
+**Bloquejos que continuen oberts:** quota de desplegaments Vercel per a la darrera revisió (HTTP 402 al darrer intent), secret exclusiu del webhook pilot, credencial de lectura Resend limitada, consentiment explícit i alias de família pilot, comprovació de font de correu i filtre selectiu Gmail. `FORWARDING_PILOT_ENABLED=false`, PR #16 en esborrany, producció no modificada.
+
+**Limitació pendent abans de connectar el worker:** persistir una proposta de revisió xifrada amb permisos mínims i revisió humana real, en lloc de limitar-se a marcar la cua.
