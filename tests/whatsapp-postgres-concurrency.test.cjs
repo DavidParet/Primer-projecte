@@ -104,7 +104,10 @@ test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out'
     await holder.query('COMMIT');
     holder.release();holder=null;
     assert.deepEqual(await inserting,{state:'unlinked'});
-    const afterSecond=await pool.query('SELECT COUNT(*)::integer AS n FROM nex_whatsapp_inbound');
+    const afterSecond=await pool.query(
+      "SELECT COUNT(*)::integer AS n FROM nex_whatsapp_inbound "+
+      "WHERE business_account_id=$1 AND provider_message_id = ANY($2::text[])",
+      [ACCOUNT,['wamid.synthetic-first','wamid.synthetic-racing-insert']]);
     assert.equal(afterSecond.rows[0].n,0);
   } finally {
     if(holder) {
