@@ -85,7 +85,7 @@
 
 ### Validació 11/11/2026 — contracte Resend i HTTP real en CI
 
-- **52/52 proves superades, 0 errors** a [GitHub Actions #42926206952](https://github.com/DavidParet/Primer-projecte/actions/runs/42926206952): 36 proves offline i 5 amb PostgreSQL 16 temporal.
+- **41/41 proves superades, 0 errors** a [GitHub Actions #42926206952](https://github.com/DavidParet/Primer-projecte/actions/runs/42926206952): 36 proves offline i 5 amb PostgreSQL 16 temporal.
 - Contrastat el contracte `email.received` amb l'[exemple oficial de Resend](https://resend.com/features/webhooks): el payload inclou `data.email_id`, `to[]`, `from`, `subject`, `message_id` i `attachments[]`. S'ha afegit una prova amb aquesta estructura completa. El mòdul pilot **només accepta** un destinatari i zero adjunts, i enregistra exclusivament metadades imprescindibles, mai `from`, `subject` o cos.
 - **HTTP POST end-to-end en CI**, no un mock de funció: un servidor HTTP efímer ha rebut un esdeveniment fictici amb signatura Svix vàlida i l'ha inserit a PostgreSQL amb rol limitat (HTTP 204); reintent ha retornat 204 sense crear duplicat; signatura falsa ha retornat HTTP 400. Tot sense accedir a Resend, Gmail ni Neon reals.
 - En secrets de Vercel exclusius del preview d'aquesta branca, `FORWARDING_PILOT_DATABASE_URL` i `FORWARDING_PILOT_ENCRYPTION_KEY` consten com a `sensitive`. La clau de xifrat del pilot s'ha creat amb entropia criptogràfica i no s'ha imprès. `FORWARDING_PILOT_ENABLED=false` es manté verificat.
@@ -107,3 +107,16 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - Vercel conserva `FORWARDING_PILOT_ENABLED=false`. No s'ha configurat el secret de signatura d'un nou webhook ni una clau d'API Resend de lectura per al nou worker; aquest codi no pot llegir missatges reals per si sol.
 
 **Proper obstacle real:** verificació del desplegament de la versió més recent, sender allowlist autoritzada per una família pilot, autenticació de font i consentiment explícit, seguit de la prova amb correus inventats i revisió humana.
+
+
+### Actualització 11/11/2026 — recorregut complet en proves integrades
+
+- S'ha afegit `lib/forwarding/resend-receiving-client.cjs`: adaptador de lectura **exclusivament GET** a l'API oficial de Resend Receiving, amb ID validat, resposta de mida limitada, timeout, sense redireccions ni dades d'HTML/capçaleres innecessàries. Sense clau real ni consulta a serveis externs en les proves.
+- `lib/forwarding/review-gate.cjs` comprova també la **coincidència exacta del destinatari** entre el missatge recuperat i l'àlies de la família autoritzada. Es rebutja un correu d'un altre àlies fins i tot quan coincideixen remitent i ID.
+- S'ha afegit una prova **de recorregut complet** amb PostgreSQL 16 efímer i servidor HTTP real local de CI: signatura Svix → recepció POST → cua xifrada i deduplicada → client Resend **simulat** → proposta `pending_human_review`, amb `approvedForAutoActions:false`. El cos no apareix a l'embolcall xifrat de metadades.
+- Es comprova la revocació posterior: la mateixa proposta torna `consent_missing` i no fa cap segona crida al client de Resend. Això prova l'aturada abans de recuperar el contingut quan falta permís.
+- [GitHub Actions #42929722396](https://github.com/DavidParet/Primer-projecte/actions/runs/42929722396): **62 proves correctes, 0 errors**, 56 offline + 6 PostgreSQL efímer. Comprovació d'importació i del driver `pg` mantinguda.
+
+**Distinció important:** el circuit que s'ha provat va d'HTTP local en CI a un Resend GET simulat. No verifica un enviament real de webhook Resend a Vercel, ni la verificació de l'adreça de reenviament a Gmail. La branca encara no està fusionada, `FORWARDING_PILOT_ENABLED=false` i no s'han llegit correus reals.
+
+**Portes següents:** desplegament de preview del commit revisat, secret propi de webhook de prova sense reutilitzar el secret del receptor estable, consentiment verificat d'una família pilot, comprovació de POST signat contra Vercel i aprovació del filtre selectiu Gmail. La font del correu requerirà més controls d'autenticitat que una llista de remitents `From`.
