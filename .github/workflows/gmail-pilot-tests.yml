@@ -54,3 +54,14 @@ jobs:
           done
       - name: Run Gmail safety and authentication tests (no external accounts)
         run: node --test tests/gmail-*.test.cjs
+
+      - name: Probe isolated Vercel preview HTTP (GET only; diagnostic)
+        if: github.event_name == 'push'
+        continue-on-error: true
+        env:
+          GMAIL_PREVIEW_URL: https://primer-projecte-7c7ybte0k-davidparets-projects.vercel.app
+        run: |
+          # The probe sends no OAuth code, cookie, authorization header or email.
+          # It exits nonzero for a protected/guarded preview; this is diagnostic,
+          # NOT proof that OAuth or Gmail message reads work.
+          node scripts/probe-gmail-preview.cjs "$GMAIL_PREVIEW_URL"
