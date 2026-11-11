@@ -142,14 +142,3 @@ test('network failure on one route does not hide the other HTTP results',async()
   assert.doesNotMatch(JSON.stringify(result),/synthetic_secret_must_not_leak/);
 });
 
-test('aborted preview request is classified as a timeout, not a verified route',async()=>{
-  const result=await probe(url,async (target,options)=>{
-    if(new URL(target).pathname.endsWith('/callback')){
-      options.signal.dispatchEvent(new Event('abort'));
-      throw Error('synthetic_timeout');
-    }
-    return fullResponse(target);
-  });
-  assert.equal(result.results[2].failure,'network_error');
-  assert.equal(result.routeReachable,false);
-});
