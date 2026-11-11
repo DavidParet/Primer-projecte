@@ -151,6 +151,45 @@ test('standalone gateway: signed HTTP, concurrent dedup, revocation and no famil
       'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue'
     )).rows[0].n,1);
    });
+   await t.test('in-flight signed delivery fails closed when consent is revoked before the durable insert',async()=>{
+    // The first two lookups may approve a delivery just before the family
+    // revokes access. The actual INSERT must check current consent again.
+    let reachedInsert,releaseInsert;
+    const paused=new Promise(resolve=>{reachedInsert=resolve;});
+    const resume=new Promise(resolve=>{releaseInsert=resolve;});
+    const gatedHandler=makeHttpHandler({
+     config:{vercelEnv:'preview',gitRef:ALLOWED_BRANCH,
+      enabled:'true',configured:true,webhookSecret:secret},
+     createAdapters:async()=>({
+      resolveAuthorizedRecipient:adapters.resolveAuthorizedRecipient,
+      enqueueReceipt:async receipt=>{
+       reachedInsert();
+       await resume;
+       return adapters.enqueueReceipt(receipt);
+      }
+     })
+    });
+    await serve(gatedHandler,async base=>{
+     const item=payload('d21b31b7-d82b-48af-8a5f-749ec74262c3');
+     const pending=fetch(base+'/api/webhook',{
+      method:'POST',headers:item.headers,body:item.raw
+     });
+     try{
+      await paused; // Both authorization checks passed, no INSERT yet.
+      await admin.query(
+       'UPDATE nexlupa_worker_rpc.synthetic_aliases SET authorized=false WHERE recipient=$1',
+       [recipient]
+      ); // Revocation is COMMITTED before permitting the INSERT.
+     }finally{
+      releaseInsert();
+     }
+     const result=await pending;
+     assert.equal(result.status,204);
+     assert.equal((await restricted.query(
+      'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue'
+     )).rows[0].n,1); // Only the original, pre-revocation receipt.
+    });
+   });
    await t.test('revoked consent blocks subsequent signed delivery',async()=>{
     await admin.query(
       'UPDATE nexlupa_worker_rpc.synthetic_aliases SET authorized=false WHERE recipient=$1',
