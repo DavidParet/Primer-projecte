@@ -7,7 +7,7 @@ const {auditIsolatedNeonTarget,CHECKS}=
 const pristine=()=>({
  project:{id:'silent-purpose-12345678',
   name:'nexlupa-whatsapp-consent-sandbox-ci-20261111'},
- branch:{id:'br-synthetic-123456',
+ branch:{id:'br-synthetic-123456',project_id:'silent-purpose-12345678',
   name:'whatsapp-consent-preview-20261111',
   primary:false,default:false,init_source:'empty'},
  tables:[],tableInventoryComplete:true,
@@ -54,6 +54,22 @@ test('the existing pilot default branch can never be mistaken for a sandbox',()=
  assert.equal(auditIsolatedNeonTarget(input).status,'blocked');
  assert.equal(auditIsolatedNeonTarget(input).safeToExecuteSQL,false);
 });
+test('preview branch must belong to the same exact Neon sandbox project',()=>{
+ for(const invalidProjectId of [undefined,null,'another-neon-project-id','']){
+  const input=pristine();
+  if(invalidProjectId===undefined)delete input.branch.project_id;
+  else input.branch.project_id=invalidProjectId;
+  const out=auditIsolatedNeonTarget(input);
+  assert.equal(out.status,'blocked');
+  assert.ok(out.failedChecks.includes('branch_project_mismatch'));
+  assert.equal(out.migrationApproved,false);
+  assert.equal(out.safeToExecuteSQL,false);
+ }
+ const correct=pristine();
+ assert.equal(auditIsolatedNeonTarget(correct).failedChecks.includes(
+  'branch_project_mismatch'),false);
+});
+
 test('an empty dedicated sandbox project may clone a verified empty parent, but SQL stays blocked',()=>{
  const input=pristine();
  input.branch.parent_id='br-synthetic-blank-parent';
