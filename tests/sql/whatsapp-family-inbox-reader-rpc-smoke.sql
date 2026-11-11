@@ -88,7 +88,8 @@ BEGIN
   'canonical-a','11111111-1111-4111-8111-111111111111',NULL,20);
  SELECT count(*) INTO n FROM public.nex_ci_read_family_whatsapp_inbox(
   'canonical-a','11111111-1111-4111-8111-111111111111',v_cursor,20)
- WHERE provider_message_id ~ '^wamid[.]inbox-ci-a-[0-9]+
+ WHERE provider_message_id ~ '^wamid[.]inbox-ci-a-[0-9]+$';
+ IF n<>3 THEN RAISE EXCEPTION 'Cursor expected 3 more fixture A rows, got %',n; END IF;
 
  SELECT count(*) INTO n FROM public.nex_ci_read_family_whatsapp_inbox(
   'ci-inbox-member-b','22222222-2222-4222-8222-222222222222',NULL,20)
