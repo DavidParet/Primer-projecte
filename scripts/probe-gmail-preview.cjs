@@ -54,6 +54,13 @@ async function probe(raw,fetchImpl=globalThis.fetch){
       results.push({path,status:response.status,contentType:type,protectedByVercel,
         expectedReadyStatus:EXPECTED[path].ready,routeVerified:ready||guarded,
         ready,guarded});
+    }catch(error){
+      // A DNS, TLS or timeout failure on one route must not hide the other
+      // results. Never include raw exception messages (URLs may contain secrets).
+      results.push({path,status:null,contentType:null,protectedByVercel:false,
+        expectedReadyStatus:EXPECTED[path].ready,routeVerified:false,
+        ready:false,guarded:false,
+        failure:controller.signal.aborted?'timeout':'network_error'});
     }finally{clearTimeout(timeout);}
   }
   const routeReachable=results.length===3 && results.every(x=>x.routeVerified);
