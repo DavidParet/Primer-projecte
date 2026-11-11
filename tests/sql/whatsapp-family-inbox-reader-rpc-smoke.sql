@@ -94,8 +94,7 @@ BEGIN
   'ci-inbox-member-b','22222222-2222-4222-8222-222222222222',NULL,20);
  IF n<>1 THEN RAISE EXCEPTION 'B should read only one record, got %',n; END IF;
 
- FOR n IN 1..1 LOOP
-  IF EXISTS(SELECT 1 FROM public.nex_ci_read_family_whatsapp_inbox(
+ IF EXISTS(SELECT 1 FROM public.nex_ci_read_family_whatsapp_inbox(
     'canonical-a','22222222-2222-4222-8222-222222222222',NULL,20))
   OR EXISTS(SELECT 1 FROM public.nex_ci_read_family_whatsapp_inbox(
     'ci-inbox-member-b','11111111-1111-4111-8111-111111111111',NULL,20))
@@ -106,7 +105,6 @@ BEGIN
   OR EXISTS(SELECT 1 FROM public.nex_ci_read_family_whatsapp_inbox(
     'canonical-a','11111111-1111-4111-8111-111111111111',0,20))
   THEN RAISE EXCEPTION 'Unlinked/disabled/invalid query leaked data'; END IF;
- END LOOP;
 END;
 $body$;
 RESET ROLE;
