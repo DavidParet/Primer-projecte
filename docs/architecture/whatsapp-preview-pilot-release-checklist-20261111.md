@@ -12,6 +12,8 @@
 | Rols sense bypass RLS, cap execució SQL creuada | Aprovat en PostgreSQL temporal | [#42933402350](https://github.com/DavidParet/Primer-projecte/actions/runs/42933402350) |
 | Producció no exposa pantalla pilot, codi ni migracions | Aprovat amb build sintètic | [#42934145412](https://github.com/DavidParet/Primer-projecte/actions/runs/42934145412) |
 | Regressions de dues famílies i PostgreSQL | Aprovat en CI | [#42934145477](https://github.com/DavidParet/Primer-projecte/actions/runs/42934145477) |
+| Inventari preflight: mode live denegat per defecte, noms sense valors de secrets | Aprovat en CI | [#42934579747](https://github.com/DavidParet/Primer-projecte/actions/runs/42934579747) |
+| Regressió completa durable inbox i dues famílies després de reforçar preflight | Aprovat en CI | [#42934579673](https://github.com/DavidParet/Primer-projecte/actions/runs/42934579673) |
 
 **Límit:** les respostes de Neon Auth i Meta en aquestes proves són simulades. Els tests no demostren una connexió amb els seus serveis reals.
 
