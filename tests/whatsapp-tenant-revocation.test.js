@@ -73,3 +73,26 @@ test('failed isolation setup rolls back without revoking or purging',async()=>{
   assert.deepEqual(statements,['BEGIN','SET TRANSACTION ISOLATION LEVEL READ COMMITTED','ROLLBACK']);
   assert.equal(released,true);
 });
+
+test('purge failure rolls back revocation instead of acknowledging success',async()=>{
+  const statements=[];
+  let released=false;
+  const db={query:async()=>{throw Error('unexpected pool query');},
+    connect:async()=>({release(){released=true;},async query(sql){
+      statements.push(sql);
+      if(sql==='BEGIN'||sql==='SET TRANSACTION ISOLATION LEVEL READ COMMITTED'||sql==='ROLLBACK')return {};
+      if(sql.includes('FOR UPDATE'))return {rowCount:1,rows:[{authorization_id:'1'}]};
+      if(sql.includes('UPDATE nex_whatsapp_sender_authorizations'))
+        return {rowCount:1,rows:[{authorization_id:'1'}]};
+      if(sql.includes('DELETE FROM nex_whatsapp_inbound'))throw Error('synthetic purge failure');
+      throw Error('unexpected SQL');
+    }})};
+  const policy=makeConsentPolicy({db,senderHmacKey:key,currentConsentVersion:'pilot-v1',
+    resolveAuthenticatedFamily:async()=>FAMILY_A,
+    verifyEnrollment:async()=>{},verifyExplicitConsent:async()=>{}});
+  await assert.rejects(policy.revoke({session:{},businessAccountId:BUSINESS,
+    phoneNumberId:NUMBER,senderWaId:SENDER}),/synthetic purge failure/);
+  assert.equal(statements.at(-1),'ROLLBACK');
+  assert.equal(statements.includes('COMMIT'),false);
+  assert.equal(released,true);
+});
