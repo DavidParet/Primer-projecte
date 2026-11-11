@@ -71,10 +71,18 @@ async function probe(raw,fetchImpl=globalThis.fetch){
     phase:fullyVerified?'configured_readiness':routeReachable?'guarded_not_ready':
       deploymentProtected?'deployment_protected':'unverified'};
 }
+// Distinct diagnostic exit codes let CI report SSO and disabled pilots as
+// expected states without hiding genuine network or response-contract failures.
+function probeExitCode(result){
+  if(result.phase==='configured_readiness') return 0;
+  if(result.phase==='deployment_protected') return 3;
+  if(result.phase==='guarded_not_ready') return 4;
+  return 2;
+}
 if(require.main===module){
   probe(process.argv[2]).then(result=>{
     console.log(JSON.stringify(result,null,2));
-    if(!result.fullyVerified)process.exitCode=2;
+    process.exitCode=probeExitCode(result);
   }).catch(error=>{console.error(error.message);process.exitCode=1;});
 }
-module.exports={probe};
+module.exports={probe,probeExitCode};
