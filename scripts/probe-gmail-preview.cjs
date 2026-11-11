@@ -65,8 +65,11 @@ async function probe(raw,fetchImpl=globalThis.fetch){
   }
   const routeReachable=results.length===3 && results.every(x=>x.routeVerified);
   const fullyVerified=routeReachable && results.every(x=>x.ready);
-  return {preview:url.origin,results,routeReachable,fullyVerified,
-    phase:fullyVerified?'configured_readiness':routeReachable?'guarded_not_ready':'unverified'};
+  // Vercel SSO blocks the request before the app, not in the Gmail handlers.
+  const deploymentProtected=results.length===3 && results.every(x=>x.protectedByVercel);
+  return {preview:url.origin,results,routeReachable,fullyVerified,deploymentProtected,
+    phase:fullyVerified?'configured_readiness':routeReachable?'guarded_not_ready':
+      deploymentProtected?'deployment_protected':'unverified'};
 }
 if(require.main===module){
   probe(process.argv[2]).then(result=>{

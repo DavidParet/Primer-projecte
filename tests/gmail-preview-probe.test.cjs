@@ -69,7 +69,8 @@ test('Vercel access wall is not counted as reachable HTTP',async()=>{
   const result=await probe(url,async()=>mocked(401,null,'text/html'));
   assert.equal(result.routeReachable,false);
   assert.equal(result.fullyVerified,false);
-  assert.equal(result.phase,'unverified');
+  assert.equal(result.phase,'deployment_protected');
+  assert.equal(result.deploymentProtected,true);
   assert.ok(result.results.every(x=>x.protectedByVercel));
 });
 
@@ -142,3 +143,14 @@ test('network failure on one route does not hide the other HTTP results',async()
   assert.doesNotMatch(JSON.stringify(result),/synthetic_secret_must_not_leak/);
 });
 
+
+
+test('partially protected or mixed HTTP responses stay unverified',async()=>{
+  const result=await probe(url,async target=>
+    new URL(target).pathname.endsWith('/callback')
+      ?mocked(401,null,'text/html')
+      :fullResponse(target));
+  assert.equal(result.deploymentProtected,false);
+  assert.equal(result.routeReachable,false);
+  assert.equal(result.phase,'unverified');
+});
