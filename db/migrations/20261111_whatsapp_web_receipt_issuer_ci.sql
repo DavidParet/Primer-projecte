@@ -71,6 +71,7 @@ SET search_path=pg_catalog,public AS $f$
 DECLARE
  v_now bigint;v_key bytea;v_payload text;v_expected bytea;
  v_proof record;v_nonce uuid;v_new bytea;
+ v_accepted_at timestamptz;
 BEGIN
  v_now=floor(extract(epoch from clock_timestamp()))::bigint;
  IF p_user IS NULL OR length(p_user) NOT BETWEEN 1 AND 128 OR
@@ -116,13 +117,16 @@ BEGIN
  ON CONFLICT DO NOTHING RETURNING nonce INTO v_nonce;
  IF v_nonce IS NULL THEN RETURN jsonb_build_object('state','rejected'); END IF;
 
+ -- Bind both columns to the same instant: strict receipt RLS requires
+ -- expires_at to be no more than ten minutes after accepted_at.
+ v_accepted_at=clock_timestamp();
  INSERT INTO public.nex_whatsapp_explicit_receipt_proofs(
   receipt_digest,proof_digest,family_id,business_account_id,
   phone_number_id,sender_digest,scope,consent_version,
   source,accepted_at,expires_at)
  VALUES(p_receipt_digest,p_proof_digest,p_family,p_business,p_phone,
    v_proof.sender_digest,'incoming_text',p_consent_version,
-   'account-web-consent',clock_timestamp(),clock_timestamp()+interval '10 minutes')
+   'account-web-consent',v_accepted_at,v_accepted_at+interval '10 minutes')
  ON CONFLICT DO NOTHING RETURNING receipt_digest INTO v_new;
  IF v_new IS NULL THEN RETURN jsonb_build_object('state','rejected'); END IF;
  RETURN jsonb_build_object('state','issued');
