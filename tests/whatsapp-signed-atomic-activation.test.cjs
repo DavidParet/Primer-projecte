@@ -770,6 +770,73 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
     await webRuntime.query('RESET ROLE');webRuntime.release();
   }
 
+  // Do not let any externally invokable service account reuse another
+  // consent stage's signing RPC. Inspect actual PG16 ACLs, not a JS mock.
+  const roles=[
+    'nex_ci_meta_proof_runtime',
+    'nex_ci_web_receipt_runtime',
+    'nex_ci_atomic_activation_runtime'
+  ];
+  const functions=[
+    'public.nex_ci_signed_store_meta_phone_proof('+
+      'text,text,bytea,bytea,bytea,text,text,bigint,uuid,bytea)',
+    'public.nex_ci_signed_create_web_consent_receipt('+
+      'text,uuid,text,text,bytea,bytea,text,text,bigint,uuid,bytea)',
+    'public.nex_ci_signed_activate_atomic_consent('+
+      'text,uuid,text,text,bytea,bytea,text,text,bigint,uuid,bytea)'
+  ];
+  const protectedTables=[
+    'nex_whatsapp_verified_phone_proofs',
+    'nex_whatsapp_explicit_receipt_proofs',
+    'nex_whatsapp_sender_authorizations',
+    'nex_ci_whatsapp_pairing_challenges',
+    'nex_ci_meta_proof_signing_keys',
+    'nex_ci_web_receipt_signing_keys',
+    'nex_ci_atomic_activation_keys',
+    'nex_ci_meta_proof_provider_receipts',
+    'nex_ci_web_receipt_operation_nonces',
+    'nex_ci_atomic_activation_nonces',
+    'nex_family_memberships',
+    'nex_users',
+    'nex_families'
+  ];
+  for(let ri=0;ri<roles.length;ri++){
+    const pgRole=roles[ri];
+    const grantInfo=await pool.query(
+      'SELECT rolsuper,rolcanlogin,rolbypassrls,rolinherit '+
+      'FROM pg_roles WHERE rolname=$1',[pgRole]);
+    assert.equal(grantInfo.rowCount,1);
+    assert.deepEqual(grantInfo.rows[0],{
+      rolsuper:false,rolcanlogin:false,rolbypassrls:false,
+      rolinherit:false
+    },'runtime privilege escalation: '+pgRole);
+    for(let fi=0;fi<functions.length;fi++){
+      const perm=await pool.query(
+        'SELECT has_function_privilege($1,$2,$3) AS allowed',
+        [pgRole,functions[fi],'EXECUTE']);
+      assert.equal(perm.rows[0].allowed,ri===fi,
+        pgRole+' may execute wrong signed RPC stage '+fi);
+    }
+    for(const table of protectedTables){
+      const p=await pool.query(
+        'SELECT has_table_privilege($1,$2,$3) AS read,'+
+        'has_table_privilege($1,$2,$4) AS write',
+        [pgRole,'public.'+table,'SELECT','INSERT']);
+      assert.equal(p.rows[0].read,false,pgRole+' can read '+table);
+      assert.equal(p.rows[0].write,false,pgRole+' can write '+table);
+    }
+  }
+  // Each definer owner can call canonical membership verification, but
+  // cannot edit the user's active/disabled status or family roles.
+  for(const owner of ['nex_ci_meta_proof_owner',
+    'nex_ci_web_receipt_owner','nex_ci_atomic_activation_owner']){
+    const result=await pool.query(
+      'SELECT has_table_privilege($1,$2,$3) AS update_membership',
+      [owner,'public.nex_family_memberships','UPDATE']);
+    assert.equal(result.rows[0].update_membership,false,
+      owner+' may alter canonical family membership');
+  }
+
   // Disabling the sole signing key must reject even otherwise valid evidence.
   const revoked=makeIds('revoked');
   await seed(pool,revoked);
