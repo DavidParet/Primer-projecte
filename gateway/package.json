@@ -1,0 +1,16 @@
+{
+  "name": "nexlupa-forwarding-gateway",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Isolated fail-closed webhook ingress for a consented, metadata-only NexLupa pilot",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check api/webhook.js && node --check lib/runtime.cjs && node --check lib/neon-receipt.cjs && node --check lib/http-handler.cjs && node --check lib/resend-intake.cjs"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}
