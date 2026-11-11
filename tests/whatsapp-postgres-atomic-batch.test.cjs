@@ -61,3 +61,45 @@ test('PostgreSQL: failed second delivery rolls back entire batch, retry stores e
     assert.equal(count.rows[0].n,2);
   }finally{await pool.end();}
 });
+
+test('PostgreSQL: provider ID collision across authorized senders fails closed without leaking families',{
+  skip:!url,timeout:40000
+},async()=>{
+  const pool=new Pool({connectionString:url,max:4,connectionTimeoutMillis:6000});
+  const hmacKey=randomBytes(32);
+  const account='9999900001',phone='8888800001';
+  const familyA='00000000-0000-4000-8000-000000000011';
+  const familyB='00000000-0000-4000-8000-000000000012';
+  const senders=['34600000011','34600000012'];
+  const messageId='wamid.synthetic-cross-family-collision';
+  try {
+    await pool.query(readFileSync(join(__dirname,
+      '../db/migrations/20261108_whatsapp_durable_inbox.sql'),'utf8'));
+    for (const [index,sender] of senders.entries()) {
+      await pool.query(
+        "INSERT INTO nex_whatsapp_sender_authorizations "+
+        "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source) "+
+        "VALUES ($1,$2,$3,$4,'incoming_text','synthetic-v1',NOW(),'synthetic-ci')",
+        [account,phone,createHmac('sha256',hmacKey).update(sender).digest(),
+          index===0?familyA:familyB]);
+    }
+    const inbox=createDurableInbox({db:pool,senderHmacKey:hmacKey.toString('base64'),
+      contentEncryptionKey:randomBytes(32).toString('base64')});
+    const delivery=sender=>({
+      provider:'whatsapp',businessAccountId:account,phoneNumberId:phone,
+      providerMessageId:messageId,senderWaId:sender,providerTimestamp:'1794150000',
+      type:'text',text:'Entirely synthetic message',contentPending:false
+    });
+    assert.deepEqual(await inbox.persistDelivery(delivery(senders[0])),{state:'stored'});
+    await assert.rejects(inbox.persistDelivery(delivery(senders[1])),
+      /Provider message ID collision/);
+    assert.deepEqual(await inbox.persistDelivery(delivery(senders[0])),{state:'duplicate'});
+    const {rows}=await pool.query(
+      'SELECT family_id,COUNT(*)::integer AS n FROM nex_whatsapp_inbound '+
+      'WHERE business_account_id=$1 AND provider_message_id=$2 GROUP BY family_id',
+      [account,messageId]);
+    assert.equal(rows.length,1);
+    assert.equal(rows[0].family_id,familyA);
+    assert.equal(rows[0].n,1);
+  } finally { await pool.end(); }
+});
