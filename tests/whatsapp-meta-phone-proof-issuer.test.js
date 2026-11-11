@@ -131,3 +131,25 @@ test('SQL rejection triggers rollback; DB error rolls back and releases',async()
   ['BEGIN','ISSUE','ROLLBACK']);
  assert.equal(failure.releases,1);
 });
+
+
+test('signed oversized body and invalid UTF-8 never issue phone evidence',async()=>{
+ const f=mock(),valid=payload();
+ // Both inputs are correctly signed to isolate bounds/decoding from HMAC.
+ const oversized=Buffer.concat([valid,Buffer.alloc(256*1024,0x20)]);
+ assert.deepEqual(await f.issuer(oversized,sig(oversized)),
+  {state:'rejected'});
+ // A malformed byte sequence in an unrelated JSON field must not silently
+ // decode to the replacement character and become a trusted proof.
+ const malformed=Buffer.concat([
+  valid.subarray(0,valid.length-1),
+  Buffer.from(',"untrusted":"'),
+  Buffer.from([0xc3,0x28]),
+  Buffer.from('"}')
+ ]);
+ assert.deepEqual(await f.issuer(malformed,sig(malformed)),
+  {state:'rejected'});
+ assert.equal(f.reads,0);
+ assert.equal(f.calls.length,0);
+ assert.equal(f.releases,0);
+});
