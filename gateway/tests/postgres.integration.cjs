@@ -19,6 +19,8 @@ if(!pgUrl)throw Error('disposable_postgres_service_required');
 
 const recipient='in-0123456789abcdef0123456789abcdef@entrada.nexlupa.app';
 const familyId='11111111-2222-4333-8444-555555555555';
+const familyId2='22222222-3333-4444-8555-666666666666';
+const recipient2='in-11111111111111111111111111111111@entrada.nexlupa.app';
 const key='ab'.repeat(32);
 const secret='whsec_'+Buffer.alloc(32,29).toString('base64');
 
@@ -85,9 +87,18 @@ async function setup(admin){
   [familyId,'entirely-synthetic-test-family','pilot']
  );
  await admin.query(
+  'INSERT INTO nexlupa_worker_test.families(family_id,alias,status) VALUES($1,$2,$3)',
+  [familyId2,'entirely-synthetic-other-family','pilot']
+ );
+ await admin.query(
   `INSERT INTO nexlupa_worker_test.inbound_aliases(alias_digest,family_id,status)
    VALUES(encode(sha256(convert_to(lower($1),'UTF8')),'hex'),$2,'active')`,
   [recipient,familyId]
+ );
+ await admin.query(
+  `INSERT INTO nexlupa_worker_test.inbound_aliases(alias_digest,family_id,status)
+   VALUES(encode(sha256(convert_to(lower($1),'UTF8')),'hex'),$2,'active')`,
+  [recipient2,familyId2]
  );
  await admin.query(
   `INSERT INTO nexlupa_worker_test.source_consents
@@ -95,6 +106,13 @@ async function setup(admin){
    VALUES($1,'resend_forward','read_school_mail',now()-interval '1 day',
    now()+interval '1 day','synthetic-test-only')`,
   [familyId]
+ );
+ await admin.query(
+  `INSERT INTO nexlupa_worker_test.source_consents
+   (family_id,source_kind,permission_scope,approved_at,expires_at,version)
+   VALUES($1,'resend_forward','read_school_mail',now()-interval '1 day',
+   now()+interval '1 day','synthetic-test-only')`,
+  [familyId2]
  );
 }
 function payload(emailId){
@@ -297,6 +315,64 @@ test('standalone gateway: signed HTTP, concurrent dedup, revocation and no famil
     assert.equal((await restricted.query(
       'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue'
     )).rows[0].n,1);
+   });
+   await t.test('two synthetic families remain isolated even with the same provider email ID',async()=>{
+    // Family A's consent was revoked in the preceding tests. Family B is
+    // independently approved and must not inherit A's authorization outcome.
+    assert.equal(await adapters.resolveAuthorizedRecipient(recipient),null);
+    const other=await adapters.resolveAuthorizedRecipient(recipient2);
+    assert.equal(other?.familyId,familyId2);
+    const baseEvent=payload('a21b31b7-d82b-48af-8a5f-749ec74262c3');
+    const changed=JSON.parse(baseEvent.raw);
+    changed.data.to=[recipient2];
+    const raw=JSON.stringify(changed);
+    const stamp=baseEvent.headers['svix-timestamp'];
+    const id=baseEvent.headers['svix-id'];
+    const signature=createHmac('sha256',Buffer.from(secret.slice(6),'base64'))
+      .update(id+'.'+stamp+'.'+raw).digest('base64');
+    const delivery={raw,headers:{
+      ...baseEvent.headers,'svix-signature':'v1,'+signature
+    }};
+    const first=await post(delivery);
+    assert.equal(first.status,204);
+    const rows=(await restricted.query(
+      'SELECT queue_id,encrypted_envelope FROM nexlupa_pilot.resend_inbox_queue'
+    )).rows;
+    assert.equal(rows.length,2);
+    const decoded=rows.map(row=>decryptReceiptEnvelope({
+      receiptKey:row.queue_id.trim(),
+      encryptedEnvelope:row.encrypted_envelope,encryptionKeyHex:key
+    }));
+    assert.equal(decoded.filter(row=>row.familyId===familyId).length,1);
+    assert.equal(decoded.filter(row=>row.familyId===familyId2).length,1);
+    const a=decoded.find(row=>row.familyId===familyId);
+    const b=decoded.find(row=>row.familyId===familyId2);
+    assert.notEqual(a.receiptKey,b.receiptKey);
+    assert.equal(a.emailId,b.emailId); // Same ID, different tenant and alias.
+    assert.equal(a.recipient,recipient);
+    assert.equal(b.recipient,recipient2);
+    assert.equal((await post(delivery)).status,204);
+    assert.equal((await restricted.query(
+      'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue'
+    )).rows[0].n,2); // Idempotent per recipient and provider ID.
+    await admin.query(
+      'UPDATE nexlupa_worker_test.source_consents SET revoked_at=now() WHERE family_id=$1',
+      [familyId2]
+    );
+    const newEvent=payload('c41b31b7-d82b-48af-8a5f-749ec74262c3');
+    const second=JSON.parse(newEvent.raw);
+    second.data.to=[recipient2];
+    const secondRaw=JSON.stringify(second);
+    const secondSig=createHmac('sha256',Buffer.from(secret.slice(6),'base64'))
+      .update(newEvent.headers['svix-id']+'.'+newEvent.headers['svix-timestamp']+'.'+secondRaw)
+      .digest('base64');
+    const blocked=await post({raw:secondRaw,headers:{
+      ...newEvent.headers,'svix-signature':'v1,'+secondSig
+    }});
+    assert.equal(blocked.status,204);
+    assert.equal((await restricted.query(
+      'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue'
+    )).rows[0].n,2);
    });
   });
  }finally{
