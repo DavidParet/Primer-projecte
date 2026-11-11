@@ -162,3 +162,27 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - **Portes abans d'activar**: resoldre l'entrada pública segura, preparar alias i consentiment explícit, verificar un POST `email.received` completament sintètic, proves de revocació simultània, clau API de Resend de lectura segregada i només després filtres selectius Gmail.
 
 **Conclusió actual:** webhooks i claus preparats i segurs, però `Gmail → Resend → NexLupa` **encara no rep correus reals**. No publicar ni fusionar automàticament.
+
+
+### 11/11/2026 · Passarel·la pública separada (implementació en curs)
+
+**Nou projecte Vercel creat:** `nexlupa-forwarding-gateway` (`prj_xjsIRCabOGPFZmMBLyxrnuoSPnSe`) en el mateix equip, però **independent del projecte de l'aplicació principal**. Té una connexió GitHub al repositori `DavidParet/Primer-projecte`; el servei està a la subcarpeta `gateway/`.
+
+**Codi i comprovacions:**
+- `gateway/api/webhook.js` és l'única funció HTTP del projecte: `POST /api/webhook` amb cos cru, validació HMAC Svix abans de PostgreSQL i cua de metadades xifrada i deduplicada. `GET /api/webhook` retorna únicament l'estat de configuració, sense secrets ni contingut.
+- Còpia separada i auditable dels mòduls de recepció, autorització i xifrat sota `gateway/lib/`. `gateway/package.json` és autònom i la funció no depèn de la interfície principal.
+- La suite independent `.github/workflows/forwarding-gateway-tests.yml` ha superat **41/41 tests, 0 errors** a [GitHub Actions #42934477048](https://github.com/DavidParet/Primer-projecte/actions/runs/42934477048). Inclou proves que la ruta GET pública no revela dades i que un POST es rebutja **abans de llegir el cos o connectar a DB** si el pilot està desactivat.
+- La configuració del projecte confirma `ssoProtection.enabled=false` només en aquesta **passarel·la**, sense tocar les proteccions SSO de `primer-projecte`.
+
+**Secrets i control d'accés, verificats a Vercel:**
+- `FORWARDING_PILOT_ENABLED=false` s'ha definit tant a preview com a producció. La comprovació final l'ha confirmat.
+- `FORWARDING_PILOT_WEBHOOK_SECRET` és el secret del webhook **de proves desactivat**, `FORWARDING_PILOT_DATABASE_URL` apunta al rol restringit `nexlupa_resend_ingest` de la branca Neon aïllada, i `FORWARDING_PILOT_ENCRYPTION_KEY` és una clau independent per a la nova passarel·la. **Les tres estan a Vercel com a `sensitive`, només preview i només a la branca pilot.** No s'han desat claus a GitHub ni exposat els seus valors.
+- **Atenció al desxifrat posterior:** la nova passarel·la té una clau d'embolcall **diferent** de la preview de l'app; el futur worker haurà d'utilitzar explícitament la clau corresponent o passar per una migració segura. No s'ha connectat cap worker real.
+
+**Bloqueig verificat de desplegament:**
+- El nou projecte està creat i les proves CI són verdes, però **encara té 0 deployments**. Un intent de preview Vercel ha retornat HTTP 402, límit `api-deployments-free-per-day` del pla Hobby. No s'ha ampliat cap quota, canviat el pla ni fet càrrecs.
+- La connexió GitHub al projecte nou existeix, però **no s'ha verificat un URL públic funcional**. No afirmar que Resend pot enviar-hi POST fins que el desplegament estigui en `READY` i es comprovi la ruta real.
+- El webhook de proves de Resend segueix `disabled` i **encara apunta a la URL de preview protegida anterior**, no a un endpoint del nou gateway. El webhook estable productiu continua sense canvis.
+- **Pròxima fita estricta:** obtenir primer deployment `READY` de la passarel·la, provar GET públic sense autenticació i POST desactivat, després provar POST fictici signat amb família i consentiment de prova; només després repuntar el webhook **encara desactivat** i considerar-ne l'activació amb autorització i filtratge Gmail selectiu.
+
+**Conclusió:** barrera pública aïllada creada, testada i configurada però encara **no publicada ni activada**. La producció NexLupa i les dades personals continuen fora del pilot.
