@@ -121,3 +121,35 @@ test('results never copy response bodies or credentials',async()=>{
   });
   assert.doesNotMatch(JSON.stringify(result),/synthetic_secret_do_not_show/);
 });
+
+test('network failure on one route does not hide the other HTTP results',async()=>{
+  const calls=[];
+  const result=await probe(url,async target=>{
+    const path=new URL(target).pathname;
+    calls.push(path);
+    if(path.endsWith('/start')) throw Error('synthetic_secret_must_not_leak');
+    return fullResponse(target);
+  });
+  assert.equal(calls.length,3);
+  assert.equal(result.results.length,3);
+  assert.equal(result.results[0].ready,true);
+  assert.equal(result.results[1].failure,'network_error');
+  assert.equal(result.results[1].routeVerified,false);
+  assert.equal(result.results[2].ready,true);
+  assert.equal(result.routeReachable,false);
+  assert.equal(result.fullyVerified,false);
+  assert.equal(result.phase,'unverified');
+  assert.doesNotMatch(JSON.stringify(result),/synthetic_secret_must_not_leak/);
+});
+
+test('aborted preview request is classified as a timeout, not a verified route',async()=>{
+  const result=await probe(url,async (target,options)=>{
+    if(new URL(target).pathname.endsWith('/callback')){
+      options.signal.dispatchEvent(new Event('abort'));
+      throw Error('synthetic_timeout');
+    }
+    return fullResponse(target);
+  });
+  assert.equal(result.results[2].failure,'network_error');
+  assert.equal(result.routeReachable,false);
+});
