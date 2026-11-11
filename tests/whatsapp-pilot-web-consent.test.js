@@ -32,9 +32,9 @@ function fixture({result='issued',allowed=true,afterRoleRevoked=false,
  };}};
  const binding=async()=>({
   authorizeFamily:async({familyId,action})=>{
-   assert.equal(familyId,FAMILY);
    assert.equal(action,'enroll_whatsapp_sender');
-   checked++;return allowed&&!(afterRoleRevoked&&checked>1);
+   checked++;return familyId===FAMILY && allowed &&
+      !(afterRoleRevoked&&checked>1);
   },
   getVerifiedPrincipal:async()=>({
    userId:USER,sessionId:sessionSwapped&&checked>1?'swapped':'valid-session'
