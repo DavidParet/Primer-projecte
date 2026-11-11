@@ -503,7 +503,7 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
       [metaProofDigest])).rows[0].n,0);
     assert.deepEqual(await metaProofIssuer(raw,mac(raw)),{state:'verified'});
     const metaRecord=await pool.query('SELECT family_id,business_account_id,'+
-      'phone_number_id,sender_digest,consumed_at FROM '+
+      'phone_number_id,sender_digest,consumed_at,verified_at,expires_at FROM '+
       'public.nex_whatsapp_verified_phone_proofs WHERE proof_digest=$1',
       [metaProofDigest]);
     assert.equal(metaRecord.rowCount,1);
@@ -511,6 +511,9 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
     assert.equal(metaRecord.rows[0].business_account_id,BIZ);
     assert.equal(metaRecord.rows[0].phone_number_id,PHONE);
     assert.equal(metaRecord.rows[0].consumed_at,null);
+    assert.equal(metaRecord.rows[0].expires_at.getTime()-
+      metaRecord.rows[0].verified_at.getTime(),10*60*1000,
+      'strict RLS proof lifetime must be exactly ten minutes');
     assert.deepEqual(metaRecord.rows[0].sender_digest,
       createHmac('sha256',metaSenderKey).update('34611111111').digest());
     assert.equal((await pool.query('SELECT COUNT(*)::int AS n FROM '+
