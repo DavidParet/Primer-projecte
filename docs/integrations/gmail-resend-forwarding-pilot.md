@@ -17,7 +17,7 @@
 - Resend: `entrada.nexlupa.app` verificat, `Receiving: enabled`, `Sending: disabled`. Un únic webhook estable `email.received` habilitat; el webhook de preview duplicat s'ha desactivat.
 - El codi del receptor estable `nexlupa-resend-pilot` actual només fa verificació criptogràfica. NO equival a ingestió de contingut en NexLupa.
 - Neon, branca aïllada `resend-worker-consent-validation-20261108`: `intake_bridge_health()` retorna `receipts=2`, `pending=1`, `signed_family_matches=0`, `eligible_for_processing=0`, `blocked_unrouted=1`. No s'han llegit dades de missatges.
-- Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. Ja existeix el codi HTTP aïllat del pilot, però sense desplegament verificat del commit més recent i sense secrets, associacions o correus reals.
+- Nou mòdul `lib/forwarding/resend-intake.cjs`: signatura, destinatari únic, alias aleatori, consentiment revalidat i hash idempotent. `lib/forwarding/neon-receipt.cjs`: adaptador **en codi, no desplegat** que prepara un rebut de metadades xifrat AES-256-GCM i un INSERT amb autorització atòmica via RPC + ON CONFLICT, sense llegir el cos del correu. El codi HTTP aïllat del pilot ja té desplegament de preview verificat per GET, però no s'ha verificat una recepció POST signada real ni cap associació amb una família consentida.
 - Tests offline i PostgreSQL disposable sota GitHub Actions: **52/52 correctes**, última execució #42927400232. Inclou 47 proves offline i 5 proves en un servei PostgreSQL 16 temporal, sense Gmail, Resend ni Neon en CI; les consultes a Neon real es documenten més avall.
 - Preview de Vercel del commit `f1edf3002886849c051df99f1c834ad59a161779`: **READY**. Per eliminar l'error de patrons de rutes del `main` s'han adaptat `vercel.json` i `scripts/build-static.js` de la branca Gmail verificada. Aquest solapament s'ha de resoldre abans de fusionar cap PR.
 
@@ -29,7 +29,7 @@
 - [x] Verificar concurrència de 12 reentregues simultànies amb PostgreSQL 16 temporal i un rol de base de dades restringit: 1 alta, 11 duplicats, 1 únic rebut.
 - [x] Verificar en CI el desxifrat AES-256-GCM amb AAD lligat a `queue_id` i el rebuig de ciphertext manipulat, fila intercanviada i clau incorrecta. El worker definitiu encara no està connectat.
 - [ ] Verificar revocació **simultània** amb una inserció en trànsit i limitar la taxa; el test només confirma revocacions ja confirmades abans d'un nou intent.
-- [x] Ruta HTTP de preview **implementada en codi**, separada del webhook estable; signatura comprovada abans d'inicialitzar PostgreSQL; cap resposta amb dades privades. **Encara pendent: desplegament i prova HTTP en Vercel**.
+- [x] Ruta HTTP de preview **implementada en codi**, separada del webhook estable; signatura comprovada abans d'inicialitzar PostgreSQL; cap resposta amb dades privades. **GET en previsualització verificat; POST signat encara pendent**.
 - [ ] Confirmació de l'adreça a Gmail i filtre selectiu definit amb revisió humana; sense reenviament global.
 - [ ] Prova de 1–3 correus **inventats**, sense dades personals ni de menors: un accepted/queued, un duplicate, un no autoritzat i revocació.
 - [ ] Comparar recepció amb fitxes en revisió i comprovar zero enviaments/Calendar. No publicar a `main` sense aprovació.
@@ -63,7 +63,7 @@
 
 **Codi HTTP preview afegit, però encara NO desplegat en la darrera revisió:**
 - `api/forwarding/pilot-webhook.js` i `lib/forwarding/{http-handler,runtime}.cjs` posen el processament darrere de triple condició: Vercel `preview`, branca exacta de pilot i `FORWARDING_PILOT_ENABLED=true`. Producció sempre inhabilitada.
-- `FORWARDING_PILOT_ENABLED=false` s'ha desat explícitament a les variables de Vercel **només per a aquesta branca**. No s'ha creat cap secret de Resend ni cap encaminament de webhook a la nova ruta.
+- `FORWARDING_PILOT_ENABLED=false` s'ha desat explícitament a les variables de Vercel **només per a aquesta branca**. El webhook de proves antic s'ha reutilitzat i apuntat a la nova ruta, però continua desactivat. La clau pròpia de verificació queda protegida en Vercel.
 - El GET de supervisió només indica configuració, **no afirma una connexió real a Neon**. El POST compara la signatura abans de preparar la connexió PostgreSQL. Els errors transitoris responen 503 per permetre reintents; els rebuts rebutjats s'acusen sense filtració de contingut.
 - `package.json` ara inclou el connector PostgreSQL `pg` i GitHub Actions verifica la càrrega del mòdul Vercel.
 
@@ -76,9 +76,9 @@
 
 - S'ha afegit `tests/forwarding-postgres.integration.cjs` amb un **PostgreSQL 16 efímer** desplegat dins GitHub Actions (no és Neon ni una base de dades familiar real). 12 crides signades simultànies al mateix correu fictici han retornat **1 `queued` i 11 `duplicate`**, amb exactament una fila al servidor. També s'ha provat la revocació prèvia al nou intent i la impossibilitat de consultar directament la taula d'autorització amb el rol restringit.
 - `lib/forwarding/neon-receipt.cjs` utilitza ara **AAD = queue_id** a AES-256-GCM i exposa un descodificador server-side que rebutja ciphertext manipulat, claus errònies o intents de moure el contingut xifrat a un altre identificador. El format ha superat proves de xifrat/desxifrat tant offline com al PostgreSQL efímer.
-- Variables Vercel exclusives de la branca de preview: `FORWARDING_PILOT_DATABASE_URL` (**sensitive**, rol `nexlupa_resend_ingest` limitat a la branca Neon de validació i `sslmode=verify-full`), i `FORWARDING_PILOT_ENABLED=false`. No s'han creat els secrets de verificació del nou webhook ni d'encriptació per a l'execució real, i no s'ha apuntat cap webhook actiu a aquesta ruta.
+- Variables Vercel exclusives de la branca de preview: `FORWARDING_PILOT_DATABASE_URL` (**sensitive**, rol `nexlupa_resend_ingest` limitat a la branca Neon de validació i `sslmode=verify-full`), i `FORWARDING_PILOT_ENABLED=false`. Ara els secrets de verificació i xifrat estan protegits a Vercel; el webhook de proves apunta a la ruta però està desactivat. No hi ha cap webhook actiu nou apuntant a aquesta ruta.
 - **Verificació HTTP d'una previsualització automàtica anterior:** `GET /api/forwarding/pilot-webhook` ha retornat **HTTP 200**, amb `configurationPresent:false`, `databaseConnectivityVerified:false`, `metadataReceiptsEnabled:false` i `productionEnabled:false`. Això confirma que la ruta es publica i funciona **desactivada**, però no que la versió de xifrat més recent ja s'hagi desplegat ni que la connexió PostgreSQL sigui funcional en Vercel.
-- Els últims commits de prova no tenen desplegament Vercel verificat per la quota de desplegaments. El CI funciona de manera independent. Encara cal un test HTTP POST amb signatura real del pilot, connexió de la cua a Neon amb alias i consentiment explícit i prova de revocació concurrent.
+- La ruta del preview està verificada per GET en un desplegament posterior, però encara no s'ha verificat POST. El CI funciona de manera independent. Encara cal un test HTTP POST amb signatura real del pilot, connexió de la cua a Neon amb alias i consentiment explícit i prova de revocació concurrent.
 
 **Important:** proves de concurrència en PostgreSQL local de CI i deduplicació seqüencial a Neon **no equivalen** a una prova completa sota múltiples instàncies Vercel amb correus reals. No promoure el PR ni activar el pilot abans d'aquesta validació.
 
@@ -89,7 +89,7 @@
 - Contrastat el contracte `email.received` amb l'[exemple oficial de Resend](https://resend.com/features/webhooks): el payload inclou `data.email_id`, `to[]`, `from`, `subject`, `message_id` i `attachments[]`. S'ha afegit una prova amb aquesta estructura completa. El mòdul pilot **només accepta** un destinatari i zero adjunts, i enregistra exclusivament metadades imprescindibles, mai `from`, `subject` o cos.
 - **HTTP POST end-to-end en CI**, no un mock de funció: un servidor HTTP efímer ha rebut un esdeveniment fictici amb signatura Svix vàlida i l'ha inserit a PostgreSQL amb rol limitat (HTTP 204); reintent ha retornat 204 sense crear duplicat; signatura falsa ha retornat HTTP 400. Tot sense accedir a Resend, Gmail ni Neon reals.
 - En secrets de Vercel exclusius del preview d'aquesta branca, `FORWARDING_PILOT_DATABASE_URL` i `FORWARDING_PILOT_ENCRYPTION_KEY` consten com a `sensitive`. La clau de xifrat del pilot s'ha creat amb entropia criptogràfica i no s'ha imprès. `FORWARDING_PILOT_ENABLED=false` es manté verificat.
-- El secret **propi d'un webhook de Resend per a aquest endpoint** encara no està creat ni configurat. El webhook actiu estable NO s'ha redirigit.
+- Secret propi del webhook pilot configurat a Vercel com a variable sensible i limitat a la branca. El webhook de proves continua DISABLED. El webhook estable de producció NO s'ha redirigit.
 - **No donar aquesta fase per completada:** falta provar el nou desplegament HTTP a Vercel amb el secret de webhook adequat, el consentiment d'una família pilot i el reenviament selectiu verificat de Gmail; mantenir tallada la recepció real fins que aquestes comprovacions passin. També cal testar revocació que coincideixi temporalment amb una inserció.
 
 Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per la nova ruta i no s'ha fet cap fusió a `main`.
@@ -104,7 +104,7 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - **Limitació de seguretat:** validar el camp `From` contra una llista no prova per si sol l'autenticitat del remitent. Abans de connectar correus reals, caldrà revisar autenticació i procedència via capçaleres verificables i la política de reenviament, amb aprovació humana sempre.
 - Les proves han detectat una ambigüitat del nom visible de remitent (`nom@domini <altra@domini>`); corregida amb un parser que rebutja aquestes formes i les capçaleres amb salts de línia.
 - [GitHub Actions #42927400232](https://github.com/DavidParet/Primer-projecte/actions/runs/42927400232): **52/52 proves, 0 errors** (47 offline + 5 PostgreSQL efímer), incloses revocació abans/durant la recuperació de contingut i protecció contra instruccions dins de correus inventats.
-- Vercel conserva `FORWARDING_PILOT_ENABLED=false`. No s'ha configurat el secret de signatura d'un nou webhook ni una clau d'API Resend de lectura per al nou worker; aquest codi no pot llegir missatges reals per si sol.
+- Vercel conserva `FORWARDING_PILOT_ENABLED=false`. El secret de signatura del webhook de proves està configurat, però aquest webhook segueix DISABLED. Encara no hi ha cap clau API de lectura Resend al worker, i aquest codi no pot llegir missatges reals per si sol.
 
 **Proper obstacle real:** verificació del desplegament de la versió més recent, sender allowlist autoritzada per una família pilot, autenticació de font i consentiment explícit, seguit de la prova amb correus inventats i revisió humana.
 
@@ -119,7 +119,7 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 
 **Distinció important:** el circuit que s'ha provat va d'HTTP local en CI a un Resend GET simulat. No verifica un enviament real de webhook Resend a Vercel, ni la verificació de l'adreça de reenviament a Gmail. La branca encara no està fusionada, `FORWARDING_PILOT_ENABLED=false` i no s'han llegit correus reals.
 
-**Portes següents:** desplegament de preview del commit revisat, secret propi de webhook de prova sense reutilitzar el secret del receptor estable, consentiment verificat d'una família pilot, comprovació de POST signat contra Vercel i aprovació del filtre selectiu Gmail. La font del correu requerirà més controls d'autenticitat que una llista de remitents `From`.
+**Portes següents:** entrada pública segura per superar SSO de Vercel, consentiment verificat d'una família pilot, comprovació de POST signat i aprovació del filtre selectiu Gmail. La font del correu requerirà més controls d'autenticitat que una llista de remitents `From`.
 
 
 ### Actualització 11/11/2026 — leases per al futur worker, encara desconnectats
@@ -130,7 +130,7 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - Prova amb **12 peticions concurrents i dos rebuts de prova:** cada rebut queda reservat per un únic treballador; un token caducat no pot completar-lo, el nou propietari el pot recuperar, una tasca completada no es pot marcar dos cops i un reintent es programa en el futur.
 - [GitHub Actions #42930973279](https://github.com/DavidParet/Primer-projecte/actions/runs/42930973279): **63/63 proves superades**, 56 offline + 7 PostgreSQL 16 efímer. Sense Resend ni Gmail reals.
 
-**Bloquejos que continuen oberts:** quota de desplegaments Vercel per a la darrera revisió (HTTP 402 al darrer intent), secret exclusiu del webhook pilot, credencial de lectura Resend limitada, consentiment explícit i alias de família pilot, comprovació de font de correu i filtre selectiu Gmail. `FORWARDING_PILOT_ENABLED=false`, PR #16 en esborrany, producció no modificada.
+**Bloquejos que continuen oberts:** quota de desplegaments Vercel per a la darrera revisió (HTTP 402 al darrer intent), secret del webhook pilot (ja configurat), credencial de lectura Resend limitada, consentiment explícit i alias de família pilot, comprovació de font de correu i filtre selectiu Gmail. `FORWARDING_PILOT_ENABLED=false`, PR #16 en esborrany, producció no modificada.
 
 **Limitació pendent abans de connectar el worker:** persistir una proposta de revisió xifrada amb permisos mínims i revisió humana real, en lloc de limitar-se a marcar la cua.
 
@@ -140,5 +140,25 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - El commit `777d24eee4c838f7a029c0e84b12541620b0588e`, posterior a les **63 proves verdes**, ha estat desplegat automàticament a Vercel en estat **READY**; el desplegament no ha requerit canvis de pla.
 - **Prova HTTP real**: `GET https://primer-projecte-47h83u7vc-davidparets-projects.vercel.app/api/forwarding/pilot-webhook` → **200 OK** amb `configurationPresent:false`, `databaseConnectivityVerified:false`, `emailBodiesFetched:false`, `metadataReceiptsEnabled:false`, `productionEnabled:false`. `Cache-Control: no-store, private`.
 - El desplegament **ja no està bloquejat** per al commit anterior. L'error 402 registrat en intents de desplegament **manuals** és històric; no vol dir que la versió automàtica actual no estigui disponible.
-- **No s'ha provat POST contra aquest Vercel**: la interfície de comprovació disponible només fa GET. El webhook pilot no té encara secret de signatura independent, ni consentiment de família pilot; per això un POST no podria validar el circuit real complet.
+- **No s'ha provat POST contra aquest Vercel**: la interfície de comprovació disponible només fa GET. El webhook pilot ja té secret de signatura independent però continua desactivat, i no hi ha consentiment de família pilot; a més, el domini de preview està darrere de Vercel Authentication.
 - La pàgina de diagnòstic no afirma connectivitat amb Neon, i la bandera de pilot continua `false`. Aquest estat és el comportament correcte fins que hi hagi consentiment i una validació d'entrada signada.
+
+
+### 11/11/2026 · Webhook de proves recuperat, secret protegit i bloqueig SSO verificat
+
+**Canvi real en Resend i Vercel, sense flux entrant actiu:**
+
+- Reutilitzat el webhook de proves preexistent `26b5d6b0-d954-4877-afb4-c038efd34297` (`email.received`), abans amb una URL efímera. L'endpoint ara és la **branca estable** `https://primer-projecte-git-feature-gmail-r-560c64-davidparets-projects.vercel.app/api/forwarding/pilot-webhook`.
+- El webhook de proves s'ha mantingut **`disabled`** en l'actualització i s'ha tornat a verificar després. El webhook estable `99ee8d6e-94e1-41ae-a9ef-e0a7408afa81` continua **`enabled`** i sense canvis: hi ha exactament un webhook actiu, no dos.
+- El secret de signatura específic del webhook desactivat està desat com a **`FORWARDING_PILOT_WEBHOOK_SECRET` de tipus `sensitive` a Vercel, `preview` i `gitBranch` exclusivament al pilot**. Comprovada la independència del secret del webhook de producció i la compatibilitat sintàctica amb l'HMAC Svix. No s'ha exposat cap secret en el codi ni en el registre.
+- **`FORWARDING_PILOT_ENABLED=false`** manté tota la recepció real desactivada; el secret d'encriptació i la connexió restringida a Neon continuen protegits.
+- El GET de la URL estable via l'accés autenticat de Vercel retorna **HTTP 200** amb `metadataReceiptsEnabled:false`.
+
+**Nou bloqueig material descobert abans de l'activació:**
+
+- La configuració real del projecte Vercel mostra `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`. Per tant, la branca `.vercel.app` requereix autenticació Vercel per a trucades de tercers. L'accés autenticat de ChatGPT **no demostra que Resend pugui fer un POST públic**, i el webhook desactivat no ha provat cap lliurament.
+- Les [instruccions oficials de Vercel](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection) confirmen que es pot usar un secret de bypass per automatització amb paràmetre URL, però un bypass compartit pot donar accés ampli als desplegaments protegits. **No se n'ha creat cap ni s'ha desactivat l'SSO.**
+- **Opció recomanada abans de cap correu personal:** un microservei públic **aïllat** amb una sola ruta de webhook, signatura obligatòria, cua limitada al pilot i sense exposar l'app principal. És una decisió arquitectònica pendent, no una integració ja completada. També és possible un domini personalitzat de branca, però exposaria més superfície de la necessària.
+- **Portes abans d'activar**: resoldre l'entrada pública segura, preparar alias i consentiment explícit, verificar un POST `email.received` completament sintètic, proves de revocació simultània, clau API de Resend de lectura segregada i només després filtres selectius Gmail.
+
+**Conclusió actual:** webhooks i claus preparats i segurs, però `Gmail → Resend → NexLupa` **encara no rep correus reals**. No publicar ni fusionar automàticament.
