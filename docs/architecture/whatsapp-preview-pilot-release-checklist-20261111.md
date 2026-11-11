@@ -30,6 +30,8 @@
 
 ### 2. Vercel preview (NO GO)
 
+**Inspecció real de només lectura, 11/11/2026:** Vercel conserva una preview del projecte `primer-projecte` en estat `READY` per al commit WhatsApp `afdceeab`. **No és la versió actual de la PR #15**, de manera que no acredita el nou control d'aïllament de Neon ni el consentiment complet. No s'ha forçat cap compilació nova ni s'ha fet cap promoció a producció. El límit de compilacions denunciat anteriorment s'ha de tornar a comprovar abans del pilot; no s'ha afirmat que sigui encara el bloqueig actual.
+
 - Resoldre la limitació actual de compilacions per poder verificar una preview real.
 - Comprovar que l'origen de prova és HTTPS i coincideix amb el host exacte autoritzat; que el build de producció no inclou el pilot; que API, credencials i fitxers SQL no són recursos estàtics.
 - Validar dos comptes ficticis autoritzats amb el servei Neon Auth de preview, amb galeta HttpOnly, expiració i tancament de sessió verificats; un tercer compte desconegut s'ha de rebutjar.
