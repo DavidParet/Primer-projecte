@@ -142,3 +142,20 @@ En un projecte de Google Cloud controlat per l'operador del producte:
 - **Producció:** cap modificació ni habilitació de lectura Gmail. Les variables noves requereixen una nova preview per ser efectives al runtime; l'existència de variables no equival a una validació de connexió real.
 
 **Fita pendent per poder connectar el Gmail real:** client OAuth propi a Google Cloud, credencials segures i compte pilot familiar verificat a Neon; després preparar la URL PostgreSQL de rol restringit i executar una prova consentida amb 1–3 missatges ficticis.
+
+
+## Validació HTTP autenticada — 11/11/2026
+
+Prova **real** executada mitjançant la sessió autoritzada de Vercel sobre l'àlies de preview de la branca `feature/gmail-readonly-pilot-20261109` (commit revisat `76f322fa9218443132c247ec31b677f404741039`). S'ha emprat únicament **GET**, sense sessions familiars, codis OAuth ni dades de Gmail. L'accés al desplegament protegit s'ha fet a través d'un enllaç temporal de Vercel, sense desactivar la protecció general.
+
+| Ruta | HTTP | Contracte verificat | Interpretació |
+| --- | --- | --- | --- |
+| `GET /api/gmail/pilot/start` | **405** | `{"error":"method_not_allowed"}` | Ruta existent; es rebutja GET, només s'admet POST. |
+| `GET /api/gmail/pilot/callback` | **503** | `{"error":"gmail_pilot_unavailable"}` | El retorn OAuth existeix i es manté bloquejat correctament. |
+| `GET /api/gmail/pilot-auth` | **200** | `ready:true`, `mode:"preview-only"`, `family_auth:"neon-jwt-required"`, `direct_family_table_access:false`, `real_email_access:false` | El rol limitat de PostgreSQL respon i supera el control de privilegis. **No** acredita una autorització familiar ni l'ús real de Gmail. |
+
+**Variables existents i aïllades en aquesta branca preview:** `GMAIL_PILOT_DATABASE_URL`, `GMAIL_PILOT_REDIRECT_URI`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL`, `GMAIL_PILOT_ENABLED`. Només s'han consultat els noms i l'abast, **no** els secrets. Les variables `GOOGLE_CLIENT_ID` i `GOOGLE_CLIENT_SECRET` continuen sense configurar. No habilitar el pilot.
+
+**CI verificat:** execució [#43083870022](https://github.com/DavidParet/Primer-projecte/actions/runs/43083870022), commit `76f322fa...`: **178/178 proves aïllades superades, 0 errors**. L'últim pas del workflow encara consulta una antiga URL efímera **sense** autenticació i rep tres 401; està marcat `continue-on-error`. Per tant, un workflow global verd **no** valida per si sol l'HTTP de preview. Les peticions HTTP autenticades anteriors són evidència independent i més recent.
+
+**Pendent crític:** client OAuth Google Cloud de prova, compte pilot adult autoritzat i vincle familiar amb consentiment verificable. Després, amb autorització explícita, habilitar `GMAIL_PILOT_ENABLED` només a la branca preview, provar l'inici POST autenticat i la lectura màxima de tres missatges ficticis etiquetats `NEXLUPA_PILOT`. Cap modificació de producció, cap lectura de correu real i cap fusió a `main` en aquesta validació.
