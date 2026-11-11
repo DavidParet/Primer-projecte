@@ -91,6 +91,15 @@ test('metadata gates require a complete table inventory and independent attestat
  assert.ok(out.failedChecks.includes('real_provider_data_excluded_pending'));
  assert.equal(out.migrationApproved,false);
 });
+test('truthy strings and numbers are not proof of a complete Neon inventory',()=>{
+ for(const unverified of ['false','true',1,{},[]]){
+  const input=pristine();input.tableInventoryComplete=unverified;
+  const out=auditIsolatedNeonTarget(input);
+  assert.equal(out.status,'blocked');
+  assert.ok(out.failedChecks.includes('table_inventory_not_confirmed_complete'));
+  assert.equal(out.safeToExecuteSQL,false);
+ }
+});
 test('even a preview-named branch is unsafe if it inherits parent data',()=>{
  const input=pristine();
  input.branch.init_source='parent-data';
