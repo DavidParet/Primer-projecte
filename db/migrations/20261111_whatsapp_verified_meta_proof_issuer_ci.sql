@@ -62,7 +62,7 @@ GRANT SELECT,UPDATE(consumed_at)
  ON public.nex_ci_whatsapp_pairing_challenges TO nex_ci_meta_proof_owner;
 CREATE POLICY nex_ci_meta_pair_read
  ON public.nex_ci_whatsapp_pairing_challenges FOR SELECT
- TO nex_ci_meta_proof_owner USING(consumed_at IS NULL);
+ TO nex_ci_meta_proof_owner USING(true);
 CREATE POLICY nex_ci_meta_pair_lock
  ON public.nex_ci_whatsapp_pairing_challenges FOR UPDATE
  TO nex_ci_meta_proof_owner USING(consumed_at IS NULL)
