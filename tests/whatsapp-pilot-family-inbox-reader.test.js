@@ -11,6 +11,11 @@ const B='22222222-2222-4222-8222-222222222222';
 const NOW=1800000000000;
 const key=randomBytes(32);
 const secret=key.toString('base64');
+const signingKey=randomBytes(32).toString('base64');
+const getActiveSigningKey=async()=>({
+ purpose:'whatsapp-inbox-read',state:'active',keyId:'ci-inbox-read-v1',
+ keyBase64:signingKey
+});
 
 function row(id,familyId=A,text='Demà sortida a les 9:00'){
  const account='123456789',phone='987654321',messageId='wamid.synthetic-'+id;
@@ -48,7 +53,8 @@ function fixture(rows=[]){
   };
  };
  const read=createPilotFamilyInboxReader({
-  db,bindVerifiedRequest,contentEncryptionKey:secret,now:()=>NOW
+  db,bindVerifiedRequest,contentEncryptionKey:secret,
+  getActiveSigningKey,now:()=>NOW
  });
  return {
   read,queries,
@@ -65,12 +71,19 @@ test('verified family can decrypt only bounded encrypted SQL RPC results',async(
  assert.equal(r.messages[0].text,'Demà sortida a les 9:00');
  assert.equal(r.messages[0].receivedAt,new Date(NOW-10000).toISOString());
  assert.equal(r.nextBeforeInboundId,13);
- assert.deepEqual(f.queries,[{sql:READ_SQL,args:['canonical-user-a',A,null,2]}]);
+ const [{sql,args}]=f.queries;
+ assert.equal(sql,READ_SQL);
+ assert.equal(args.length,9);
+ assert.deepEqual(args.slice(0,2),['canonical-user-a',A]);
+ assert.equal(args[2].length,32);
+ assert.deepEqual(args.slice(3,7),[null,2,'ci-inbox-read-v1',Math.floor(NOW/1000)+30]);
+ assert.match(args[7],/^[0-9a-f-]{36}$/);
+ assert.equal(args[8].length,32);
  assert.equal(Object.hasOwn(r.messages[0],'senderWaId'),false);
  assert.equal(Object.hasOwn(r.messages[0],'groupId'),false);
  assert.equal(Object.hasOwn(r.messages[0],'ciphertext'),false);
- assert.equal(f.checks(),2);
- assert.equal(f.principalChecks(),2);
+ assert.equal(f.checks(),3);
+ assert.equal(f.principalChecks(),3);
 });
 
 test('cross-family request and forged actor cannot reach any inbox SQL',async()=>{
@@ -120,7 +133,7 @@ test('revoked family membership after RPC denies returning any decrypted data',a
    getVerifiedPrincipal:async()=>({userId:'canonical-user-a',
     sessionId:'verified-synthetic-session-a'})
   }),
-  contentEncryptionKey:secret,now:()=>NOW
+  contentEncryptionKey:secret,getActiveSigningKey,now:()=>NOW
  });
  await assert.rejects(reader({familyId:A}),/access expired/);
 });
@@ -132,12 +145,16 @@ test('session swap during SQL denies returning messages',async()=>{
   bindVerifiedRequest:async()=>({
    authorizeFamily:async()=>true,
    getVerifiedPrincipal:async()=>({userId:'canonical-user-a',sessionId:id})
-  }),contentEncryptionKey:secret,now:()=>NOW
+  }),contentEncryptionKey:secret,getActiveSigningKey,now:()=>NOW
  });
  await assert.rejects(reader({familyId:A}),/session changed/);
 });
 
 test('invalid DB result, missing key or auth dependency never opens inbox',async()=>{
+ assert.throws(()=>createPilotFamilyInboxReader({
+  db:{query:async()=>({rows:[]})},bindVerifiedRequest:async()=>null,
+  contentEncryptionKey:secret
+ }),/signing key resolver/);
  const f=fixture();
  assert.throws(()=>createPilotFamilyInboxReader({
   db:{query:async()=>({rows:[]})},bindVerifiedRequest:async()=>null,
@@ -149,7 +166,7 @@ test('invalid DB result, missing key or auth dependency never opens inbox',async
   bindVerifiedRequest:async()=>({
    authorizeFamily:async()=>true,
    getVerifiedPrincipal:async()=>({userId:'canonical-user-a',sessionId:'s1'})
-  }),contentEncryptionKey:secret
+  }),contentEncryptionKey:secret,getActiveSigningKey
  });
  await assert.rejects(reader({familyId:A}),/Inbox data unavailable/);
  assert.equal(f.queries.length,0);
