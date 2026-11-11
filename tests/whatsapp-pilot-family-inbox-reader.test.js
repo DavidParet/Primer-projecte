@@ -150,6 +150,43 @@ test('session swap during SQL denies returning messages',async()=>{
  await assert.rejects(reader({familyId:A}),/session changed/);
 });
 
+test('revocation during asynchronous signing blocks database access',async()=>{
+ let allowed=true,queries=0;
+ const reader=createPilotFamilyInboxReader({
+  db:{async query(){queries++;return {rows:[row(6)]};}},
+  bindVerifiedRequest:async()=>({
+   authorizeFamily:async()=>allowed,
+   getVerifiedPrincipal:async()=>({userId:'canonical-user-a',sessionId:'session-verified'})
+  }),
+  contentEncryptionKey:secret,now:()=>NOW,
+  getActiveSigningKey:async purpose=>{
+   assert.equal(purpose,'whatsapp-inbox-read');
+   allowed=false;
+   return getActiveSigningKey();
+  }
+ });
+ await assert.rejects(reader({familyId:A}),/access expired before inbox query/);
+ assert.equal(queries,0);
+});
+
+test('session replacement during asynchronous signing blocks database access',async()=>{
+ let sessionId='session-a',queries=0;
+ const reader=createPilotFamilyInboxReader({
+  db:{async query(){queries++;return {rows:[row(5)]};}},
+  bindVerifiedRequest:async()=>({
+   authorizeFamily:async()=>true,
+   getVerifiedPrincipal:async()=>({userId:'canonical-user-a',sessionId})
+  }),
+  contentEncryptionKey:secret,now:()=>NOW,
+  getActiveSigningKey:async()=>{
+   sessionId='session-b';
+   return getActiveSigningKey();
+  }
+ });
+ await assert.rejects(reader({familyId:A}),/session changed before inbox query/);
+ assert.equal(queries,0);
+});
+
 test('invalid DB result, missing key or auth dependency never opens inbox',async()=>{
  assert.throws(()=>createPilotFamilyInboxReader({
   db:{query:async()=>({rows:[]})},bindVerifiedRequest:async()=>null,
