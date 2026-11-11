@@ -91,6 +91,7 @@ SET search_path=pg_catalog,public AS $f$
 DECLARE
  v_now bigint;v_key bytea;v_payload text;v_expected bytea;
  v_challenge record;v_used uuid;v_row bytea;v_id bigint;v_receipt text;
+ v_verified_at timestamptz;
 BEGIN
  v_now=floor(extract(epoch from clock_timestamp()))::bigint;
  IF p_business IS NULL OR p_business !~ '^[0-9]{5,30}$' OR
@@ -138,11 +139,14 @@ BEGIN
  ON CONFLICT DO NOTHING RETURNING nonce INTO v_used;
  IF v_used IS NULL THEN RETURN jsonb_build_object('state','rejected'); END IF;
 
+ -- Use ONE timestamp for both columns: RLS prohibits a proof that lives
+ -- even microseconds longer than the 10-minute maximum.
+ v_verified_at=clock_timestamp();
  INSERT INTO public.nex_whatsapp_verified_phone_proofs(
   proof_digest,family_id,business_account_id,phone_number_id,
   sender_digest,verified_at,expires_at)
  VALUES(p_proof_digest,v_challenge.family_id,p_business,p_phone,p_sender_digest,
-  clock_timestamp(),clock_timestamp()+interval '10 minutes')
+  v_verified_at,v_verified_at+interval '10 minutes')
  ON CONFLICT DO NOTHING RETURNING proof_digest INTO v_row;
  IF v_row IS NULL THEN RETURN jsonb_build_object('state','rejected'); END IF;
 
