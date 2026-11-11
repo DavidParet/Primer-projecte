@@ -689,6 +689,83 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
       if(pending)await pending.catch(()=>{});
       held.release();
     }
+
+    // Two genuinely independent restricted database sessions race to
+    // accept the SAME verified proof with separately generated receipts.
+    // The one-receipt-per-proof index must reject the second issuance.
+    const raceCode='ci_dual_web_receipts_00033';
+    const raceProof=createHmac('sha256',metaProofKey)
+      .update('nexlupa:phone-proof:v1:').update(raceCode).digest();
+    await pool.query('INSERT INTO public.nex_whatsapp_verified_phone_proofs '+
+      '(proof_digest,family_id,business_account_id,phone_number_id,'+
+      'sender_digest,verified_at,expires_at) VALUES($1,$2,$3,$4,$5,'+
+      "clock_timestamp(),clock_timestamp()+interval '10 minutes')",
+      [raceProof,A,BIZ,PHONE,randomBytes(32)]);
+    const secondWebRuntime=await pool.connect();
+    try{
+      await secondWebRuntime.query('SET ROLE nex_ci_web_receipt_runtime');
+      const webIssuer2=createSignedWebConsentIssuer({
+        db:{connect:async()=>({
+          query:(sql,args)=>secondWebRuntime.query(sql,args),release(){}
+        })},
+        bindVerifiedRequest:async()=>({
+          authorizeFamily:async({familyId,action})=>
+            familyId===A&&action==='enroll_whatsapp_sender',
+          getVerifiedPrincipal:async()=>({
+            userId:USER,sessionId:'verified-ci-second-web-session'
+          })
+        }),
+        proofHmacKey:metaProofKey.toString('base64'),
+        receiptHmacKey:webReceiptHmacKey.toString('base64'),
+        getActiveSigningKey:async purpose=>({
+          purpose,state:'active',keyId:'web-receipt-ci-key',
+          keyBase64:webSigningKey.toString('base64')
+        }),
+        businessAccountId:BIZ,phoneNumberId:PHONE
+      });
+      const raceRequest={familyId:A,challengeId:raceCode,
+        accepted:true,versionAccepted:CONSENT_VERSION};
+      const concurrentReceipts=await Promise.all([
+        webIssuer(raceRequest),webIssuer2(raceRequest)
+      ]);
+      assert.deepEqual(
+        concurrentReceipts.map(x=>x.state).sort(),['issued','rejected']);
+      assert.equal((await pool.query(
+        'SELECT count(*)::int AS n FROM '+
+        'public.nex_whatsapp_explicit_receipt_proofs WHERE proof_digest=$1',
+        [raceProof])).rows[0].n,1);
+    }finally{
+      await secondWebRuntime.query('RESET ROLE');
+      secondWebRuntime.release();
+    }
+
+    // Even if the web-facing adapter was incorrectly permissive, the
+    // canonical membership lock in the SQL issuer denies a suspended admin.
+    const suspendedCode='ci_suspended_web_user_00044';
+    const suspendedProof=createHmac('sha256',metaProofKey)
+      .update('nexlupa:phone-proof:v1:').update(suspendedCode).digest();
+    await pool.query('INSERT INTO public.nex_whatsapp_verified_phone_proofs '+
+      '(proof_digest,family_id,business_account_id,phone_number_id,'+
+      'sender_digest,verified_at,expires_at) VALUES($1,$2,$3,$4,$5,'+
+      "clock_timestamp(),clock_timestamp()+interval '10 minutes')",
+      [suspendedProof,A,BIZ,PHONE,randomBytes(32)]);
+    await pool.query("UPDATE public.nex_family_memberships SET status='suspended',"+
+      'updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2',
+      [USER,A]);
+    try{
+      assert.deepEqual(await webIssuer({
+        familyId:A,challengeId:suspendedCode,
+        accepted:true,versionAccepted:CONSENT_VERSION
+      }),{state:'rejected'});
+      assert.equal((await pool.query(
+        'SELECT count(*)::int AS n FROM '+
+        'public.nex_whatsapp_explicit_receipt_proofs WHERE proof_digest=$1',
+        [suspendedProof])).rows[0].n,0);
+    }finally{
+      await pool.query("UPDATE public.nex_family_memberships SET status='active',"+
+        'updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2',
+        [USER,A]);
+    }
   }finally{
     await webRuntime.query('RESET ROLE');webRuntime.release();
   }
