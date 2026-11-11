@@ -21,6 +21,8 @@
 
 ### 1. Entorn aïllat Neon (NO GO)
 
+**Inspecció real de només lectura, 11/11/2026:** el projecte `nexlupa-resend-pilot` conté una branca principal amb la cua de Resend i branques descendents amb taules `neon_auth` i de WhatsApp. Les branques existents **no són un entorn inicial buit**. És preferible preparar un projecte sandbox nou i verificar-ne l'absència de dades abans de clonar cap branca. Vegeu la [inspecció i pla d'aïllament](./whatsapp-neon-isolation-readonly-audit-20261111.md). La creació encara requereix autorització i no s'ha executat.
+
 - Confirmar una branca de prova sense còpia de dades familiars, missatges, correus, telèfons ni identificadors reals.
 - Preparar scripts per a preview **diferents** dels `*_ci.sql`; aquells fitxers són exclusius d'un PostgreSQL efímer i contenen rols `nex_ci_*` no aptes per aplicar a Neon real.
 - Revisar migració d'anada i retirada, rol runtime restringit, RLS, `SECURITY DEFINER`, drets sobre seqüències, permisos que poden heretar rols i rotació de claus.
