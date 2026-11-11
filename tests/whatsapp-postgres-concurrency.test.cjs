@@ -37,9 +37,9 @@ async function waitForBlockedLock(pool) {
 async function authorize(pool,family,sender){
   await pool.query(
     "INSERT INTO nex_whatsapp_sender_authorizations "+
-    "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source) "+
-    "VALUES ($1,$2,$3,$4,'incoming_text','test-v1',NOW(),'synthetic-ci')",
-    [ACCOUNT,NUMBER,senderDigest(sender),family]
+    "(business_account_id,phone_number_id,sender_digest,family_id,scope,consent_version,consent_at,consent_source,consent_receipt_digest) "+
+    "VALUES ($1,$2,$3,$4,'incoming_text','test-v1',NOW(),'synthetic-ci',$5)",
+    [ACCOUNT,NUMBER,senderDigest(sender),family,randomBytes(32)]
   );
 }
 function delivery(sender,id){
@@ -58,6 +58,8 @@ test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out'
   try {
     await pool.query(readFileSync(
       join(__dirname,'../db/migrations/20261108_whatsapp_durable_inbox.sql'),'utf8'));
+    await pool.query(readFileSync(join(__dirname,
+      '../db/migrations/20261109_whatsapp_explicit_consent_receipt.sql'),'utf8'));
     await authorize(pool,FAMILY_A,SENDER_A);
     await authorize(pool,FAMILY_B,SENDER_B);
 
