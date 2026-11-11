@@ -86,3 +86,26 @@ test('No confon estat de lliurament amb missatge entrant',()=>{
   assert.equal(r.deliveries.length,0);
   assert.equal(r.meta.statusUpdates,1);
 });
+
+test('Conflicting duplicate provider ID is flagged so durable inbox rejects entire batch',async()=>{
+  const {createDurableInbox}=require('../lib/whatsapp/durable-inbox');
+  const {randomBytes}=require('node:crypto');
+  const original=item('wamid.conflict');
+  for(const altered of [
+    {...original,from:'111111111111'},
+    {...original,text:{body:'Different synthetic message'}},
+    {...original,timestamp:'1794150001'}
+  ]){
+    const payload=makePayload([original,altered]);
+    const normalized=normalizeMetaDeliveries(payload);
+    assert.equal(normalized.meta.skipped,1);
+    let writes=0;
+    const inbox=createDurableInbox({
+      db:{query:async()=>{writes++;throw Error('must not write');}},
+      senderHmacKey:randomBytes(32).toString('base64'),
+      contentEncryptionKey:randomBytes(32).toString('base64')
+    });
+    await assert.rejects(inbox.persistVerifiedBatch(payload),/requires review/);
+    assert.equal(writes,0);
+  }
+});
