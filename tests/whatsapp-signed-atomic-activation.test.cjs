@@ -645,6 +645,50 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
       familyId:A,businessAccountId:BIZ,phoneNumberId:PHONE,
       challengeId:code,consentReceiptId:issued.receiptId
     }),{state:'rejected'});
+
+    // In-transaction web receipt creation must NOT race a revocation/
+    // consumption of the signed Meta proof. Hold a competing write lock,
+    // check that the restricted signed function blocks on FOR SHARE,
+    // commit consumption, then reject without creating any web receipt.
+    const lockingCode='ci_lock_evidence_token_00022';
+    const lockingProof=createHmac('sha256',metaProofKey)
+      .update('nexlupa:phone-proof:v1:').update(lockingCode).digest();
+    await pool.query('INSERT INTO public.nex_whatsapp_verified_phone_proofs '+
+      '(proof_digest,family_id,business_account_id,phone_number_id,'+
+      'sender_digest,verified_at,expires_at) VALUES($1,$2,$3,$4,$5,'+
+      "clock_timestamp(),clock_timestamp()+interval '10 minutes')",
+      [lockingProof,A,BIZ,PHONE,randomBytes(32)]);
+    const held=await pool.connect();
+    let heldOpen=false,pending;
+    try{
+      await held.query('BEGIN');heldOpen=true;
+      await held.query('UPDATE public.nex_whatsapp_verified_phone_proofs '+
+       'SET consumed_at=clock_timestamp() WHERE proof_digest=$1',
+       [lockingProof]);
+      pending=webIssuer({familyId:A,challengeId:lockingCode,
+        accepted:true,versionAccepted:CONSENT_VERSION});
+      let waiting=false;
+      for(let retry=0;retry<100;retry++){
+        const tracked=await pool.query(
+          "SELECT count(*)::int AS waiting FROM pg_stat_activity "+
+          "WHERE datname=current_database() AND wait_event_type='Lock' "+
+          "AND state='active' AND query LIKE "+
+          "'%nex_ci_signed_create_web_consent_receipt%'");
+        if(tracked.rows[0].waiting>0){waiting=true;break;}
+        await new Promise(resolve=>setTimeout(resolve,30));
+      }
+      assert.equal(waiting,true,
+       'Web receipt must await the competing proof consumption');
+      await held.query('COMMIT');heldOpen=false;
+      assert.deepEqual(await pending,{state:'rejected'});
+      assert.equal((await pool.query('SELECT count(*)::int AS n FROM '+
+        'public.nex_whatsapp_explicit_receipt_proofs WHERE proof_digest=$1',
+        [lockingProof])).rows[0].n,0);
+    }finally{
+      if(heldOpen)await held.query('COMMIT');
+      if(pending)await pending.catch(()=>{});
+      held.release();
+    }
   }finally{
     await webRuntime.query('RESET ROLE');webRuntime.release();
   }
