@@ -13,6 +13,7 @@ const {once}=require('node:events');
 const {makeHttpHandler,ALLOWED_BRANCH}=require('../lib/forwarding/http-handler.cjs');
 const {acceptSignedReceipt}=require('../lib/forwarding/resend-intake.cjs');
 const {createNeonReceiptAdapters,decryptReceiptEnvelope}=require('../lib/forwarding/neon-receipt.cjs');
+const {createLeaseAdapter}=require('../lib/forwarding/worker-lease.cjs');
 const {createReceivingClient}=require('../lib/forwarding/resend-receiving-client.cjs');
 const {prepareHumanReview}=require('../lib/forwarding/review-gate.cjs');
 
@@ -50,6 +51,7 @@ async function setup(admin){
     CREATE SCHEMA nexlupa_worker_rpc;
     CREATE SCHEMA nexlupa_pilot;
     CREATE ROLE nexlupa_ingest_ci LOGIN PASSWORD 'synthetic-ci-only';
+    CREATE ROLE nexlupa_reviewer_ci LOGIN PASSWORD 'synthetic-ci-only';
     CREATE TABLE nexlupa_worker_rpc.synthetic_authorizations(
       recipient text PRIMARY KEY, family_id uuid NOT NULL, consent_active boolean NOT NULL
     );
@@ -57,8 +59,18 @@ async function setup(admin){
       queue_id char(64) PRIMARY KEY CHECK(queue_id ~ '^[0-9a-f]{64}$'),
       encrypted_envelope text NOT NULL
         CHECK(octet_length(encrypted_envelope) BETWEEN 30 AND 4096),
-      state text NOT NULL CHECK(state IN ('received','done','failed')),
-      attempts integer NOT NULL DEFAULT 0 CHECK(attempts>=0)
+      state text NOT NULL CHECK(state IN
+        ('received','processing','retry','done','needs_review','failed')),
+      attempts integer NOT NULL DEFAULT 0 CHECK(attempts>=0),
+      available_at timestamptz NOT NULL DEFAULT now(),
+      lease_token uuid,
+      lease_until timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT lease_consistent CHECK (
+        (state='processing' AND lease_token IS NOT NULL AND lease_until IS NOT NULL)
+        OR (state<>'processing' AND lease_token IS NULL AND lease_until IS NULL)
+      )
     );
     CREATE FUNCTION nexlupa_worker_rpc.resolve_authorized_recipient(p_recipient text)
     RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER
@@ -75,6 +87,8 @@ async function setup(admin){
       nexlupa_worker_rpc.resolve_authorized_recipient(text) TO nexlupa_ingest_ci;
     GRANT USAGE ON SCHEMA nexlupa_pilot TO nexlupa_ingest_ci;
     GRANT INSERT,SELECT ON nexlupa_pilot.resend_inbox_queue TO nexlupa_ingest_ci;
+    GRANT USAGE ON SCHEMA nexlupa_pilot TO nexlupa_reviewer_ci;
+    GRANT SELECT,UPDATE ON nexlupa_pilot.resend_inbox_queue TO nexlupa_reviewer_ci;
   `);
   await admin.query(
     'INSERT INTO nexlupa_worker_rpc.synthetic_authorizations(recipient,family_id,consent_active) VALUES($1,$2,true)',
@@ -87,6 +101,11 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
   roleUrl.username='nexlupa_ingest_ci';
   roleUrl.password='synthetic-ci-only';
   const restricted=new Pool({connectionString:roleUrl.toString(),max:16,
+    connectionTimeoutMillis:5000});
+  const reviewerUrl=new URL(url);
+  reviewerUrl.username='nexlupa_reviewer_ci';
+  reviewerUrl.password='synthetic-ci-only';
+  const reviewer=new Pool({connectionString:reviewerUrl.toString(),max:15,
     connectionTimeoutMillis:5000});
   try{
     await setup(admin);
@@ -263,7 +282,65 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       const role=await restricted.query('SELECT current_user AS role');
       assert.equal(role.rows[0].role,'nexlupa_ingest_ci');
     });
+
+    await t.test('12 concurrent reviewers claim unique queue leases, and stale worker tokens cannot complete',async()=>{
+      const who=await reviewer.query('SELECT current_user AS name');
+      assert.equal(who.rows[0].name,'nexlupa_reviewer_ci');
+      await assert.rejects(reviewer.query(
+        'SELECT * FROM nexlupa_worker_rpc.synthetic_authorizations'
+      ),/permission denied/);
+
+      const lease=createLeaseAdapter({
+        query:(sql,params)=>reviewer.query(sql,params),
+        leaseSeconds:45,maxAttempts:5
+      });
+      const promises=Array.from({length:12},()=>lease.claimOne());
+      const claims=(await Promise.all(promises)).filter(Boolean);
+      assert.equal(claims.length,3);
+      assert.equal(new Set(claims.map(c=>c.queueId)).size,3);
+      assert.equal(new Set(claims.map(c=>c.leaseToken)).size,3);
+      assert.equal(claims.every(c=>c.attempts===1),true);
+
+      const [done,expired,toRetry]=claims;
+      await assert.rejects(lease.finish({
+        queueId:done.queueId,leaseToken:done.leaseToken,status:'needs_review'
+      }),/invalid_lease_completion/);
+      assert.equal(await lease.finish({
+        queueId:done.queueId,leaseToken:done.leaseToken,status:'done'
+      }),true);
+      assert.equal(await lease.finish({
+        queueId:done.queueId,leaseToken:done.leaseToken,status:'done'
+      }),false);
+
+      await admin.query(
+        `UPDATE nexlupa_pilot.resend_inbox_queue
+          SET lease_until=now()-interval '1 second' WHERE queue_id=$1`,
+        [expired.queueId]
+      );
+      const reclaimed=await lease.claimOne();
+      assert.equal(reclaimed.queueId,expired.queueId);
+      assert.equal(reclaimed.attempts,2);
+      assert.notEqual(reclaimed.leaseToken,expired.leaseToken);
+      assert.equal(await lease.finish({
+        queueId:expired.queueId,leaseToken:expired.leaseToken,status:'done'
+      }),false);
+      assert.equal(await lease.finish({
+        queueId:reclaimed.queueId,leaseToken:reclaimed.leaseToken,
+        status:'retry',retrySeconds:30
+      }),true);
+      assert.equal(await lease.finish({
+        queueId:toRetry.queueId,leaseToken:toRetry.leaseToken,status:'failed'
+      }),true);
+      assert.equal(await lease.claimOne(),null);
+
+      const states=await admin.query(
+        'SELECT state,count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue GROUP BY state'
+      );
+      const counts=Object.fromEntries(states.rows.map(r=>[r.state,r.n]));
+      assert.deepEqual(counts,{done:1,retry:1,failed:1});
+    });
+
   }finally{
-    await Promise.allSettled([restricted.end(),admin.end()]);
+    await Promise.allSettled([reviewer.end(),restricted.end(),admin.end()]);
   }
 });
