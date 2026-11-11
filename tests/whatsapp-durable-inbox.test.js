@@ -48,7 +48,8 @@ test('only encrypted text and HMAC digest go to Postgres',async()=>{
   assert.match(sql,/SELECT family_id/);
   // Without this lock, a concurrent revocation may purge before the
   // in-flight insert commits, leaving a retained message after opt-out.
-  assert.match(sql,/FROM nex_whatsapp_sender_authorizations[\s\S]*?LIMIT 1\s+FOR SHARE\s*\)/);
+  assert.match(sql,/FROM nex_whatsapp_sender_authorizations[\s\S]*?FOR SHARE\s*\)/);
+  assert.match(sql,/HAVING COUNT\(\*\) = 1/);
   assert.equal(values.length,8);
   assert.equal(values[2].length,32);
   assert.equal(values.some(x=>x===msg.senderWaId),false);
@@ -163,4 +164,11 @@ test('expiration worker exposes only deletion count',async()=>{
   const db=mockDb();
   assert.deepEqual(await inbox(db).purgeExpired(),{deleted:3});
   assert.match(db.calls[0].sql,/expires_at <= NOW/);
+});
+
+
+test('ambiguous sender-to-family authorization fails closed',async()=>{
+  const db=mockDb('ambiguous');
+  await assert.rejects(inbox(db).persistDelivery(delivery()),/Ambiguous sender authorization/);
+  assert.match(db.calls[0].sql,/WHEN \(SELECT COUNT\(\*\) FROM eligible\) > 1 THEN 'ambiguous'/);
 });
