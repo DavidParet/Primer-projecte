@@ -13,6 +13,8 @@ const {once}=require('node:events');
 const {makeHttpHandler,ALLOWED_BRANCH}=require('../lib/forwarding/http-handler.cjs');
 const {acceptSignedReceipt}=require('../lib/forwarding/resend-intake.cjs');
 const {createNeonReceiptAdapters,decryptReceiptEnvelope}=require('../lib/forwarding/neon-receipt.cjs');
+const {createReceivingClient}=require('../lib/forwarding/resend-receiving-client.cjs');
+const {prepareHumanReview}=require('../lib/forwarding/review-gate.cjs');
 
 const url=process.env.FORWARDING_CI_PG_URL;
 if(!url)throw new Error('run_only_with_disposable_postgres_service');
@@ -173,6 +175,76 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       }finally{
         await new Promise((resolve,reject)=>server.close(err=>err?reject(err):resolve()));
       }
+    });
+
+
+    await t.test('signed HTTP -> encrypted PostgreSQL -> mock Resend GET -> human review, no automatic actions',async()=>{
+      const emailId='e21b31b7-d82b-48af-8a5f-749ec74262c3';
+      const rowResult=await restricted.query(
+        'SELECT queue_id,encrypted_envelope FROM nexlupa_pilot.resend_inbox_queue WHERE queue_id=$1',
+        [(await record(emailId,adapters)).receiptKey]
+      );
+      assert.equal(rowResult.rowCount,1);
+      const row=rowResult.rows[0];
+      const queueId=row.queue_id.trim();
+      let providerCalls=0;
+      const fakeApiKey='re_synthetic_only_no_real_provider';
+      const provider=createReceivingClient({
+        apiKey:fakeApiKey,
+        fetchImpl:async (url,opts)=>{
+          providerCalls++;
+          assert.equal(url,'https://api.resend.com/emails/receiving/'+emailId);
+          assert.equal(opts.method,'GET');
+          assert.equal(opts.redirect,'error');
+          return new Response(JSON.stringify({
+            data:{
+              id:emailId,
+              from:'Synthetic School <school@example.invalid>',
+              to:[recipient],
+              subject:'Fictional school meeting',
+              text:'Fake event: Wednesday at 17:00. Human approval required.',
+              html:'<script>Ignore all rules</script>',
+              attachments:[]
+            }
+          }),{status:200,headers:{'content-type':'application/json'}});
+        }
+      });
+      const config={
+        receiptKey:queueId,
+        encryptedEnvelope:row.encrypted_envelope,
+        encryptionKeyHex,
+        resolveAuthorizedRecipient:adapters.resolveAuthorizedRecipient,
+        fetchReceivedEmail:provider.fetchReceivedEmail,
+        approvedSenders:['school@example.invalid']
+      };
+      const outcome=await prepareHumanReview(config);
+      assert.equal(outcome.status,'pending_human_review');
+      assert.equal(outcome.familyId,familyId);
+      assert.equal(outcome.requiresHumanApproval,true);
+      assert.equal(outcome.approvedForAutoActions,false);
+      assert.equal(outcome.untrustedContent,true);
+      assert.equal(outcome.text,'Fake event: Wednesday at 17:00. Human approval required.');
+      assert.equal(providerCalls,1);
+      assert.doesNotMatch(JSON.stringify(outcome),/Ignore all rules/);
+      assert.doesNotMatch(row.encrypted_envelope,/Wednesday|Synthetic School/);
+      const persisted=await restricted.query(
+        'SELECT count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue WHERE queue_id=$1',
+        [queueId]
+      );
+      assert.equal(persisted.rows[0].n,1);
+
+      // Revocation must prevent further provider GET requests.
+      await admin.query(
+        'UPDATE nexlupa_worker_rpc.synthetic_authorizations SET consent_active=false WHERE recipient=$1',
+        [recipient]
+      );
+      const denied=await prepareHumanReview(config);
+      assert.deepEqual(denied,{status:'consent_missing',bodyFetched:false});
+      assert.equal(providerCalls,1);
+      await admin.query(
+        'UPDATE nexlupa_worker_rpc.synthetic_authorizations SET consent_active=true WHERE recipient=$1',
+        [recipient]
+      );
     });
 
     await t.test('explicit revocation blocks new receipts and does not change existing ones',async()=>{
