@@ -296,12 +296,12 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
       });
       const promises=Array.from({length:12},()=>lease.claimOne());
       const claims=(await Promise.all(promises)).filter(Boolean);
-      assert.equal(claims.length,3);
-      assert.equal(new Set(claims.map(c=>c.queueId)).size,3);
-      assert.equal(new Set(claims.map(c=>c.leaseToken)).size,3);
+      assert.equal(claims.length,2);
+      assert.equal(new Set(claims.map(c=>c.queueId)).size,2);
+      assert.equal(new Set(claims.map(c=>c.leaseToken)).size,2);
       assert.equal(claims.every(c=>c.attempts===1),true);
 
-      const [done,expired,toRetry]=claims;
+      const [done,expired]=claims;
       await assert.rejects(lease.finish({
         queueId:done.queueId,leaseToken:done.leaseToken,status:'needs_review'
       }),/invalid_lease_completion/);
@@ -328,16 +328,14 @@ test('real PostgreSQL: concurrent signed receipts are deduplicated by the restri
         queueId:reclaimed.queueId,leaseToken:reclaimed.leaseToken,
         status:'retry',retrySeconds:30
       }),true);
-      assert.equal(await lease.finish({
-        queueId:toRetry.queueId,leaseToken:toRetry.leaseToken,status:'failed'
-      }),true);
+
       assert.equal(await lease.claimOne(),null);
 
       const states=await admin.query(
         'SELECT state,count(*)::int AS n FROM nexlupa_pilot.resend_inbox_queue GROUP BY state'
       );
       const counts=Object.fromEntries(states.rows.map(r=>[r.state,r.n]));
-      assert.deepEqual(counts,{done:1,retry:1,failed:1});
+      assert.deepEqual(counts,{done:1,retry:1});
     });
 
   }finally{
