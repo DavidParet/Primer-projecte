@@ -737,6 +737,11 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
         'SELECT count(*)::int AS n FROM '+
         'public.nex_whatsapp_explicit_receipt_proofs WHERE proof_digest=$1',
         [raceProof])).rows[0].n,1);
+      assert.equal((await pool.query(
+        'SELECT (expires_at-accepted_at)=interval \'10 minutes\' AS exact FROM '+
+        'public.nex_whatsapp_explicit_receipt_proofs WHERE proof_digest=$1',
+        [raceProof])).rows[0].exact,true,
+        'web consent proof lifetime must satisfy exact ten-minute RLS window');
     }finally{
       await secondWebRuntime.query('RESET ROLE');
       secondWebRuntime.release();
