@@ -25,7 +25,7 @@ const secret='whsec_'+Buffer.alloc(32,29).toString('base64');
 async function setup(admin){
  // Mirror the real Neon RPC contract using synthetic data on disposable PG16.
  // No live family, consent record, alias or Resend message is created here.
- await admin.query(\`
+ await admin.query(`
  CREATE SCHEMA nexlupa_worker_rpc;
  CREATE SCHEMA nexlupa_worker_test;
  CREATE SCHEMA nexlupa_pilot;
@@ -79,21 +79,21 @@ async function setup(admin){
    TO gateway_ingest_ci;
  GRANT USAGE ON SCHEMA nexlupa_pilot TO gateway_ingest_ci;
  GRANT INSERT,SELECT ON nexlupa_pilot.resend_inbox_queue TO gateway_ingest_ci;
- \`);
+ `);
  await admin.query(
   'INSERT INTO nexlupa_worker_test.families(family_id,alias,status) VALUES($1,$2,$3)',
   [familyId,'entirely-synthetic-test-family','pilot']
  );
  await admin.query(
-  \`INSERT INTO nexlupa_worker_test.inbound_aliases(alias_digest,family_id,status)
-   VALUES(encode(sha256(convert_to(lower($1),'UTF8')),'hex'),$2,'active')\`,
+  `INSERT INTO nexlupa_worker_test.inbound_aliases(alias_digest,family_id,status)
+   VALUES(encode(sha256(convert_to(lower($1),'UTF8')),'hex'),$2,'active')`,
   [recipient,familyId]
  );
  await admin.query(
-  \`INSERT INTO nexlupa_worker_test.source_consents
+  `INSERT INTO nexlupa_worker_test.source_consents
    (family_id,source_kind,permission_scope,approved_at,expires_at,version)
    VALUES($1,'resend_forward','read_school_mail',now()-interval '1 day',
-   now()+interval '1 day','synthetic-test-only')\`,
+   now()+interval '1 day','synthetic-test-only')`,
   [familyId]
  );
 }
