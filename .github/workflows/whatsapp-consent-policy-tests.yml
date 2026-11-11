@@ -5,6 +5,7 @@ on:
     branches:
       - 'feat/whatsapp-consent-policy-v1'
     paths:
+      - 'db/migrations/20261109_whatsapp_explicit_consent_receipt.sql'
       - 'lib/whatsapp/**'
       - 'tests/whatsapp-*.test.js'
       - 'tests/whatsapp-*.test.cjs'
