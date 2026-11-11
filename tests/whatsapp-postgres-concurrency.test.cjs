@@ -49,7 +49,7 @@ function delivery(sender,id){
     type:'text',text:'Missatge totalment fictici',contentPending:false
   };
 }
-test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out',{
+test('PostgreSQL: reject cross-family ID collisions and both insert/revoke race orders',{
   skip:!url,timeout:40000
 },async()=>{
   const pool=new Pool({connectionString:url,max:8,connectionTimeoutMillis:6000,
@@ -64,6 +64,32 @@ test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out'
     const inbox=createDurableInbox({db:pool,
       senderHmacKey:HMAC_KEY.toString('base64'),
       contentEncryptionKey:CONTENT_KEY.toString('base64')});
+    // An ID conflict must NEVER ACK data belonging to a different sender
+    // or family. Re-delivery is valid only for the same authenticated
+    // number, sender, family and original provider timestamp.
+    const collisionId='wamid.synthetic-ci-cross-family-collision';
+    assert.deepEqual(
+      await inbox.persistDelivery(delivery(SENDER_A,collisionId)),{state:'stored'});
+    assert.deepEqual(
+      await inbox.persistDelivery(delivery(SENDER_B,collisionId)),{state:'unlinked'});
+    assert.deepEqual(
+      await inbox.persistDelivery(delivery(SENDER_A,collisionId)),{state:'duplicate'});
+    assert.deepEqual(
+      await inbox.persistDelivery({
+        ...delivery(SENDER_A,collisionId),providerTimestamp:'1794150111'
+      }),{state:'unlinked'});
+    const collisionRow=await pool.query(
+      'SELECT family_id,sender_digest FROM nex_whatsapp_inbound '+
+      'WHERE business_account_id=$1 AND provider_message_id=$2',
+      [ACCOUNT,collisionId]
+    );
+    assert.equal(collisionRow.rowCount,1);
+    assert.equal(collisionRow.rows[0].family_id,FAMILY_A);
+    assert.deepEqual(collisionRow.rows[0].sender_digest,senderDigest(SENDER_A));
+    await pool.query('DELETE FROM nex_whatsapp_inbound '+
+      'WHERE business_account_id=$1 AND provider_message_id=$2',
+      [ACCOUNT,collisionId]);
+
     const policy=makeConsentPolicy({db:pool,senderHmacKey:HMAC_KEY.toString('base64'),
       currentConsentVersion:'test-v1',
       resolveAuthenticatedFamily:async()=>FAMILY_A,
