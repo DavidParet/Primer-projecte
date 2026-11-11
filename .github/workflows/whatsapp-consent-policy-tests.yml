@@ -8,6 +8,7 @@ on:
     paths:
       - 'lib/whatsapp/**'
       - 'tests/whatsapp-*.test.js'
+      - 'scripts/build-static.js'
       - 'tests/whatsapp-*.test.cjs'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
   pull_request:
@@ -26,6 +27,8 @@ on:
       - 'tests/whatsapp-pilot-atomic-consent.test.js'
       - 'tests/whatsapp-meta-phone-proof-issuer.test.js'
       - 'tests/whatsapp-pilot-web-consent.test.js'
+      - 'tests/whatsapp-preview-build-boundary.test.js'
+      - 'scripts/build-static.js'
       - 'db/migrations/20261111_whatsapp_web_receipt_issuer_ci.sql'
       - 'db/migrations/20261111_whatsapp_verified_meta_proof_issuer_ci.sql'
       - 'db/migrations/20261111_whatsapp_signed_atomic_activation_ci.sql'
@@ -67,6 +70,8 @@ jobs:
         run: node --test tests/whatsapp-pilot-web-consent.test.js
       - name: Cross-check signed Meta pairing and canonical family identity regressions
         run: node --test tests/whatsapp-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-request-identity-binding.test.js
+      - name: Verify Vercel preview static build does not expose private code
+        run: node --test tests/whatsapp-preview-build-boundary.test.js
       - name: PostgreSQL two-connection concurrency regression
         env:
           WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:synthetic-test-only@127.0.0.1:5432/postgres
