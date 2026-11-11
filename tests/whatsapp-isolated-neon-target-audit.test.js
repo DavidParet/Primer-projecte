@@ -54,6 +54,16 @@ test('the existing pilot default branch can never be mistaken for a sandbox',()=
  assert.equal(auditIsolatedNeonTarget(input).status,'blocked');
  assert.equal(auditIsolatedNeonTarget(input).safeToExecuteSQL,false);
 });
+test('an empty dedicated sandbox project may clone a verified empty parent, but SQL stays blocked',()=>{
+ const input=pristine();
+ input.branch.parent_id='br-synthetic-blank-parent';
+ input.branch.init_source='parent-data';
+ input.attestations.parent_branch_empty_verified=true;
+ const out=auditIsolatedNeonTarget(input);
+ assert.equal(out.status,'independent_review_required');
+ assert.equal(out.safeToExecuteSQL,false);
+ assert.equal(out.productionApproved,false);
+});
 test('metadata gates require a complete table inventory and independent attestations',()=>{
  const input=pristine();
  input.tableInventoryComplete=false;
