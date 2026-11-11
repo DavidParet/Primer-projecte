@@ -56,7 +56,9 @@ jobs:
         run: node --test tests/gmail-*.test.cjs
 
       - name: Probe isolated Vercel preview HTTP (GET only; diagnostic)
-        if: github.event_name == 'push'
+        # Execute on pull_request as well: the previous condition skipped the
+        # HTTP diagnostic in the PR check despite a green offline test suite.
+        # GET-only, no credentials, and never gates the offline suite.
         continue-on-error: true
         env:
           GMAIL_PREVIEW_URL: https://primer-projecte-7c7ybte0k-davidparets-projects.vercel.app
