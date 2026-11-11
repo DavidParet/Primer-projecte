@@ -62,3 +62,18 @@ test('authenticated malformed delivery fails closed before database write',async
     /review|acknowledge|Malformed/i);
   assert.equal(writes,0);
 });
+
+test('signed invalid UTF-8 is rejected before inbox persistence',async()=>{
+  let writes=0;
+  const ingest=createVerifiedIngestion({appSecret:secret,inbox:{
+    async persistVerifiedBatch(){writes++;return {};}
+  }});
+  // Invalid UTF-8 inside a signed JSON string must not become replacement text.
+  const malformed=Buffer.concat([
+    Buffer.from('{"object":"whatsapp_business_account","entry":[],"x":"'),
+    Buffer.from([0xc3,0x28]),Buffer.from('"}')
+  ]);
+  await assert.rejects(ingest({rawBody:malformed,signature:sign(malformed)}),
+    /Malformed authenticated JSON/);
+  assert.equal(writes,0);
+});
