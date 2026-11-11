@@ -45,6 +45,8 @@ test('only encrypted text and HMAC digest go to Postgres',async()=>{
   const {sql,values}=db.calls[0];
   assert.match(sql,/ON CONFLICT .* DO NOTHING/);
   assert.match(sql,/revoked_at IS NULL/);
+  // Legacy synthetic authorizations with no explicit receipt cannot ingest.
+  assert.match(sql,/consent_receipt_digest IS NOT NULL/);
   assert.match(sql,/SELECT family_id/);
   // Without this lock, a concurrent revocation may purge before the
   // in-flight insert commits, leaving a retained message after opt-out.
