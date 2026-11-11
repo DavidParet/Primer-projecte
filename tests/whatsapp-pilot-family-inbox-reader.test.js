@@ -112,27 +112,8 @@ test('tampering with AES-GCM and expired records fails closed',async()=>{
 });
 
 test('revoked family membership after RPC denies returning any decrypted data',async()=>{
- const f=fixture([row(9)]);
- const original=f.read;
- // Revoke as soon as restricted SQL runs, before the mandatory second check.
- const q=f.queries;
- const gated=createPilotFamilyInboxReader({
-  db:{async query(sql,args){
-   q.push({sql,args});
-   f.revoke();
-   return {rows:[row(9)]};
-  }},
-  bindVerifiedRequest:async()=>({
-   authorizeFamily:async()=>true,
-   getVerifiedPrincipal:async()=>({userId:'canonical-user-a',
-    sessionId:'verified-synthetic-session-a'})
-  }),
-  contentEncryptionKey:secret,now:()=>NOW
- });
- // The separate fixture's default authorizer cannot be modified through
- // the inner closure, so assert membership changes using a mutable adapter.
  let allowed=true;
- const protectedReader=createPilotFamilyInboxReader({
+ const reader=createPilotFamilyInboxReader({
   db:{async query(){allowed=false;return {rows:[row(9)]};}},
   bindVerifiedRequest:async()=>({
    authorizeFamily:async()=>allowed,
@@ -141,9 +122,7 @@ test('revoked family membership after RPC denies returning any decrypted data',a
   }),
   contentEncryptionKey:secret,now:()=>NOW
  });
- await assert.rejects(protectedReader({familyId:A}),/access expired/);
- assert.equal(typeof original,'function');
- assert.equal(typeof gated,'function');
+ await assert.rejects(reader({familyId:A}),/access expired/);
 });
 
 test('session swap during SQL denies returning messages',async()=>{
