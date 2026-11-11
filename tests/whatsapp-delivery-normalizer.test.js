@@ -109,3 +109,25 @@ test('Conflicting duplicate provider ID is flagged so durable inbox rejects enti
     assert.equal(writes,0);
   }
 });
+
+test('Malformed text body rejects entire batch before any database write',async()=>{
+  const {createDurableInbox}=require('../lib/whatsapp/durable-inbox');
+  const {randomBytes}=require('node:crypto');
+  for(const body of [undefined,null,42,{nested:'unexpected'}]){
+    const malformed=item('wamid.malformed','text',{
+      text:body===undefined ? {} : {body}
+    });
+    const payload=makePayload([item('wamid.valid'),malformed]);
+    const normalized=normalizeMetaDeliveries(payload);
+    assert.equal(normalized.meta.skipped,1);
+    assert.equal(normalized.deliveries.length,1);
+    let writes=0;
+    const inbox=createDurableInbox({
+      db:{query:async()=>{writes++;throw Error('unexpected write');}},
+      senderHmacKey:randomBytes(32).toString('base64'),
+      contentEncryptionKey:randomBytes(32).toString('base64')
+    });
+    await assert.rejects(inbox.persistVerifiedBatch(payload),/requires review/);
+    assert.equal(writes,0);
+  }
+});
