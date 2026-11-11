@@ -200,3 +200,18 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 - **Encara 0 deployments al projecte `nexlupa-forwarding-gateway`** després de l'última consulta. L'automatització puntual `NexLupa · Gateway preview` està programada per al 12/11/2026 a les 02:02 (Europe/Madrid), i farà **com a màxim un intent** si el servei segueix no desplegat. La comprovació de quota Vercel continua pendent.
 
 **Portes que NO han canviat:** `FORWARDING_PILOT_ENABLED=false`, secrets sensibles només a preview, webhook pilot Resend desactivat, cap filtre Gmail, consentiment de família real no registrat i cap merge de PR. **50 proves no equivalen a un webhook de Resend rebut des d'Internet.**
+
+
+### 11/11/2026 — primer desplegament READY de la passarel·la nova: TARGET PRODUCTION
+
+**Novetat descoberta després de la validació de 50 tests:** Vercel ha creat automàticament un desplegament amb estat `READY` del projecte separat `nexlupa-forwarding-gateway`, ID `dpl_Pmu9qhnembjsTbuSVJW1SzTNS49L`, commit `8ed614198c8b4ec9fa077504bebf24e98a2740cf` de la branca `feature/gmail-resend-forwarding-pilot-20261110`.
+
+- URL: `https://nexlupa-forwarding-gateway-d9xi81onu-davidparets-projects.vercel.app/api/webhook`.
+- **Advertiment:** Vercel indica `target=production` **del projecte nou**, no `target=preview`. Això NO és el projecte principal `primer-projecte`; no s'ha publicat ni canviat l'aplicació familiar de producció.
+- La consulta GET a través de l'eina Vercel retorna `HTTP 200` i exactament `configurationPresent:false`, `databaseConnectivityVerified:false`, `mode:"isolated-forwarding-pilot"`, `emailBodiesFetched:false`, `metadataReceiptsEnabled:false`, `productionEnabled:false`. Cap dada ni secret retornat. En ser un target de producció, `enabled()` **rebutja sempre** el processament encara que hi hagués una flag true. La flag `FORWARDING_PILOT_ENABLED=false` està confirmada també a production.
+- La passarel·la nova té `ssoProtection.enabled=false`, però **encara no s'ha provat una connexió externa de Resend** ni un POST signat al desplegament, i la prova GET de l'eina amb credencials Vercel no demostra per si sola la connectivitat externa sense autenticació.
+- La revisió `8ed6141` ja incorpora el codi del gateway i el primer test PostgreSQL; la suite de **50 tests correctes** correspon a un commit posterior `6d5974c77fd02c8b49560d06c29ec7fe3ffc286f` que afegeix el job CI. La ruta HTTP del gateway no ha canviat entre aquestes revisions.
+- L'automatització de revisió `NexLupa · Gateway preview` (12/11/2026 02:02 hora local) s'ha **endurit** per exigir explícitament `requestBody.target="preview"` en qualsevol desplegament futur. Si la interfície rebutja aquest valor, té ordre de no reintentar sense target per evitar una altra publicació a `production`.
+- El nou objectiu és obtenir **un deployment PREVIEW** vinculat a la branca pilot amb secrets `sensitive` limitats a preview i provar la recepció signada amb dades fictícies, sempre amb consentiment verificat. Cap webhook de prova de Resend s'ha activat ni ha canviat d'endpoint en aquesta ronda.
+
+**Estat de seguretat:** PR #16 draft no fusionat, flag OFF, secret de signatura/xifrat/DB només a PREVIEW; production del gateway només allotja una ruta de diagnòstic i no pot processar correus, segons el codi verificat. La producció de NexLupa principal continua intacta.
