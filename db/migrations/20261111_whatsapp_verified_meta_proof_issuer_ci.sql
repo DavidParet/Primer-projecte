@@ -21,7 +21,7 @@ CREATE TABLE public.nex_ci_meta_proof_provider_receipts(
  business_account_id text NOT NULL CHECK(business_account_id ~ '^[0-9]{5,30}$'),
  provider_message_id text NOT NULL CHECK(
    length(provider_message_id)<=262 AND
-   provider_message_id ~ '^wamid[.][A-Za-z0-9._=-]+
+   provider_message_id ~ '^wamid[.][A-Za-z0-9._=-]+$'),
  proof_digest bytea NOT NULL CHECK(octet_length(proof_digest)=32),
  received_at timestamptz NOT NULL DEFAULT clock_timestamp(),
  PRIMARY KEY(business_account_id,provider_message_id)
