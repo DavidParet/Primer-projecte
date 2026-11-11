@@ -95,6 +95,20 @@ test('invalid identities and oversized/empty text never reach database',async()=
   assert.equal(db.calls.length,0);
 });
 
+test('forwards have no verifiable source group; forged group identifiers never reach SQL',async()=>{
+  const db=mockDb(),store=inbox(db);
+  await assert.rejects(store.persistDelivery(delivery({
+    groupId:'group-claimed-by-browser',
+    familyId:'another-family',
+    text:'Reenvio: sortida dimecres'
+  })),/source group cannot be verified/);
+  assert.equal(db.calls.length,0);
+  const forwarded=delivery({text:'Reenviat: excursió dijous',groupId:null});
+  assert.deepEqual(await store.persistDelivery(forwarded),{state:'stored'});
+  assert.equal(db.calls.length,1);
+  assert.equal(db.calls[0].values.includes('group-claimed-by-browser'),false);
+});
+
 test('image and unsupported media are not ingested or claimed to be read',async()=>{
   const db=mockDb();
   assert.deepEqual(await inbox(db).persistDelivery(
