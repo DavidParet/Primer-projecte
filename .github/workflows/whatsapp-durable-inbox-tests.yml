@@ -36,6 +36,8 @@ on:
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
       - 'db/migrations/20261109_nexlupa_canonical_identity_staged.sql'
+      - 'db/migrations/20261112_whatsapp_family_inbox_reader_ci.sql'
+      - 'tests/sql/whatsapp-family-inbox-reader-rpc-smoke.sql'
       - 'db/checks/whatsapp-pilot-release-gate-readonly.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-verified-ingestion.test.js'
@@ -208,6 +210,12 @@ jobs:
       - name: Verify canonical family admin authorizes real signed pairing path
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-canonical-pairing-bridge-smoke.sql
+      - name: Install limited canonical family inbox reader in disposable PostgreSQL only
+        run: |
+          psql -v ON_ERROR_STOP=1 -f db/migrations/20261112_whatsapp_family_inbox_reader_ci.sql
+      - name: Test family inbox reader cross-tenant RLS, member revoke and pagination
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-family-inbox-reader-rpc-smoke.sql
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
