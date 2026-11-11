@@ -13,6 +13,8 @@ const {createPilotAtomicConsentFactory}=
  require('../lib/whatsapp/pilot-atomic-consent');
 const {createMetaPhoneProofIssuer,ISSUE_SQL:ISSUE_META_PROOF_SQL}=
  require('../lib/whatsapp/meta-phone-proof-issuer');
+const {createSignedWebConsentIssuer,SIGNED_WEB_RECEIPT_SQL}=
+ require('../lib/whatsapp/pilot-web-consent');
 const {pairingDigest}=
  require('../lib/whatsapp/family-pairing-protocol');
 const {PILOT_COOKIE,encodePilotSession}=
@@ -544,6 +546,107 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
       'updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2',[USER,A]);
   }finally{
     await metaRuntime.query('RESET ROLE');metaRuntime.release();
+  }
+
+  // Final synthetic link: verified Meta sender proof -> explicit web
+  // consent receipt -> signed atomic activation. Each service uses its OWN
+  // NOBYPASSRLS runtime, not the superuser that seeds CI fixture data.
+  await pool.query(readFileSync(join(__dirname,
+    '../db/migrations/20261111_whatsapp_web_receipt_issuer_ci.sql'),'utf8'));
+  const webSigningKey=randomBytes(32),webReceiptHmacKey=randomBytes(32);
+  await pool.query('INSERT INTO public.nex_ci_web_receipt_signing_keys '+
+    '(key_id,key_data,state) VALUES($1,$2,$3)',
+    ['web-receipt-ci-key',webSigningKey,'active']);
+  const webRuntime=await pool.connect();
+  try{
+    await webRuntime.query('SET ROLE nex_ci_web_receipt_runtime');
+    for(const table of ['nex_whatsapp_verified_phone_proofs',
+      'nex_whatsapp_explicit_receipt_proofs',
+      'nex_ci_web_receipt_signing_keys','nex_family_memberships',
+      'nex_ci_web_receipt_operation_nonces']){
+      await assert.rejects(webRuntime.query('SELECT * FROM public.'+table),
+       e=>e.code==='42501');
+    }
+    const webIssuer=createSignedWebConsentIssuer({
+      db:{connect:async()=>({
+        query:(sql,args)=>webRuntime.query(sql,args),release(){}
+      })},
+      bindVerifiedRequest:async()=>({
+        authorizeFamily:async({familyId,action})=>
+          familyId===A && action==='enroll_whatsapp_sender',
+        getVerifiedPrincipal:async()=>({
+          userId:USER,sessionId:'verified-ci-web-session'
+        })
+      }),
+      proofHmacKey:metaProofKey.toString('base64'),
+      receiptHmacKey:webReceiptHmacKey.toString('base64'),
+      getActiveSigningKey:async purpose=>({
+        purpose,state:'active',keyId:'web-receipt-ci-key',
+        keyBase64:webSigningKey.toString('base64')
+      }),
+      businessAccountId:BIZ,phoneNumberId:PHONE
+    });
+    const webInput={familyId:A,challengeId:code,
+      accepted:true,versionAccepted:CONSENT_VERSION};
+    await assert.rejects(webIssuer({...webInput,accepted:false}),/Explicit/);
+    const issued=await webIssuer(webInput);
+    assert.equal(issued.state,'issued');
+    assert.match(issued.receiptId,/^[A-Za-z0-9_-]{32}$/);
+    const digest=createHmac('sha256',webReceiptHmacKey)
+      .update('nexlupa:consent-receipt:v1:')
+      .update(issued.receiptId).digest();
+    const receiptRow=await pool.query(
+      'SELECT family_id,sender_digest,proof_digest,consent_version,'+
+      'consumed_at FROM public.nex_whatsapp_explicit_receipt_proofs '+
+      'WHERE receipt_digest=$1',[digest]);
+    assert.equal(receiptRow.rowCount,1);
+    assert.equal(receiptRow.rows[0].family_id,A);
+    assert.equal(receiptRow.rows[0].consent_version,CONSENT_VERSION);
+    assert.deepEqual(receiptRow.rows[0].sender_digest,
+      createHmac('sha256',metaSenderKey).update('34611111111').digest());
+    assert.deepEqual(receiptRow.rows[0].proof_digest,metaProofDigest);
+    assert.equal(receiptRow.rows[0].consumed_at,null);
+    assert.deepEqual(await webIssuer(webInput),{state:'rejected'},
+      'same verified phone proof must never produce multiple receipts');
+
+    // Only the verified session can sign activation, but even a stolen
+    // runtime credential cannot directly read raw evidence or insert consent.
+    const fullEnroll=createSignedAtomicConsentClient({
+      db:{connect:async()=>({query:(sql,args)=>runtime1.query(sql,args),
+       release(){}})},
+      proofHmacKey:metaProofKey.toString('base64'),
+      receiptHmacKey:webReceiptHmacKey.toString('base64'),
+      consentVersion:CONSENT_VERSION,
+      bindVerifiedRequest:async()=>({
+        authorizeFamily:async({familyId,action})=>
+          familyId===A&&action==='enroll_whatsapp_sender',
+        getVerifiedPrincipal:async()=>({
+          userId:USER,sessionId:'verified-ci-web-session'
+        })
+      }),
+      getActiveSigningKey:async purpose=>({
+        purpose,state:'active',keyId:KEY_ID,keyBase64:key.toString('base64')
+      })
+    });
+    const enrolled=await fullEnroll({
+      familyId:A,businessAccountId:BIZ,phoneNumberId:PHONE,
+      challengeId:code,consentReceiptId:issued.receiptId
+    });
+    assert.deepEqual(enrolled,{state:'enrolled'});
+    const used=await pool.query(
+      'SELECT consumed_at FROM public.nex_whatsapp_verified_phone_proofs '+
+      'WHERE proof_digest=$1',[metaProofDigest]);
+    assert.ok(used.rows[0].consumed_at);
+    const usedReceipt=await pool.query(
+      'SELECT consumed_at FROM public.nex_whatsapp_explicit_receipt_proofs '+
+      'WHERE receipt_digest=$1',[digest]);
+    assert.ok(usedReceipt.rows[0].consumed_at);
+    assert.deepEqual(await fullEnroll({
+      familyId:A,businessAccountId:BIZ,phoneNumberId:PHONE,
+      challengeId:code,consentReceiptId:issued.receiptId
+    }),{state:'rejected'});
+  }finally{
+    await webRuntime.query('RESET ROLE');webRuntime.release();
   }
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
