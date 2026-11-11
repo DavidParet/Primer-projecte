@@ -56,15 +56,18 @@ jobs:
         run: node --test tests/gmail-*.test.cjs
 
       - name: Probe isolated Vercel preview HTTP (GET only; diagnostic)
-        # Diagnostic only. Vercel protects this stable branch alias with SSO:
-        # unauthenticated 401 is expected and is NOT an application test.
-        # Authenticated GET checks are recorded separately in the runbook.
-        # GET-only, no credentials, and never gates the offline suite.
-        continue-on-error: true
+        # No cookies, OAuth tokens, credentials or email. This external check is
+        # advisory; only the offline safety suite gates this branch.
         env:
           GMAIL_PREVIEW_URL: https://primer-projecte-git-feature-gmail-r-42096a-davidparets-projects.vercel.app
         run: |
-          # The probe sends no OAuth code, cookie, authorization header or email.
-          # It exits nonzero for a protected/guarded preview; this is diagnostic,
-          # NOT proof that OAuth or Gmail message reads work.
+          set +e
           node scripts/probe-gmail-preview.cjs "$GMAIL_PREVIEW_URL"
+          probe_exit=$?
+          set -e
+          case "$probe_exit" in
+            0) echo "::notice::Preview HTTP contract reachable; this is NOT proof of real Gmail access." ;;
+            3) echo "::notice::Vercel SSO prevents unauthenticated GET as expected; authenticated verification is documented separately." ;;
+            4) echo "::notice::Preview routes are reachable and Gmail pilot remains guarded/not ready." ;;
+            *) echo "::warning::Preview HTTP unverified (exit $probe_exit); check access, deployment and response contract." ;;
+          esac
