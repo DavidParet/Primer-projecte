@@ -86,7 +86,9 @@ test('PostgreSQL: both insert/revoke lock orders leave no message after opt-out'
     await holder.query('COMMIT');
     holder.release();holder=null;
     assert.deepEqual(await revoking,{state:'revoked',deletedMessages:1});
-    const afterFirst=await pool.query('SELECT COUNT(*)::integer AS n FROM nex_whatsapp_inbound WHERE family_id=$1',[FAMILY_A]);
+    const afterFirst=await pool.query(
+      'SELECT COUNT(*)::integer AS n FROM nex_whatsapp_inbound WHERE business_account_id=$1 AND provider_message_id=$2',
+      [ACCOUNT,'wamid.synthetic-first']);
     assert.equal(afterFirst.rows[0].n,0);
     assert.deepEqual(await inbox.persistDelivery(delivery(SENDER_A,'wamid.synthetic-after-revocation')),
       {state:'unlinked'});
