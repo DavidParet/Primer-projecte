@@ -1,0 +1,42 @@
+name: Forwarding isolated gateway — fail closed
+
+on:
+  push:
+    branches:
+      - 'feature/gmail-resend-forwarding-pilot-*'
+    paths:
+      - 'gateway/**'
+      - '.github/workflows/forwarding-gateway-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'gateway/**'
+      - '.github/workflows/forwarding-gateway-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-gateway:
+    name: Standalone public gateway — no credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install package without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check route and source syntax
+        run: npm run check
+      - name: Assert serverless endpoint can load without credentials
+        run: |
+          node -e "const route=require('./api/webhook.js'); if(typeof route!=='function'||route.config.api.bodyParser!==false) process.exit(1)"
+      - name: Run self-contained, synthetic security tests
+        run: npm test
