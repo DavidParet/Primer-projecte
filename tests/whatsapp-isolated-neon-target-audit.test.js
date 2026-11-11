@@ -75,11 +75,45 @@ test('an empty dedicated sandbox project may clone a verified empty parent, but 
  input.branch.parent_id='br-synthetic-blank-parent';
  input.branch.init_source='parent-data';
  input.attestations.parent_branch_empty_verified=true;
+ input.attestations.parent_branch_id=input.branch.parent_id;
+ input.attestations.parent_project_id=input.project.id;
+ input.attestations.parent_branch_primary=true;
+ input.attestations.parent_branch_default=true;
+ input.attestations.parent_table_inventory_complete=true;
  const out=auditIsolatedNeonTarget(input);
  assert.equal(out.status,'independent_review_required');
  assert.equal(out.safeToExecuteSQL,false);
  assert.equal(out.productionApproved,false);
 });
+test('a real-looking inherited Neon branch cannot borrow proof from a different root',()=>{
+ const valid=pristine();
+ valid.branch.parent_id='br-synthetic-blank-parent';
+ valid.branch.init_source='parent-data';
+ valid.attestations.parent_branch_empty_verified=true;
+ valid.attestations.parent_branch_id=valid.branch.parent_id;
+ valid.attestations.parent_project_id=valid.project.id;
+ valid.attestations.parent_branch_primary=true;
+ valid.attestations.parent_branch_default=true;
+ valid.attestations.parent_table_inventory_complete=true;
+ assert.equal(auditIsolatedNeonTarget(valid).status,'independent_review_required');
+ for(const mutate of [
+  x=>{x.attestations.parent_branch_id='br-another-source';},
+  x=>{x.attestations.parent_project_id='different-neon-project';},
+  x=>{x.attestations.parent_branch_primary=false;},
+  x=>{x.attestations.parent_branch_default=false;},
+  x=>{x.attestations.parent_table_inventory_complete='true';},
+  x=>{delete x.attestations.parent_branch_id;},
+  x=>{x.branch.parent_id='br-external-database';}
+ ]){
+  const snapshot=structuredClone(valid);
+  mutate(snapshot);
+  const result=auditIsolatedNeonTarget(snapshot);
+  assert.equal(result.status,'blocked');
+  assert.ok(result.failedChecks.includes('parent_data_copy_not_excluded'));
+  assert.equal(result.safeToExecuteSQL,false);
+ }
+});
+
 test('metadata gates require a complete table inventory and independent attestations',()=>{
  const input=pristine();
  input.tableInventoryComplete=false;
