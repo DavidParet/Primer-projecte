@@ -99,6 +99,16 @@ test('invalid identities and oversized/empty text never reach database',async()=
   assert.equal(db.calls.length,0);
 });
 
+test('direct text delivery with missing body fails closed before database write',async()=>{
+  const db=mockDb(), store=inbox(db);
+  for(const malformed of [
+    {text:null}, {text:undefined}, {contentPending:true}, {text:{body:'fake'}}
+  ]) {
+    await assert.rejects(store.persistDelivery(delivery(malformed)),TypeError);
+  }
+  assert.equal(db.calls.length,0);
+});
+
 test('image and unsupported media are not ingested or claimed to be read',async()=>{
   const db=mockDb();
   assert.deepEqual(await inbox(db).persistDelivery(
