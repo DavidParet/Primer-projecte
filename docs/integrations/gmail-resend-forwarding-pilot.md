@@ -133,3 +133,12 @@ Aquest treball és de codi i proves aïllades. Cap missatge real ha entrat per l
 **Bloquejos que continuen oberts:** quota de desplegaments Vercel per a la darrera revisió (HTTP 402 al darrer intent), secret exclusiu del webhook pilot, credencial de lectura Resend limitada, consentiment explícit i alias de família pilot, comprovació de font de correu i filtre selectiu Gmail. `FORWARDING_PILOT_ENABLED=false`, PR #16 en esborrany, producció no modificada.
 
 **Limitació pendent abans de connectar el worker:** persistir una proposta de revisió xifrada amb permisos mínims i revisió humana real, en lloc de limitar-se a marcar la cua.
+
+
+### Verificació de Vercel (última revisió desplegada)
+
+- El commit `777d24eee4c838f7a029c0e84b12541620b0588e`, posterior a les **63 proves verdes**, ha estat desplegat automàticament a Vercel en estat **READY**; el desplegament no ha requerit canvis de pla.
+- **Prova HTTP real**: `GET https://primer-projecte-47h83u7vc-davidparets-projects.vercel.app/api/forwarding/pilot-webhook` → **200 OK** amb `configurationPresent:false`, `databaseConnectivityVerified:false`, `emailBodiesFetched:false`, `metadataReceiptsEnabled:false`, `productionEnabled:false`. `Cache-Control: no-store, private`.
+- El desplegament **ja no està bloquejat** per al commit anterior. L'error 402 registrat en intents de desplegament **manuals** és històric; no vol dir que la versió automàtica actual no estigui disponible.
+- **No s'ha provat POST contra aquest Vercel**: la interfície de comprovació disponible només fa GET. El webhook pilot no té encara secret de signatura independent, ni consentiment de família pilot; per això un POST no podria validar el circuit real complet.
+- La pàgina de diagnòstic no afirma connectivitat amb Neon, i la bandera de pilot continua `false`. Aquest estat és el comportament correcte fins que hi hagi consentiment i una validació d'entrada signada.
