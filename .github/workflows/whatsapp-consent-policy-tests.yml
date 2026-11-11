@@ -13,10 +13,14 @@ on:
     paths:
       - 'lib/whatsapp/consent-policy.js'
       - 'lib/whatsapp/durable-inbox.js'
+      - 'lib/whatsapp/verified-ingestion.js'
+      - 'lib/whatsapp/delivery-normalizer.js'
       - 'tests/whatsapp-consent-policy.test.js'
       - 'tests/whatsapp-tenant-revocation.test.js'
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-atomic-batch.test.js'
+      - 'tests/whatsapp-verified-ingestion.test.js'
+      - 'tests/whatsapp-provider-id-collision.test.js'
       - 'tests/whatsapp-postgres-concurrency.test.cjs'
       - 'tests/whatsapp-postgres-atomic-batch.test.cjs'
       - '.github/workflows/whatsapp-consent-policy-tests.yml'
@@ -47,7 +51,7 @@ jobs:
         with:
           node-version: 22
       - name: Test consent and durable inbox policies
-        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-tenant-revocation.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-atomic-batch.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js tests/whatsapp-provider-id-collision.test.js
+        run: node --test tests/whatsapp-consent-policy.test.js tests/whatsapp-tenant-revocation.test.js tests/whatsapp-durable-inbox.test.js tests/whatsapp-atomic-batch.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js tests/whatsapp-provider-id-collision.test.js tests/whatsapp-verified-ingestion.test.js
       - name: PostgreSQL two-connection concurrency regression
         env:
           WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:synthetic-test-only@127.0.0.1:5432/postgres
