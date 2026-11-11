@@ -11,6 +11,10 @@ const {createSignedAtomicConsentClient}=
  require('../lib/whatsapp/signed-atomic-consent-client');
 const {createPilotAtomicConsentFactory}=
  require('../lib/whatsapp/pilot-atomic-consent');
+const {createMetaPhoneProofIssuer,ISSUE_SQL:ISSUE_META_PROOF_SQL}=
+ require('../lib/whatsapp/meta-phone-proof-issuer');
+const {pairingDigest}=
+ require('../lib/whatsapp/family-pairing-protocol');
 const {PILOT_COOKIE,encodePilotSession}=
  require('../lib/whatsapp/pilot-auth-bff');
 const {CONSENT_VERSION}=
@@ -87,6 +91,20 @@ test('signed limited-role activation: deny direct access, verify signatures, one
      .split('\n').filter(line=>!line.startsWith('\\')).join('\n');
    await pool.query(migrationSql);
   }
+  // Minimal TTP236 challenge schema for this isolated PG16 test; the full
+  // pairing issuer is tested separately in PostgreSQL 17 CI.
+  await pool.query("CREATE TABLE public.nex_ci_whatsapp_pairing_challenges ("+
+    "challenge_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,"+
+    "family_id uuid NOT NULL, business_account_id text NOT NULL,"+
+    "phone_number_id text NOT NULL, code_digest bytea NOT NULL UNIQUE,"+
+    "requested_by text NOT NULL, consent_version text NOT NULL,"+
+    "created_at timestamptz NOT NULL DEFAULT clock_timestamp(),"+
+    "expires_at timestamptz NOT NULL, consumed_at timestamptz)");
+  await pool.query("REVOKE ALL ON public.nex_ci_whatsapp_pairing_challenges FROM PUBLIC");
+  await pool.query("ALTER TABLE public.nex_ci_whatsapp_pairing_challenges ENABLE ROW LEVEL SECURITY");
+  await pool.query("ALTER TABLE public.nex_ci_whatsapp_pairing_challenges FORCE ROW LEVEL SECURITY");
+  await pool.query(readFileSync(join(__dirname,
+    '../db/migrations/20261111_whatsapp_verified_meta_proof_issuer_ci.sql'),'utf8'));
   await pool.query('INSERT INTO public.nex_ci_atomic_activation_keys '+
    '(key_id,key_data,state) VALUES($1,$2,$3)',[KEY_ID,key,'active']);
   // Canonical, staged TTP240 tables -- NO synthetic membership copy.
@@ -418,6 +436,114 @@ EXECUTE FUNCTION public.nex_ci_atomic_fail_on_receipt();
   }finally{
     await identityReader.query('RESET ROLE');
     identityReader.release();
+  }
+
+  // Meta proof issuer: the webhook signature is verified against original
+  // raw bytes. Signed permit only creates a phone-proof row, never consent.
+  const code='ABCD-EFGH-JKLM-NPQR';
+  const proofBiz=BIZ,proofPhone=PHONE;
+  const metaSecret='CI-META-APP-SECRET-ONLY';
+  const metaSenderKey=randomBytes(32),metaPairingKey=randomBytes(32),
+    metaProofKey=randomBytes(32),metaSignerKey=randomBytes(32);
+  const codeDigest=pairingDigest({code,businessAccountId:proofBiz,
+    phoneNumberId:proofPhone,pairingKey:metaPairingKey});
+  const metaProofDigest=createHmac('sha256',metaProofKey)
+    .update('nexlupa:phone-proof:v1:').update(code).digest();
+  await pool.query(
+    'INSERT INTO public.nex_ci_meta_proof_signing_keys '+
+    '(key_id,key_data,state) VALUES($1,$2,$3)',
+    ['ci-meta-proof-key',metaSignerKey,'active']);
+  await pool.query(
+    'INSERT INTO public.nex_ci_whatsapp_pairing_challenges '+
+    '(family_id,business_account_id,phone_number_id,code_digest,'+
+    'requested_by,consent_version,expires_at) '+
+    "VALUES($1,$2,$3,$4,$5,$6,clock_timestamp()+interval '9 minutes')",
+    [A,proofBiz,proofPhone,codeDigest,USER,CONSENT_VERSION]);
+  const metaRuntime=await pool.connect();
+  try{
+    await metaRuntime.query('SET ROLE nex_ci_meta_proof_runtime');
+    for(const table of ['nex_ci_whatsapp_pairing_challenges',
+      'nex_whatsapp_verified_phone_proofs','nex_ci_meta_proof_signing_keys',
+      'nex_ci_meta_proof_provider_receipts','nex_ci_meta_proof_operation_nonces']){
+      await assert.rejects(metaRuntime.query('SELECT * FROM public.'+table),
+        e=>e.code==='42501');
+    }
+    const metaProofIssuer=createMetaPhoneProofIssuer({
+      db:{connect:async()=>({query:(sql,args)=>metaRuntime.query(sql,args),
+        release(){}})},
+      metaAppSecret:metaSecret,
+      senderHmacKey:metaSenderKey.toString('base64'),
+      pairingHmacKey:metaPairingKey.toString('base64'),
+      proofHmacKey:metaProofKey.toString('base64'),
+      businessAccountId:proofBiz,phoneNumberId:proofPhone,
+      getActiveSigningKey:async purpose=>({
+        purpose,state:'active',keyId:'ci-meta-proof-key',
+        keyBase64:metaSignerKey.toString('base64')
+      })
+    });
+    const makeEvent=(id='wamid.ci-verified-phone-1',word=code)=>
+      Buffer.from(JSON.stringify({object:'whatsapp_business_account',
+        entry:[{id:proofBiz,changes:[{field:'messages',value:{
+          metadata:{phone_number_id:proofPhone},
+          messages:[{id,from:'34611111111',
+            timestamp:String(Math.floor(Date.now()/1000)),
+            type:'text',text:{body:'NEXLUPA ACCEPTA '+word}}]
+        }}]}]}));
+    const raw=makeEvent(),mac=bytes=>'sha256='+
+      createHmac('sha256',metaSecret).update(bytes).digest('hex');
+    const previousAuth=(await pool.query(
+      'SELECT COUNT(*)::int AS n FROM public.nex_whatsapp_sender_authorizations '+
+      'WHERE business_account_id=$1',[BIZ])).rows[0].n;
+    assert.deepEqual(await metaProofIssuer(raw,'sha256='+'0'.repeat(64)),
+      {state:'rejected'});
+    assert.equal((await pool.query('SELECT COUNT(*)::int AS n FROM '+
+      'public.nex_whatsapp_verified_phone_proofs WHERE proof_digest=$1',
+      [metaProofDigest])).rows[0].n,0);
+    assert.deepEqual(await metaProofIssuer(raw,mac(raw)),{state:'verified'});
+    const metaRecord=await pool.query('SELECT family_id,business_account_id,'+
+      'phone_number_id,sender_digest,consumed_at FROM '+
+      'public.nex_whatsapp_verified_phone_proofs WHERE proof_digest=$1',
+      [metaProofDigest]);
+    assert.equal(metaRecord.rowCount,1);
+    assert.equal(metaRecord.rows[0].family_id,A);
+    assert.equal(metaRecord.rows[0].business_account_id,BIZ);
+    assert.equal(metaRecord.rows[0].phone_number_id,PHONE);
+    assert.equal(metaRecord.rows[0].consumed_at,null);
+    assert.deepEqual(metaRecord.rows[0].sender_digest,
+      createHmac('sha256',metaSenderKey).update('34611111111').digest());
+    assert.equal((await pool.query('SELECT COUNT(*)::int AS n FROM '+
+      'public.nex_whatsapp_sender_authorizations WHERE business_account_id=$1',
+      [BIZ])).rows[0].n,previousAuth,'phone proof is NOT explicit consent');
+    assert.deepEqual(await metaProofIssuer(raw,mac(raw)),{state:'rejected'});
+    const replay=makeEvent('wamid.ci-meta-new-id');
+    assert.deepEqual(await metaProofIssuer(replay,mac(replay)),{state:'rejected'});
+    assert.equal((await pool.query('SELECT COUNT(*)::int AS n FROM '+
+      'public.nex_ci_meta_proof_provider_receipts WHERE business_account_id=$1',
+      [BIZ])).rows[0].n,1);
+
+    // Signed Meta proof must refuse a challenge whose canonical admin was
+    // suspended AFTER creating the challenge.
+    const otherCode='ABCD-EFGH-JKLM-NPQS';
+    const otherDigest=pairingDigest({code:otherCode,
+      businessAccountId:BIZ,phoneNumberId:PHONE,pairingKey:metaPairingKey});
+    await pool.query(
+      'INSERT INTO public.nex_ci_whatsapp_pairing_challenges '+
+      '(family_id,business_account_id,phone_number_id,code_digest,'+
+      'requested_by,consent_version,expires_at) '+
+      "VALUES($1,$2,$3,$4,$5,$6,clock_timestamp()+interval '9 minutes')",
+      [A,BIZ,PHONE,otherDigest,USER,CONSENT_VERSION]);
+    await pool.query("UPDATE public.nex_family_memberships SET status='suspended',"+
+      'updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2',[USER,A]);
+    const deniedRaw=makeEvent('wamid.ci-meta-denied',otherCode);
+    assert.deepEqual(await metaProofIssuer(deniedRaw,mac(deniedRaw)),
+      {state:'rejected'});
+    assert.equal((await pool.query(
+      'SELECT COUNT(*)::int AS n FROM public.nex_ci_whatsapp_pairing_challenges '+
+      'WHERE code_digest=$1 AND consumed_at IS NOT NULL',[otherDigest])).rows[0].n,0);
+    await pool.query("UPDATE public.nex_family_memberships SET status='active',"+
+      'updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2',[USER,A]);
+  }finally{
+    await metaRuntime.query('RESET ROLE');metaRuntime.release();
   }
 
   // Disabling the sole signing key must reject even otherwise valid evidence.
