@@ -139,6 +139,19 @@ test('verified batch normalizes Meta envelope before storing',async()=>{
   assert.equal(db.calls.length,1);
 });
 
+test('single verified but unlinked delivery fails closed rather than being acknowledged',async()=>{
+  const db=mockDb('unlinked'), store=inbox(db);
+  const payload={object:'whatsapp_business_account',entry:[{
+    id:'123456789',changes:[{field:'messages',value:{
+      metadata:{phone_number_id:'987654321'},
+      messages:[{id:'wamid.unlinked-synthetic',from:'34600000000',
+        timestamp:'1794150000',type:'text',text:{body:'Missatge fictici'}}]
+    }}]
+  }]};
+  await assert.rejects(store.persistVerifiedBatch(payload),/authorization review/);
+  assert.equal(db.calls.length,1);
+});
+
 test('malformed batch is rejected before database access',async()=>{
   const db=mockDb(), store=inbox(db);
   const payload={object:'whatsapp_business_account',entry:[{
