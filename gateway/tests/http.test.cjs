@@ -220,3 +220,16 @@ test('UTF-8 stream is read exactly once; never accesses parsed body getter',asyn
  assert.equal(await rawBody(req),'a');
  assert.equal(req.reads,1);
 });
+
+
+test('oversized declared Content-Length is rejected before reading stream or connecting',async()=>{
+ const raw=rawEvent(),track={count:0};
+ for(const length of ['16385','999999999999999999999','1, 2']){
+   const req=request('POST',raw,{...signedHeaders(raw),'content-length':length});
+   const res=await run(makeHttpHandler({config:validConfig,
+     createAdapters:mockAdapters('inserted',track)}),req);
+   assert.equal(res.statusCode,413);
+   assert.equal(req.reads,0);
+   assert.equal(track.count,0);
+ }
+});
