@@ -437,51 +437,8 @@ function formatActionDate(str) {
 
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
-  var _eventRe    = /actuaci|concert|excursi|jornada|espectacle|representaci|festival|parti[dt]|final|visita\s+m[eè]d|reunió/i;
-  var _deadlineRe = /pagar|lliurar|signar|entregar|termini|data\s+l[ií]mit|pla[çc]|renovar/i;
-  var _prepRe     = /assaig|recollir|recollida|portar|dur\s|comprar|preparar|arribar\s+abans|inscri[ub]|confirmar/i;
-
-  /* Índexs del primer event, primer deadline i primer ALTA de la IA */
-  var mainEventIdx    = -1;
-  var mainDeadlineIdx = -1;
-  var aiAltaIdx       = -1;
-
-  accions.forEach(function (a, i) {
-    var txt = String(a.accio || '');
-    if (mainEventIdx    === -1 && _eventRe.test(txt))     mainEventIdx    = i;
-    if (mainDeadlineIdx === -1 && _deadlineRe.test(txt))  mainDeadlineIdx = i;
-    if (aiAltaIdx       === -1 && a.prioritat === 'alta') aiAltaIdx       = i;
-  });
-
-  /* Fallback keyword: actua NOMÉS si la IA no ha marcat cap "alta" */
-  var aiHasAlta  = aiAltaIdx !== -1;
-  var keywordAlta = !aiHasAlta ? (mainEventIdx !== -1 ? mainEventIdx : mainDeadlineIdx) : -1;
-
-  /* Primera passada: IA és la font primària, keywords actuen com a xarxa de seguretat */
-  var result = accions.map(function (a, i) {
-    var txt    = String(a.accio || '');
-    var isPrep = _prepRe.test(txt);
-    var hasDate = !!(a.data && String(a.data) !== 'null');
-    var aiPrior = a.prioritat;
-    var prioritat;
-
-    if (aiPrior === 'alta' || i === keywordAlta) {
-      prioritat = 'alta';
-    } else if (isPrep || hasDate || aiPrior === 'mitja') {
-      prioritat = 'mitja';
-    } else {
-      prioritat = 'baixa';
-    }
-
-    return Object.assign({}, a, { _origIdx: i, prioritat: prioritat });
-  });
-
-  /* Cap: màxim 2 "alta" */
-  var altaCount = 0;
-  result = result.map(function (a) {
-    if (a.prioritat !== 'alta') return a;
-    altaCount++;
-    return altaCount <= 2 ? a : Object.assign({}, a, { prioritat: 'mitja' });
+  var result = accions.map(function(a, i) {
+    return Object.assign({}, a, { _origIdx: i, prioritat: a.prioritat || 'baixa' });
   });
 
   /* Ordre estable: alta → mitja → baixa, per data ISO, per ordre original */
@@ -527,7 +484,10 @@ function addActionToCalendar(a) {
     var hasTime = m[4] && !(m[4] === '00' && m[5] === '00');
     if (hasTime) {
       var dt  = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
-      var dt2 = new Date(dt.getTime() + 60 * 60 * 1000);
+      var end = typeof a.dataFi === 'string' ? a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
+      var explicitEnd = end && new Date(+end[1], +end[2]-1, +end[3], +end[4], +end[5]);
+      var dt2 = explicitEnd > dt ? explicitEnd : new Date(dt.getTime() + 60 * 60 * 1000);
+      var provisionalEnd = !(explicitEnd > dt);
       startStr = formatGCalDateTime(dt);
       endStr   = formatGCalDateTime(dt2);
     } else {
@@ -543,6 +503,7 @@ function addActionToCalendar(a) {
     endStr   = toGCalDate(pd2);
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
+  if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
@@ -557,14 +518,12 @@ function addActionToCalendar(a) {
 
 /* ── CATEGORITZACIÓ D'ACCIONS (motor v3 — sense calendari, que va a mainEvent) ── */
 /* Filtre de verbs d'event: "Assistir a", "Participar a", "Anar a", "Acudir a" mai són accions */
-var _evtVerbRe = /^(assistir|participar|anar\s+a|acudir)\b/i;
 function categorizeAccions(accions) {
   var p1   = [];
   var p2   = [];
   var info = [];
   accions.forEach(function(a) {
     if (a.tipus === 'calendari') return; /* l'event principal va a mainEvent */
-    if (_evtVerbRe.test((a.accio || '').trim())) return; /* verb d'event → filtrat */
     if (a.prioritat === 'alta')        p1.push(a);
     else if (a.prioritat === 'mitja')  p2.push(a);
     else                               info.push(a);
@@ -572,8 +531,15 @@ function categorizeAccions(accions) {
   return { p1: p1, p2: p2, info: info };
 }
 
+function canOpenMaps(lloc) {
+  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+}
+
 function _buildLlocLink(lloc) {
-  var el = document.createElement('a');
+  var el = document.createElement(canOpenMaps(lloc) ? 'a' : 'span');
+  el.className = 'nx-card-lloc';
+  el.textContent = '📍 ' + lloc;
+  if (el.tagName === 'SPAN') return el;
   el.className = 'nx-card-lloc';
   el.href      = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc);
   el.target    = '_blank';
@@ -667,7 +633,7 @@ function buildEventCard(mainEvent) {
   btnRow.className = 'nx-event-btn-row';
 
   if (mainEvent.data && mainEvent.data !== 'null') {
-    var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc };
+    var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc, dataFi: mainEvent.dataFi };
     var calBtn = document.createElement('button');
     calBtn.className   = 'nx-event-btn nx-event-btn-cal';
     calBtn.textContent = '📅 Afegir al calendari';
@@ -675,7 +641,7 @@ function buildEventCard(mainEvent) {
     btnRow.appendChild(calBtn);
   }
 
-  if (mainEvent.lloc) {
+  if (canOpenMaps(mainEvent.lloc)) {
     var mapsBtn = document.createElement('a');
     mapsBtn.className   = 'nx-event-btn nx-event-btn-maps';
     mapsBtn.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mainEvent.lloc);
@@ -767,6 +733,14 @@ function buildActionCard(a, cardClass) {
   }
 
   if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
+  if (typeof a.enllac === 'string' && /^https?:\/\//i.test(a.enllac)) {
+    var actionLink = document.createElement('a');
+    actionLink.href = a.enllac;
+    actionLink.target = '_blank';
+    actionLink.rel = 'noopener noreferrer';
+    actionLink.textContent = 'Obrir l’enllaç';
+    card.appendChild(actionLink);
+  }
 
   if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
 
@@ -784,36 +758,14 @@ function renderResult(d) {
     if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
     if (!a || typeof a !== 'object') return null;
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
-    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null };
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null, enllac: a.enllac || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
-  /* MAIN EVENT — fallback en 3 capes (abans de categorizeAccions per eliminar de P2) */
-  var _evtKeyRe2    = /\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
-  var mainEvent     = d.mainEvent || null;
-  var _meSrcIdx     = -1;
+  var mainEvent = d.mainEvent || null;
   if (!mainEvent) {
-    /* capa 1: tipus === 'calendari' */
-    for (var _mei = 0; _mei < accions.length; _mei++) {
-      if (accions[_mei].tipus === 'calendari') {
-        mainEvent = { title: accions[_mei].accio, data: accions[_mei].data, lloc: accions[_mei].lloc };
-        _meSrcIdx = _mei; break;
-      }
-    }
-  }
-  if (!mainEvent) {
-    /* capa 2: data + (lloc o keyword d'event) */
-    for (var _mei2 = 0; _mei2 < accions.length; _mei2++) {
-      var _mea = accions[_mei2];
-      if (_mea.data && (_mea.lloc || _evtKeyRe2.test(_mea.accio || ''))) {
-        mainEvent = { title: _mea.accio, data: _mea.data, lloc: _mea.lloc };
-        _meSrcIdx = _mei2; break;
-      }
-    }
-  }
-  /* elimina l'acció usada com a mainEvent → no apareix a P2 */
-  if (_meSrcIdx !== -1) {
-    accions = accions.filter(function(_, idx) { return idx !== _meSrcIdx; });
+    var event = accions.find(function(a) { return a.tipus === 'calendari'; });
+    if (event) mainEvent = { title: event.accio, data: event.data, lloc: event.lloc };
   }
 
   var cats = categorizeAccions(accions);
@@ -831,6 +783,12 @@ function renderResult(d) {
       decisioEl.className   = 'nx-decisio-text';
       if (decisioLabel) decisioLabel.style.display = '';
     }
+  }
+
+  var dateWarning = document.getElementById('nx-date-warning');
+  if (dateWarning) {
+    dateWarning.textContent = typeof d.avisDates === 'string' ? d.avisDates : '';
+    dateWarning.hidden = !dateWarning.textContent;
   }
 
   var eventBlock   = document.getElementById('nx-event-block');
