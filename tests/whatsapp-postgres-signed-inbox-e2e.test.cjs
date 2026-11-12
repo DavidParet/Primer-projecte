@@ -5,13 +5,14 @@
  * restricted family SELECT -> AES-GCM plaintext read integration.
  * Disposable GitHub Actions Postgres 17 ONLY. NEVER connects to Neon.
  * Admin seeds only synthetic consent and signer keys; both actual ingest
- * and read run with separate restricted NOLOGIN roles via SET ROLE.
+ * and read run with real, separate, low-privilege PostgreSQL LOGINs.
+ * Credentials are generated in memory for the disposable CI database only.
  */
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {Readable}=require('node:stream');
 const {createHmac,randomBytes}=require('node:crypto');
-const {Pool}=require('pg');
+const {Pool,Client}=require('pg');
 const {createDurableInbox}=require('../lib/whatsapp/durable-inbox');
 const {createSignedInboundIngestAdapter,SIGNED_INSERT_SQL}=
  require('../lib/whatsapp/signed-inbound-ingest-adapter');
@@ -27,6 +28,40 @@ const SENDER='34677711111',OUTSIDER='34677722222',SECOND='34677733333';
 const MESSAGE='wamid.node-sql-reader-ci-01';
 const TEXT='CI fictici: excursió el dijous a les 09:00';
 const APP_SECRET='CI-only-fictitious-Meta-app-secret';
+
+// Only these fixed CI-only names enter DDL. Passwords are random for each run,
+// never logged, written to the repository or sent to a production database.
+async function createRestrictedLogin(pool,connectionUrl,roleName,grantedRole){
+ if(!['nex_ci_ingest_e2e_login','nex_ci_reader_e2e_login'].includes(roleName)||
+    !['nex_ci_inbound_ingest_runtime','nex_ci_inbox_reader_runtime'].includes(grantedRole))
+  throw new TypeError('CI-only PostgreSQL login and runtime role required');
+ const password=randomBytes(24).toString('hex');
+ await pool.query(
+  'CREATE ROLE '+roleName+' LOGIN INHERIT NOSUPERUSER NOBYPASSRLS '+
+  "NOCREATEDB NOCREATEROLE NOREPLICATION PASSWORD '"+password+"'"
+ );
+ await pool.query('GRANT '+grantedRole+' TO '+roleName+
+  ' WITH ADMIN FALSE, INHERIT TRUE, SET FALSE');
+ const parsed=new URL(connectionUrl);
+ const client=new Client({
+  host:parsed.hostname,port:Number(parsed.port||5432),
+  database:decodeURIComponent(parsed.pathname.slice(1)),user:roleName,
+  password,connectionTimeoutMillis:6000,statement_timeout:15000
+ });
+ await client.connect();
+ const role=await client.query(
+  "SELECT current_user AS login_user,session_user AS session_name,"+
+  "rolsuper AS superuser,rolbypassrls AS bypass_rls "+
+  "FROM pg_roles WHERE rolname=current_user"
+ );
+ assert.deepEqual(role.rows[0],{
+  login_user:roleName,session_name:roleName,
+  superuser:false,bypass_rls:false
+ });
+ // These logins have no SET privilege on any elevated role.
+ await assert.rejects(client.query('SET ROLE postgres'),e=>e.code==='42501');
+ return client;
+}
 
 function envelope(from,id,text){
  return Buffer.from(JSON.stringify({
@@ -83,11 +118,10 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
    'INSERT INTO public.nex_ci_inbound_ingest_keys(key_id,key_data,state) '+
    "VALUES ($1,$2,'active')",[ingestKeyId,ingestSigningKey]);
 
-  // Ingest is NOT run with the PostgreSQL admin: this connection can only
-  // execute the signed security-definer function. It cannot read consents,
-  // encrypted messages, keys or grant itself new permissions.
-  ingestClient=await pool.connect();
-  await ingestClient.query('SET ROLE nex_ci_inbound_ingest_runtime');
+  // A separate authenticated LOGIN, not an admin SET ROLE simulation,
+  // can only execute the signed security-definer function.
+  ingestClient=await createRestrictedLogin(pool,url,
+   'nex_ci_ingest_e2e_login','nex_ci_inbound_ingest_runtime');
   const ingestPrivilege=await ingestClient.query(
    "SELECT has_table_privilege(current_user,'public.nex_whatsapp_inbound','INSERT') AS insert_direct,"+
    "has_table_privilege(current_user,'public.nex_whatsapp_sender_authorizations',"+
@@ -97,6 +131,12 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.deepEqual(ingestPrivilege.rows[0],{
    insert_direct:false,consent_direct:false,signing_key_direct:false
   });
+  await assert.rejects(ingestClient.query(
+   'SELECT 1 FROM public.nex_whatsapp_inbound LIMIT 1'
+  ),e=>e.code==='42501');
+  await assert.rejects(ingestClient.query(
+   'SELECT 1 FROM public.nex_ci_inbound_ingest_keys LIMIT 1'
+  ),e=>e.code==='42501');
   const ingestCalls=[];
   const signedDb=createSignedInboundIngestAdapter({
    db:{async query(sql,values){
@@ -174,9 +214,9 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
    'SELECT family_id FROM public.nex_whatsapp_inbound WHERE provider_message_id=$1',
    [MESSAGE])).rows[0].family_id,A);
 
-  // This separate connection executes ONLY with the restricted inbox role.
-  readerClient=await pool.connect();
-  await readerClient.query('SET ROLE nex_ci_inbox_reader_runtime');
+  // A second LOGIN has only the reader RPC; no ingestion or raw inbox rights.
+  readerClient=await createRestrictedLogin(pool,url,
+   'nex_ci_reader_e2e_login','nex_ci_inbox_reader_runtime');
   const privileges=await readerClient.query(
    "SELECT has_table_privilege(current_user,'public.nex_whatsapp_inbound','SELECT') "+
    "AS direct_read,has_table_privilege(current_user,'public.nex_ci_inbox_read_keys',"+
@@ -185,6 +225,16 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.deepEqual(privileges.rows[0],{
    direct_read:false,direct_key_read:false
   });
+  await assert.rejects(readerClient.query(
+   'SELECT 1 FROM public.nex_whatsapp_inbound LIMIT 1'
+  ),e=>e.code==='42501');
+  await assert.rejects(readerClient.query(SIGNED_INSERT_SQL,[
+   BUSINESS,PHONE,senderDigest,'wamid.reader-must-not-ingest',
+   randomBytes(12),randomBytes(16),Buffer.from('cipher'),
+   String(Math.floor(Date.now()/1000)),ingestKeyId,
+   Math.floor(Date.now()/1000)+20,
+   'f0b16666-aaaa-4aaa-8aaa-777777777777',Buffer.alloc(32)
+  ]),e=>e.code==='42501');
 
   const calls=[];
   let authorized=true;
@@ -244,14 +294,8 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   await assert.rejects(inboxReader({familyId:A}),/membership/);
   assert.equal(calls.length,1,'revoked web family did not reach SQL');
  }finally{
-  if(ingestClient){
-   try{await ingestClient.query('RESET ROLE');}
-   finally{ingestClient.release();}
-  }
-  if(readerClient){
-   try{await readerClient.query('RESET ROLE');}
-   finally{readerClient.release();}
-  }
+  if(ingestClient)await ingestClient.end();
+  if(readerClient)await readerClient.end();
   await pool.end();
  }
 });
