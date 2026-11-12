@@ -6,7 +6,7 @@ const {
  LOCK_SQL,ROLE_SQL,INGEST_PURGE_SQL,INBOX_PURGE_SQL
 }=require('../lib/whatsapp/signed-inbox-nonce-retention');
 const safeRole=()=>({
- role_name:'nex_ci_inbox_nonce_maintenance',
+ role_name:'nex_ci_nonce_maintenance_e2e_login',purpose_role:true,
  superuser:false,bypass_rls:false,
  ingest_read:true,ingest_delete:true,inbox_read:true,inbox_delete:true,
  ingest_insert:false,inbox_insert:false,ingest_keys:false,inbox_keys:false,
@@ -75,7 +75,7 @@ test('unavailable advisory lock reports busy without any table access',async()=>
 
 test('rejects elevated, wrong-purpose or writable maintenance credentials',async()=>{
  for(const role of [
-  {...safeRole(),role_name:'postgres'},
+  {...safeRole(),role_name:'postgres',purpose_role:false},
   {...safeRole(),superuser:true},
   {...safeRole(),bypass_rls:true},
   {...safeRole(),inbox_read:false},
