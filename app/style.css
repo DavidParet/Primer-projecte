@@ -652,20 +652,15 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   -webkit-font-smoothing: antialiased;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
   margin-top: 18px; position: relative; overflow: hidden;
-  color: #ffffff;
+  color: #17120a;
   --btn-x: 50%; --btn-y: 50%;
 
-  background: linear-gradient(180deg,
-    #2DAEE8 0%,
-    #0B99D6 40%,
-    #0278B8 75%,
-    #035f94 100%
-  );
+  background: var(--gold);
 
   box-shadow:
     0 1px 0 rgba(255,255,255,.18) inset,
     0 -1px 0 rgba(0,0,0,.22) inset,
-    0 2px 6px rgba(14,165,233,.20),
+    0 2px 6px rgba(212,168,48,.14),
     0 1px 3px rgba(0,0,0,.40);
 
   transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .25s ease;
@@ -710,14 +705,14 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
     box-shadow:
       0 1px 0 rgba(255,255,255,.22) inset,
       0 -1px 0 rgba(0,0,0,.24) inset,
-      0 3px 10px rgba(14,165,233,.38),
+      0 3px 10px rgba(212,168,48,.24),
       0 1px 4px rgba(0,0,0,.45);
   }
   50% {
     box-shadow:
       0 1px 0 rgba(255,255,255,.22) inset,
       0 -1px 0 rgba(0,0,0,.22) inset,
-      0 3px 10px rgba(14,165,233,.28),
+      0 3px 10px rgba(212,168,48,.18),
       0 1px 3px rgba(0,0,0,.40);
   }
 }
@@ -727,7 +722,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   box-shadow:
     0 1px 0 rgba(255,255,255,.24) inset,
     0 -1px 0 rgba(0,0,0,.22) inset,
-    0 4px 12px rgba(14,165,233,.28),
+    0 4px 12px rgba(212,168,48,.18),
     0 1px 4px rgba(0,0,0,.44);
   animation-play-state: paused;
 }
@@ -737,7 +732,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   box-shadow:
     0 1px 0 rgba(255,255,255,.14) inset,
     0 -1px 0 rgba(0,0,0,.20) inset,
-    0 2px 6px rgba(14,165,233,.28),
+    0 2px 6px rgba(212,168,48,.18),
     0 1px 3px rgba(0,0,0,.40);
   animation-play-state: paused;
 }
@@ -1665,7 +1660,11 @@ body.dark #pageApp .app-col-right textarea:focus {
   .app-col-right .card-head     { margin-bottom: 4px; }
   .app-col-right .input-tabs    { margin-bottom: 6px; }
   .app-col-right .ex-row        { margin-top: 2px; }
-  .app-col-right .btn-analyze   { margin-top: 14px; padding: 12px; }
+  .app-col-right .btn-analyze {
+    max-width: 320px;
+    margin: 14px auto 0;
+    padding: 12px;
+  }
   .app-col-right .usage-counter { margin-top: 6px; padding-top: 8px; }
 }
 
