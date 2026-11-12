@@ -64,8 +64,8 @@ module.exports = async function handler(req, res) {
     }
 
     const completionOpts = {
-      model:       image ? 'gpt-4o' : 'gpt-4o-mini',
-      max_tokens:  3500,
+      model:       image ? 'gpt-4o' : (process.env.NEXLUPA_TEXT_MODEL || 'gpt-4o'),
+      max_tokens:  5000,
       temperature: 0,
       messages,
       response_format: { type: 'json_object' }
@@ -81,7 +81,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Normalització determinista: preserva tots els esdeveniments, dates i dades útils.
-    parsed = normalizeAnalysis(parsed, typeof text === 'string' ? text : '', today);
+    parsed = normalizeAnalysis(parsed, typeof text === 'string' ? text : '', today, original);
 
     // Una sola reconsulta quan una expressió inequívocament futura ha produït dates passades.
     const futureText = typeof text === 'string' && /(?:demà|passat demà|que ve|setmana vinent|proper|pròxim)/i.test(text);
@@ -102,7 +102,7 @@ module.exports = async function handler(req, res) {
         });
         const candidate = JSON.parse(again.choices[0].message.content);
         if (candidate && Array.isArray(candidate.accions) && candidate.resum) {
-          const fixed = normalizeAnalysis(candidate, text, today);
+          const fixed = normalizeAnalysis(candidate, text, today, original);
           const stillPast = fixed.esdeveniments.some(e => e.data && e.data.slice(0,10) < today);
           if (!stillPast) parsed = fixed;
         }
