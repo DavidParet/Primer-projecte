@@ -54,4 +54,4 @@ jobs:
                 echo "- $key: missing"
               fi
             done
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
