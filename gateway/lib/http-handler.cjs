@@ -80,6 +80,11 @@ function makeHttpHandler({config,createAdapters}) {
       return reply(res,err?.message==='oversized_webhook'?413:400,
         {error:'invalid_request_body'});
     }
+    // Reject framing inconsistencies before signature verification or DB access.
+    // The streaming limit still applies when Content-Length is omitted.
+    if(advertised!==undefined && advertised!==null &&
+       Buffer.byteLength(raw,'utf8')!==Number(advertised))
+      return reply(res,400,{error:'invalid_request_body'});
     // Check signature before even initializing the database adapter. A forged
     // event must never be able to cause database connections or queries.
     if(!verifySvix(raw,req.headers||{},config.webhookSecret))
