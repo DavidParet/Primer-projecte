@@ -25,8 +25,13 @@ module.exports = async function handler(req, res) {
 
   try {
     let today = madridToday();
-    // Referència fixa exclusivament per a tests amb clau QA configurada al servidor.
-    if (process.env.NEXLUPA_QA_KEY && req.headers['x-nexlupa-qa-key'] === process.env.NEXLUPA_QA_KEY) {
+    // Referència QA fixa només a la branca preview protegida o amb clau de servidor.
+    // Mai a producció per una petició d'usuari ordinari.
+    const previewQa = process.env.VERCEL_ENV === 'preview' &&
+      process.env.VERCEL_GIT_COMMIT_REF === 'fix/claude-50-casos-20261112';
+    const keyQa = !!process.env.NEXLUPA_QA_KEY &&
+      req.headers['x-nexlupa-qa-key'] === process.env.NEXLUPA_QA_KEY;
+    if (previewQa || keyQa) {
       const fixed = validIsoDate(testReferenceDate);
       if (fixed) today = fixed.slice(0, 10);
     }
