@@ -1183,7 +1183,7 @@ body.dark #pageApp .app-col-right textarea:focus {
 .compare-row:last-child { border-bottom: none; }
 .compare-yes { color: #69d99a; font-weight: 800; text-align: right; }
 .compare-no { color: #ff8188; }
-.compare-status { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 8px; }
+.compare-status { display: flex; flex-wrap: wrap; justify-content: flex-end; column-gap: 18px; row-gap: 5px; text-align: right; }
 .compare-status strong { white-space: nowrap; }
 
 /* ── BACK BUTTON — pàgines internes (Premium, etc.) ─────────── */
