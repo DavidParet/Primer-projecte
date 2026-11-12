@@ -67,6 +67,7 @@ on:
       - 'tests/whatsapp-signed-inbox-read-permit.test.js'
       - 'tests/whatsapp-signed-inbound-ingest-adapter.test.js'
       - 'tests/whatsapp-postgres-signed-inbox-e2e.test.cjs'
+      - 'tests/whatsapp-postgres-signed-consent-races.test.cjs'
       - 'tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql'
       - 'lib/whatsapp/signed-inbox-nonce-retention.js'
       - 'tests/whatsapp-signed-inbox-nonce-retention.test.js'
@@ -243,6 +244,11 @@ jobs:
         run: |
           npm install --no-save --no-package-lock --ignore-scripts pg@8
           node --test tests/whatsapp-postgres-signed-inbox-e2e.test.cjs
+      - name: Verify real signed read and ingest locks block concurrent consent revocation
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          node --test tests/whatsapp-postgres-signed-consent-races.test.cjs
       - name: Prove RLS-only nonce expiry cleanup for signed ingest and inbox reads
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql
