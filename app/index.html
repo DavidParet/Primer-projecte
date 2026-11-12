@@ -122,7 +122,7 @@
         <p class="btn-micro-copy">Resum i accions en 10 segons</p>
 
         <div id="premiumPromoCard" style="text-align:center;margin-top:10px;padding:12px 0 14px;border-top:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Gmail amb reenviament automàtic i avisos de terminis</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:7px;">Menys gestions, més tranquil·litat</div>
           <button onclick="navTo('premium')"
             style="background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;"
             onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold2)';"
@@ -142,12 +142,10 @@
       </div>
 
       <!-- Conv strip: FORA de la card → sibling en app-col-right flex column -->
-      <div class="conv-strip" id="convStrip" onclick="navTo('premium')">
+      <div class="conv-strip" id="convStrip" style="animation:none;margin-top:8px;padding:8px 12px;" onclick="navTo('premium')">
         <div class="conv-left">
-          <div class="conv-label">⭐ PREMIUM 1.0</div>
-          <div class="conv-title">Els correus de Gmail que triïs entren sols</div>
-          <div class="conv-sub">🔔 Avisos automàtics per correu abans dels terminis.</div>
-          <div class="conv-sub">Properament · Prova gratuïta de 14 dies</div>
+          <div class="conv-title"><strong style="color:var(--gold);">⭐ Premium</strong></div>
+          <div class="conv-sub">Menys gestions, més tranquil·litat.</div>
         </div>
         <div class="conv-right">
           <button class="conv-btn" onclick="event.stopPropagation();navTo('premium')">Veure el pla →</button>
