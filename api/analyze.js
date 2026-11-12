@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
+const { localDate, messageDate, validateAnalysis, weekday } = require('../lib/analysis-dates');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -16,15 +17,20 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, image } = req.body || {};
+  const { text, image: rawImage } = req.body || {};
+  const image = typeof rawImage === 'string' ? rawImage : '';
+  const source = typeof text === 'string' ? text.trim() : '';
 
-  if (!text && !image) {
+  if (!source && !image) {
     return res.status(400).json({ error: 'El camp text és obligatori' });
   }
 
   try {
-    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
-    const prompt = SYSTEM_PROMPT + '\n\nData actual de referència (Europe/Madrid): ' + today + '.';
+    const now = new Date();
+    const today = localDate(now);
+    const anchor = messageDate(image ? '' : source, today);
+    const prompt = SYSTEM_PROMPT + '\n\nAvui (Europe/Madrid): ' + weekday(today) + ' ' + today +
+      '. Referència per al text: ' + (anchor ? weekday(anchor) + ' ' + anchor : 'incerta; conserva les dates relatives sense convertir-les') + '.';
     let messages;
 
     if (image) {
@@ -43,13 +49,13 @@ module.exports = async function handler(req, res) {
     } else {
       messages = [
         { role: 'system', content: prompt },
-        { role: 'user', content: 'Analitza:\n\n' + text.trim() }
+        { role: 'user', content: 'Analitza:\n\n' + source }
       ];
     }
 
     const completionOpts = {
       model:       image ? 'gpt-4o' : 'gpt-4o-mini',
-      max_tokens:  2000,
+      max_tokens:  4000,
       temperature: 0,
       messages,
       response_format: { type: 'json_object' }
@@ -64,18 +70,22 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Resposta invàlida de la IA' });
     }
 
-    if (!parsed.mainEvent) {
-      const eventIndex = parsed.accions.findIndex(action => action?.tipus === 'calendari');
-      if (eventIndex !== -1) {
-        const [event] = parsed.accions.splice(eventIndex, 1);
-        parsed.mainEvent = {
-          title: event.accio, data: event.data || null, dataFi: event.dataFi || null,
-          lloc: event.lloc || null, edat: event.edat || null
-        };
-      }
+    const legacyEvents = parsed.accions.filter(action => action?.tipus === 'calendari');
+    parsed.accions = parsed.accions.filter(action => action && action.tipus !== 'calendari');
+    parsed.esdeveniments = [...(Array.isArray(parsed.esdeveniments) ? parsed.esdeveniments : []), ...legacyEvents];
+    if (!parsed.mainEvent && parsed.esdeveniments.length) {
+      parsed.mainEvent = parsed.esdeveniments.shift();
     }
 
-    return res.status(200).json(parsed);
+    // Also keep literal URLs when the model omits them from the extracted details.
+    const links = (image ? [] : source.match(/https?:\/\/[^\s<>"«»]+/gi) || [])
+      .map(link => link.replace(/[.,;!?]+$/, ''))
+      .map(link => link.endsWith(')') && link.split(')').length > link.split('(').length ? link.slice(0, -1) : link);
+    const details = Array.isArray(parsed.dadesUtils) ? parsed.dadesUtils : [];
+    const facts = details.filter(detail => typeof detail === 'string');
+    parsed.dadesUtils = [...new Set([...facts, ...links.filter(link => !facts.some(fact => fact.includes(link)))])];
+
+    return res.status(200).json(validateAnalysis(parsed, image ? '' : source, today, now));
 
   } catch (err) {
     if (err instanceof SyntaxError) {
