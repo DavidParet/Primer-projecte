@@ -131,6 +131,13 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.deepEqual(ingestPrivilege.rows[0],{
    insert_direct:false,consent_direct:false,signing_key_direct:false
   });
+  const wrongReadPermission=await ingestClient.query(
+   "SELECT has_function_privilege(current_user,"+
+   "'public.nex_ci_signed_read_family_whatsapp_inbox("+
+   "text,uuid,bytea,bigint,integer,text,bigint,uuid,bytea)',"+
+   "'EXECUTE') AS can_read_other_role"
+  );
+  assert.equal(wrongReadPermission.rows[0].can_read_other_role,false);
   await assert.rejects(ingestClient.query(
    'SELECT 1 FROM public.nex_whatsapp_inbound LIMIT 1'
   ),e=>e.code==='42501');
@@ -225,6 +232,13 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.deepEqual(privileges.rows[0],{
    direct_read:false,direct_key_read:false
   });
+  const wrongIngestPermission=await readerClient.query(
+   "SELECT has_function_privilege(current_user,"+
+   "'public.nex_ci_signed_store_whatsapp_inbound("+
+   "text,text,bytea,text,bytea,bytea,bytea,bigint,text,bigint,uuid,bytea)',"+
+   "'EXECUTE') AS can_ingest_other_role"
+  );
+  assert.equal(wrongIngestPermission.rows[0].can_ingest_other_role,false);
   await assert.rejects(readerClient.query(
    'SELECT 1 FROM public.nex_whatsapp_inbound LIMIT 1'
   ),e=>e.code==='42501');
