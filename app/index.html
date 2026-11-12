@@ -145,9 +145,8 @@
       <div class="conv-strip" id="convStrip" onclick="navTo('premium')">
         <div class="conv-left">
           <div class="conv-label">⭐ PREMIUM 1.0</div>
-          <div class="conv-title">Anàlisis il·limitades<sup>*</sup></div>
-          <div class="conv-sub">Automatització de Gmail: recepció i anàlisi dels correus que triïs.</div>
-          <div class="conv-sub">Google Calendar: gestió d’esdeveniments i recordatoris.</div>
+          <div class="conv-title">Més anàlisis i menys gestions</div>
+          <div class="conv-sub">Anàlisis il·limitades* · Gmail automatitzat · Calendari connectat amb recordatoris.</div>
           <div class="conv-sub">* Fins a 1.000 anàlisis al mes, de les quals fins a 30 poden ser captures.</div>
         </div>
         <div class="conv-right">
@@ -248,90 +247,74 @@
     </div><!-- fi pageInici -->
 
     <!-- PREMIUM -->
-    <div id="pagePremium" style="display:none;">
-
-      <button class="btn-back-page" onclick="navTo('inici')">← Enrera</button>
+    <section id="pagePremium" aria-labelledby="premiumTitle" style="display:none;">
+      <button type="button" class="btn-back-page" onclick="navTo('inici')">← Tornar a l’inici</button>
 
       <div class="premium-hero">
-        <div class="premium-badge">⭐ nexlupa PREMIUM</div>
-        <h1 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">La lupa sense límits</h1>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;">Mai més et perdràs res important.</p>
-
-        <div class="premium-checklist">
-          <div class="pchk-item yes">✔ Anàlisis il·limitades</div>
-          <div class="pchk-item yes">✔ Respostes suggerides</div>
-          <div class="pchk-item yes">✔ Carpetes i projectes</div>
-          <div class="pchk-item yes">✔ Anàlisi múltiple de missatges</div>
-          <div class="pchk-item yes">✔ Recordatoris push automàtics</div>
-          <div class="pchk-item yes">✔ Informe setmanal en PDF</div>
-          <div class="pchk-item no">✖ Versió gratuïta limitada a 3/dia</div>
-        </div>
-
-        <div class="plans-row">
-          <div class="plan-card">
-            <div class="plan-name">Free</div>
-            <div class="plan-price">0€</div>
-            <div class="plan-desc">3 anàlisis/dia<br>Funcions bàsiques</div>
-          </div>
-          <div class="plan-card active">
-            <div class="plan-badge">⭐ RECOMANAT</div>
-            <div class="plan-name">Premium</div>
-            <div class="plan-price" style="font-size:16px;padding-top:6px;letter-spacing:.01em;">Properament</div>
-            <div class="plan-desc">Tot inclòs<br>Preu de llançament</div>
-          </div>
-        </div>
-
-        <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20nexlupa%20%E2%80%94%20Avisa%27m" style="display:block;text-decoration:none;text-align:center;">
-          ⭐ Vull Premium — Avisa'm quan llanci
-        </a>
-        <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:10px;">Sense compromís · Cancel·la quan vulguis</div>
+        <h1 id="premiumTitle">Compara els plans</h1>
+        <p>Analitza missatges amb Free. Premium 1.0 inclourà la recepció de correus seleccionats i la connexió amb Google Calendar.</p>
       </div>
 
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">🆓</div><div class="c-label">Free vs Premium</div></div>
-        <div class="compare-row"><span>Anàlisi de text i imatges</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span>Resum + accions + dates</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span>Compartir per WhatsApp</span><span class="compare-yes">✓ Free</span></div>
-        <div class="compare-row"><span style="color:var(--red);">Límit diari</span><span style="color:var(--red);font-weight:700;">3 anàlisis/dia</span></div>
-        <div class="compare-row"><span>Anàlisis il·limitats</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Respostes suggerides</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Carpetes i projectes</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Anàlisi múltiple</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Recordatoris push</span><span class="compare-yes">⭐ Premium</span></div>
-        <div class="compare-row"><span>Informe setmanal PDF</span><span class="compare-yes">⭐ Premium</span></div>
-      </div>
+      <table class="plan-comparison" aria-label="Comparativa Free i Premium 1.0">
+        <colgroup><col class="plan-feature-col"><col><col></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Funció</th>
+            <th scope="col">Free <small>0 €</small></th>
+            <th scope="col">Premium 1.0 <small>4,99 €/mes · preu proposat</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Anàlisi ràpida</th>
+            <td>Text enganxat o captura</td>
+            <td>Text enganxat, captura o correu rebut</td>
+          </tr>
+          <tr>
+            <th scope="row">Quota ampliada</th>
+            <td>3 anàlisis al dia</td>
+            <td>1.000 al mes, fins a 30 captures</td>
+          </tr>
+          <tr>
+            <th scope="row">Resum clar</th>
+            <td>Resum, accions, dates i terminis</td>
+            <td>Resum, accions, dates i terminis</td>
+          </tr>
+          <tr>
+            <th scope="row">Tasques prioritzades</th>
+            <td>Llista de tasques i historial</td>
+            <td>Llista de tasques i historial</td>
+          </tr>
+          <tr>
+            <th scope="row">Compartició ràpida</th>
+            <td>Copia el resultat o comparteix-lo per WhatsApp</td>
+            <td>Copia el resultat o comparteix-lo per WhatsApp</td>
+          </tr>
+          <tr>
+            <th scope="row">Ubicacions identificades</th>
+            <td>Consulta el lloc i obre’l a Maps si apareix al missatge</td>
+            <td>Consulta el lloc i obre’l a Maps si apareix al missatge</td>
+          </tr>
+          <tr>
+            <th scope="row">Calendari connectat</th>
+            <td>Obre l’esdeveniment a Google Calendar i desa’l</td>
+            <td>Connecta Google Calendar per crear i actualitzar esdeveniments i detectar duplicats</td>
+          </tr>
+          <tr>
+            <th scope="row">Recordatoris programables</th>
+            <td>Els pots configurar a Google Calendar</td>
+            <td>NexLupa proposa recordatoris a partir de les dates detectades</td>
+          </tr>
+          <tr>
+            <th scope="row">Gmail automatitzat</th>
+            <td>Copia i enganxa el text del correu</td>
+            <td>Rep i analitza els correus que triïs amb reenviament selectiu</td>
+          </tr>
+        </tbody>
+      </table>
 
-      <div class="card">
-        <div class="card-head"><div class="c-icon ci-gold">⭐</div><div class="c-label">Funcionalitats Premium</div></div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-blue">💬</div>
-          <div><div class="feat-ttl">Respostes suggerides</div><div class="feat-dsc">L'app et proposa com respondre el missatge directament.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-green">📁</div>
-          <div><div class="feat-ttl">Carpetes i projectes</div><div class="feat-dsc">Organitza els missatges per temes, projectes o àmbits. Tot classificat automàticament.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-purple">📊</div>
-          <div><div class="feat-ttl">Anàlisi múltiple</div><div class="feat-dsc">Analitza diversos missatges alhora i obté un resum del dia consolidat.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-red">🔔</div>
-          <div><div class="feat-ttl">Recordatoris push</div><div class="feat-dsc">Avís al mòbil quan s'acosta una data detectada. Mai més oblides res.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-gold">📄</div>
-          <div><div class="feat-ttl">Informe setmanal PDF</div><div class="feat-dsc">Totes les tasques i dates de la setmana en un PDF per compartir.</div></div>
-        </div>
-        <div class="feat-item">
-          <div class="feat-icon-sm fi-blue">♾️</div>
-          <div><div class="feat-ttl">Anàlisis il·limitats</div><div class="feat-dsc">Sense límit diari. Analitza tots els missatges que vulguis.</div></div>
-        </div>
-      </div>
-
-      <button class="btn-reset" onclick="navTo('inici')">← Tornar a l'app</button>
-
-    </div><!-- fi pagePremium -->
+      <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20NexLupa%20%E2%80%94%20Aviseu-me">Aviseu-me quan surti Premium</a>
+    </section>
 
     <!-- CONFIG -->
     <div id="pageConfig" style="display:none;">
