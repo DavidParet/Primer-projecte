@@ -185,6 +185,8 @@
           <div id="nx-what-content"></div>
         </div>
 
+        <p id="nx-date-warning" class="nx-card-date" hidden></p>
+
         <!-- P1 — ACCIONS IMPRESCINDIBLES -->
         <div class="nx-p1-block" id="nx-p1-block" style="display:none;">
           <div class="nx-section-label nx-p1-label">
@@ -208,7 +210,7 @@
         <div class="nx-info-block" id="nx-info-block" style="display:none;">
           <div class="nx-section-label nx-info-label">
             <span class="nxs-icon">ℹ️</span>
-            <span>Informació addicional</span>
+            <span>P3 — Tasques opcionals i informació</span>
           </div>
           <div id="nx-info-content"></div>
         </div>
@@ -399,7 +401,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=260bb2c"></script>
+<script src="script.js?v=qa50"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');
@@ -437,34 +439,6 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 });
 </script>
-<script>
-/* PATCH — fallback mainEvent en 3 capes (s'executa sempre, independent de la caché de script.js) */
-(function(){
-  if(typeof renderResult!=='function') return;
-  var _orig=renderResult;
-  var _re=/\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
-  window.renderResult=function(d){
-    if(!d.mainEvent&&Array.isArray(d.accions)){
-      var acc=d.accions;
-      for(var i=0;i<acc.length;i++){
-        var a=acc[i];
-        if(!a||!a.accio) continue;
-        if(a.data&&(a.lloc||_re.test(a.accio))){
-          d=Object.assign({},d,{
-            mainEvent:{title:a.accio,data:a.data,lloc:a.lloc||null,edat:a.edat||null},
-            accions:acc.filter(function(_,j){return j!==i;})
-          });
-          break;
-        }
-      }
-    }
-    _orig(d);
-  };
-  if(typeof render==='function'){
-    var _origRender=render;
-    window.render=function(d){ window.renderResult(d); };
-  }
-})();
-</script>
+
 </body>
 </html>
