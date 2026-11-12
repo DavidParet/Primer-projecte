@@ -34,6 +34,15 @@
 - Comprova també firma Meta falsa (403 sense persistència), reenviament idempotent, remitent sense permís (503, cap escrit), rol SQL sense `SELECT` directe, reenviament de nonce i temptativa de canvi de família rebutjats; el text real/fictici no es guarda en clar.
 - **Límit verificat:** el test d'ingesta s'executa amb l'administrador de la BD efímera i el vincle IdP és una simulació; no demostra privilegis mínims d'ingesta ni autenticació real de Neon Auth/Meta. No s'ha executat cap test a Neon ni desplegat a Meta.
 
+### Recepció xifrada amb rol SQL restringit (CI ONLY, 12/11/2026)
+
+- `db/migrations/20261112_whatsapp_signed_inbound_ingest_ci.sql` crea dos rols sense login, una funció SECURITY DEFINER amb SQL només en PostgreSQL 17 efímer i claus separades per a la signatura d'ingesta. El rol `nex_ci_inbound_ingest_runtime` només pot fer EXECUTE de la funció signada; no pot llegir consentiments, missatges o claus, ni inserir directament.
+- `lib/whatsapp/signed-inbound-ingest-adapter.js` converteix l'INSERT del mòdul de recepció en una autorització HMAC d'un sol ús, de 30 segons, sobre compte/telefon oficial, digest HMAC del remitent, identificador Meta, timestamp, nonce AES-GCM, tag i hash del xifrat. Només es pot invocar després de verificar independentment la signatura Meta sobre els bytes RAW.
+- La funció comprova la signatura, la clau activa, el nonce no reutilitzat i bloqueja el consentiment del remitent durant l'INSERT. Rebutja permisos caducats/revocats, remitents desconeguts, col·lisions entre famílies i persistència de contingut no xifrat. Una altra funció i rol restringits fan la lectura familiar posterior.
+- La prova `tests/whatsapp-postgres-signed-inbox-e2e.test.cjs` usa explícitament `SET ROLE nex_ci_inbound_ingest_runtime` per rebre i `SET ROLE nex_ci_inbox_reader_runtime` per consultar, amb el compte administrador reservat a preparar dades sintètiques. Verifica signatures Meta simulades, registres AES-GCM reals, duplicitats, autorització familiar i denegació de SQL directe.
+- **Riscos pendents de pilot real:** aquest esquema existeix únicament en CI, no s'ha instal·lat a Neon, no ha passat la comprovació amb una credencial de login real de mínim privilegi, ni la validació de Meta Cloud API; falta revisió de l'amenaça de compromís del signer, rotació/custòdia de claus, neteja dels nonces caducats i autorització del pilot. El rol propietari de la funció té `UPDATE(consent_at)` exclusivament perquè PostgreSQL permeti `FOR SHARE`; aquest privilegi ha de ser auditat.
+- **No GO:** no desplegar el servidor públic de webhook ni connectar pares, infants o grups reals fins que es validin permisos, consentiments, privacitat i retenció.
+
 ### Lectura dels avisos del pilot (STAGED ONLY, 12/11/2026)
 
 - Nou mòdul intern `lib/whatsapp/pilot-family-inbox-reader.js`: valida la sessió de pilot, el rol familiar, la paginació i les files retornades; desxifra localment amb AES-256-GCM després de tornar a comprovar autorització i sessió. No retorna remitent, número o grup original.
