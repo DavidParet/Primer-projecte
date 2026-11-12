@@ -23,13 +23,15 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
+    const prompt = SYSTEM_PROMPT + '\n\nData actual de referència (Europe/Madrid): ' + today + '.';
     let messages;
 
     if (image) {
       const base64Data = image.includes(',') ? image.split(',')[1] : image;
       const mediaType  = image.startsWith('data:') ? image.split(';')[0].split(':')[1] : 'image/jpeg';
       messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: prompt },
         {
           role: 'user',
           content: [
@@ -40,14 +42,14 @@ module.exports = async function handler(req, res) {
       ];
     } else {
       messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: prompt },
         { role: 'user', content: 'Analitza:\n\n' + text.trim() }
       ];
     }
 
     const completionOpts = {
       model:       image ? 'gpt-4o' : 'gpt-4o-mini',
-      max_tokens:  1000,
+      max_tokens:  2000,
       temperature: 0,
       messages,
       response_format: { type: 'json_object' }
@@ -62,43 +64,16 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Resposta invàlida de la IA' });
     }
 
-    /* ── POST-PROCESSAMENT SERVER-SIDE: fallback mainEvent en 3 capes ──────
-     * Garanteix que l'event principal mai aparegui com a targeta MITJA,
-     * independentment del que retorni la IA.
-     */
-    const EVT_KEY_RE = /\b(festa|jornada|torneig|reuni[oó]|sortida|acte|festival|excursi[oó]|espectacle)\b/i;
-
     if (!parsed.mainEvent) {
-      let srcIdx = -1;
-
-      // Capa 1: tipus === 'calendari'
-      for (let i = 0; i < parsed.accions.length; i++) {
-        if (parsed.accions[i].tipus === 'calendari') {
-          const a = parsed.accions[i];
-          parsed.mainEvent = { title: a.accio, data: a.data || null, lloc: a.lloc || null, edat: a.edat || null };
-          srcIdx = i;
-          break;
-        }
-      }
-
-      // Capa 2: data + (lloc o keyword d'event)
-      if (!parsed.mainEvent) {
-        for (let i = 0; i < parsed.accions.length; i++) {
-          const a = parsed.accions[i];
-          if (a.data && (a.lloc || EVT_KEY_RE.test(a.accio || ''))) {
-            parsed.mainEvent = { title: a.accio, data: a.data || null, lloc: a.lloc || null, edat: a.edat || null };
-            srcIdx = i;
-            break;
-          }
-        }
-      }
-
-      // Elimina l'acció usada com a mainEvent → no pot arribar al frontend com a MITJA
-      if (srcIdx !== -1) {
-        parsed.accions = parsed.accions.filter((_, idx) => idx !== srcIdx);
+      const eventIndex = parsed.accions.findIndex(action => action?.tipus === 'calendari');
+      if (eventIndex !== -1) {
+        const [event] = parsed.accions.splice(eventIndex, 1);
+        parsed.mainEvent = {
+          title: event.accio, data: event.data || null, dataFi: event.dataFi || null,
+          lloc: event.lloc || null, edat: event.edat || null
+        };
       }
     }
-    /* ──────────────────────────────────────────────────────────────────── */
 
     return res.status(200).json(parsed);
 
