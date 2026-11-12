@@ -402,15 +402,14 @@ async function analyze() {
     }
 
     incrementUsage();
-    checkLimit();
     updateCounter();
     render(d);
   } catch (ex) {
     showInputCard();
     showErr(ex.message || 'Hi ha hagut un error. Torna-ho a intentar.');
   } finally {
-    btn.disabled = false;
     load.classList.remove('on');
+    btn.disabled = !checkLimit();
   }
 }
 
