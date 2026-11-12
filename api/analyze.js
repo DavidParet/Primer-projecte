@@ -1,11 +1,12 @@
 const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
+const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis } = require('../lib/nexlupa-result');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = fs.readFileSync(
-  path.join(__dirname, '..', 'docs', 'ai', 'nexlupa-core-ai-prompt.txt'),
+  path.join(__dirname, '..', 'docs', 'ai', 'nexlupa-core-ai-prompt-v2.txt'),
   'utf8'
 );
 
@@ -16,15 +17,25 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, image } = req.body || {};
+  const { text, image, sourceDate, language, testReferenceDate } = req.body || {};
 
   if (!text && !image) {
     return res.status(400).json({ error: 'El camp text és obligatori' });
   }
 
   try {
-    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
-    const prompt = SYSTEM_PROMPT + '\n\nData actual de referència (Europe/Madrid): ' + today + '.';
+    let today = madridToday();
+    // Referència fixa exclusivament per a tests amb clau QA configurada al servidor.
+    if (process.env.NEXLUPA_QA_KEY && req.headers['x-nexlupa-qa-key'] === process.env.NEXLUPA_QA_KEY) {
+      const fixed = validIsoDate(testReferenceDate);
+      if (fixed) today = fixed.slice(0, 10);
+    }
+    const original = validIsoDate(sourceDate);
+    const locale = ['ca','es','en','fr'].includes(language) ? language : 'ca';
+    const prompt = SYSTEM_PROMPT + '\n\nCONTEXT TEMPORAL DEL SERVIDOR: avui és ' +
+      weekdayForISO(today) + ' ' + today + ' (Europe/Madrid).' +
+      '\nData original del missatge (si fiable): ' + (original || 'no disponible') + '.' +
+      '\nIdioma de sortida: ' + locale + '. Calcula totes les dates relatives segons aquest context.';
     let messages;
 
     if (image) {
@@ -49,7 +60,7 @@ module.exports = async function handler(req, res) {
 
     const completionOpts = {
       model:       image ? 'gpt-4o' : 'gpt-4o-mini',
-      max_tokens:  2000,
+      max_tokens:  3500,
       temperature: 0,
       messages,
       response_format: { type: 'json_object' }
@@ -58,21 +69,39 @@ module.exports = async function handler(req, res) {
     const completion = await client.chat.completions.create(completionOpts);
 
     const raw    = completion.choices[0].message.content.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(raw);
+    let parsed = JSON.parse(raw);
 
     if (!parsed.resum || !Array.isArray(parsed.accions)) {
       return res.status(500).json({ error: 'Resposta invàlida de la IA' });
     }
 
-    if (!parsed.mainEvent) {
-      const eventIndex = parsed.accions.findIndex(action => action?.tipus === 'calendari');
-      if (eventIndex !== -1) {
-        const [event] = parsed.accions.splice(eventIndex, 1);
-        parsed.mainEvent = {
-          title: event.accio, data: event.data || null, dataFi: event.dataFi || null,
-          lloc: event.lloc || null, edat: event.edat || null
-        };
-      }
+    // Normalització determinista: preserva tots els esdeveniments, dates i dades útils.
+    parsed = normalizeAnalysis(parsed, typeof text === 'string' ? text : '', today);
+
+    // Una sola reconsulta quan una expressió inequívocament futura ha produït dates passades.
+    const futureText = typeof text === 'string' && /(?:demà|passat demà|que ve|setmana vinent|proper|pròxim)/i.test(text);
+    const pastFuture = futureText && (
+      parsed.esdeveniments.some(e => e.data && e.data.slice(0,10) < today) ||
+      parsed.accions.some(a => a.data && a.data.slice(0,10) < today && !a.vençut)
+    );
+    if (pastFuture) {
+      try {
+        const again = await client.chat.completions.create({
+          ...completionOpts,
+          messages: messages.concat([
+            { role: 'assistant', content: JSON.stringify(parsed) },
+            { role: 'user', content: 'Revisa les dates: el missatge conté referències futures però hi ha dates passades. ' +
+              'Respecta els terminis ja vençuts i els fets històrics; corregeix NOMÉS dates futures errònies. ' +
+              'No perdis cap tasca, esdeveniment o dada útil. Retorna JSON complet.' }
+          ])
+        });
+        const candidate = JSON.parse(again.choices[0].message.content);
+        if (candidate && Array.isArray(candidate.accions) && candidate.resum) {
+          const fixed = normalizeAnalysis(candidate, text, today);
+          const stillPast = fixed.esdeveniments.some(e => e.data && e.data.slice(0,10) < today);
+          if (!stillPast) parsed = fixed;
+        }
+      } catch (retryError) { /* mantenim el resultat validat original */ }
     }
 
     return res.status(200).json(parsed);
