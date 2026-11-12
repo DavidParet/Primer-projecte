@@ -755,6 +755,12 @@ function buildActionCard(a, cardClass) {
     card.appendChild(dateEl);
   }
 
+  if (a.vençut) {
+    var expiredLabel = document.createElement('div');
+    expiredLabel.className = 'nx-card-date';
+    expiredLabel.textContent = 'Termini vençut: cal comprovar si encara es pot gestionar';
+    card.appendChild(expiredLabel);
+  }
   if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
   if (typeof a.enllac === 'string' && /^https?:\/\//i.test(a.enllac)) {
     var actionLink = document.createElement('a');
@@ -840,6 +846,12 @@ function renderResult(d) {
   _lastData = d;
 
   var decisio  = (d.decisio || '').trim();
+  var hasUserTasks = Array.isArray(d.accions) && d.accions.some(function(a) {
+    return a && typeof a === 'object' && a.tipus !== 'informatiu' && a.tipus !== 'calendari';
+  });
+  if (hasUserTasks && decisio.toLowerCase() === 'cap acció necessària') {
+    decisio = 'Hi ha tasques per revisar en aquest missatge';
+  }
   var noAction = decisio.toLowerCase() === 'cap acció necessària';
   var accions  = (d.accions || []).map(function(a) {
     if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
