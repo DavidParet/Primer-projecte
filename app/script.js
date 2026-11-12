@@ -158,7 +158,7 @@ function normalizeResult(raw) {
 
   var accions = d.accions;
   if (!Array.isArray(accions)) accions = [];
-  accions = accions.slice(0, 3).map(function (a) {
+  accions = accions.map(function (a) {
     if (typeof a === 'string') return a.trim();
     if (a && typeof a === 'object') return String(a.accio || a.text || a.descripcio || a.action || '').trim();
     return String(a || '').trim();
@@ -755,6 +755,12 @@ function buildActionCard(a, cardClass) {
     card.appendChild(dateEl);
   }
 
+  if (a.dataFi && a.dataFi !== a.data) {
+    var endLabel = document.createElement('div');
+    endLabel.className = 'nx-card-date';
+    endLabel.textContent = 'Fins: ' + (formatActionDate(a.dataFi) || a.dataFi);
+    card.appendChild(endLabel);
+  }
   if (a.vençut) {
     var expiredLabel = document.createElement('div');
     expiredLabel.className = 'nx-card-date';
@@ -857,7 +863,11 @@ function renderResult(d) {
     if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
     if (!a || typeof a !== 'object') return null;
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
-    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null, enllac: a.enllac || null };
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca',
+      data: a.data || null, dataFi: a.dataFi || null,
+      vençut: !!a.vençut,
+      prioritat: (a.prioritat || 'baixa').toLowerCase(),
+      lloc: a.lloc || null, enllac: a.enllac || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
