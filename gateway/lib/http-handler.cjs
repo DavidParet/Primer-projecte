@@ -67,6 +67,13 @@ function makeHttpHandler({config,createAdapters}) {
        typeof createAdapters!=='function'){
       return reply(res,503,{error:'pilot_disabled'});
     }
+    // Reject an advertised oversized payload before consuming the stream.
+    // Streaming LIMIT remains authoritative when Content-Length is absent or false.
+    const advertised=req.headers?.['content-length'];
+    if(advertised!==undefined && advertised!==null &&
+       (!/^(0|[1-9][0-9]*)$/.test(String(advertised)) ||
+        Number(advertised)>LIMIT))
+      return reply(res,413,{error:'invalid_request_body'});
     let raw;
     try{raw=await rawBody(req);}
     catch(err){
