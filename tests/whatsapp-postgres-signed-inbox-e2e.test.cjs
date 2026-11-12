@@ -200,7 +200,9 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   const outsider=await deliver(bridge,
    envelope(OUTSIDER,'wamid.node-sql-reader-unlinked','CI fictional outsider'));
   assert.equal(outsider.statusCode,503);
-  assert.equal(outsider.body.status,'not_durably_processed');
+  // Unlinked deliveries now throw before an ACK; the HTTP bridge deliberately
+  // hides internal authorization errors as storage_unavailable (503).
+  assert.equal(outsider.body.status,'storage_unavailable');
   assert.equal((await pool.query(
    "SELECT COUNT(*)::integer AS n FROM public.nex_whatsapp_inbound "+
    "WHERE provider_message_id='wamid.node-sql-reader-unlinked'"
