@@ -171,3 +171,27 @@ test('pool adapter rejects transaction control without a pinned client',async()=
  assert.equal((await client.query('ROLLBACK')).rows[0].sql,'ROLLBACK');
  client.release();
 });
+
+test('released pinned client cannot sign or execute further SQL and releases once',async()=>{
+ const calls=[];let releases=0,keyCalls=0;
+ const db={
+  async query(){throw new Error('pool must not execute transaction SQL');},
+  async connect(){return {
+   async query(sql){calls.push(sql);return {rows:[]};},
+   release(){releases++;}
+  };}
+ };
+ const adapter=createSignedInboundIngestAdapter({
+  db,getActiveSigningKey:async()=>{keyCalls++;return selected();},
+  now:()=>NOW,senderHmacKey:senderKey,contentEncryptionKey:contentKey
+ });
+ const client=await adapter.connect();
+ await client.query('BEGIN');
+ client.release();
+ client.release();
+ assert.equal(releases,1);
+ await assert.rejects(client.query('COMMIT'),/already released/);
+ await assert.rejects(client.query(INSERT_SQL,input()),/already released/);
+ assert.deepEqual(calls,['BEGIN']);
+ assert.equal(keyCalls,0);
+});
