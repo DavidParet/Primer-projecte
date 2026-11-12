@@ -4,8 +4,8 @@
  * Fully synthetic Meta-HMAC -> PostgreSQL encrypted inbox -> signed
  * restricted family SELECT -> AES-GCM plaintext read integration.
  * Disposable GitHub Actions Postgres 17 ONLY. NEVER connects to Neon.
- * Persistence is performed by the ephemeral CI database administrator;
- * the read operation uses the actual NOLOGIN restricted role via SET ROLE.
+ * Admin seeds only synthetic consent and signer keys; both actual ingest
+ * and read run with separate restricted NOLOGIN roles via SET ROLE.
  */
 const test=require('node:test');
 const assert=require('node:assert/strict');
@@ -13,6 +13,8 @@ const {Readable}=require('node:stream');
 const {createHmac,randomBytes}=require('node:crypto');
 const {Pool}=require('pg');
 const {createDurableInbox}=require('../lib/whatsapp/durable-inbox');
+const {createSignedInboundIngestAdapter,SIGNED_INSERT_SQL}=
+ require('../lib/whatsapp/signed-inbound-ingest-adapter');
 const {createMetaDurablePostBridge}=require('../lib/whatsapp/meta-durable-post-bridge');
 const {createPilotFamilyInboxReader,READ_SQL}=
  require('../lib/whatsapp/pilot-family-inbox-reader');
@@ -59,10 +61,11 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
 },async()=>{
  const pool=new Pool({connectionString:url,max:5,
   connectionTimeoutMillis:6000,statement_timeout:15000});
- let readerClient;
+ let readerClient,ingestClient;
  try{
   const senderKey=randomBytes(32),encryptionKey=randomBytes(32);
   const signingKey=randomBytes(32),signingKeyId='ci-inbox-node-e2e';
+  const ingestSigningKey=randomBytes(32),ingestKeyId='ci-ingest-node-e2e';
   const senderDigest=createHmac('sha256',senderKey).update(SENDER).digest();
   // Test-only seeding, never a real person, Meta account or credential.
   await pool.query(
@@ -76,9 +79,36 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   await pool.query(
    'INSERT INTO public.nex_ci_inbox_read_keys(key_id,key_data,state) '+
    "VALUES ($1,$2,'active')",[signingKeyId,signingKey]);
+  await pool.query(
+   'INSERT INTO public.nex_ci_inbound_ingest_keys(key_id,key_data,state) '+
+   "VALUES ($1,$2,'active')",[ingestKeyId,ingestSigningKey]);
 
+  // Ingest is NOT run with the PostgreSQL admin: this connection can only
+  // execute the signed security-definer function. It cannot read consents,
+  // encrypted messages, keys or grant itself new permissions.
+  ingestClient=await pool.connect();
+  await ingestClient.query('SET ROLE nex_ci_inbound_ingest_runtime');
+  const ingestPrivilege=await ingestClient.query(
+   "SELECT has_table_privilege(current_user,'public.nex_whatsapp_inbound','INSERT') AS insert_direct,"+
+   "has_table_privilege(current_user,'public.nex_whatsapp_sender_authorizations',"+
+   "'SELECT') AS consent_direct,has_table_privilege(current_user,"+
+   "'public.nex_ci_inbound_ingest_keys','SELECT') AS signing_key_direct"
+  );
+  assert.deepEqual(ingestPrivilege.rows[0],{
+   insert_direct:false,consent_direct:false,signing_key_direct:false
+  });
+  const signedDb=createSignedInboundIngestAdapter({
+   db:ingestClient,
+   getActiveSigningKey:async purpose=>{
+    assert.equal(purpose,'whatsapp-inbound-ingest');
+    return {purpose,state:'active',keyId:ingestKeyId,
+     keyBase64:ingestSigningKey.toString('base64')};
+   },
+   senderHmacKey:senderKey.toString('base64'),
+   contentEncryptionKey:encryptionKey.toString('base64')
+  });
   const inbox=createDurableInbox({
-   db:pool,senderHmacKey:senderKey.toString('base64'),
+   db:signedDb,senderHmacKey:senderKey.toString('base64'),
    contentEncryptionKey:encryptionKey.toString('base64')
   });
   const bridge=createMetaDurablePostBridge({
@@ -88,6 +118,16 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.equal((await deliver(bridge,raw,{forgedSignature:true})).statusCode,403);
   assert.equal((await deliver(bridge,raw)).statusCode,200);
   assert.equal((await deliver(bridge,raw)).statusCode,200,'replay ACKs valid duplicate');
+
+  // Bare DB role cannot forge a message merely by knowing a sender digest.
+  const falseInsert=await ingestClient.query(SIGNED_INSERT_SQL,[
+   BUSINESS,PHONE,senderDigest,'wamid.forbidden-unsigned',
+   randomBytes(12),randomBytes(16),Buffer.from('ci-cipher'),
+   String(Math.floor(Date.now()/1000)),ingestKeyId,
+   Math.floor(Date.now()/1000)+25,
+   'f0b16666-aaaa-4aaa-8aaa-777777777777',Buffer.alloc(32)
+  ]);
+  assert.equal(falseInsert.rows[0].state,'unlinked');
 
   const rows=await pool.query(
    'SELECT family_id,sender_digest,ciphertext FROM public.nex_whatsapp_inbound '+
@@ -165,6 +205,10 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   await assert.rejects(inboxReader({familyId:A}),/membership/);
   assert.equal(calls.length,1,'revoked web family did not reach SQL');
  }finally{
+  if(ingestClient){
+   try{await ingestClient.query('RESET ROLE');}
+   finally{ingestClient.release();}
+  }
   if(readerClient){
    try{await readerClient.query('RESET ROLE');}
    finally{readerClient.release();}
