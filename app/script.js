@@ -475,6 +475,8 @@ function formatGCalDateTime(d) {
 }
 
 function addActionToCalendar(a) {
+  if (!a || a.estat === 'suspes' || a.estat === 'recurrent' || a.passada ||
+      a.dataDubtosa || a.vençut) return;
   var rawDate = String(a.data || '');
   if (!rawDate || rawDate === 'null') return;
   /* Només dates ISO validades; no inventem un "demà" de substitució. */
@@ -560,6 +562,8 @@ function _buildLlocLink(lloc) {
 }
 
 function _buildCalBtn(action) {
+  if (!action || !action.data || action.passada || action.dataDubtosa ||
+      action.vençut || action.estat === 'suspes' || action.estat === 'recurrent') return null;
   var btn = document.createElement('button');
   btn.className   = 'nx-btn-cal';
   btn.textContent = '📅 Afegir al calendari';
@@ -605,6 +609,25 @@ function buildEventCard(mainEvent) {
   nameEl.textContent = String(mainEvent.title || mainEvent.accio || '');
   card.appendChild(nameEl);
 
+  var note = null;
+  if (mainEvent.estat === 'suspes') note = 'Activitat suspesa · no es pot afegir al calendari';
+  else if (mainEvent.estat === 'recurrent') note = 'Activitat recurrent · no és una cita única';
+  else if (mainEvent.passada) note = 'Data passada · confirma-la abans de guardar';
+  else if (mainEvent.dataDubtosa) note = 'Data interpretada · pendent de confirmació';
+  else if (!mainEvent.data) note = 'Data pendent de confirmar';
+  if (note) {
+    var noteEl = document.createElement('div');
+    noteEl.className = 'nx-card-date';
+    noteEl.textContent = note;
+    card.appendChild(noteEl);
+  }
+  if (mainEvent.dataOriginal && (mainEvent.estat === 'suspes' || mainEvent.estat === 'recurrent')) {
+    var oldDate = document.createElement('div');
+    oldDate.className = 'nx-card-date';
+    oldDate.textContent = 'Data informativa original: ' +
+      (formatActionDate(mainEvent.dataOriginal) || mainEvent.dataOriginal);
+    card.appendChild(oldDate);
+  }
   var meta = document.createElement('div');
   meta.className = 'nx-event-meta';
 
@@ -655,7 +678,8 @@ function buildEventCard(mainEvent) {
   var btnRow = document.createElement('div');
   btnRow.className = 'nx-event-btn-row';
 
-  if (mainEvent.data && mainEvent.data !== 'null') {
+  if (mainEvent.data && mainEvent.data !== 'null' && !mainEvent.passada && !mainEvent.dataDubtosa &&
+      mainEvent.estat !== 'suspes' && mainEvent.estat !== 'recurrent') {
     var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc, dataFi: mainEvent.dataFi };
     var calBtn = document.createElement('button');
     calBtn.className   = 'nx-event-btn nx-event-btn-cal';
@@ -767,6 +791,13 @@ function buildActionCard(a, cardClass) {
     expiredLabel.textContent = 'Termini vençut: cal comprovar si encara es pot gestionar';
     card.appendChild(expiredLabel);
   }
+  if (a.passada || a.dataDubtosa || (!a.data && a.dataOriginal)) {
+    var unsureLabel = document.createElement('div');
+    unsureLabel.className = 'nx-card-date';
+    unsureLabel.textContent = a.passada ? 'Data passada: confirma-la abans de guardar' :
+      'Data per confirmar; no s’exportarà al calendari';
+    card.appendChild(unsureLabel);
+  }
   if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
   if (typeof a.enllac === 'string' && /^https?:\/\//i.test(a.enllac)) {
     var actionLink = document.createElement('a');
@@ -777,7 +808,8 @@ function buildActionCard(a, cardClass) {
     card.appendChild(actionLink);
   }
 
-  if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
+  var calActionButton = _buildCalBtn(a);
+  if (calActionButton) card.appendChild(calActionButton);
 
   return card;
 }
@@ -813,6 +845,18 @@ function renderUsefulData(items) {
   if (!block || !container) return;
   container.textContent = '';
   if (!items || typeof items !== 'object') {block.style.display='none';return;}
+  if (items.origenImatge) {
+    var fromImageNote = document.createElement('div');
+    fromImageNote.className = 'nx-card-date';
+    fromImageNote.textContent = 'Dades llegides d’una imatge: comprova-les abans d’utilitzar-les.';
+    container.appendChild(fromImageNote);
+  }
+  if (Array.isArray(items.avisos)) items.avisos.forEach(function(av) {
+    var note = document.createElement('div');
+    note.className = 'nx-card-date';
+    note.textContent = String(av || '');
+    container.appendChild(note);
+  });
   var groups = [
     ['enllacos','Enllaços'],['iban','Compte bancari'],['telefons','Telèfons'],
     ['imports','Imports'],['altres','Altres dades']
@@ -843,7 +887,8 @@ function renderUsefulData(items) {
       count++;
     });
   });
-  block.style.display = count ? '' : 'none';
+  block.style.display = count || items.origenImatge ||
+    (Array.isArray(items.avisos) && items.avisos.length) ? '' : 'none';
 }
 
 /* ── RENDER PRINCIPAL ── */
@@ -865,7 +910,9 @@ function renderResult(d) {
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
     return { accio: txt.trim(), tipus: a.tipus || 'tasca',
       data: a.data || null, dataFi: a.dataFi || null,
-      vençut: !!a.vençut,
+      vençut: !!a.vençut, passada: !!a.passada,
+      dataDubtosa: !!a.dataDubtosa, dataOriginal: a.dataOriginal || null,
+      estat: a.estat || null,
       prioritat: (a.prioritat || 'baixa').toLowerCase(),
       lloc: a.lloc || null, enllac: a.enllac || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
@@ -1105,7 +1152,10 @@ function buildShareText(d) {
     lines.push('📅 Esdeveniments:');
     events.forEach(function(e) {
       lines.push('• ' + String(e.title || e.accio || 'Activitat') +
-        (e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
+        (e.estat === 'suspes' ? ' — SUSPESA' :
+          e.estat === 'recurrent' ? ' — RECURRENT' :
+          e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
+        (e.passada || e.dataDubtosa ? ' (pendent de confirmació)' : '') +
         (e.dataFi ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
         (e.lloc ? ' · ' + e.lloc : ''));
     });

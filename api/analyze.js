@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
     // Referència QA fixa només a la branca preview protegida o amb clau de servidor.
     // Mai a producció per una petició d'usuari ordinari.
     const previewQa = process.env.VERCEL_ENV === 'preview' &&
-      process.env.VERCEL_GIT_COMMIT_REF === 'fix/claude-50-casos-20261112';
+      ['fix/claude-50-casos-20261112','fix/qa96-deterministic-dates-20261112'].includes(process.env.VERCEL_GIT_COMMIT_REF);
     const sentKey = String(req.headers['x-nexlupa-qa-key'] || '');
     const keyQa = !!process.env.NEXLUPA_QA_KEY &&
       sentKey.length === process.env.NEXLUPA_QA_KEY.length &&
