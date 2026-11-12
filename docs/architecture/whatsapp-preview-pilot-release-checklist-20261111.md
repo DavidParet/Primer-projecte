@@ -43,6 +43,14 @@
 - **Riscos pendents de pilot real:** el control amb connexions autenticades de mínima autoritat està provat **només a CI**, amb credencials sintètiques temporals. No s'ha instal·lat ni provat a Neon; resten la verificació real de Neon Auth, validació Meta Cloud API, segregació i custòdia operativa de claus, rotació, neteja dels nonces caducats, revisió independent del risc de compromís del signer i aprovació del pilot. El propietari de la funció té `UPDATE(consent_at)` únicament per permetre `FOR SHARE` a PostgreSQL, privilegi que requereix auditoria abans de preview. Cap credencial real de servei s'ha generat ni utilitzat.
 - **No GO:** no desplegar el servidor públic de webhook ni connectar pares, infants o grups reals fins que es validin permisos, consentiments, privacitat i retenció.
 
+### Caducitat dels permisos signats: manteniment controlat (CI ONLY, 12/11/2026)
+
+- `tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql` afegeix dues polítiques RLS de lectura i esborrat sobre els registres d'un sol ús de recepció i consulta. El rol `nex_ci_inbox_nonce_maintenance` només veu i pot esborrar nonces que hagin caducat fa **més de 5 minuts**; no pot inserir, renovar, llegir claus, consultar dades familiars o executar funcions de missatgeria.
+- La prova SQL comprova dos lots limitats i que els nonces encara vàlids o caducats recentment continuen protegits. També comprova que el mantenidor no pot executar cap altre RPC del WhatsApp.
+- `lib/whatsapp/signed-inbox-nonce-retention.js` afegeix un procés d'esborrat `enabled:false` per defecte, amb bloqueig PostgreSQL contra execucions solapades, validació estricta del compte de manteniment, lots màxims limitats, rollback en error i informes sense dades privades.
+- `tests/whatsapp-postgres-signed-inbox-nonce-retention-e2e.test.cjs` prova el procés amb **un tercer compte PostgreSQL LOGIN real i amb credencials aleatòries de CI**, separat dels usuaris de recepció i lectura. Valida que no pot assumir el compte administrador, veure claus o missatges, ni esborrar nonces recents. No s'hi utilitza Neon.
+- **Pendent abans de pilot:** decidir freqüència i identitat del manteniment en un projecte Neon de proves amb compute autoritzat, aprovar rotació de claus i monitoratge sense dades privades. Aquest mòdul no disposa de scheduler actiu, no s'ha desplegat i no justifica utilitzar les migracions de CI a Neon.
+
 ### Lectura dels avisos del pilot (STAGED ONLY, 12/11/2026)
 
 - Nou mòdul intern `lib/whatsapp/pilot-family-inbox-reader.js`: valida la sessió de pilot, el rol familiar, la paginació i les files retornades; desxifra localment amb AES-256-GCM després de tornar a comprovar autorització i sessió. No retorna remitent, número o grup original.
