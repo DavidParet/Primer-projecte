@@ -1205,26 +1205,20 @@ body.dark #pageApp .app-col-right textarea:focus {
 .conv-label {
   font-size: 9px; font-weight: 600; color: rgba(212,168,48,.65);
   letter-spacing: .6px; text-transform: uppercase;
-  white-space: nowrap; margin-bottom: 2px;
+  margin-bottom: 2px;
 }
 .conv-title {
   font-size: 14px; font-weight: 700; color: var(--darker);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 2px; line-height: 1.2;
 }
 .conv-sub {
-  font-size: 10px; color: var(--muted); opacity: .8;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 11px; color: var(--soft);
+  line-height: 1.4;
 }
 .conv-right {
   display: flex; flex-direction: column;
   align-items: flex-end; gap: 6px; flex-shrink: 0;
 }
-.conv-price {
-  font-size: 15px; font-weight: 600; color: rgba(212,168,48,.75);
-  line-height: 1; white-space: nowrap;
-}
-.conv-per { font-size: 9px; font-weight: 400; color: var(--muted); }
 .conv-btn {
   background: rgba(212,168,48,.15); color: var(--gold);
   border: 1px solid rgba(212,168,48,.30);
