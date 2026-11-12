@@ -36,9 +36,17 @@ function parseVerdicts(raw, expectedIds) {
 }
 async function callClaude(items) {
   const key=process.env.ANTHROPIC_API_KEY;
-  const model=process.env.CLAUDE_MODEL || 'claude-opus-5-5';
+  const model=process.env.CLAUDE_MODEL || 'claude-opus-5';
   if(!key) throw Error('Manca ANTHROPIC_API_KEY');
+  const schema={type:'object',additionalProperties:false,required:['verdicts'],
+    properties:{verdicts:{type:'array',minItems:items.length,maxItems:items.length,
+      items:{type:'object',additionalProperties:false,required:['id','status','area','reason'],
+        properties:{id:{type:'integer',minimum:1,maximum:50},
+          status:{type:'string',enum:['PASS','WARN','FAIL']},
+          area:{type:'string',enum:[...areas]},
+          reason:{type:'string',maxLength:400}}}}}};
   const payload={model,max_tokens:2800,temperature:0,system,
+    output_config:{format:{type:'json_schema',schema}},
     messages:[{role:'user',content:JSON.stringify({
       referenceDate:'2026-11-12',cases:items.map(x=>({
         id:x.id,canal:x.canal,categoria:x.categoria,
@@ -62,6 +70,16 @@ async function callClaude(items) {
   }
   throw Error('Claude API no disponible');
 }
+function scrubForPublicSummary(reason) {
+  return reason
+    .replace(/https?:\\/\\/\\S+/gi,'[URL]')
+    .replace(/[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}/g,'[CORREU]')
+    .replace(/\\b[A-Z]{2}\\d{2}(?:[ -]?\\d{4}){3,7}\\b/gi,'[COMPTE]')
+    .replace(/\\b(?:\\+?\\d[\\d -]{7,}\\d)\\b/g,'[DADA]')
+    .replace(/[|\\r\\n]/g,' ')
+    .slice(0,230);
+}
+
 function report(all){
   const n=(k)=>all.filter(x=>x.status===k).length;
   const lines=[
@@ -73,13 +91,16 @@ function report(all){
     '- Baseline Claude anterior: 17 PASS, 17 WARN, 16 FAIL',
     '- **Publicacio bloquejada llevat de 50 PASS i 0 WARN/FAIL**.',
     '',
-    '| Cas | Resultat | Area |',
-    '|---:|---|---|',
-    ...all.sort((a,b)=>a.id-b.id).map(x=>'| '+x.id+' | '+x.status+' | '+x.area+' |')
+    '| Cas | Resultat | Area | Diagnosi resumida |',
+    '|---:|---|---|---|',
+    ...all.sort((a,b)=>a.id-b.id).map(x=>'| '+x.id+' | '+x.status+' | '+x.area+' | '+(x.status==='PASS'?'—':scrubForPublicSummary(x.reason))+' |')
   ];
   fs.writeFileSync(summary,lines.join('\n')+'\n',{mode:0o600});
   fs.writeFileSync(dst,JSON.stringify({referenceDate:'2026-11-12',results:all},null,2),{mode:0o600});
   console.log('QA50 Claude: '+n('PASS')+' PASS, '+n('WARN')+' WARN, '+n('FAIL')+' FAIL. No hi ha publicacio automatica.');
+  // Safe diagnostics available from GitHub Actions logs to guide code fixes.
+  for(const item of all) if(item.status!=='PASS')
+    console.log('Cas '+item.id+' '+item.status+' '+item.area+': '+scrubForPublicSummary(item.reason));
 }
 async function main(){
   if(process.argv.includes('--self-test')){
