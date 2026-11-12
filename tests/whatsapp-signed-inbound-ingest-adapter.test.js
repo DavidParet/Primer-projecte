@@ -127,3 +127,16 @@ test('invalid keys and malformed encrypted delivery never reach SQL',async()=>{
  }
  assert.equal(f.calls.length,0);
 });
+
+test('malformed inbound never invokes signing key provider or SQL',async()=>{
+ let keyCalls=0,sqlCalls=0;
+ const adapter=createSignedInboundIngestAdapter({
+  db:{async query(){sqlCalls++;throw new Error('SQL should not run');}},
+  getActiveSigningKey:async()=>{keyCalls++;return selected();},
+  now:()=>NOW,senderHmacKey:senderKey,contentEncryptionKey:contentKey
+ });
+ const malformed=input();malformed[6]=Buffer.alloc(0);
+ await assert.rejects(adapter.query(INSERT_SQL,malformed),/Invalid verified/);
+ assert.equal(keyCalls,0);
+ assert.equal(sqlCalls,0);
+});
