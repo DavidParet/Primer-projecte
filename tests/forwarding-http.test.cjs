@@ -201,6 +201,10 @@ test('connection URL is constrained to isolated Neon role and TLS verify-full',(
   uri.replace('neon.tech','evil.example'),
   uri.replace('nexlupa_pilot?','postgres?'),
   uri.replace('verify-full','verify-full&sslcert=%2Ftmp%2Fcustom.crt'),
+  uri+'&sslmode=disable',
+  uri+'&sslmode=verify-full',
+  uri+'&channel_binding=disable',
+  uri+'&channel_binding=require&channel_binding=prefer',
   uri.replace('postgresql:','http:')
  ]){
    assert.throws(()=>validateConnectionString(bad),/invalid_forwarding_database_configuration/);
