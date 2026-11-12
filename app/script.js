@@ -575,7 +575,13 @@ function calcDiesRestants(dateStr) {
   if (!m) return null;
   var evDate = new Date(+m[1], +m[2]-1, +m[3]);
   var today  = new Date(); today.setHours(0, 0, 0, 0);
-  return Math.round((evDate - today) / 86400000);
+  // Referència de servidor (Europe/Madrid), no el rellotge local del mòbil.
+  var ref = _lastData && _lastData.dataReferencia;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ref || '')) {
+    ref = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Madrid', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+  }
+  var base = new Date(+ref.slice(0,4), +ref.slice(5,7)-1, +ref.slice(8,10));
+  return Math.round((evDate - base) / 86400000);
 }
 
 /* ── TARGETA ESDEVENIMENT PRINCIPAL ── */
@@ -604,6 +610,12 @@ function buildEventCard(mainEvent) {
     tc.className   = 'nx-event-chip';
     tc.textContent = '🕒 ' + dt.time;
     meta.appendChild(tc);
+  }
+  if (mainEvent.dataFi && mainEvent.dataFi !== mainEvent.data) {
+    var endChip = document.createElement('span');
+    endChip.className = 'nx-event-chip';
+    endChip.textContent = 'Fins: ' + (formatActionDate(mainEvent.dataFi) || mainEvent.dataFi);
+    meta.appendChild(endChip);
   }
   if (mainEvent.lloc) {
     var lc = document.createElement('span');
@@ -747,6 +759,70 @@ function buildActionCard(a, cardClass) {
   return card;
 }
 
+/* ── INFORMACIONS FUTURES, SENSE NOTIFICACIONS AUTOMÀTIQUES (FREE) ── */
+function renderFutureNotices(items) {
+  var block = document.getElementById('nx-future-block');
+  var container = document.getElementById('nx-future-content');
+  if (!block || !container) return;
+  container.textContent = '';
+  var notices = Array.isArray(items) ? items.filter(function(a) {return a && (a.text || a.titol);}) : [];
+  notices.forEach(function(a) {
+    var card = document.createElement('div');
+    card.className = 'nx-info-card';
+    var label = document.createElement('div');
+    label.className = 'nx-card-text';
+    label.textContent = String(a.text || a.titol);
+    card.appendChild(label);
+    if (a.data) {
+      var d = document.createElement('div');
+      d.className = 'nx-card-date';
+      d.textContent = formatActionDate(a.data) || String(a.data);
+      card.appendChild(d);
+    }
+    container.appendChild(card);
+  });
+  block.style.display = notices.length ? '' : 'none';
+}
+/* ── DADES ÚTILS: URLs, IBAN, imports i instruccions literals ── */
+function renderUsefulData(items) {
+  var block = document.getElementById('nx-utils-block');
+  var container = document.getElementById('nx-utils-content');
+  if (!block || !container) return;
+  container.textContent = '';
+  if (!items || typeof items !== 'object') {block.style.display='none';return;}
+  var groups = [
+    ['enllacos','Enllaços'],['iban','Compte bancari'],['telefons','Telèfons'],
+    ['imports','Imports'],['altres','Altres dades']
+  ];
+  var count = 0;
+  groups.forEach(function(group) {
+    var arr = Array.isArray(items[group[0]]) ? items[group[0]] : [];
+    if (!arr.length) return;
+    var title = document.createElement('div');
+    title.className = 'nx-section-label';
+    title.textContent = group[1];
+    container.appendChild(title);
+    arr.forEach(function(value) {
+      if (typeof value !== 'string' || !value.trim()) return;
+      var cell;
+      if (group[0] === 'enllacos' && /^https?:\/\//i.test(value)) {
+        cell = document.createElement('a');
+        cell.href = value;
+        cell.target = '_blank';
+        cell.rel = 'noopener noreferrer';
+      } else {
+        cell = document.createElement('div');
+      }
+      cell.className = 'nx-card-text';
+      cell.textContent = value;
+      cell.style.cssText = 'display:block;overflow-wrap:anywhere;margin:4px 0 8px 0;';
+      container.appendChild(cell);
+      count++;
+    });
+  });
+  block.style.display = count ? '' : 'none';
+}
+
 /* ── RENDER PRINCIPAL ── */
 function renderResult(d) {
   hideInputCard();
@@ -762,10 +838,11 @@ function renderResult(d) {
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
-  var mainEvent = d.mainEvent || null;
-  if (!mainEvent) {
-    var event = accions.find(function(a) { return a.tipus === 'calendari'; });
-    if (event) mainEvent = { title: event.accio, data: event.data, lloc: event.lloc };
+  var esdeveniments = Array.isArray(d.esdeveniments) ? d.esdeveniments.filter(function(e) { return e && (e.title || e.accio); }) : [];
+  if (!esdeveniments.length && d.mainEvent) esdeveniments = [d.mainEvent];
+  if (!esdeveniments.length) {
+    esdeveniments = accions.filter(function(a) { return a.tipus === 'calendari'; })
+      .map(function(a) { return {title:a.accio,data:a.data,dataFi:a.dataFi,lloc:a.lloc}; });
   }
 
   var cats = categorizeAccions(accions);
@@ -795,8 +872,8 @@ function renderResult(d) {
   var eventContent = document.getElementById('nx-event-content');
   if (eventBlock && eventContent) {
     eventContent.innerHTML = '';
-    if (!noAction && mainEvent && (mainEvent.title || mainEvent.accio)) {
-      eventContent.appendChild(buildEventCard(mainEvent));
+    if (esdeveniments.length > 0) {
+      esdeveniments.forEach(function(e) { eventContent.appendChild(buildEventCard(e)); });
       eventBlock.style.display = '';
     } else {
       eventBlock.style.display = 'none';
@@ -804,7 +881,10 @@ function renderResult(d) {
   }
 
   /* CONTINGUT — bloc "QUÈ HI TROBARÀS" */
-  renderContingut(!noAction ? (d.contingut || null) : null);
+  renderContingut(d.contingut || null);
+
+  renderFutureNotices(d.recordatoris);
+  renderUsefulData(d.dadesUtils);
 
   /* P1 — ACCIONS IMPRESCINDIBLES */
   var p1Block   = document.getElementById('nx-p1-block');
@@ -843,7 +923,7 @@ function renderResult(d) {
   var infoContent = document.getElementById('nx-info-content');
   if (infoBlock && infoContent) {
     infoContent.innerHTML = '';
-    if (!noAction && cats.info.length > 0) {
+    if (cats.info.length > 0) {
       cats.info.forEach(function(a) { infoContent.appendChild(buildActionCard(a, 'nx-info-card')); });
       infoBlock.style.display = '';
     } else {
