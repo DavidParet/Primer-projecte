@@ -28,6 +28,12 @@
 - Revisar migració d'anada i retirada, rol runtime restringit, RLS, `SECURITY DEFINER`, drets sobre seqüències, permisos que poden heretar rols i rotació de claus.
 - Definir proves de rollback i destrucció del conjunt de dades fictícies. No executar sense revisió i aprovació específica.
 
+### Primera prova integrada real sobre PostgreSQL temporal (12/11/2026)
+
+- `tests/whatsapp-postgres-signed-inbox-e2e.test.cjs` posa a prova tot el recorregut: HMAC sobre el webhook Meta fictici → comprovació de consentiment de remitent → SQL a PostgreSQL 17 → text xifrat AES-256-GCM → `SET ROLE nex_ci_inbox_reader_runtime` → permís de lectura signat d'un sol ús → desxifrat JavaScript.
+- Comprova també firma Meta falsa (403 sense persistència), reenviament idempotent, remitent sense permís (503, cap escrit), rol SQL sense `SELECT` directe, reenviament de nonce i temptativa de canvi de família rebutjats; el text real/fictici no es guarda en clar.
+- **Límit verificat:** el test d'ingesta s'executa amb l'administrador de la BD efímera i el vincle IdP és una simulació; no demostra privilegis mínims d'ingesta ni autenticació real de Neon Auth/Meta. No s'ha executat cap test a Neon ni desplegat a Meta.
+
 ### Lectura dels avisos del pilot (STAGED ONLY, 12/11/2026)
 
 - Nou mòdul intern `lib/whatsapp/pilot-family-inbox-reader.js`: valida la sessió de pilot, el rol familiar, la paginació i les files retornades; desxifra localment amb AES-256-GCM després de tornar a comprovar autorització i sessió. No retorna remitent, número o grup original.
@@ -41,9 +47,10 @@
 
 ### 2. Vercel preview (NO GO)
 
-**Inspecció real de només lectura, 11/11/2026:** Vercel conserva una preview del projecte `primer-projecte` en estat `READY` per al commit WhatsApp `afdceeab`. **No és la versió actual de la PR #15**, de manera que no acredita el nou control d'aïllament de Neon ni el consentiment complet. No s'ha forçat cap compilació nova ni s'ha fet cap promoció a producció. El límit de compilacions denunciat anteriorment s'ha de tornar a comprovar abans del pilot; no s'ha afirmat que sigui encara el bloqueig actual.
+**Inspecció real de només lectura, 12/11/2026:** `primer-projecte` té previews de la PR #15 en estat `READY`, inclosa la del commit `5b23661d`; aquesta és anterior a l'últim codi de lectura signada i no l'acredita. `nexlupa-forwarding-gateway`, projecte Vercel **separat** creat per al pilot Gmail/forwarding, falla en construir perquè els logs indiquen literalment `The specified Root Directory "gateway" does not exist. Please update your Project Settings.` Aquesta és una configuració de directori Git del projecte gateway, no una fallada del test PostgreSQL/WhatsApp. El projecte gateway informa `live:false`; la producció principal no s'ha modificat.
 
-- Resoldre la limitació actual de compilacions per poder verificar una preview real.
+- Auditar el checkout real que correspon al projecte gateway, decidir si la carpeta `gateway` s'ha de crear en una branca pròpia o si el root configurat és incorrecte, i validar una compilació **només preview**. No canviar el directori arrel compartit ni publicar serveis fins a revisar l'impacte sobre Gmail.
+- Comprovar que un commit actual de la PR #15 genera una nova preview `READY`; el codi JavaScript i SQL de CI no són prova de desplegament live.
 - Comprovar que l'origen de prova és HTTPS i coincideix amb el host exacte autoritzat; que el build de producció no inclou el pilot; que API, credencials i fitxers SQL no són recursos estàtics.
 - Validar dos comptes ficticis autoritzats amb el servei Neon Auth de preview, amb galeta HttpOnly, expiració i tancament de sessió verificats; un tercer compte desconegut s'ha de rebutjar.
 - No crear una ruta pública de consentiment fins que totes les proves d'identitat, CSRF, doble ús i revocació passin en preview.
