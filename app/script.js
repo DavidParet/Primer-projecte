@@ -477,34 +477,45 @@ function formatGCalDateTime(d) {
 function addActionToCalendar(a) {
   var rawDate = String(a.data || '');
   if (!rawDate || rawDate === 'null') return;
-  /* Suporta YYYY-MM-DD HH:MM i YYYY-MM-DDTHH:MM */
-  var m = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+  /* Només dates ISO validades; no inventem un "demà" de substitució. */
+  var m = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?$/);
+  if (!m) return;
   var startStr, endStr;
-  if (m) {
-    var hasTime = m[4] && !(m[4] === '00' && m[5] === '00');
-    if (hasTime) {
-      var dt  = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
-      var end = typeof a.dataFi === 'string' ? a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
-      var explicitEnd = end && new Date(+end[1], +end[2]-1, +end[3], +end[4], +end[5]);
-      var dt2 = explicitEnd > dt ? explicitEnd : new Date(dt.getTime() + 60 * 60 * 1000);
-      var provisionalEnd = !(explicitEnd > dt);
-      startStr = formatGCalDateTime(dt);
-      endStr   = formatGCalDateTime(dt2);
-    } else {
-      var d0 = new Date(+m[1], +m[2]-1, +m[3]);
-      var d1 = new Date(d0); d1.setDate(d1.getDate() + 1);
-      startStr = toGCalDate(d0);
-      endStr   = toGCalDate(d1);
+  var provisionalEnd = false;
+  var hasTime = !!(m[4] && !(m[4] === '00' && m[5] === '00'));
+  function dateCompact(d) {
+    return String(d.getUTCFullYear()).padStart(4,'0') +
+      String(d.getUTCMonth()+1).padStart(2,'0') + String(d.getUTCDate()).padStart(2,'0');
+  }
+  function timeCompact(d) {
+    return dateCompact(d) + 'T' + String(d.getUTCHours()).padStart(2,'0') +
+      String(d.getUTCMinutes()).padStart(2,'0') + '00';
+  }
+  if (hasTime) {
+    var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
+    var endMatch = typeof a.dataFi === 'string' ?
+      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
+    var endDate = endMatch ?
+      new Date(Date.UTC(+endMatch[1],+endMatch[2]-1,+endMatch[3],+endMatch[4],+endMatch[5])) : null;
+    startStr = timeCompact(baseDate);
+    if (endDate && endDate > baseDate) endStr = timeCompact(endDate);
+    else {
+      endStr = timeCompact(new Date(baseDate.getTime() + 3600000));
+      provisionalEnd = true;
     }
   } else {
-    var pd  = parseDate(rawDate);
-    var pd2 = new Date(pd); pd2.setDate(pd2.getDate() + 1);
-    startStr = toGCalDate(pd);
-    endStr   = toGCalDate(pd2);
+    var first = new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+    var endAllDay = typeof a.dataFi === 'string' ?
+      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+    var last = endAllDay ?
+      new Date(Date.UTC(+endAllDay[1],+endAllDay[2]-1,+endAllDay[3])) : first;
+    if (last < first) last = first;
+    startStr = dateCompact(first);
+    endStr = dateCompact(new Date(last.getTime() + 86400000)); // fi exclusiva Google Calendar
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
-  var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details };
+  var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details, ctz: 'Europe/Madrid' };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
   /* Anchor click evita que el popup blocker talli l'obertura */
@@ -1063,6 +1074,43 @@ function buildShareText(d) {
     lines.push('No cal fer cap acció.');
   } else {
     lines.push(decisio);
+  }
+
+  var events = Array.isArray(d.esdeveniments) && d.esdeveniments.length ?
+    d.esdeveniments : (d.mainEvent ? [d.mainEvent] : []);
+  if (events.length) {
+    lines.push('');
+    lines.push('📅 Esdeveniments:');
+    events.forEach(function(e) {
+      lines.push('• ' + String(e.title || e.accio || 'Activitat') +
+        (e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
+        (e.dataFi ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
+        (e.lloc ? ' · ' + e.lloc : ''));
+    });
+  }
+  if (Array.isArray(d.recordatoris) && d.recordatoris.length) {
+    lines.push('');
+    lines.push('Pròximament:');
+    d.recordatoris.forEach(function(r) {
+      if (r && (r.text || r.titol)) lines.push('• ' + (r.text || r.titol) +
+        (r.data ? ' — ' + (formatActionDate(r.data) || r.data) : ''));
+    });
+  }
+  if (d.avisDates) { lines.push(''); lines.push('Data per confirmar: ' + d.avisDates); }
+  if (d.dadesUtils && typeof d.dadesUtils === 'object') {
+    var dataLines = [];
+    [['enllacos','Enllaç'],['iban','IBAN'],['telefons','Telèfon'],
+     ['imports','Import'],['altres','Detall']].forEach(function(entry) {
+      var items = d.dadesUtils[entry[0]];
+      if (Array.isArray(items)) items.forEach(function(v) {
+        if (typeof v === 'string' && v.trim()) dataLines.push(entry[1] + ': ' + v);
+      });
+    });
+    if (dataLines.length) {
+      lines.push('');
+      lines.push('Dades útils:');
+      dataLines.forEach(function(line) { lines.push('• ' + line); });
+    }
   }
 
   /* Normalitzar accions i aplicar heurístiques */
