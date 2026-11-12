@@ -32,3 +32,5 @@ jobs:
           find . -path './node_modules' -prune -o -path './.git' -prune -o -type f -name '*.js' -print0 | xargs -0 -r -n 1 node --check
       - name: Existing priorities regression test
         run: node tests/run-test.js
+      - name: Verify Claude audit verdict parser (offline)
+        run: node tests/audit-qa50-claude.js --self-test
