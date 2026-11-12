@@ -97,7 +97,7 @@ BEGIN
    OR p_phone IS NULL OR p_phone !~ '^[0-9]{5,30}$'
    OR p_sender IS NULL OR octet_length(p_sender)<>32
    OR p_message_id IS NULL OR length(p_message_id)>262 OR p_message_id !~
-      '^wamid[.][A-Za-z0-9._=-]+
+      '^wamid[.][A-Za-z0-9._=-]+$'
    OR p_iv IS NULL OR octet_length(p_iv)<>12
    OR p_tag IS NULL OR octet_length(p_tag)<>16
    OR p_ciphertext IS NULL OR octet_length(p_ciphertext)<1
