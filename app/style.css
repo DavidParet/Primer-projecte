@@ -1951,6 +1951,7 @@ body.dark #pageApp .app-col-right textarea:focus {
   padding: 16px 18px;
   position: relative; overflow: hidden;
 }
+.nx-event-card + .nx-event-card { margin-top: 8px; }
 .nx-event-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -2004,6 +2005,9 @@ body.dark #pageApp .app-col-right textarea:focus {
 /* ── INFORMACIÓ ADDICIONAL ── */
 .nx-info-block { margin-bottom: 14px; }
 .nx-info-label { color: #5c6580; }
+#nx-useful { overflow-wrap: anywhere; }
+#nx-useful > div + div { margin-top: 6px; }
+#nx-useful a { color: inherit; text-decoration: underline; }
 
 .nx-info-card {
   background: rgba(255,255,255,.02);
