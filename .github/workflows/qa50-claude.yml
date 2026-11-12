@@ -1,0 +1,65 @@
+# QA50 amb el motor REAL i l'auditor independent Claude.
+# No desplega mai; no publica la fixture ni les respostes.
+# S'activa a main un cop revisada aquesta PR i configurats els secrets.
+name: NexLupa - QA50 real i auditoria Claude
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexlupa-qa50-independent
+  cancel-in-progress: false
+
+jobs:
+  qa50:
+    if: github.repository == 'DavidParet/Primer-projecte'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      QA50_FIXTURES_GZIP_B64: ${{ secrets.QA50_FIXTURES_GZIP_B64 }}
+      NEXLUPA_QA_URL: ${{ secrets.NEXLUPA_QA_URL }}
+      NEXLUPA_QA_KEY: ${{ secrets.NEXLUPA_QA_KEY }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+    steps:
+      - name: Checkout stable reviewed code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Required configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in QA50_FIXTURES_GZIP_B64 NEXLUPA_QA_URL NEXLUPA_QA_KEY ANTHROPIC_API_KEY; do
+            if [ -z "${!key:-}" ]; then
+              echo "::error::Falta el secret $key. Auditoria NO executada."
+              exit 1
+            fi
+          done
+      - name: 50 real NexLupa API calls
+        run: node tests/run-qa50-live.js
+      - name: Independent Claude review (50 of 50)
+        run: node tests/audit-qa50-claude.js
+      - name: Publish redacted summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f qa50-summary.md ]; then
+            cat qa50-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Auditoria no completada: no hi ha 50 veredictes contrastats." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Delete private inputs and raw outputs
+        if: always()
+        shell: bash
+        run: rm -f qa50-live-results.json qa50-audited-private.json qa50-summary.md
