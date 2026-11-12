@@ -95,6 +95,20 @@ test('invalid identities and oversized/empty text never reach database',async()=
   assert.equal(db.calls.length,0);
 });
 
+test('forwards have no verifiable source group; forged group identifiers never reach SQL',async()=>{
+  const db=mockDb(),store=inbox(db);
+  await assert.rejects(store.persistDelivery(delivery({
+    groupId:'group-claimed-by-browser',
+    familyId:'another-family',
+    text:'Reenvio: sortida dimecres'
+  })),/source group cannot be verified/);
+  assert.equal(db.calls.length,0);
+  const forwarded=delivery({text:'Reenviat: excursió dijous',groupId:null});
+  assert.deepEqual(await store.persistDelivery(forwarded),{state:'stored'});
+  assert.equal(db.calls.length,1);
+  assert.equal(db.calls[0].values.includes('group-claimed-by-browser'),false);
+});
+
 test('image and unsupported media are not ingested or claimed to be read',async()=>{
   const db=mockDb();
   assert.deepEqual(await inbox(db).persistDelivery(
@@ -122,6 +136,19 @@ test('verified batch normalizes Meta envelope before storing',async()=>{
   assert.deepEqual(await store.persistVerifiedBatch(payload),{
     stored:1,duplicate:0,unlinked:0,unsupported:0
   });
+  assert.equal(db.calls.length,1);
+});
+
+test('single verified but unlinked delivery fails closed rather than being acknowledged',async()=>{
+  const db=mockDb('unlinked'), store=inbox(db);
+  const payload={object:'whatsapp_business_account',entry:[{
+    id:'123456789',changes:[{field:'messages',value:{
+      metadata:{phone_number_id:'987654321'},
+      messages:[{id:'wamid.unlinked-synthetic',from:'34600000000',
+        timestamp:'1794150000',type:'text',text:{body:'Missatge fictici'}}]
+    }}]
+  }]};
+  await assert.rejects(store.persistVerifiedBatch(payload),/authorization review/);
   assert.equal(db.calls.length,1);
 });
 

@@ -36,6 +36,10 @@ on:
       - 'lib/whatsapp/delivery-normalizer.js'
       - 'db/migrations/20261108_whatsapp_durable_inbox.sql'
       - 'db/migrations/20261109_nexlupa_canonical_identity_staged.sql'
+      - 'db/migrations/20261112_whatsapp_family_inbox_reader_ci.sql'
+      - 'tests/sql/whatsapp-family-inbox-reader-rpc-smoke.sql'
+      - 'db/migrations/20261112_whatsapp_signed_family_inbox_reader_ci.sql'
+      - 'tests/sql/whatsapp-signed-family-inbox-reader-smoke.sql'
       - 'db/checks/whatsapp-pilot-release-gate-readonly.sql'
       - 'tests/whatsapp-durable-inbox.test.js'
       - 'tests/whatsapp-verified-ingestion.test.js'
@@ -58,6 +62,19 @@ on:
       - 'tests/whatsapp-neon-auth-server-session.test.js'
       - 'tests/whatsapp-pilot-auth-bff.test.js'
       - 'tests/whatsapp-pilot-family-session.test.js'
+      - 'lib/whatsapp/pilot-family-inbox-reader.js'
+      - 'tests/whatsapp-pilot-family-inbox-reader.test.js'
+      - 'tests/whatsapp-signed-inbox-read-permit.test.js'
+      - 'tests/whatsapp-signed-inbound-ingest-adapter.test.js'
+      - 'tests/whatsapp-postgres-signed-inbox-e2e.test.cjs'
+      - 'tests/whatsapp-postgres-signed-consent-races.test.cjs'
+      - 'tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql'
+      - 'lib/whatsapp/signed-inbox-nonce-retention.js'
+      - 'tests/whatsapp-signed-inbox-nonce-retention.test.js'
+      - 'tests/whatsapp-postgres-signed-inbox-nonce-retention-e2e.test.cjs'
+      - 'db/migrations/20261112_whatsapp_signed_inbound_ingest_ci.sql'
+      - 'lib/whatsapp/signed-inbound-ingest-adapter.js'
+      - 'lib/whatsapp/signed-inbox-read-permit.js'
       - 'tests/whatsapp-pilot-pairing-issuer.test.js'
       - 'tests/whatsapp-two-family-authenticated-flow.test.js'
       - 'tests/whatsapp-signed-consent-revoker.test.js'
@@ -110,7 +127,7 @@ jobs:
         run: node scripts/security/check-tracked-credentials.js
       - name: Verify WhatsApp pilot remains disabled and audit missing config without secrets
         run: node scripts/whatsapp-pilot-preflight.js
-      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-neon-auth-server-session.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-pilot-family-session.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
+      - run: node --test tests/whatsapp-durable-inbox.test.js tests/whatsapp-verified-ingestion.test.js tests/whatsapp-meta-durable-post-bridge.test.js tests/whatsapp-family-pairing.test.js tests/whatsapp-restricted-family-pairing.test.js tests/whatsapp-signed-family-pairing.test.js tests/whatsapp-pilot-preflight.test.js tests/whatsapp-consent-revocation.test.js tests/whatsapp-tenant-security.test.js tests/whatsapp-retention-worker.test.js tests/whatsapp-retention-lock.test.js tests/whatsapp-retention-scheduler.test.js tests/whatsapp-family-authorization.test.js tests/whatsapp-membership-store.test.js tests/whatsapp-transactional-family-authorization.test.js tests/whatsapp-request-identity-binding.test.js tests/whatsapp-verified-server-session.test.js tests/whatsapp-canonical-verified-session.test.js tests/whatsapp-neon-auth-server-session.test.js tests/whatsapp-pilot-auth-bff.test.js tests/whatsapp-pilot-family-session.test.js tests/whatsapp-pilot-family-inbox-reader.test.js tests/whatsapp-signed-inbox-read-permit.test.js tests/whatsapp-signed-inbound-ingest-adapter.test.js tests/whatsapp-signed-inbox-nonce-retention.test.js tests/whatsapp-pilot-pairing-issuer.test.js tests/whatsapp-two-family-authenticated-flow.test.js tests/whatsapp-signed-consent-revoker.test.js tests/whatsapp-rotating-keyring.test.js tests/whatsapp-nonce-retention.test.js tests/whatsapp-credential-scan.test.js tests/whatsapp-webhook.test.js tests/whatsapp-delivery-normalizer.test.js
 
   two-family-postgres:
     runs-on: ubuntu-latest
@@ -206,6 +223,40 @@ jobs:
       - name: Verify canonical family admin authorizes real signed pairing path
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-canonical-pairing-bridge-smoke.sql
+      - name: Install limited canonical family inbox reader in disposable PostgreSQL only
+        run: |
+          psql -v ON_ERROR_STOP=1 -f db/migrations/20261112_whatsapp_family_inbox_reader_ci.sql
+      - name: Test family inbox reader cross-tenant RLS, member revoke and pagination
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-family-inbox-reader-rpc-smoke.sql
+      - name: Stage HMAC-signed one-use family inbox reads in disposable PostgreSQL
+        run: |
+          psql -v ON_ERROR_STOP=1 -f db/migrations/20261112_whatsapp_signed_family_inbox_reader_ci.sql
+      - name: Reject replay, family impersonation, forged and revoked-key read permits
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-family-inbox-reader-smoke.sql
+      - name: Install signed restricted Meta ingress on disposable PostgreSQL
+        run: |
+          psql -v ON_ERROR_STOP=1 -f db/migrations/20261112_whatsapp_signed_inbound_ingest_ci.sql
+      - name: End-to-end signed Meta -> encrypted PostgreSQL -> restricted family inbox
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts pg@8
+          node --test tests/whatsapp-postgres-signed-inbox-e2e.test.cjs
+      - name: Verify real signed read and ingest locks block concurrent consent revocation
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          node --test tests/whatsapp-postgres-signed-consent-races.test.cjs
+      - name: Prove RLS-only nonce expiry cleanup for signed ingest and inbox reads
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql
+      - name: Verify real non-superuser PostgreSQL login cleans only aged signed nonces
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          node --test tests/whatsapp-postgres-signed-inbox-nonce-retention-e2e.test.cjs
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql

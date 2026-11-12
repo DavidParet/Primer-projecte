@@ -307,7 +307,10 @@ test('production static build omits pilot assets; gated preview includes them',(
  const command=path.join(root,'scripts/build-static.js');
  const base={...process.env,VERCEL_ENV:'production',
   NEXLUPA_AUTH_PILOT:'enabled',
-  NEXLUPA_AUTH_PILOT_ORIGIN:ORIGIN};
+  NEXLUPA_AUTH_PILOT_ORIGIN:ORIGIN,
+  NEXLUPA_AUTH_BASE_URL:
+   'https://ep-ci.neonauth.c-7.eu-central-1.aws.neon.tech/neondb/auth',
+  NEXLUPA_AUTH_PILOT_ALLOWED_SUBJECTS:'ci-auth-preview-user-01'};
  const production=spawnSync(process.execPath,[command],{
   cwd:root,env:base,encoding:'utf8'
  });

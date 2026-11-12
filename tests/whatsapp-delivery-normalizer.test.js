@@ -40,6 +40,21 @@ test('Normalitza text sense assignar família ni grup: consentiment pendent',()=
   assert.equal(result.meta.statusUpdates,1);
 });
 
+test('un WhatsApp reenviat no revela el grup original ni autoritza una família',()=>{
+  const content=item('wamid.forwarded-synthetic','text',{
+    context:{forwarded:true,group_id:'grup-del-collegi-inventat'},
+    groupId:'arbitrary-provider-extension',
+    familyId:'claimed-by-sender'
+  });
+  const r=normalizeMetaDeliveries(makePayload([content]));
+  assert.equal(r.deliveries.length,1);
+  assert.equal(r.deliveries[0].groupId,null);
+  assert.equal(r.deliveries[0].familyId,null);
+  assert.equal(r.deliveries[0].authorization,'unresolved');
+  assert.equal(Object.hasOwn(r.deliveries[0],'context'),false);
+  assert.equal(Object.hasOwn(r.deliveries[0],'originalGroup'),false);
+});
+
 test('Duplicats dins de la mateixa entrega es descarten',()=>{
   const data=makePayload([item(),item()]);
   assert.equal(normalizeMetaDeliveries(data).deliveries.length,1);

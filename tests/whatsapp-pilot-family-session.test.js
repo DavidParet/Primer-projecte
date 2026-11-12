@@ -162,6 +162,25 @@ test('family operations reject unsafe GET by default; explicit read-only use is 
   assert.equal(f.seen.length>=2,true);
 });
 
+test('read-only pilot binding refuses POST, cross-site GET and wrong Origin',()=>{
+  const f=fixture();
+  const baseline={...request(),method:'GET'};
+  for(const bad of [
+    {...request(),method:'POST'},
+    {...request(),method:'DELETE'},
+    {...baseline,headers:{...baseline.headers,origin:'https://attacker.example.test'}},
+    {...baseline,headers:{...baseline.headers,'sec-fetch-site':'cross-site'}},
+    {...baseline,headers:{...baseline.headers,'sec-fetch-site':'same-site'}},
+    {...baseline,headers:{...baseline.headers,host:'unrelated.vercel.app'}}
+  ]){
+    assert.throws(()=>f.factory(bad,{mutation:false}),
+      /Untrusted pilot request origin/);
+  }
+  assert.equal(f.calls.length,0);
+  assert.equal(f.seen.length,0);
+  assert.doesNotThrow(()=>f.factory(baseline,{mutation:false}));
+});
+
 test('missing, malformed and duplicate host cookies never contact provider',()=>{
   const f=fixture();
   const good=request();
