@@ -30,9 +30,9 @@
 
 ### Primera prova integrada real sobre PostgreSQL temporal (12/11/2026)
 
-- `tests/whatsapp-postgres-signed-inbox-e2e.test.cjs` posa a prova tot el recorregut: HMAC sobre el webhook Meta fictici → comprovació de consentiment de remitent → SQL a PostgreSQL 17 → text xifrat AES-256-GCM → `SET ROLE nex_ci_inbox_reader_runtime` → permís de lectura signat d'un sol ús → desxifrat JavaScript.
+- `tests/whatsapp-postgres-signed-inbox-e2e.test.cjs` posa a prova tot el recorregut: HMAC del webhook Meta fictici → comprovació del consentiment → ingesta restringida i signada sobre PostgreSQL 17 → xifrat AES-256-GCM → segon compte SQL de lectura restringida → autorització familiar signada d'un sol ús → desxifrat JavaScript.
 - Comprova també firma Meta falsa (403 sense persistència), reenviament idempotent, remitent sense permís (503, cap escrit), rol SQL sense `SELECT` directe, reenviament de nonce i temptativa de canvi de família rebutjats; el text real/fictici no es guarda en clar.
-- **Límit verificat:** el test d'ingesta s'executa amb l'administrador de la BD efímera i el vincle IdP és una simulació; no demostra privilegis mínims d'ingesta ni autenticació real de Neon Auth/Meta. No s'ha executat cap test a Neon ni desplegat a Meta.
+- **Límit verificat:** l'administrador de la base de proves només prepara consentiments i claus ficticis; la ingesta, consulta i neteja s'han comprovat amb comptes PostgreSQL de login restringits i independents. El vincle IdP, Meta i la custòdia de claus continuen simulats. Cap comprovació amb Neon Auth o WhatsApp Cloud API real, cap SQL a Neon i cap desplegament de Meta.
 
 ### Recepció xifrada amb rol SQL restringit (CI ONLY, 12/11/2026)
 
@@ -42,6 +42,13 @@
 - **Actualització 12/11/2026 — credencials separades en CI:** `tests/whatsapp-postgres-signed-inbox-e2e.test.cjs` ja no es limita a `SET ROLE` amb una connexió d'administrador. Crea dos comptes PostgreSQL `LOGIN` diferents i de permisos mínims, cadascun amb una contrasenya aleatòria generada durant la prova efímera, i comprova que s'autentiquen realment, no són superusuaris, no poden elevar permisos, no tenen accés directe a les taules ni executar l'RPC de l'altre compte. L'administrador només prepara les dades fictícies de consentiment i claus. La prova travessa la signatura Meta simulada, l'ingrés SQL restringit, el xifrat AES-GCM i la lectura familiar signada.
 - **Riscos pendents de pilot real:** el control amb connexions autenticades de mínima autoritat està provat **només a CI**, amb credencials sintètiques temporals. No s'ha instal·lat ni provat a Neon; resten la verificació real de Neon Auth, validació Meta Cloud API, segregació i custòdia operativa de claus, rotació, neteja dels nonces caducats, revisió independent del risc de compromís del signer i aprovació del pilot. El propietari de la funció té `UPDATE(consent_at)` únicament per permetre `FOR SHARE` a PostgreSQL, privilegi que requereix auditoria abans de preview. Cap credencial real de servei s'ha generat ni utilitzat.
 - **No GO:** no desplegar el servidor públic de webhook ni connectar pares, infants o grups reals fins que es validin permisos, consentiments, privacitat i retenció.
+
+### Revocació simultània a la recepció i consulta (CI ONLY, 12/11/2026)
+
+- La prova `tests/whatsapp-postgres-signed-consent-races.test.cjs` obre dues connexions PostgreSQL simultànies i comprova amb `lock_timeout` de 350 ms que la revocació del membre canònic no pot avançar-se a una consulta signada que conserva el bloqueig `FOR SHARE`. Després de completar la revocació, una signatura nova de lectura retorna zero files.
+- La mateixa prova confirma que revocar el consentiment del remitent no pot avançar-se a una ingesta signada, validada i encara en transacció. Després de revocar, una autorització signada nova no insereix el missatge.
+- Evidència de GitHub Actions per al commit `5d54a5ea`: consentiment `43133143286`, webhook `43133143308`, PostgreSQL + safata `43133143450`, **totes tres success**.
+- **Límit:** són revocacions sobre identitats i missatges sintètics, no hi ha connexió a Meta ni Neon Auth. Les dues ordres de cursa (ingesta/consulta que ja ha adquirit el bloqueig abans de la revocació) estan verificades; la variant on la revocació obté el bloqueig primer encara necessita una prova específica.
 
 ### Caducitat dels permisos signats: manteniment controlat (CI ONLY, 12/11/2026)
 
