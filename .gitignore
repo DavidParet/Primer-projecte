@@ -6,3 +6,7 @@
 !.env.sample
 *.pem
 *.key
+
+# QA real: missatges originals i resultats locals, mai al repositori públic.
+qa50.private.json
+qa50-result-*.json
