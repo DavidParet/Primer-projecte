@@ -65,6 +65,7 @@ on:
       - 'lib/whatsapp/pilot-family-inbox-reader.js'
       - 'tests/whatsapp-pilot-family-inbox-reader.test.js'
       - 'tests/whatsapp-signed-inbox-read-permit.test.js'
+      - 'tests/whatsapp-postgres-signed-inbox-e2e.test.cjs'
       - 'lib/whatsapp/signed-inbox-read-permit.js'
       - 'tests/whatsapp-pilot-pairing-issuer.test.js'
       - 'tests/whatsapp-two-family-authenticated-flow.test.js'
@@ -226,6 +227,12 @@ jobs:
       - name: Reject replay, family impersonation, forged and revoked-key read permits
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-family-inbox-reader-smoke.sql
+      - name: End-to-end signed Meta -> encrypted PostgreSQL -> restricted family inbox
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts pg@8
+          node --test tests/whatsapp-postgres-signed-inbox-e2e.test.cjs
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
