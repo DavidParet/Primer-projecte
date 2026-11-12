@@ -190,8 +190,8 @@ test('released pinned client cannot sign or execute further SQL and releases onc
  client.release();
  client.release();
  assert.equal(releases,1);
- await assert.rejects(client.query('COMMIT'),/already released/);
- await assert.rejects(client.query(INSERT_SQL,input()),/already released/);
+ assert.throws(()=>client.query('COMMIT'),/already released/);
+ assert.throws(()=>client.query(INSERT_SQL,input()),/already released/);
  assert.deepEqual(calls,['BEGIN']);
  assert.equal(keyCalls,0);
 });
