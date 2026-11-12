@@ -1,17 +1,34 @@
-name: Deploy to Vercel
+# The Vercel Git integration already creates deployments.
+# This workflow runs validation only; it NEVER deploys or touches production.
+name: NexLupa - validacions sense desplegament
 
 on:
-  push:
+  pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexlupa-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  checks:
+    name: Syntax and regression smoke test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel production
-        run: npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73a2e2f17e592450 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JavaScript syntax
+        run: |
+          find . -path './node_modules' -prune -o -path './.git' -prune -o -type f -name '*.js' -print0 | xargs -0 -r -n 1 node --check
+      - name: Existing priorities regression test
+        run: node tests/run-test.js
