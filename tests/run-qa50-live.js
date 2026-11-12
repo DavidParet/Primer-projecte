@@ -28,6 +28,8 @@ function endpoint() {
   if(!raw || !process.env.NEXLUPA_QA_KEY) throw Error('Calen NEXLUPA_QA_URL i NEXLUPA_QA_KEY.');
   const u=new URL(raw);
   if(u.protocol!=='https:' || u.username || u.password) throw Error('Cal HTTPS i URL sense credencials.');
+  // Prevent credential leakage or accidental production traffic: QA only on Vercel previews.
+  if(!u.hostname.endsWith('.vercel.app')) throw Error('QA50 només admet URL de previsualització *.vercel.app.');
   u.pathname='/api/analyze';
   u.search='';
   return u;
@@ -38,7 +40,7 @@ async function one(c,url){
     const headers={'Content-Type':'application/json','x-nexlupa-qa-key':process.env.NEXLUPA_QA_KEY};
     if(process.env.VERCEL_AUTOMATION_BYPASS_SECRET)
       headers['x-vercel-protection-bypass']=process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
-    const r=await fetch(url,{method:'POST',headers,signal:AbortSignal.timeout(90000),
+    const r=await fetch(url,{method:'POST',headers,redirect:'error',signal:AbortSignal.timeout(90000),
       body:JSON.stringify({text:c.message,testReferenceDate:expectedDate})});
     const body=await r.text();
     let data;
@@ -46,6 +48,9 @@ async function one(c,url){
     catch{throw Error('Resposta no JSON (HTTP '+r.status+')')}
     if(!r.ok)throw Error('HTTP '+r.status);
     if(!data||typeof data!=='object'||Array.isArray(data)) throw Error('Format de resposta invalid');
+    if(data.dataReferencia!==expectedDate)throw Error('La data de QA no esta fixada al servidor: resultat no comparable.');
+    if(typeof data.resum!=='string'||!Array.isArray(data.accions)||!Array.isArray(data.esdeveniments))
+      throw Error('L\'API no ha retornat resum/accions/esdeveniments validables.');
     return {id:c.id,canal:c.canal,categoria:c.categoria,esperat:c.esperat,message:c.message,
       status:r.status,ms:Math.round(performance.now()-begin),resultat:data};
   } catch(e) {
