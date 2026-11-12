@@ -23,7 +23,7 @@ const url=process.env.WHATSAPP_TEST_DATABASE_URL;
 const A='11111111-1111-4111-8111-111111111111';
 const B='22222222-2222-4222-8222-222222222222';
 const BUSINESS='123456789',PHONE='987654321';
-const SENDER='34677711111',OUTSIDER='34677722222';
+const SENDER='34677711111',OUTSIDER='34677722222',SECOND='34677733333';
 const MESSAGE='wamid.node-sql-reader-ci-01';
 const TEXT='CI fictici: excursió el dijous a les 09:00';
 const APP_SECRET='CI-only-fictitious-Meta-app-secret';
@@ -97,8 +97,12 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.deepEqual(ingestPrivilege.rows[0],{
    insert_direct:false,consent_direct:false,signing_key_direct:false
   });
+  const ingestCalls=[];
   const signedDb=createSignedInboundIngestAdapter({
-   db:ingestClient,
+   db:{async query(sql,values){
+    ingestCalls.push({sql,values});
+    return ingestClient.query(sql,values);
+   }},
    getActiveSigningKey:async purpose=>{
     assert.equal(purpose,'whatsapp-inbound-ingest');
     return {purpose,state:'active',keyId:ingestKeyId,
@@ -118,6 +122,12 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   assert.equal((await deliver(bridge,raw,{forgedSignature:true})).statusCode,403);
   assert.equal((await deliver(bridge,raw)).statusCode,200);
   assert.equal((await deliver(bridge,raw)).statusCode,200,'replay ACKs valid duplicate');
+  assert.equal(ingestCalls.length,2);
+  assert.equal(ingestCalls[0].sql,SIGNED_INSERT_SQL);
+  // Replaying the exact signed SQL request must fail even with a privileged
+  // signature that was valid for the first delivery.
+  assert.equal((await ingestClient.query(
+   SIGNED_INSERT_SQL,ingestCalls[0].values)).rows[0].state,'unlinked');
 
   // Bare DB role cannot forge a message merely by knowing a sender digest.
   const falseInsert=await ingestClient.query(SIGNED_INSERT_SQL,[
@@ -148,6 +158,21 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
    "SELECT COUNT(*)::integer AS n FROM public.nex_whatsapp_inbound "+
    "WHERE provider_message_id='wamid.node-sql-reader-unlinked'"
   )).rows[0].n,0);
+  // Another VALID family consent is still not a valid duplicate: a Meta
+  // message ID collision cannot overwrite/acknowledge family A's record.
+  await pool.query(
+   'INSERT INTO public.nex_whatsapp_sender_authorizations '+
+   '(business_account_id,phone_number_id,sender_digest,family_id,scope,'+
+   'consent_version,consent_at,consent_source,valid_until) '+
+   "VALUES ($1,$2,$3,$4,'incoming_text','ci-e2e',clock_timestamp(),"+
+   "'synthetic-ci',clock_timestamp()+interval '30 minutes')",
+   [BUSINESS,PHONE,createHmac('sha256',senderKey).update(SECOND).digest(),B]
+  );
+  const collision=await deliver(bridge,envelope(SECOND,MESSAGE,'CI another family'));
+  assert.equal(collision.statusCode,503);
+  assert.equal((await pool.query(
+   'SELECT family_id FROM public.nex_whatsapp_inbound WHERE provider_message_id=$1',
+   [MESSAGE])).rows[0].family_id,A);
 
   // This separate connection executes ONLY with the restricted inbox role.
   readerClient=await pool.connect();
@@ -200,6 +225,20 @@ test('signed Meta webhook -> encrypted PostgreSQL -> one-use authorized read -> 
   const swapped=[...calls[0].values];
   swapped[1]=B;
   assert.equal((await readerClient.query(READ_SQL,swapped)).rowCount,0);
+
+  // Even if the in-process signer has not noticed key rotation, PostgreSQL
+  // must immediately reject a newly signed message under a revoked key.
+  await pool.query(
+   "UPDATE public.nex_ci_inbound_ingest_keys SET state='revoked' WHERE key_id=$1",
+   [ingestKeyId]
+  );
+  const denied=await deliver(bridge,
+   envelope(SENDER,'wamid.node-sql-reader-revoked','CI revoked signing key'));
+  assert.equal(denied.statusCode,503);
+  assert.equal((await pool.query(
+   "SELECT COUNT(*)::integer AS n FROM public.nex_whatsapp_inbound "+
+   "WHERE provider_message_id='wamid.node-sql-reader-revoked'"
+  )).rows[0].n,0);
 
   authorized=false;
   await assert.rejects(inboxReader({familyId:A}),/membership/);
