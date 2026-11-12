@@ -49,9 +49,9 @@ module.exports = async function handler(req, res) {
       model:       image ? 'gpt-4o' : 'gpt-4o-mini',
       max_tokens:  1000,
       temperature: 0,
-      messages
+      messages,
+      response_format: { type: 'json_object' }
     };
-    if (!image) completionOpts.response_format = { type: 'json_object' };
 
     const completion = await client.chat.completions.create(completionOpts);
 
@@ -104,7 +104,7 @@ module.exports = async function handler(req, res) {
 
   } catch (err) {
     if (err instanceof SyntaxError) {
-      return res.status(500).json({ error: 'Error parsejant la resposta de la IA' });
+      return res.status(500).json({ error: 'No hem pogut completar l’anàlisi. Torna-ho a provar.' });
     }
     if (err.status === 401) {
       return res.status(500).json({ error: 'Clau API no configurada al servidor' });
