@@ -70,6 +70,7 @@ on:
       - 'tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql'
       - 'lib/whatsapp/signed-inbox-nonce-retention.js'
       - 'tests/whatsapp-signed-inbox-nonce-retention.test.js'
+      - 'tests/whatsapp-postgres-signed-inbox-nonce-retention-e2e.test.cjs'
       - 'db/migrations/20261112_whatsapp_signed_inbound_ingest_ci.sql'
       - 'lib/whatsapp/signed-inbound-ingest-adapter.js'
       - 'lib/whatsapp/signed-inbox-read-permit.js'
@@ -245,6 +246,11 @@ jobs:
       - name: Prove RLS-only nonce expiry cleanup for signed ingest and inbox reads
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql
+      - name: Verify real non-superuser PostgreSQL login cleans only aged signed nonces
+        env:
+          WHATSAPP_TEST_DATABASE_URL: postgresql://postgres:ci-only-not-a-real-secret@127.0.0.1:5432/whatsapp_ci
+        run: |
+          node --test tests/whatsapp-postgres-signed-inbox-nonce-retention-e2e.test.cjs
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
