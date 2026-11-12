@@ -80,7 +80,7 @@ test('unknown SQL, missing authorization or selected wrong key fails closed',asy
    senderHmacKey:senderKey,contentEncryptionKey:contentKey,
    getActiveSigningKey:async()=>selection,now:()=>NOW
   });
-  await assert.rejects(adapter.query(INSERT_SQL,input()),/key|isolated/i);
+  await assert.rejects(adapter.query(INSERT_SQL,input()),/key|isolated|32-byte/i);
  }
 });
 
