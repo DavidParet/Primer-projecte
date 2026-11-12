@@ -18,7 +18,8 @@ SORTIDA (estructura obligatòria):
   "decisio": "acció clara en format imperatiu",
   "mainEvent": {
     "title": "Nom oficial de l'acte (SENSE verbs com 'Participar a' o 'Assistir a', SENSE ubicació)",
-    "data": "YYYY-MM-DD HH:MM (o null)",
+    "data": "YYYY-MM-DD HH:MM, YYYY-MM-DD (si només consta el dia), o null",
+    "dataFi": "YYYY-MM-DD HH:MM si el missatge indica quan acaba l’acte, o null",
     "lloc": "ubicació literal o null",
     "edat": "rang d'edat si s'esmenta o null"
   },
@@ -29,18 +30,27 @@ SORTIDA (estructura obligatòria):
     "organitzador": "nom de l'organitzador o null",
     "cost": "15€ (o null si és gratuït o no s'esmenta)"
   },
+  "avisDates": "avís breu si hi ha una contradicció o falta confirmar la data, o null",
   "accions": [
     {
       "accio": "string",
       "tipus": "tasca | informatiu",
       "data": "YYYY-MM-DD HH:MM (si aplica, sinó null)",
       "prioritat": "alta | mitja | baixa",
-      "lloc": "ubicació literal del missatge o null"
+      "lloc": "ubicació literal del missatge o null",
+      "enllac": "URL http o https literal i necessària per fer la tasca, o null"
     }
   ]
 }
 
 ---
+
+NORMES DE FIDELITAT (tenen precedència sobre els exemples i les normes següents):
+- Usa la data actual proporcionada per interpretar «avui» i «demà» en missatges actuals. Si el text és reenviat i la data original no consta, mantén la data relativa sense convertir-la.
+- Si el dia de la setmana contradiu la data, falta el mes, hi ha un rang de dies a triar o l'hora depèn d'una condició, no fixis una data/hora única al camp data. Conserva les opcions al text i explica què cal confirmar a avisDates. Una correcció explícita substitueix la dada antiga.
+- Mantén dins de cada tasca les condicions que n'afecten el compliment (p. ex. «si encara no has pagat»). No converteixis avisos que enviarà l'organització en tasques de la família.
+- Conserva l'enllaç literal del formulari, la pista, la sala, l'adreça, l'hora d'arribada i l'hora de tornada quan constin. No mostris marcadors com null, [Ubicació] o venue en textos visibles.
+- Assigna P1 (alta) als requisits imprescindibles, P2 (mitja) als preparatius i P3 (baixa) a les tasques opcionals o complementàries. L'acte principal va a mainEvent i queda separat de les prioritats. Una recomanació opcional amb data continua sent P3.
 
 NORMES:
 
@@ -76,7 +86,7 @@ Retorna:
 ---
 
 3. ACCIONS
-- Màxim 6 accions.
+- Recull totes les accions explícites. Si n'hi ha cinc o més, conserva-les per separat.
 - 1 acció = 1 intenció. Mai combinar 2 verbs en una acció.
 - Només accions útils i reals (no redundants).
 - Cada acció ha d'aportar valor.
