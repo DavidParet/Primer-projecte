@@ -95,6 +95,35 @@ test('signed family reader locks canonical membership until read transaction com
   const denied=await reader.query(READ_SQL,await args());
   assert.equal(denied.rowCount,0,
    'fresh valid signature must not bypass a completed family revocation');
+
+  // REVERSE ORDER: when revocation acquires the lock first, the signed
+  // reader must block; it must never return the old active membership.
+  await pool.query(
+   "UPDATE public.nex_family_memberships SET status='active' "+
+   "WHERE user_id=$1 AND family_id=$2",[USER,family]
+  );
+  const revoker=await pool.connect();
+  let revoking=false;
+  try{
+   await revoker.query('BEGIN');revoking=true;
+   await revoker.query(
+    "UPDATE public.nex_family_memberships SET status='suspended',"+
+    "updated_at=clock_timestamp() WHERE user_id=$1 AND family_id=$2",
+    [USER,family]
+   );
+   await reader.query('BEGIN');holding=true;
+   await reader.query("SET LOCAL lock_timeout='350ms'");
+   await assert.rejects(reader.query(READ_SQL,await args()),
+    error=>error.code==='55P03');
+   await reader.query('ROLLBACK');holding=false;
+   await revoker.query('COMMIT');revoking=false;
+   const afterRevokerWins=await reader.query(READ_SQL,await args());
+   assert.equal(afterRevokerWins.rowCount,0,
+    'read after revoker wins lock must fail authorization');
+  }finally{
+   if(revoking)await revoker.query('ROLLBACK').catch(()=>{});
+   revoker.release();
+  }
  }finally{
   if(reader){
    if(holding)await reader.query('ROLLBACK').catch(()=>{});
@@ -170,6 +199,40 @@ test('signed ingest locks sender consent, then rejects post-revocation messages'
    'WHERE provider_message_id=ANY($1::text[])',[ [message,later] ]
   );
   assert.deepEqual(db.rows.map(r=>r.provider_message_id),[message]);
+
+  // REVERSE ORDER: a revocation that has already locked consent must block
+  // a new signed ingress until it commits; no stale authorized insert.
+  await pool.query(
+   'UPDATE public.nex_whatsapp_sender_authorizations '+
+   'SET revoked_at=NULL WHERE authorization_id=$1',[authId]
+  );
+  const revoker=await pool.connect();
+  let revoking=false;
+  try{
+   await revoker.query('BEGIN');revoking=true;
+   await revoker.query(
+    'UPDATE public.nex_whatsapp_sender_authorizations '+
+    'SET revoked_at=clock_timestamp() WHERE authorization_id=$1',[authId]
+   );
+   await writer.query('BEGIN');holding=true;
+   await writer.query("SET LOCAL lock_timeout='350ms'");
+   await assert.rejects(writer.query(SIGNED_INSERT_SQL,
+    args('wamid.ci-concurrent-revoker-wins')),error=>error.code==='55P03');
+   await writer.query('ROLLBACK');holding=false;
+   await revoker.query('COMMIT');revoking=false;
+   const afterRevokerWins=await writer.query(
+    SIGNED_INSERT_SQL,args('wamid.ci-concurrent-revoker-wins')
+   );
+   assert.equal(afterRevokerWins.rows[0].state,'unlinked');
+   const final=await pool.query(
+    "SELECT count(*)::integer AS n FROM public.nex_whatsapp_inbound "+
+    "WHERE provider_message_id='wamid.ci-concurrent-revoker-wins'"
+   );
+   assert.equal(final.rows[0].n,0);
+  }finally{
+   if(revoking)await revoker.query('ROLLBACK').catch(()=>{});
+   revoker.release();
+  }
  }finally{
   if(writer){
    if(holding)await writer.query('ROLLBACK').catch(()=>{});
