@@ -251,69 +251,58 @@
       <button type="button" class="btn-back-page" onclick="navTo('inici')">← Tornar a l’inici</button>
 
       <div class="premium-hero">
-        <h1 id="premiumTitle">Compara els plans</h1>
-        <p>Analitza missatges amb Free. Premium 1.0 inclourà la recepció de correus seleccionats i la connexió amb Google Calendar.</p>
+        <div class="premium-badge">⭐ nexlupa PREMIUM</div>
+        <h1 id="premiumTitle" style="font-size:24px;color:#fff;">La lupa sense límits</h1>
+        <p style="font-size:13px;color:#fff;">Mai més et perdràs res important.</p>
+
+        <div class="premium-checklist">
+          <div class="pchk-item yes">✔ <span>Gmail automatitzat</span></div>
+          <div class="pchk-item yes">✔ <span>Calendari connectat</span></div>
+          <div class="pchk-item yes">✔ <span>Recordatoris programables</span></div>
+          <div class="pchk-item no">✖ <span>Amb el FREE, 3 anàlisis al dia</span></div>
+        </div>
+
+        <div class="plans-row">
+          <div class="plan-card">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">0 €</div>
+            <div class="plan-desc">3 anàlisis al dia</div>
+          </div>
+          <div class="plan-card active">
+            <div class="plan-badge">⭐ RECOMANAT</div>
+            <div class="plan-name">Premium 1.0</div>
+            <div class="plan-price" style="font-size:17px;">4,99 €/mes</div>
+            <div class="plan-desc">Preu proposat</div>
+          </div>
+        </div>
+
+        <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20NexLupa%20%E2%80%94%20Aviseu-me" style="display:block;text-decoration:none;">⭐ Vull Premium — Aviseu-me quan surti</a>
       </div>
 
-      <table class="plan-comparison" aria-label="Comparativa Free i Premium 1.0">
-        <colgroup><col class="plan-feature-col"><col><col></colgroup>
-        <thead>
-          <tr>
-            <th scope="col">Funció</th>
-            <th scope="col">Free <small>0 €</small></th>
-            <th scope="col">Premium 1.0 <small>4,99 €/mes · preu proposat</small></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">Anàlisi ràpida</th>
-            <td>Text enganxat o captura</td>
-            <td>Text enganxat, captura o correu rebut</td>
-          </tr>
-          <tr>
-            <th scope="row">Quota ampliada</th>
-            <td>3 anàlisis al dia</td>
-            <td><strong>Anàlisis il·limitades*</strong><br><small>* Fins a 1.000 anàlisis al mes, de les quals fins a 30 poden ser captures.</small></td>
-          </tr>
-          <tr>
-            <th scope="row">Resum clar</th>
-            <td>Resum, accions, dates i terminis</td>
-            <td>Resum, accions, dates i terminis</td>
-          </tr>
-          <tr>
-            <th scope="row">Tasques prioritzades</th>
-            <td>Llista de tasques i historial</td>
-            <td>Llista de tasques i historial</td>
-          </tr>
-          <tr>
-            <th scope="row">Compartició ràpida</th>
-            <td>Copia el resultat o comparteix-lo per WhatsApp</td>
-            <td>Copia el resultat o comparteix-lo per WhatsApp</td>
-          </tr>
-          <tr>
-            <th scope="row">Ubicacions identificades</th>
-            <td>Consulta el lloc i obre’l a Maps si apareix al missatge</td>
-            <td>Consulta el lloc i obre’l a Maps si apareix al missatge</td>
-          </tr>
-          <tr>
-            <th scope="row">Calendari connectat</th>
-            <td>Obre l’esdeveniment a Google Calendar i desa’l</td>
-            <td>Connecta Google Calendar per crear i actualitzar esdeveniments i detectar duplicats</td>
-          </tr>
-          <tr>
-            <th scope="row">Recordatoris programables</th>
-            <td>Els pots configurar a Google Calendar</td>
-            <td>NexLupa proposa recordatoris a partir de les dates detectades</td>
-          </tr>
-          <tr>
-            <th scope="row">Gmail automatitzat</th>
-            <td>Copia i enganxa el text del correu</td>
-            <td>Rep i analitza els correus que triïs amb reenviament selectiu</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">🆓</div><h2 class="c-label">Free vs Premium 1.0</h2></div>
+        <div class="compare-row">
+          <span><strong>Quota ampliada</strong><small class="compare-note">FREE · 3 anàlisis al dia</small></span>
+          <strong class="compare-yes">✓ Anàlisis il·limitades*<small class="compare-note">* 1.000 al mes, fins a 30 captures.</small></strong>
+        </div>
+        <div class="compare-row"><span>Anàlisi ràpida de text i captures</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Resum clar, accions i dates</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Tasques prioritzades i historial</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Compartició ràpida per WhatsApp</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Ubicacions identificades i Maps</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Desament manual a Google Calendar</span><strong class="compare-yes">✓ Tots dos</strong></div>
+        <div class="compare-row"><span>Gmail automatitzat<small class="compare-note"><span class="compare-no">✕</span> FREE</small></span><strong class="compare-yes">✓ Premium 1.0</strong></div>
+        <div class="compare-row"><span>Calendari connectat<small class="compare-note"><span class="compare-no">✕</span> FREE</small></span><strong class="compare-yes">✓ Premium 1.0</strong></div>
+        <div class="compare-row"><span>Recordatoris programables des de NexLupa<small class="compare-note"><span class="compare-no">✕</span> FREE</small></span><strong class="compare-yes">✓ Premium 1.0</strong></div>
+      </div>
 
-      <a class="btn-buy-hero" href="mailto:hola@nexlupa.app?subject=Premium%20NexLupa%20%E2%80%94%20Aviseu-me">Aviseu-me quan surti Premium</a>
+      <div class="card">
+        <div class="card-head"><div class="c-icon ci-gold">⭐</div><h2 class="c-label">Funcionalitats Premium 1.0</h2></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-gold">♾️</div><div><div class="feat-ttl">Quota ampliada</div><div class="feat-dsc">Fins a 1.000 anàlisis al mes, amb un màxim de 30 captures.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Gmail automatitzat</div><div class="feat-dsc">Reenvia els correus que triïs perquè NexLupa els analitzi.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-green">📅</div><div><div class="feat-ttl">Calendari connectat</div><div class="feat-dsc">Crea i actualitza esdeveniments i detecta duplicats.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Recordatoris programables</div><div class="feat-dsc">Rep propostes de recordatoris a partir de les dates detectades.</div></div></div>
+      </div>
     </section>
 
     <!-- CONFIG -->
