@@ -1413,7 +1413,15 @@ function saveToHistorial(d) {
     urgencia:      d.urgencia      || 0,
     urgencia_text: d.urgencia_text || '',
     accions:       cleanAccions,
-    dates:         cleanDates
+    dates:         cleanDates,
+    /* Camps del motor v2: sense ells, reobrir l'historial perd esdeveniments, dades útils i avisos. */
+    decisio:       d.decisio       || '',
+    mainEvent:     d.mainEvent     || null,
+    esdeveniments: Array.isArray(d.esdeveniments) ? d.esdeveniments : [],
+    recordatoris:  Array.isArray(d.recordatoris)  ? d.recordatoris  : [],
+    dadesUtils:    d.dadesUtils    || null,
+    avisDates:     d.avisDates     || null,
+    contingut:     d.contingut     || null
   };
   _historial.push(entry);
   if (_historial.length > 30) _historial.shift();
