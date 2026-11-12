@@ -135,8 +135,16 @@ test('malformed inbound never invokes signing key provider or SQL',async()=>{
   getActiveSigningKey:async()=>{keyCalls++;return selected();},
   now:()=>NOW,senderHmacKey:senderKey,contentEncryptionKey:contentKey
  });
- const malformed=input();malformed[6]=Buffer.alloc(0);
- await assert.rejects(adapter.query(INSERT_SQL,malformed),/Invalid verified/);
+ for(const malformed of [
+  input().map((v,i)=>i===6?Buffer.alloc(0):v),
+  input().map((v,i)=>i===6?Buffer.alloc(65537):v),
+  input().map((v,i)=>i===7?'not-a-timestamp':v),
+  input().map((v,i)=>i===2?Buffer.alloc(31):v),
+  input().map((v,i)=>i===4?Buffer.alloc(11):v),
+  input().map((v,i)=>i===5?Buffer.alloc(15):v)
+ ]){
+  await assert.rejects(adapter.query(INSERT_SQL,malformed),/Invalid verified/);
+ }
  assert.equal(keyCalls,0);
  assert.equal(sqlCalls,0);
 });
