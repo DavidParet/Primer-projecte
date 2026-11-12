@@ -72,11 +72,11 @@ async function callClaude(items) {
 }
 function scrubForPublicSummary(reason) {
   return reason
-    .replace(/https?:\\/\\/\\S+/gi,'[URL]')
-    .replace(/[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}/g,'[CORREU]')
-    .replace(/\\b[A-Z]{2}\\d{2}(?:[ -]?\\d{4}){3,7}\\b/gi,'[COMPTE]')
-    .replace(/\\b(?:\\+?\\d[\\d -]{7,}\\d)\\b/g,'[DADA]')
-    .replace(/[|\\r\\n]/g,' ')
+    .replace(/https?:\/\/\S+/gi,'[URL]')
+    .replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g,'[CORREU]')
+    .replace(/\b[A-Z]{2}\d{2}(?:[ -]?\d{4}){3,7}\b/gi,'[COMPTE]')
+    .replace(/\b(?:\+?\d[\d -]{7,}\d)\b/g,'[DADA]')
+    .replace(/[|\r\n]/g,' ')
     .slice(0,230);
 }
 
