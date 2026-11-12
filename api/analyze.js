@@ -104,6 +104,7 @@ module.exports = async function handler(req, res) {
       } catch (retryError) { /* mantenim el resultat validat original */ }
     }
 
+    parsed.dataReferencia = today;
     return res.status(200).json(parsed);
 
   } catch (err) {
