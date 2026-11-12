@@ -69,3 +69,30 @@ test('real loopback HTTP preview boundary: signed metadata, duplicate, forgery, 
     assert.equal(disabled.headers.get('allow'),'GET, POST');
   });
 });
+
+test('loopback HTTP: revoked consent acknowledges signed metadata without persistence',async()=>{
+  let authorized=true;
+  let queued=0;
+  const handler=makeHttpHandler({config,createAdapters:async()=>({
+    resolveAuthorizedRecipient:async()=>({
+      familyId,active:true,consentActive:authorized
+    }),
+    enqueueReceipt:async()=>{queued++;return 'inserted';}
+  })});
+  await withServer(handler,async base=>{
+    const raw=JSON.stringify({type:'email.received',data:{
+      email_id:'b21b31b7-d82b-48af-8a5f-749ec74262c3',
+      from:'Synthetic <sender@example.invalid>',to:[recipient],
+      subject:'Consent regression',attachments:[]}});
+    authorized=false;
+    const response=await fetch(base,{method:'POST',
+      headers:signature(raw,'msg_revoked_001'),body:raw});
+    assert.equal(response.status,204);
+    assert.equal(queued,0,'revoked consent must not enqueue metadata');
+    authorized=true;
+    const permitted=await fetch(base,{method:'POST',
+      headers:signature(raw,'msg_revoked_002'),body:raw});
+    assert.equal(permitted.status,204);
+    assert.equal(queued,1,'active consent allows one synthetic receipt');
+  });
+});
