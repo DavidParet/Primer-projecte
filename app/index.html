@@ -171,7 +171,7 @@
         <div class="nx-event-block" id="nx-event-block" style="display:none;">
           <div class="nx-section-label nx-event-label">
             <span class="nxs-icon">📌</span>
-            <span>Esdeveniment principal</span>
+            <span>Esdeveniments i dates</span>
           </div>
           <div id="nx-event-content"></div>
         </div>
@@ -186,6 +186,18 @@
         </div>
 
         <p id="nx-date-warning" class="nx-card-date" hidden></p>
+
+        <!-- AVISOS FUTURS: informació visible al FREE, sense programació automàtica -->
+        <div class="nx-info-block" id="nx-future-block" style="display:none;">
+          <div class="nx-section-label"><span class="nxs-icon">📆</span><span>Pròximament</span></div>
+          <div id="nx-future-content"></div>
+        </div>
+
+        <!-- DADES ÚTILS EXTRETES DEL MISSATGE -->
+        <div class="nx-info-block" id="nx-utils-block" style="display:none;">
+          <div class="nx-section-label"><span class="nxs-icon">📎</span><span>Dades útils</span></div>
+          <div id="nx-utils-content"></div>
+        </div>
 
         <!-- P1 — ACCIONS IMPRESCINDIBLES -->
         <div class="nx-p1-block" id="nx-p1-block" style="display:none;">
@@ -401,7 +413,7 @@
 
 </div><!-- fi pageApp -->
 
-<script src="script.js?v=qa50"></script>
+<script src="script.js?v=qa50-fix-20261112"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.body.classList.add('app-active');

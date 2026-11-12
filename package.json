@@ -2,7 +2,8 @@
   "name": "nexlupa",
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/inject-version.js"
+    "build": "node scripts/inject-version.js",
+    "test": "node --test tests/nexlupa-result.test.js"
   },
   "dependencies": {
     "openai": "^4.0.0"
