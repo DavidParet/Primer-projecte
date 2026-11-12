@@ -124,6 +124,19 @@ test('tampering with AES-GCM and expired records fails closed',async()=>{
  await assert.rejects(fixture([badTag]).read({familyId:A}),/Inbox data unavailable/);
 });
 
+test('authenticated ciphertext with invalid UTF-8 fails closed',async()=>{
+ const record=row(21);
+ const aad=Buffer.from(JSON.stringify([
+  record.business_account_id,record.phone_number_id,
+  record.provider_message_id,record.sender_digest.toString('hex')
+ ]));
+ const cipher=createCipheriv('aes-256-gcm',key,record.nonce);
+ cipher.setAAD(aad);
+ record.ciphertext=Buffer.concat([cipher.update(Buffer.from([0xc3,0x28])),cipher.final()]);
+ record.authentication_tag=cipher.getAuthTag();
+ await assert.rejects(fixture([record]).read({familyId:A}),/Inbox data unavailable/);
+});
+
 test('revoked family membership after RPC denies returning any decrypted data',async()=>{
  let allowed=true;
  const reader=createPilotFamilyInboxReader({
