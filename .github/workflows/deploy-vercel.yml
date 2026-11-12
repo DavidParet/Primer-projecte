@@ -34,3 +34,24 @@ jobs:
         run: node tests/run-test.js
       - name: Verify Claude audit verdict parser (offline)
         run: node tests/audit-qa50-claude.js --self-test
+      - name: Safe QA credentials readiness (only yes/no)
+        shell: bash
+        env:
+          HAS_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          HAS_CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          HAS_QA50_FIXTURES_GZIP_B64: ${{ secrets.QA50_FIXTURES_GZIP_B64 }}
+          HAS_NEXLUPA_QA_KEY: ${{ secrets.NEXLUPA_QA_KEY }}
+          HAS_NEXLUPA_QA_URL: ${{ secrets.NEXLUPA_QA_URL }}
+          HAS_BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          {
+            echo '### NexLupa QA50 readiness (only secret presence; no values)'
+            for key in ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN QA50_FIXTURES_GZIP_B64 NEXLUPA_QA_KEY NEXLUPA_QA_URL BYPASS; do
+              name="HAS_$key"
+              if [ -n "${!name:-}" ]; then
+                echo "- $key: configured"
+              else
+                echo "- $key: missing"
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
