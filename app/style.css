@@ -578,10 +578,10 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 /* Textarea */
 #pageApp textarea {
   width: 100%;
-  border: 1.5px solid var(--border); border-radius: 14px;
+  border: 2px solid #69758a; border-radius: 14px;
   padding: 14px 16px;
   font-family: 'Nunito', sans-serif; font-size: 15px; line-height: 1.7;
-  color: var(--dark); background: var(--bg);
+  color: var(--dark); background: #1a202c;
   resize: vertical; min-height: 240px; outline: none;
   transition: border-color .25s, box-shadow .25s;
   box-shadow: inset 0 2px 14px rgba(255,255,255,.018);
@@ -591,10 +591,10 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
   box-shadow: inset 0 2px 14px rgba(255,255,255,.025), 0 0 0 2px rgba(212,168,48,.12);
 }
 #pageApp textarea::placeholder {
-  color: rgba(140,148,170,.65);
+  color: #aab4c8;
   font-weight: 400;
   font-size: 14px;
-  font-style: italic;
+  opacity: 1;
 }
 
 /* Examples */
@@ -927,7 +927,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .input-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
 .tab-btn {
   flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid var(--border);
-  background: transparent; color: var(--muted);
+  background: transparent; color: #aab4c8;
   font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all .2s;
 }
@@ -1073,12 +1073,7 @@ body.dark {
 /* ── TEXTAREA DARK MODE ── */
 body.dark #pageApp textarea,
 body.dark #pageApp .app-col-right textarea {
-  background: #040608;
   color: #eaedf5;
-  border-color: rgba(212,168,48,.38);
-}
-body.dark #pageApp textarea::placeholder {
-  color: rgba(255,255,255,.38);
 }
 body.dark #pageApp textarea:focus,
 body.dark #pageApp .app-col-right textarea:focus {
@@ -1469,18 +1464,9 @@ body.dark #pageApp .app-col-right textarea:focus {
     border: 1px solid rgba(255,255,255,0.06);
   }
 
-  /* Textarea OLED negre pur — contrast alt, glow interior molt subtil */
-  #pageApp .app-col-right textarea {
-    background: #040608;
-    box-shadow: inset 0 2px 18px rgba(255,255,255,.022);
-    border-color: rgba(255,255,255,.07);
-  }
   #pageApp .app-col-right textarea:focus {
     border-color: rgba(212,168,48,.45);
     box-shadow: inset 0 2px 18px rgba(255,255,255,.03), 0 0 0 2px rgba(212,168,48,.10);
-  }
-  #pageApp .app-col-right textarea::placeholder {
-    color: rgba(130,140,165,.55);
   }
 
   /* Label "Prova:" ocult — els botons d'exemple parlen per si sols */
