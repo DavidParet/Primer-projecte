@@ -48,7 +48,8 @@
 - La prova `tests/whatsapp-postgres-signed-consent-races.test.cjs` obre dues connexions PostgreSQL simultànies i comprova amb `lock_timeout` de 350 ms que la revocació del membre canònic no pot avançar-se a una consulta signada que conserva el bloqueig `FOR SHARE`. Després de completar la revocació, una signatura nova de lectura retorna zero files.
 - La mateixa prova confirma que revocar el consentiment del remitent no pot avançar-se a una ingesta signada, validada i encara en transacció. Després de revocar, una autorització signada nova no insereix el missatge.
 - Evidència de GitHub Actions per al commit `5d54a5ea`: consentiment `43133143286`, webhook `43133143308`, PostgreSQL + safata `43133143450`, **totes tres success**.
-- **Límit:** són revocacions sobre identitats i missatges sintètics, no hi ha connexió a Meta ni Neon Auth. Les dues ordres de cursa (ingesta/consulta que ja ha adquirit el bloqueig abans de la revocació) estan verificades; la variant on la revocació obté el bloqueig primer encara necessita una prova específica.
+- **Ampliació validada al commit `e6cd257b`:** s'han provat també les dues curses inverses: quan la revocació adquireix el bloqueig abans que la consulta o la ingesta, la nova operació espera i no pot llegir ni inserir. Després del COMMIT de revocació, una autorització nova és denegada. Evidència: [consentiment](https://github.com/DavidParet/Primer-projecte/actions/runs/43133527625), [webhook](https://github.com/DavidParet/Primer-projecte/actions/runs/43133527555), [PostgreSQL](https://github.com/DavidParet/Primer-projecte/actions/runs/43133527712), totes `success`.
+- **Límit:** són curses reproduïdes amb PostgreSQL efímer i identitats fictícies; no verifiquen ni el proveïdor real Meta ni Neon Auth, i no substitueixen les proves amb dades sintètiques en el sandbox Neon aïllat un cop se n'aprovi l'ús.
 
 ### Caducitat dels permisos signats: manteniment controlat (CI ONLY, 12/11/2026)
 
