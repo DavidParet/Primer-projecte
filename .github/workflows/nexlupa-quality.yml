@@ -1,0 +1,48 @@
+name: NexLupa - Qualitat abans de desplegar
+
+on:
+  push:
+    branches:
+      - 'fix/**'
+      - 'feat/**'
+      - 'chore/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexlupa-qa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout sense credencials persistents
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Informació de Node
+        run: node --version
+      - name: Sintaxi de codi crític
+        run: |
+          node --check api/analyze.js
+          node --check lib/nexlupa-result.js
+          node --check app/script.js
+          node --check tests/run-qa50.js
+          node --check tests/nexlupa-result.test.js
+      - name: Proves deterministes sense serveis externs
+        run: node --test tests/nexlupa-result.test.js
+      - name: Preparar assets sense desplegar
+        run: |
+          node scripts/inject-version.js
+          node scripts/build-static.js
+      - name: Comprovar els recursos generats
+        run: |
+          test -f public/app/index.html
+          test -f public/app/script.js
+          test -f public/index.html
