@@ -148,3 +148,26 @@ test('malformed inbound never invokes signing key provider or SQL',async()=>{
  assert.equal(keyCalls,0);
  assert.equal(sqlCalls,0);
 });
+
+test('pool adapter rejects transaction control without a pinned client',async()=>{
+ const f=fixture();
+ for(const command of ['BEGIN','COMMIT','ROLLBACK']){
+  await assert.rejects(f.adapter.query(command),/requires a pinned client/);
+ }
+ assert.equal(f.calls.length,0);
+ const db={
+  async query(){throw new Error('pool must not handle transaction control');},
+  async connect(){return {
+   async query(sql){return {rows:[{sql}]};},
+   release(){}
+  };}
+ };
+ const adapter=createSignedInboundIngestAdapter({
+  db,getActiveSigningKey:async()=>selected(),now:()=>NOW,
+  senderHmacKey:senderKey,contentEncryptionKey:contentKey
+ });
+ const client=await adapter.connect();
+ assert.equal((await client.query('BEGIN')).rows[0].sql,'BEGIN');
+ assert.equal((await client.query('ROLLBACK')).rows[0].sql,'ROLLBACK');
+ client.release();
+});
