@@ -67,6 +67,7 @@ on:
       - 'tests/whatsapp-signed-inbox-read-permit.test.js'
       - 'tests/whatsapp-signed-inbound-ingest-adapter.test.js'
       - 'tests/whatsapp-postgres-signed-inbox-e2e.test.cjs'
+      - 'tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql'
       - 'db/migrations/20261112_whatsapp_signed_inbound_ingest_ci.sql'
       - 'lib/whatsapp/signed-inbound-ingest-adapter.js'
       - 'lib/whatsapp/signed-inbox-read-permit.js'
@@ -239,6 +240,9 @@ jobs:
         run: |
           npm install --no-save --no-package-lock --ignore-scripts pg@8
           node --test tests/whatsapp-postgres-signed-inbox-e2e.test.cjs
+      - name: Prove RLS-only nonce expiry cleanup for signed ingest and inbox reads
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/whatsapp-signed-inbox-nonce-retention-smoke.sql
       - name: Report production schema release prerequisites (read-only SQL)
         run: |
           psql -v ON_ERROR_STOP=1 -f db/checks/whatsapp-pilot-release-gate-readonly.sql
