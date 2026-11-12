@@ -484,6 +484,7 @@ function addActionToCalendar(a) {
   if (!m) return;
   var startStr, endStr;
   var provisionalEnd = false;
+  var multiDayAllDay = false;
   var hasTime = !!(m[4] && !(m[4] === '00' && m[5] === '00'));
   function dateCompact(d) {
     return String(d.getUTCFullYear()).padStart(4,'0') +
@@ -494,16 +495,28 @@ function addActionToCalendar(a) {
       String(d.getUTCMinutes()).padStart(2,'0') + '00';
   }
   if (hasTime) {
-    var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
-    var endMatch = typeof a.dataFi === 'string' ?
-      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
-    var endDate = endMatch ?
-      new Date(Date.UTC(+endMatch[1],+endMatch[2]-1,+endMatch[3],+endMatch[4],+endMatch[5])) : null;
-    startStr = timeCompact(baseDate);
-    if (endDate && endDate > baseDate) endStr = timeCompact(endDate);
-    else {
-      endStr = timeCompact(new Date(baseDate.getTime() + 3600000));
-      provisionalEnd = true;
+    // A multi-day event with date-only end time MUST NOT become a one-hour event.
+    var firstDay = new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+    var endOnly = typeof a.dataFi === 'string' ?
+      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+    var lastDay = endOnly ?
+      new Date(Date.UTC(+endOnly[1], +endOnly[2]-1, +endOnly[3])) : null;
+    if (lastDay && lastDay > firstDay) {
+      startStr = dateCompact(firstDay);
+      endStr = dateCompact(new Date(lastDay.getTime()+86400000));
+      multiDayAllDay = true;
+    } else {
+      var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
+      var endMatch = typeof a.dataFi === 'string' ?
+        a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
+      var endDate = endMatch ?
+        new Date(Date.UTC(+endMatch[1],+endMatch[2]-1,+endMatch[3],+endMatch[4],+endMatch[5])) : null;
+      startStr = timeCompact(baseDate);
+      if (endDate && endDate > baseDate) endStr = timeCompact(endDate);
+      else {
+        endStr = timeCompact(new Date(baseDate.getTime() + 3600000));
+        provisionalEnd = true;
+      }
     }
   } else {
     var first = new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
@@ -517,6 +530,7 @@ function addActionToCalendar(a) {
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
+  if (multiDayAllDay) details += '\nActivitat de diversos dies: s’ha representat com a dies complets perquè l’hora final no consta. Revisa-ho abans de desar.';
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details, ctz: 'Europe/Madrid' };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
@@ -1068,64 +1082,7 @@ var MONTHS = {
   'july':7,'august':8,'september':9,'october':10,'november':11,'december':12
 };
 
-function parseDate(str) {
-  var now  = new Date();
-  var year = now.getFullYear();
-  var m1   = str.match(/(\d{1,2})\s+(?:de\s+)?([a-zç]+)/i);
-  if (m1) {
-    var day = parseInt(m1[1]);
-    var mon = MONTHS[m1[2].toLowerCase()];
-    if (mon) return new Date(year, mon - 1, day);
-  }
-  var m2 = str.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-  if (m2) {
-    var d2 = parseInt(m2[1]), mo = parseInt(m2[2]);
-    var y  = m2[3] ? parseInt(m2[3]) : year;
-    return new Date(y < 100 ? 2000 + y : y, mo - 1, d2);
-  }
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow;
-}
-
-function toGCalDate(date) {
-  var y = date.getFullYear();
-  var m = String(date.getMonth() + 1).padStart(2, '0');
-  var d = String(date.getDate()).padStart(2, '0');
-  return '' + y + m + d;
-}
-
-function addSingleToCalendar(dt) {
-  var date    = parseDate(dt.data);
-  var nextDay = new Date(date);
-  nextDay.setDate(nextDay.getDate() + 1);
-  var params = new URLSearchParams({
-    action:  'TEMPLATE',
-    text:    dt.descripcio,
-    dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-    details: '📌 ' + ((_lastData && _lastData.resum) || '') + '\n\nGenerat per nexlupa'
-  });
-  window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
-}
-
-function exportCalendar() {
-  if (!_lastData || !_lastData.dates || _lastData.dates.length === 0) return;
-  var resum = _lastData.resum || 'nexlupa';
-  _lastData.dates.forEach(function (dt, i) {
-    var date    = parseDate(dt.data);
-    var nextDay = new Date(date);
-    nextDay.setDate(nextDay.getDate() + 1);
-    var params = new URLSearchParams({
-      action:  'TEMPLATE',
-      text:    dt.descripcio,
-      dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-      details: '📌 ' + resum + '\n\nGenerat per nexlupa'
-    });
-    setTimeout(function () {
-      window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
-    }, i * 400);
-  });
-}
+/* Calendar legacy removed: never fall back to tomorrow on invalid dates. */
 
 /* ── SHARE ── */
 function tipusIcon(tipus) {
