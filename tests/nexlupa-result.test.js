@@ -47,7 +47,7 @@ test('Cas 4: colònies amb interval de 3 dies i import/IBAN', () => {
   const d = analyze({resum:'x',mainEvent:{title:'Colònies 5è',data:'2027-01-13'},
     esdeveniments:[{title:'Colònies 5è',data:'2027-01-13',dataFi:'2027-01-15'}],
     accions:[{accio:'Pagar abans de 30/11',data:'2026-11-30',prioritat:'alta'}]},
-    'Colònies del 13 al 15 de gener 2027. 125 € transferència ES12 1234 5678 9012 3456 7890.');
+    'Colònies del 13 al 15 de gener 2027. 125 € transferència ES91 2100 0418 4502 0005 1332.');
   assert.equal(d.esdeveniments.length, 1);
   assert.equal(d.esdeveniments[0].dataFi, '2027-01-15');
   assert.equal(d.dadesUtils.iban.length, 1);

@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
+const crypto = require('crypto');
 const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis } = require('../lib/nexlupa-result');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -29,8 +30,10 @@ module.exports = async function handler(req, res) {
     // Mai a producció per una petició d'usuari ordinari.
     const previewQa = process.env.VERCEL_ENV === 'preview' &&
       process.env.VERCEL_GIT_COMMIT_REF === 'fix/claude-50-casos-20261112';
+    const sentKey = String(req.headers['x-nexlupa-qa-key'] || '');
     const keyQa = !!process.env.NEXLUPA_QA_KEY &&
-      req.headers['x-nexlupa-qa-key'] === process.env.NEXLUPA_QA_KEY;
+      sentKey.length === process.env.NEXLUPA_QA_KEY.length &&
+      crypto.timingSafeEqual(Buffer.from(sentKey), Buffer.from(process.env.NEXLUPA_QA_KEY));
     if (previewQa || keyQa) {
       const fixed = validIsoDate(testReferenceDate);
       if (fixed) today = fixed.slice(0, 10);
@@ -81,13 +84,16 @@ module.exports = async function handler(req, res) {
     }
 
     // Normalització determinista: preserva tots els esdeveniments, dates i dades útils.
-    parsed = normalizeAnalysis(parsed, typeof text === 'string' ? text : '', today, original);
+    const fromImage = !!image && !text;
+    parsed = normalizeAnalysis(parsed, typeof text === 'string' ? text : '', today, original, { fromImage });
 
     // Una sola reconsulta quan una expressió inequívocament futura ha produït dates passades.
-    const futureText = typeof text === 'string' && /(?:demà|passat demà|que ve|setmana vinent|proper|pròxim)/i.test(text);
+    const ntext = typeof text === 'string'
+      ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+    const futureText = /\b(?:dema|passat dema|manana|pasado manana|que ve|vinent|setmana vinent|semana que viene|proper|proxim|proximo|siguiente)\b/.test(ntext);
+    const isPast = x => x && x.data && x.data.slice(0, 10) < today && !x.vençut && !(original);
     const pastFuture = futureText && (
-      parsed.esdeveniments.some(e => e.data && e.data.slice(0,10) < today) ||
-      parsed.accions.some(a => a.data && a.data.slice(0,10) < today && !a.vençut)
+      parsed.esdeveniments.some(isPast) || parsed.accions.some(isPast)
     );
     if (pastFuture) {
       try {
@@ -102,11 +108,23 @@ module.exports = async function handler(req, res) {
         });
         const candidate = JSON.parse(again.choices[0].message.content);
         if (candidate && Array.isArray(candidate.accions) && candidate.resum) {
-          const fixed = normalizeAnalysis(candidate, text, today, original);
-          const stillPast = fixed.esdeveniments.some(e => e.data && e.data.slice(0,10) < today);
+          const fixed = normalizeAnalysis(candidate, text, today, original, { fromImage });
+          const stillPast = fixed.esdeveniments.some(isPast) || fixed.accions.some(isPast);
           if (!stillPast) parsed = fixed;
         }
-      } catch (retryError) { /* mantenim el resultat validat original */ }
+      } catch (retryError) { /* es tracta com a reconsulta fallida */ }
+      // Si segueix havent-hi dates passades en un missatge amb referències futures, mai les enviem
+      // al calendari: es buiden i l'usuari rep l'avís de confirmar-les.
+      const stillBad = [...parsed.esdeveniments, ...parsed.accions].filter(isPast);
+      if (stillBad.length) {
+        stillBad.forEach(x => { x.dataOriginal = x.data; x.data = null; x.dataFi = null; });
+        parsed.avisDates = [parsed.avisDates,
+          'No hem pogut determinar amb seguretat la data d’algun element; confirma-la abans de guardar-la.']
+          .filter(Boolean).join(' ');
+        parsed.revisioDates = { requereixRevisio: true,
+          camps: stillBad.map(x => x.title || x.accio) };
+        parsed.mainEvent = parsed.esdeveniments[0] || null; // mateix objecte que la llista
+      }
     }
 
     parsed.dataReferencia = today;
