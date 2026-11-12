@@ -960,7 +960,7 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 .nav-btn.active span  { filter: drop-shadow(0 0 3px rgba(200,164,60,.30)); }
 .nav-badge {
   position: absolute; top: 6px; right: calc(50% - 18px);
-  background: rgba(196,42,42,.80); color: white;
+  background: #34445b; color: #f0f2f8;
   font-size: 8px; font-weight: 700;
   width: 14px; height: 14px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -1020,12 +1020,11 @@ footer strong { color: var(--gold); font-family: 'Syne', sans-serif; }
 }
 
 /* Colors de prioritat — mode clar */
-.tsk-prior-alta  { color: #e53935; }
+.tsk-prior-alta  { color: var(--dark) !important; font-weight: 700; }
 .tsk-prior-mitja { color: #c07000; }
 .tsk-prior-baixa { color: var(--dark); }
 
 /* Colors de prioritat — dark mode (mateixos que nx-prior-pill per consistència) */
-body.dark .tsk-prior-alta  { color: #f87171; }
 body.dark .tsk-prior-mitja { color: #f5b400; }
 body.dark .tsk-prior-baixa { color: var(--dark); }
 
