@@ -221,3 +221,22 @@ test('QA96: duplicate same-date same-venue event remains deduplicated', () => {
     'Assaig 18/12 a les 18:00 a Escola Nord');
   assert.equal(d.esdeveniments.length,1);
 });
+
+
+test('QA96: same title/start/venue but different explicit end times are distinct events', () => {
+  const d = analyze({esdeveniments:[
+    {title:'Taller',data:'2026-12-18 18:00',dataFi:'2026-12-18 19:00',lloc:'Sala A'},
+    {title:'Taller',data:'2026-12-18 18:00',dataFi:'2026-12-18 20:00',lloc:'Sala A'}
+  ],accions:[]}, 'Dos tallers a Sala A el 18/12, un de 18:00 a 19:00 i un de 18:00 a 20:00.');
+  assert.equal(d.esdeveniments.length, 2);
+  assert.deepEqual(d.esdeveniments.map(e => e.dataFi),
+    ['2026-12-18 19:00','2026-12-18 20:00']);
+});
+
+test('QA96: main event without end merges with detailed duplicate retaining its end', () => {
+  const d = analyze({mainEvent:{title:'Taller',data:'2026-12-18 18:00'},
+    esdeveniments:[{title:'Taller',data:'2026-12-18 18:00',dataFi:'2026-12-18 19:00'}],
+    accions:[]}, 'Taller el 18/12 de 18:00 a 19:00.');
+  assert.equal(d.esdeveniments.length,1);
+  assert.equal(d.esdeveniments[0].dataFi,'2026-12-18 19:00');
+});
