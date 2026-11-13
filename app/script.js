@@ -447,11 +447,11 @@ function applyPriorityHeuristics(accions) {
     var pa = priorRank[a.prioritat] !== undefined ? priorRank[a.prioritat] : 2;
     var pb = priorRank[b.prioritat] !== undefined ? priorRank[b.prioritat] : 2;
     if (pa !== pb) return pa - pb;
-    var aHasDate = !!(a.data && a.data !== 'null');
-    var bHasDate = !!(b.data && b.data !== 'null');
-    if (aHasDate && !bHasDate) return -1;
-    if (!aHasDate && bHasDate) return  1;
-    if (aHasDate && bHasDate && a.data !== b.data) return a.data < b.data ? -1 : 1;
+    var aDue = (a.dataFi || a.data || '').replace(/^null$/,'');
+    var bDue = (b.dataFi || b.data || '').replace(/^null$/,'');
+    if (aDue && !bDue) return -1;
+    if (!aDue && bDue) return  1;
+    if (aDue && bDue && aDue !== bDue) return aDue < bDue ? -1 : 1;
     return (a._origIdx || 0) - (b._origIdx || 0);
   });
 
@@ -561,7 +561,7 @@ function categorizeAccions(accions) {
 }
 
 function canOpenMaps(lloc) {
-  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|plaça|plaza|local|centre|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
 }
 
 function mapsSearchUrl(lloc) {
