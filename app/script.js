@@ -872,7 +872,8 @@ function renderUsefulData(items) {
     container.appendChild(note);
   });
   var groups = [
-    ['enllacos','Enllaços'],['iban','Compte bancari'],['telefons','Telèfons'],
+    ['enllacos','Enllaços'],['iban','IBAN (dígits de control correctes)'],
+    ['ibanInvalids','IBAN no vàlid · no utilitzar per pagar'],['telefons','Telèfons'],
     ['imports','Imports'],['altres','Altres dades']
   ];
   var count = 0;
@@ -1132,8 +1133,9 @@ function buildShareText(d) {
   if (d.avisDates) { lines.push(''); lines.push('Data per confirmar: ' + d.avisDates); }
   if (d.dadesUtils && typeof d.dadesUtils === 'object') {
     var dataLines = [];
-    [['enllacos','Enllaç'],['iban','IBAN'],['telefons','Telèfon'],
-     ['imports','Import'],['altres','Detall']].forEach(function(entry) {
+    [['enllacos','Enllaç'],['iban','IBAN'],
+     ['ibanInvalids','IBAN NO VÀLID (no utilitzar per pagar)'],
+     ['telefons','Telèfon'],['imports','Import'],['altres','Detall']].forEach(function(entry) {
       var items = d.dadesUtils[entry[0]];
       if (Array.isArray(items)) items.forEach(function(v) {
         if (typeof v === 'string' && v.trim()) dataLines.push(entry[1] + ': ' + v);
