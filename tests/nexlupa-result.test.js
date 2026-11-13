@@ -176,3 +176,11 @@ test('QA96: hores alternatives d’un altre acte no contaminen aquest', () => {
   assert.equal(d.esdeveniments[0].dataDubtosa,false);
   assert.equal(d.esdeveniments[1].dataDubtosa,true);
 });
+
+test('QA96: alternatives 18:30 / 19:30 no es poden exportar com a hora certa', () => {
+  const d = analyze({mainEvent:{title:'Reunió de famílies',data:'2026-11-20 18:30'},accions:[]},
+    'Reunió de famílies divendres 20 de novembre a les 18:30 / 19:30.');
+  assert.equal(d.esdeveniments[0].dataDubtosa, true);
+  assert.equal(d.revisioDates.requereixRevisio, true);
+  assert.match(d.avisDates, /dues hores alternatives/);
+});
