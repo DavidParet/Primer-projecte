@@ -63,3 +63,23 @@ test('R3 · weekday+número coherent no es toca', () => {
   assert.equal(d.esdeveniments[0].data, '2026-11-22 10:00');
   assert.ok(!d.esdeveniments[0].dataDubtosa);
 });
+
+test('R3 backend · cap acció necessària no pot conviure amb dues tasques', () => {
+  const d = run({decisio:'Cap acció necessària',accions:[
+    {accio:'Pagar la quota',tipus:'tasca',prioritat:'alta'},
+    {accio:'Portar una samarreta',tipus:'tasca',prioritat:'mitja'}
+  ]}, 'Cal pagar la quota i portar una samarreta.');
+  assert.equal(d.accions.length, 2);
+  assert.doesNotMatch(d.decisio.toLowerCase(), /cap acció necessària/);
+  assert.match(d.decisio, /2 tasques pendents/);
+});
+test('R3 backend · les comunicacions informatives mantenen cap acció necessària', () => {
+  const d = run({decisio:'cap acció necessària',accions:[]}, "L'escola estarà tancada diumenge.");
+  assert.equal(d.decisio, 'cap acció necessària');
+});
+test('R3 prompt · hora inici als camps estructurats i dates naturals al text', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  const p = fs.readFileSync(path.join(__dirname,'../docs/ai/nexlupa-core-ai-prompt-v2.txt'), 'utf8');
+  assert.match(p, /inclou-la OBLIGATÒRIAMENT a esdeveniments\[\]\.data/);
+  assert.match(p, /Les dates ISO només són per als camps estructurats data i dataFi/);
+});

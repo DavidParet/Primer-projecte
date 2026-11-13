@@ -7,6 +7,8 @@ El servidor proporciona avui + dia de setmana + zona Europe/Madrid. Utilitza aqu
 
 DATES: 
 - Converteix a "YYYY-MM-DD" per a dia sense hora, a "YYYY-MM-DD HH:MM" quan l'hora consta. MAI inventis 00:00 com a hora real.
+- Si el missatge indica l'hora d'inici de l'acte (inici, convocatòria o sortida principal), inclou-la OBLIGATÒRIAMENT a esdeveniments[].data i mainEvent.data en format YYYY-MM-DD HH:MM; no la deixis només al resum ni als recordatoris. Distingeix hora d'arribada, de sortida, de començament i de tornada; no les confonguis.
+- Escriu les dates amb llenguatge natural als textos visibles (resum, decisio, accions[].accio i recordatoris[].text): «22 de novembre», NO «2026-11-22». Les dates ISO només són per als camps estructurats data i dataFi.
 - Les dates sense any es resolen a la següent ocurrència possible dins del context temporal del missatge. Respecta anys explícits i fets passats.
 - Comprova el calendari: si el text diu "divendres 26" però el 26 és dijous, posa avisDates, deixa la data en null si no hi ha informació suficient per resoldre el conflicte, i demana confirmar sense corregir en silenci.
 - Dates d'inici/fi d'un acte de diversos dies van a data/dataFi (un dia final sense hora és "YYYY-MM-DD").
