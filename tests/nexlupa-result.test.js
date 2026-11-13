@@ -134,3 +134,21 @@ test('QA96: data de missatge històric preserva el context original', () => {
     'Partit el 10/11/2026.', '2026-11-12', '2026-11-09');
   assert.equal(d.esdeveniments[0].passada,undefined);
 });
+
+
+test('QA96: interval invertit exigeix revisió i no exporta la fi errònia', () => {
+  const d = analyze({mainEvent:{title:'Colònies',data:'2027-01-15',dataFi:'2027-01-13'},accions:[]},
+    'Colònies del 13 al 15 de gener de 2027.');
+  assert.equal(d.esdeveniments[0].data, '2027-01-15');
+  assert.equal(d.esdeveniments[0].dataFi, null);
+  assert.equal(d.esdeveniments[0].dataDubtosa, true);
+  assert.equal(d.revisioDates.requereixRevisio, true);
+  assert.match(d.avisDates, /anterior a la data d.inici/);
+});
+
+test('QA96: interval cronològic vàlid no exigeix revisió', () => {
+  const d = analyze({mainEvent:{title:'Colònies',data:'2027-01-13',dataFi:'2027-01-15'},accions:[]},
+    'Colònies del 13 al 15 de gener de 2027.');
+  assert.equal(d.esdeveniments[0].dataFi, '2027-01-15');
+  assert.equal(d.revisioDates.requereixRevisio, false);
+});
