@@ -42,3 +42,26 @@ test('R11: una escola «sala de sempre» no crea una URL de Maps',()=>{
  assert.equal(ctx.mapsSearchUrl('a casa'),null);
  assert.match(ctx.mapsSearchUrl('Pavelló Nord de Tarragona'),/https:\/\/www\.google\.com\/maps\/search/);
 });
+
+test('R11: escola amb nom propi i carrer concret admet Maps; escola sense nom, no',()=>{
+ const source=fs.readFileSync('app/script.js','utf8');
+ const a=source.indexOf('function canOpenMaps('),b=source.indexOf('function _buildLlocLink(',a);
+ const ctx={encodeURIComponent};vm.runInNewContext(source.slice(a,b),ctx);
+ assert.equal(ctx.mapsSearchUrl('a l’escola'),null);
+ assert.equal(ctx.mapsSearchUrl('escola, sala habitual'),null);
+ assert.match(ctx.mapsSearchUrl('Escola del Pi Blau'),/^https:\/\/www\.google\.com\/maps/);
+});
+test('R11: recinte ancorat amb nom d’escola es recupera literalment',()=>{
+ const msg="Trobada el dissabte 5 de desembre a les 11:00 a l'Escola del Pi Blau (Carrer de les Mimoses 7, Reus).";
+ const d=run({esdeveniments:[{title:'Trobada amb les famílies',data:'2026-12-05 11:00',lloc:null}]},msg);
+ assert.equal(d.esdeveniments[0].lloc,'Escola del Pi Blau');
+});
+test('R11: diversos títols no poden amagar una data textual impossible',()=>{
+ const msg='Dilluns 24 de novembre del 2026 fem una lectura en veu alta, amb taller de música.';
+ const d=run({esdeveniments:[
+ {title:'Lectura',data:null},
+ {title:'Taller de música',data:null}
+ ]},msg);
+ assert.equal(d.revisioDates.requereixRevisio,true);
+ assert.ok(d.esdeveniments.every(e=>e.dataDubtosa));
+});
