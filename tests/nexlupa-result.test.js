@@ -262,3 +262,25 @@ test('QA96: ubicació inventada en tasca tampoc no es presenta com a certa', () 
   assert.equal(d.accions[0].lloc,null);
   assert.equal(d.revisioDates.requereixRevisio,true);
 });
+
+
+test('QA96: unsupported event location marks the event itself as doubtful', () => {
+  const d = analyze({mainEvent:{title:'Assaig',data:'2026-12-18 18:00',lloc:'Palau Sant Jordi'},accions:[]},
+    'Assaig el 18/12 a les 18:00.');
+  assert.equal(d.esdeveniments[0].lloc, null);
+  assert.equal(d.esdeveniments[0].dataDubtosa, true);
+  assert.equal(d.revisioDates.requereixRevisio, true);
+});
+
+test('QA96: unsupported task location marks the task itself as doubtful', () => {
+  const d = analyze({accions:[{accio:'Portar autorització',tipus:'tasca',data:'2026-12-18',lloc:'Ajuntament'}]},
+    'Cal portar autorització el 18/12 a secretaria.');
+  assert.equal(d.accions[0].lloc, null);
+  assert.equal(d.accions[0].dataDubtosa, true);
+});
+
+test('QA96: explicitly grounded event venue remains confirmed', () => {
+  const d = analyze({mainEvent:{title:'Assaig',data:'2026-12-18 18:00',lloc:'Centre Cívic'},accions:[]},
+    'Assaig el 18/12 a les 18:00 al Centre Cívic.');
+  assert.equal(d.esdeveniments[0].dataDubtosa, false);
+});
