@@ -287,7 +287,7 @@ function checkLimit() {
   }
   banner.style.display = 'none';
   btn.disabled = false;
-  btn.innerHTML = '🔍 &nbsp;Analitzar amb nexlupa';
+  btn.innerHTML = '🔍 &nbsp;Analitzar amb NexLupa';
   return true;
 }
 
@@ -543,7 +543,7 @@ function addActionToCalendar(a) {
     startStr = toGCalDate(pd);
     endStr   = toGCalDate(pd2);
   }
-  var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
+  var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per NexLupa';
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
@@ -986,14 +986,14 @@ function addSingleToCalendar(dt) {
     action:  'TEMPLATE',
     text:    dt.descripcio,
     dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-    details: '📌 ' + ((_lastData && _lastData.resum) || '') + '\n\nGenerat per nexlupa'
+    details: '📌 ' + ((_lastData && _lastData.resum) || '') + '\n\nGenerat per NexLupa'
   });
   window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
 }
 
 function exportCalendar() {
   if (!_lastData || !_lastData.dates || _lastData.dates.length === 0) return;
-  var resum = _lastData.resum || 'nexlupa';
+  var resum = _lastData.resum || 'NexLupa';
   _lastData.dates.forEach(function (dt, i) {
     var date    = parseDate(dt.data);
     var nextDay = new Date(date);
@@ -1002,7 +1002,7 @@ function exportCalendar() {
       action:  'TEMPLATE',
       text:    dt.descripcio,
       dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-      details: '📌 ' + resum + '\n\nGenerat per nexlupa'
+      details: '📌 ' + resum + '\n\nGenerat per NexLupa'
     });
     setTimeout(function () {
       window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
@@ -1140,8 +1140,8 @@ function copyCardText() {
 
 /* ── ONBOARDING ── */
 var OB_STEPS = [
-  { icon: '🔍', title: 'Benvingut a nexlupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
-  { icon: '✅', title: 'Resum + Accions + Dates', desc: 'nexlupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
+  { icon: '🔍', title: 'Benvingut a NexLupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
+  { icon: '✅', title: 'Resum + Accions + Dates', desc: 'NexLupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
   { icon: '📅', title: 'Tot sincronitzat', desc: 'Afegeix les dates al Google Calendar, comparteix per WhatsApp i guarda historial de tots els missatges analitzats.' }
 ];
 var _obStep = 0;
