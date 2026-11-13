@@ -152,3 +152,27 @@ test('QA96: interval cronològic vàlid no exigeix revisió', () => {
   assert.equal(d.esdeveniments[0].dataFi, '2027-01-15');
   assert.equal(d.revisioDates.requereixRevisio, false);
 });
+
+
+test('QA96: dues hores alternatives requereixen revisió, no exportació confirmada', () => {
+  const d = analyze({mainEvent:{title:'Assaig de ball',data:'2026-11-20 18:00'},accions:[]},
+    'Assaig de ball divendres 20 de novembre a les 18:00 o 19:00.');
+  assert.equal(d.esdeveniments[0].dataDubtosa,true);
+  assert.equal(d.revisioDates.requereixRevisio,true);
+  assert.match(d.avisDates,/dues hores alternatives/);
+});
+
+test('QA96: una hora inequívoca no és dubtosa', () => {
+  const d = analyze({mainEvent:{title:'Assaig de ball',data:'2026-11-20 18:00'},accions:[]},
+    'Assaig de ball divendres 20 de novembre a les 18:00.');
+  assert.equal(d.esdeveniments[0].dataDubtosa,false);
+});
+
+test('QA96: hores alternatives d’un altre acte no contaminen aquest', () => {
+  const d = analyze({esdeveniments:[
+    {title:'Assaig de ball',data:'2026-11-20 18:00'},
+    {title:'Partit de bàsquet',data:'2026-11-21 10:00'}],accions:[]},
+    'Assaig de ball divendres 20 de novembre a les 18:00. Partit de bàsquet dissabte 21 de novembre a les 10:00 o 11:00.');
+  assert.equal(d.esdeveniments[0].dataDubtosa,false);
+  assert.equal(d.esdeveniments[1].dataDubtosa,true);
+});
