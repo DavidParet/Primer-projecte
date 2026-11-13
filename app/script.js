@@ -494,6 +494,13 @@ function addActionToCalendar(a) {
       String(d.getUTCMinutes()).padStart(2,'0') + '00';
   }
   if (hasTime) {
+    // A date-only end for a multi-day event has no verified end time.
+    // Do not silently export a misleading one-hour event.
+    var dateOnlyEnd = typeof a.dataFi === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.dataFi) ? a.dataFi : null;
+    if (dateOnlyEnd && dateOnlyEnd > rawDate.slice(0, 10)) {
+      if (typeof alert === 'function') alert('Aquest acte dura diversos dies, però falta l’hora de finalització. Confirma-la abans d’exportar-lo.');
+      return;
+    }
     var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
     var endMatch = typeof a.dataFi === 'string' ?
       a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
