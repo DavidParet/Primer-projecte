@@ -113,3 +113,24 @@ test('Dades estranyes i horaris impossibles no creen calendaris falsos', () => {
   assert.equal(d.accions[0].data,null);
   assert.ok(d.avisDates);
 });
+
+test('QA96: un acte passat amb any explícit no és exportable sense revisió', () => {
+  const d = analyze({mainEvent:{title:'Partit de bàsquet',data:'2026-11-10 18:00'},accions:[]},
+    'Resultat del partit de bàsquet del 10/11/2026.');
+  assert.equal(d.esdeveniments[0].passada,true);
+  assert.equal(d.revisioDates.requereixRevisio,true);
+  assert.match(d.avisDates,/ja ha passat/);
+});
+
+test('QA96: esdeveniment futur amb any explícit no rep avís de passat', () => {
+  const d = analyze({mainEvent:{title:'Partit de bàsquet',data:'2026-11-17 18:00'},accions:[]},
+    'Partit de bàsquet el 17/11/2026.');
+  assert.equal(d.esdeveniments[0].passada,undefined);
+  assert.equal(d.revisioDates.requereixRevisio,false);
+});
+
+test('QA96: data de missatge històric preserva el context original', () => {
+  const d = normalizeAnalysis({mainEvent:{title:'Partit',data:'2026-11-10'},accions:[]},
+    'Partit el 10/11/2026.', '2026-11-12', '2026-11-09');
+  assert.equal(d.esdeveniments[0].passada,undefined);
+});
