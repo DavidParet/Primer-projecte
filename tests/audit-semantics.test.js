@@ -77,3 +77,15 @@ test('S6 · l\'historial desa esdeveniments, dades útils i avisos (frontend rea
   assert.equal(e.avisDates, 'Confirma la data');
   assert.equal(e.recordatoris.length, 1);
 });
+
+test('S7 · quota i taxa econòmica explícita mantenen P1 sense verb pagar', () => {
+  const d = run({accions:[
+    {accio:'Quota de 25 € per a la sortida',tipus:'tasca',prioritat:'baixa'},
+    {accio:'Taxa de 10 € de matrícula',tipus:'tasca',prioritat:'mitja'},
+    {accio:'Si voleu, aporteu una quota voluntària',tipus:'tasca',prioritat:'alta'}
+  ]}, 'Quota de 25 € per a la sortida. Taxa de 10 € de matrícula. Si voleu, aporteu una quota voluntària.');
+  const p = Object.fromEntries(d.accions.map(a => [a.accio, a.prioritat]));
+  assert.equal(p['Quota de 25 € per a la sortida'], 'alta');
+  assert.equal(p['Taxa de 10 € de matrícula'], 'alta');
+  assert.equal(p['Si voleu, aporteu una quota voluntària'], 'baixa');
+});
