@@ -204,3 +204,20 @@ test('QA96: termini de tasca amb interval correcte manté data de fi', () => {
   assert.equal(d.accions[0].dataDubtosa, false);
   assert.equal(d.revisioDates.requereixRevisio, false);
 });
+
+// Regression: identical labels on the same day may refer to distinct venues.
+test('QA96: events at different explicit venues must not be deduplicated', () => {
+  const d = analyze({resum:'Dos assajos',esdeveniments:[
+    {title:'Assaig',data:'2026-12-18 18:00',lloc:'Escola Nord'},
+    {title:'Assaig',data:'2026-12-18 18:00',lloc:'Centre Cívic'}],accions:[]},
+    'Assaig 18/12 a les 18:00 a Escola Nord i assaig 18/12 a les 18:00 al Centre Cívic');
+  assert.equal(d.esdeveniments.length,2);
+  assert.deepEqual(d.esdeveniments.map(e=>e.lloc),['Escola Nord','Centre Cívic']);
+});
+test('QA96: duplicate same-date same-venue event remains deduplicated', () => {
+  const d = analyze({resum:'Assaig',esdeveniments:[
+    {title:'Assaig',data:'2026-12-18 18:00',lloc:'Escola Nord'},
+    {title:'Assaig',data:'2026-12-18 18:00',lloc:'Escola Nord'}],accions:[]},
+    'Assaig 18/12 a les 18:00 a Escola Nord');
+  assert.equal(d.esdeveniments.length,1);
+});
