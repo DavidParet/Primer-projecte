@@ -1096,6 +1096,10 @@ function buildShareText(d) {
   lines.push('');
 
   var decisio = (d.decisio || d.resum || '').trim();
+  var shareHasTasks = Array.isArray(d.accions) && d.accions.some(function(a) {
+    return a && typeof a === 'object' && a.tipus !== 'informatiu' && a.tipus !== 'calendari';
+  });
+  if (shareHasTasks && decisio.toLowerCase() === 'cap acció necessària') decisio = 'Hi ha tasques per revisar en aquest missatge';
   if (!decisio || decisio.toLowerCase() === 'cap acció necessària') {
     lines.push('No cal fer cap acció.');
   } else {
