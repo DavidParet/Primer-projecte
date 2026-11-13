@@ -53,3 +53,20 @@ test('an ordinary entrance is not a venue and a material task is not an event', 
   assert.equal(result.esdeveniments.length, 1);
   assert.equal(result.accions.length, 1);
 });
+
+test('an event date appended to a venue is removed from its map query', () => {
+  const result = analyze('La trobada a la Biblioteca Mercè Rodoreda de Sant Joan Despí del 22/11 és a les 10.', {
+    mainEvent: { title: 'Trobada', data: '2026-11-22 10:00', lloc: 'Biblioteca Mercè Rodoreda de Sant Joan Despí del 22/11' }
+  });
+  assert.equal(result.mainEvent.lloc, 'Biblioteca Mercè Rodoreda de Sant Joan Despí');
+});
+
+test('both source rates survive a missing model option and a swapped date', () => {
+  const result = analyze('Pagament avançat fins al 20/11 amb un 10% de descompte, o fins al 25/11 amb un 3%.', {
+    accions: [{ accio: 'Realitzar el pagament avançat amb un 10%', dataFi: '2026-11-25', prioritat: 'alta' }]
+  });
+  assert.equal(result.accions.length, 1);
+  assert.equal(result.accions[0].prioritat, 'baixa');
+  assert.equal(result.accions[0].dataFi, '2026-11-20');
+  assert.match(result.accions[0].accio, /10%.*20.*3%.*25/);
+});
