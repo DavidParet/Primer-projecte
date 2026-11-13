@@ -70,3 +70,13 @@ test('both source rates survive a missing model option and a swapped date', () =
   assert.equal(result.accions[0].dataFi, '2026-11-20');
   assert.match(result.accions[0].accio, /10%.*20.*3%.*25/);
 });
+
+test('a separate explicit optional participation survives model omission', () => {
+  const result = analyze('Cal lliurar el full abans del 18/11. Podeu venir disfressats si us ve de gust.', {
+    accions: [{ accio: 'Lliurar el full', dataFi: '2026-11-18', prioritat: 'alta' }]
+  });
+  assert.equal(result.accions.length, 2);
+  assert.equal(result.accions[0].prioritat, 'alta');
+  assert.equal(result.accions[1].prioritat, 'baixa');
+  assert.match(result.accions[1].accio, /disfressats/);
+});
