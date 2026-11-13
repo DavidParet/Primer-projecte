@@ -10,16 +10,17 @@ test('C1: dilluns 24 ambigu no es transforma en dilluns 23 ni és exportable',()
     accions:[{accio:'Portar bambes per a entrenament',tipus:'tasca',data:'2026-11-23',prioritat:'mitja'}],
     recordatoris:[{text:'Entrenament dilluns 24',data:'2026-11-23'}]},
     'Dilluns 24 de novembre entrenament a les 18h. Portar bambes.');
-  assert.equal(d.esdeveniments[0].data,null);
+  assert.equal(d.esdeveniments[0].data,'2026-11-24 18:00');
   assert.equal(d.esdeveniments[0].dataDubtosa,true);
-  assert.equal(d.accions[0].data,null);
+  assert.equal(d.accions[0].data,'2026-11-24');
   assert.equal(d.accions[0].dataDubtosa,true);
-  assert.equal(d.recordatoris[0].data,null);
+  assert.equal(d.recordatoris[0].data,'2026-11-24');
   assert.equal(d.revisioDates.requereixRevisio,true);
 });
 test('C1: el conflicte directe dimarts 26 erroni també deixa data buida',()=>{
   const d=run({esdeveniments:[{title:'Sortida de teatre',data:'2026-11-26'}]},'Dimarts 26 de novembre: sortida de teatre.');
-  assert.equal(d.esdeveniments[0].data,null);
+  assert.equal(d.esdeveniments[0].data,'2026-11-26');
+  assert.equal(d.esdeveniments[0].dataDubtosa,true);
   assert.equal(d.revisioDates.requereixRevisio,true);
 });
 test('C2: una data pròpia no s\'hereta d\'un festiu mencionat a la mateixa circular',()=>{

@@ -77,6 +77,7 @@ test('QA: cap enllaç inventat a una tasca ni altres dades auxiliars',()=>{
 test('QA: continua bloquejant el conflicte dia/data del 26',()=>{
   const data=analyze({resum:'x',mainEvent:{title:'Sortida',data:'2026-11-26'},accions:[]},
     'Sortida divendres 26 de novembre');
-  assert.equal(data.mainEvent.data,null);
+  assert.equal(data.mainEvent.data,'2026-11-26');
+  assert.equal(data.mainEvent.dataDubtosa,true);
   assert.match(data.avisDates,/dijous/);
 });

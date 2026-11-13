@@ -531,6 +531,8 @@ function addActionToCalendar(a) {
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
   if (multiDayAllDay) details += '\nActivitat de diversos dies: s’ha representat com a dies complets perquè l’hora final no consta. Revisa-ho abans de desar.';
+  var actionMapUrl = typeof mapsSearchUrl==='function' ? mapsSearchUrl(a.lloc) : null;
+  if (actionMapUrl) details += '\nMapa: ' + actionMapUrl;
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details, ctz: 'Europe/Madrid' };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
@@ -559,16 +561,23 @@ function categorizeAccions(accions) {
 }
 
 function canOpenMaps(lloc) {
-  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+}
+
+function mapsSearchUrl(lloc) {
+  if (!canOpenMaps(lloc) || typeof lloc!=='string' ||
+      lloc.trim().length>60 || /[),;]+$/.test(lloc.trim()) && !/\([^()]+\)$/.test(lloc.trim())) return null;
+  return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc.trim());
 }
 
 function _buildLlocLink(lloc) {
-  var el = document.createElement(canOpenMaps(lloc) ? 'a' : 'span');
+  var mapsUrl = mapsSearchUrl(lloc);
+  var el = document.createElement(mapsUrl ? 'a' : 'span');
   el.className = 'nx-card-lloc';
   el.textContent = '📍 ' + lloc;
   if (el.tagName === 'SPAN') return el;
   el.className = 'nx-card-lloc';
-  el.href      = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc);
+  el.href      = mapsUrl;
   el.target    = '_blank';
   el.rel       = 'noopener noreferrer';
   el.textContent = '📍 ' + lloc;
@@ -702,10 +711,10 @@ function buildEventCard(mainEvent) {
     btnRow.appendChild(calBtn);
   }
 
-  if (canOpenMaps(mainEvent.lloc)) {
+  if (typeof mapsSearchUrl==='function' && mapsSearchUrl(mainEvent.lloc)) {
     var mapsBtn = document.createElement('a');
     mapsBtn.className   = 'nx-event-btn nx-event-btn-maps';
-    mapsBtn.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mainEvent.lloc);
+    mapsBtn.href        = mapsSearchUrl(mainEvent.lloc);
     mapsBtn.target      = '_blank';
     mapsBtn.rel         = 'noopener noreferrer';
     mapsBtn.textContent = '🗺️ Obrir Maps';
@@ -941,6 +950,11 @@ function renderResult(d) {
   }
 
   var cats = categorizeAccions(accions);
+  // F2: top tres VISUALS; totes les tasques queden disponibles en desplegar
+  // i es conserven intactes a _lastData, historial i text complet de compartir.
+  var rankedTasks=accions.filter(function(a){return a.tipus!=='informatiu' && a.tipus!=='calendari';});
+  var topThree=rankedTasks.slice(0,3);
+  var remainingTasks=rankedTasks.slice(3);
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -988,8 +1002,10 @@ function renderResult(d) {
   if (p1Block && p1Content) {
     p1Content.innerHTML = '';
     if (!noAction) {
-      if (cats.p1.length > 0) {
-        cats.p1.forEach(function(a) { p1Content.appendChild(buildActionCard(a, 'nx-p1-card')); });
+      if (cats.p1.some(function(a){return topThree.indexOf(a)!==-1;})) {
+        cats.p1.filter(function(a){return topThree.indexOf(a)!==-1;}).forEach(function(a) {
+          p1Content.appendChild(buildActionCard(a, 'nx-p1-card'));
+        });
         if (p1Empty) p1Empty.style.display = 'none';
       } else {
         if (p1Empty) p1Empty.style.display = '';
@@ -1005,8 +1021,10 @@ function renderResult(d) {
   var p2Content = document.getElementById('nx-p2-content');
   if (p2Block && p2Content) {
     p2Content.innerHTML = '';
-    if (!noAction && cats.p2.length > 0) {
-      cats.p2.forEach(function(a) { p2Content.appendChild(buildActionCard(a, 'nx-p2-card')); });
+    if (!noAction && cats.p2.some(function(a){return topThree.indexOf(a)!==-1;})) {
+      cats.p2.filter(function(a){return topThree.indexOf(a)!==-1;}).forEach(function(a) {
+        p2Content.appendChild(buildActionCard(a, 'nx-p2-card'));
+      });
       p2Block.style.display = '';
     } else {
       p2Block.style.display = 'none';
@@ -1018,12 +1036,36 @@ function renderResult(d) {
   var infoContent = document.getElementById('nx-info-content');
   if (infoBlock && infoContent) {
     infoContent.innerHTML = '';
-    if (cats.info.length > 0) {
-      cats.info.forEach(function(a) { infoContent.appendChild(buildActionCard(a, 'nx-info-card')); });
+    if (cats.info.some(function(a){return a.tipus==='informatiu'||topThree.indexOf(a)!==-1;})) {
+      cats.info.filter(function(a){return a.tipus==='informatiu'||topThree.indexOf(a)!==-1;}).forEach(function(a) {
+        infoContent.appendChild(buildActionCard(a, 'nx-info-card'));
+      });
       infoBlock.style.display = '';
     } else {
       infoBlock.style.display = 'none';
     }
+  }
+
+  /* F2 — tasques addicionals plegades (mai descartades) */
+  var moreBlock=document.getElementById('nx-more-actions-block');
+  var moreBtn=document.getElementById('nx-more-actions-toggle');
+  var moreContent=document.getElementById('nx-more-actions-content');
+  if (moreBlock && moreBtn && moreContent) {
+    moreContent.textContent='';
+    remainingTasks.forEach(function(a){
+      moreContent.appendChild(buildActionCard(a,
+        a.prioritat==='alta'?'nx-p1-card':a.prioritat==='mitja'?'nx-p2-card':'nx-info-card'));
+    });
+    moreContent.style.display='none';
+    moreBlock.style.display=remainingTasks.length?'':'none';
+    moreBtn.textContent='Veure-les totes ('+remainingTasks.length+')';
+    moreBtn.setAttribute('aria-expanded','false');
+    moreBtn.onclick=function(){
+      var open=moreContent.style.display==='none';
+      moreContent.style.display=open?'block':'none';
+      moreBtn.textContent=(open?'Amagar tasques':'Veure-les totes')+' ('+remainingTasks.length+')';
+      moreBtn.setAttribute('aria-expanded',open?'true':'false');
+    };
   }
 
   /* RESUM */
@@ -1120,6 +1162,8 @@ function buildShareText(d) {
         (e.passada || e.dataDubtosa ? ' (pendent de confirmació)' : '') +
         (e.dataFi ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
         (e.lloc ? ' · ' + e.lloc : ''));
+      var mapUrl = mapsSearchUrl(e.lloc);
+      if (mapUrl) lines.push('  🗺️ ' + mapUrl);
     });
   }
   if (Array.isArray(d.recordatoris) && d.recordatoris.length) {
@@ -1213,7 +1257,9 @@ function buildSharePreviewHTML(d) {
 
   if (d.accions && d.accions.length > 0) {
     html += '<div class="sc-sep"></div><div class="sc-actions">';
-    d.accions.forEach(function (a) {
+    applyPriorityHeuristics(d.accions.map(function(a){
+      return typeof a==='object'&&a ? a : {accio:String(a),tipus:'tasca',prioritat:'baixa'};
+    })).slice(0,3).forEach(function (a) {
       var isObj = typeof a === 'object' && a !== null;
       var text  = isObj ? a.accio : a;
       var tipus = isObj ? (a.tipus || 'tasca') : 'tasca';
@@ -1224,6 +1270,7 @@ function buildSharePreviewHTML(d) {
       if (data) html += '<span class="sc-act-date"> · ' + escHtml(data) + '</span>';
       html += '</span></div>';
     });
+    if (d.accions.length>3) html += '<div class="sc-act-row">+'+(d.accions.length-3)+' tasques més a NexLupa</div>';
     html += '</div>';
   }
 

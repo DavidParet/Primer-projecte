@@ -14,7 +14,8 @@ test('D1: termini explícit de novembre no salta al desembre per dimecres 30 gen
 test('D1: el contradicció real de calendari segueix bloquejada',()=>{
  const x=run({esdeveniments:[{title:'Sessió de joc',data:'2026-11-23 17:30'}]},
   'Sessió de joc dilluns 24 de novembre a les 17:30.');
- assert.equal(x.esdeveniments[0].data,null);
+ assert.equal(x.esdeveniments[0].data,'2026-11-24 17:30');
+ assert.equal(x.esdeveniments[0].dataDubtosa,true);
  assert.equal(x.revisioDates.requereixRevisio,true);
 });
 test('D2: data omesa amb dimarts 24 coherent recupera 24 de novembre',()=>{

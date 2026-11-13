@@ -90,12 +90,14 @@ test('M2 · «dimecres 25» ja correcte no s\'altera', () => {
 });
 test('M2 · «dilluns 24» (és dimarts) no es corregeix en silenci ni salta mesos', () => {
   const d = run({esdeveniments:[{title:'Entrenament',data:'2026-11-24'}]}, 'Ens veiem dilluns 24.');
-  assert.equal(d.esdeveniments[0].data, null);
+  assert.equal(d.esdeveniments[0].data, '2026-11-24');
+  assert.equal(d.esdeveniments[0].dataDubtosa, true);
   assert.match(d.avisDates, /dimarts/);
 });
 test('M2 · «divendres 26 de novembre» (és dijous) continua sent null + avís', () => {
   const d = run({esdeveniments:[{title:'Festa',data:'2026-11-26'}]}, 'Festa divendres 26 de novembre');
-  assert.equal(d.esdeveniments[0].data, null);
+  assert.equal(d.esdeveniments[0].data, '2026-11-26');
+  assert.equal(d.esdeveniments[0].dataDubtosa, true);
   assert.match(d.avisDates, /dijous/);
 });
 test('M4 · data passada sense any al text es marca per confirmar', () => {

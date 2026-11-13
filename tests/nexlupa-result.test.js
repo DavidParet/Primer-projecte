@@ -27,13 +27,15 @@ test('Dies de la setmana en castellà i català', () => {
 test('Cas 6: contradicció divendres 26, no correcció silenciosa', () => {
   const d = analyze({resum:'x',mainEvent:{title:'Sortida',data:'2026-11-26'},accions:[]},
     'Sortida divendres 26 de novembre');
-  assert.equal(d.esdeveniments[0].data, null);
+  assert.equal(d.esdeveniments[0].data, '2026-11-26');
+  assert.equal(d.esdeveniments[0].dataDubtosa,true);
   assert.match(d.avisDates, /dijous/);
 });
 test('Cas 31: contradicció dilluns 24', () => {
   const d = analyze({resum:'x',mainEvent:{title:'Entrenament',data:'2026-11-24'},accions:[]},
     'Ens veiem dilluns 24.');
-  assert.equal(d.esdeveniments[0].data, null);
+  assert.equal(d.esdeveniments[0].data, '2026-11-24');
+  assert.equal(d.esdeveniments[0].dataDubtosa,true);
   assert.match(d.avisDates, /dimarts/);
 });
 test('Cas 3: sense accions amb dia sense classe al calendari', () => {
