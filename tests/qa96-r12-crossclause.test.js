@@ -51,3 +51,17 @@ test('R12: avís sanitari de revisió manté P2 sense generar urgència P1', () 
   assert.ok(check);
   assert.equal(check.prioritat, 'mitja');
 });
+
+
+test('R12: un termini d’una tasca no converteix en P1 una confirmació independent sense termini', () => {
+  const source = 'Aviseu si assistireu a la trobada. Cal lliurar la fitxa signada abans del 20 de novembre.';
+  const result = run({ resum:'Trobada', accions:[
+    { tipus:'tasca', accio:'Avisar si assistireu a la trobada', prioritat:'mitja' },
+    { tipus:'tasca', accio:'Lliurar la fitxa signada abans del 20 de novembre', prioritat:'baixa' }
+  ]}, source);
+  const confirmacio = result.accions.find(a => /Avisar si assistireu/i.test(a.accio));
+  const fitxa = result.accions.find(a => /Lliurar la fitxa/i.test(a.accio));
+  assert.ok(confirmacio && fitxa);
+  assert.equal(confirmacio.prioritat, 'mitja', 'un termini aliè no pot elevar aquesta tasca a P1');
+  assert.equal(fitxa.prioritat, 'alta');
+});
