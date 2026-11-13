@@ -240,3 +240,25 @@ test('QA96: main event without end merges with detailed duplicate retaining its 
   assert.equal(d.esdeveniments.length,1);
   assert.equal(d.esdeveniments[0].dataFi,'2026-12-18 19:00');
 });
+
+test('QA96: no inventar ubicació absent del missatge original', () => {
+  const d = analyze({mainEvent:{title:'Assaig',data:'2026-12-18 18:00',lloc:'Palau Sant Jordi'},accions:[]},
+    'Assaig el 18/12 a les 18:00.');
+  assert.equal(d.esdeveniments[0].lloc,null);
+  assert.equal(d.revisioDates.requereixRevisio,true);
+  assert.match(d.avisDates,/ubicació/);
+});
+
+test('QA96: preservar ubicació explícita i no activar revisió', () => {
+  const d = analyze({mainEvent:{title:'Assaig',data:'2026-12-18 18:00',lloc:'Centre Cívic'},accions:[]},
+    'Assaig el 18/12 a les 18:00 al Centre Cívic.');
+  assert.equal(d.esdeveniments[0].lloc,'Centre Cívic');
+  assert.equal(d.revisioDates.requereixRevisio,false);
+});
+
+test('QA96: ubicació inventada en tasca tampoc no es presenta com a certa', () => {
+  const d = analyze({accions:[{accio:'Portar autorització',tipus:'tasca',lloc:'Ajuntament',prioritat:'alta'}]},
+    'Cal portar autorització a secretaria.');
+  assert.equal(d.accions[0].lloc,null);
+  assert.equal(d.revisioDates.requereixRevisio,true);
+});
