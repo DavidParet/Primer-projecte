@@ -65,14 +65,13 @@ test('C5: diferents hores reals al mateix dia no es fusionen',()=>{
     'Partit a les 10:00 i un segon partit a les 15:00 el 21 de novembre.');
   assert.equal(d.esdeveniments.length,2);
 });
-test('C6: dues quotes domiciliades amb dates distintes originen tasques distintes',()=>{
+test('D4: dues quotes domiciliades sense ordre de revisar no inventen tasques',()=>{
   const d=run({recordatoris:[
     {text:'La quota domiciliada de 70 € es carregarà el 15 de novembre',data:'2026-11-15'},
     {text:'La quota domiciliada de 70 € es carregarà el 15 de gener',data:'2027-01-15'}]},
     'La quota de 70 € es carregarà per domiciliació el 15 de novembre i el 15 de gener.');
-  assert.equal(d.accions.length,2);
-  assert.equal(d.accions[0].prioritat,'mitja');
-  assert.match(d.decisio,/tasques pendents/);
+  assert.equal(d.accions.length,0);
+  assert.equal(d.decisio,'Cap acció necessària');
 });
 test('C6: cal portar material és una tasca, no sols recordatori',()=>{
   const d=run({recordatoris:[{text:'Cal portar esmorzar i una ampolla d’aigua',data:'2026-11-19'}]},

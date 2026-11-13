@@ -260,5 +260,6 @@ test('QA96: ubicació inventada en tasca tampoc no es presenta com a certa', () 
   const d = analyze({accions:[{accio:'Portar autorització',tipus:'tasca',lloc:'Ajuntament',prioritat:'alta'}]},
     'Cal portar autorització a secretaria.');
   assert.equal(d.accions[0].lloc,null);
-  assert.equal(d.revisioDates.requereixRevisio,true);
+  // R7 D7: una tasca no ha de disparar alarmes falses d'ubicació.
+  assert.equal(d.revisioDates.requereixRevisio,false);
 });
