@@ -30,3 +30,24 @@ test('R12: lloc genèric no es converteix en recinte verificat', () => {
   }, accions:[] }, 'La trobada serà el 21/11 a la sala de sempre.');
   assert.equal(result.esdeveniments[0].lloc, null);
 });
+
+test('R12: formulari obligatori amb termini conserva P1 malgrat opció separada', () => {
+  const result = run({ resum:'Inscripció', accions:[
+    { tipus:'tasca', accio:'Omplir el formulari obligatori abans del 20 de novembre', prioritat:'baixa' },
+    { tipus:'tasca', accio:'Portar una fotografia si voleu', prioritat:'alta' }
+  ]}, 'Cal omplir el formulari obligatori abans del 20 de novembre; si voleu, podeu portar una fotografia.');
+  const required = result.accions.find(a => /formulari/i.test(a.accio));
+  const optional = result.accions.find(a => /fotografia/i.test(a.accio));
+  assert.ok(required && optional);
+  assert.equal(required.prioritat, 'alta');
+  assert.equal(optional.prioritat, 'baixa');
+});
+
+test('R12: avís sanitari de revisió manté P2 sense generar urgència P1', () => {
+  const result = run({ resum:'Avís sanitari', accions:[
+    { tipus:'tasca', accio:'Revisar el cap per detectar polls', prioritat:'baixa' }
+  ]}, 'Avís sanitari: reviseu el cap dels infants per detectar polls.');
+  const check = result.accions.find(a => /revisar/i.test(a.accio));
+  assert.ok(check);
+  assert.equal(check.prioritat, 'mitja');
+});
