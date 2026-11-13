@@ -561,7 +561,12 @@ function categorizeAccions(accions) {
 }
 
 function canOpenMaps(lloc) {
-  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|plaça|plaza|local|centre|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+  if(typeof lloc!=='string' || !lloc.trim())return false;
+  var name=lloc.trim();
+  if(/\b(?:de sempre|sala de sempre|lloc habitual|mateix lloc|mateixa escola|mateix pavelló)\b/i.test(name))return false;
+  if(/^(?:al |a la |el |la )?(?:escola|casa|sala)(?:[, ]+.*)?$/i.test(name))return false;
+  if(/\b(?:serà|sera|dissabte|diumenge|dilluns|dimarts|dimecres|dijous|divendres)\b/i.test(name))return false;
+  return !/^(?:al |a la |el |la )?(?:pati|plaça|plaza|local|centre|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(name);
 }
 
 function mapsSearchUrl(lloc) {
