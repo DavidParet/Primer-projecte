@@ -184,3 +184,23 @@ test('QA96: alternatives 18:30 / 19:30 no es poden exportar com a hora certa', (
   assert.equal(d.revisioDates.requereixRevisio, true);
   assert.match(d.avisDates, /dues hores alternatives/);
 });
+
+test('QA96: termini de tasca amb interval invertit no conserva fi incorrecta', () => {
+  const d = analyze({accions:[{accio:'Entregar documentació',tipus:'tasca',
+    data:'2026-11-20',dataFi:'2026-11-18',prioritat:'alta'}]},
+    'Entregar documentació del 18 al 20 de novembre.');
+  assert.equal(d.accions[0].data, '2026-11-20');
+  assert.equal(d.accions[0].dataFi, null);
+  assert.equal(d.accions[0].dataDubtosa, true);
+  assert.equal(d.revisioDates.requereixRevisio, true);
+  assert.match(d.avisDates, /anterior a la data d.inici/);
+});
+
+test('QA96: termini de tasca amb interval correcte manté data de fi', () => {
+  const d = analyze({accions:[{accio:'Entregar documentació',tipus:'tasca',
+    data:'2026-11-18',dataFi:'2026-11-20',prioritat:'alta'}]},
+    'Entregar documentació del 18 al 20 de novembre.');
+  assert.equal(d.accions[0].dataFi, '2026-11-20');
+  assert.equal(d.accions[0].dataDubtosa, false);
+  assert.equal(d.revisioDates.requereixRevisio, false);
+});
