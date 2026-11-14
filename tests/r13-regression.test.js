@@ -115,3 +115,19 @@ test('a coherent weekday is recovered from the dated sentence despite model warn
   assert.equal(result.esdeveniments[0].data, '2026-11-24');
   assert.equal(result.esdeveniments[0].dataDubtosa, false);
 });
+
+test('an optional team meal preserves the conditional payment at P3', () => {
+  const result = analyze("Partit el dissabte 28. Qui es vulgui quedar a dinar que ho confirmi abans de dijous 26 i pagui 12 €.", {
+    accions: [{accio: 'Confirmar assistència al dinar i pagar 12 €', prioritat: 'alta', dataFi: '2026-11-26'}]
+  });
+  assert.equal(result.accions[0].prioritat, 'baixa');
+  assert.equal(result.accions[0].dataFi, '2026-11-26');
+  assert.match(result.accions[0].accio, /^Si us quedeu a dinar:/);
+});
+
+test('a suspension explanation is not a fallback venue', () => {
+  const result = analyze('Dilluns no hi ha classe de piscina perquè tanquen per manteniment. Recuperem el dilluns 30.', {
+    esdeveniments: [{title: 'Recuperació de la classe de piscina', data: '2026-11-30'}]
+  });
+  assert.equal(result.esdeveniments[0].lloc, null);
+});
