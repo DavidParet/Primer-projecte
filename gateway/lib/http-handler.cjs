@@ -53,7 +53,8 @@ function makeHttpHandler({config,createAdapters}) {
     // inherits a preview feature flag. No authorization from query/body.
     const active=enabled(config);
     if(req.method==='GET'){
-      return reply(res,200,{configurationPresent:active && config?.configured===true,
+      return reply(res,200,{configurationPresent:config?.vercelEnv==='preview' &&
+        config?.gitRef===ALLOWED_BRANCH && config?.configured===true,
         databaseConnectivityVerified:false,
         mode:'isolated-forwarding-pilot',emailBodiesFetched:false,
         metadataReceiptsEnabled:active && config?.configured===true,
