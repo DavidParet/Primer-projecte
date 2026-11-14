@@ -563,6 +563,8 @@ function categorizeAccions(accions) {
 function canOpenMaps(lloc) {
   if(typeof lloc!=='string' || !lloc.trim())return false;
   var name=lloc.trim();
+  if (/\b(?:mateixa sala|habitual|perqu[eè]|est[aà] inundat)\b/i.test(name) ||
+      /^(?:gimn[aà]s|pista(?: exterior)?|pati) de l['’]escola$/i.test(name)) return false;
   if (/^(?:(?:a la|a l[’']|la|l[’'])\s*)?(?:porta|entrada|accés|acces|sortida)\s+(?:habitual|de sempre)$/i.test(name)) return false;
   if(/\b(?:de sempre|sala de sempre|lloc habitual|mateix lloc|mateixa escola|mateix pavelló)\b/i.test(name))return false;
   if(/^(?:al |a la |el |la |a l[’']\s*)?(?:escola|casa|sala)(?:\s*,\s*.*|\s+de sempre|\s+habitual)?$/i.test(name))return false;

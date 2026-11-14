@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
 const crypto = require('crypto');
-const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis } = require('../lib/nexlupa-result');
+const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis, sanitizeNotice } = require('../lib/nexlupa-result');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -18,7 +18,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, image, sourceDate, language, testReferenceDate } = req.body || {};
+  const { text: inputText, image, sourceDate, language, testReferenceDate } = req.body || {};
+  const text = sanitizeNotice(inputText);
 
   if (!text && !image) {
     return res.status(400).json({ error: 'El camp text és obligatori' });
@@ -62,7 +63,7 @@ module.exports = async function handler(req, res) {
     } else {
       messages = [
         { role: 'system', content: prompt },
-        { role: 'user', content: 'Analitza:\n\n' + text.trim() }
+        { role: 'user', content: JSON.stringify({ missatge: text }) }
       ];
     }
 
