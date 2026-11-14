@@ -7,8 +7,14 @@ const {performance}=require('node:perf_hooks');
 const filename=process.argv[2], url=process.env.NEXLUPA_QA_URL;
 const qaKey=process.env.NEXLUPA_QA_KEY;
 if(!filename||!url||!qaKey){console.error('Ús: NEXLUPA_QA_URL=... NEXLUPA_QA_KEY=... node tests/run-qa.js qa50.private.json');process.exit(2);}
-const cases=JSON.parse(fs.readFileSync(path.resolve(filename),'utf8'));
-if(!Array.isArray(cases)||cases.length<1||cases.some(x=>!x||!x.message)){throw Error('Cal una llista de casos amb message');}
+const input=JSON.parse(fs.readFileSync(path.resolve(filename),'utf8'));
+const cases=Array.isArray(input)?input:input?.cases;
+if(!Array.isArray(cases)||cases.length!==50||cases.some(x=>!x||typeof x.message!=='string'||!x.message.trim()||!x.id))
+  throw Error('QA50: calen exactament 50 casos amb id i message');
+if(new Set(cases.map(x=>x.id)).size!==50||new Set(cases.map(x=>x.message)).size!==50)
+  throw Error('QA50: identificadors o missatges duplicats');
+if(!Array.isArray(input)&&input.reference_date!=='2026-11-12')
+  throw Error('QA50: data de referència del fitxer incorrecta');
 const endpoint=new URL(url);
 if(endpoint.protocol!=='https:')throw Error('Utilitza HTTPS');
 if(!/^primer-projecte-(?:[a-z0-9]{9}|git-fix-qa96-[a-z0-9-]+)-davidparets-projects\.vercel\.app$/.test(endpoint.hostname))
@@ -34,11 +40,11 @@ async function testOne(item){
       throw Error('Resposta HTTP 200 però contracte semàntic invàlid');
     const dates=[...(d.esdeveniments||[]),...(d.accions||[]),...(d.recordatoris||[])]
       .filter(x=>x&&x.data).map(x=>x.data);
-    return {id:item.id,esperat:item.esperat,ms:Math.round(performance.now()-start),
+    return {id:item.id,esperat:item.expected??item.esperat,ms:Math.round(performance.now()-start),
       status:r.status,dates,avisDates:d.avisDates||null,
       numEsdeveniments:(d.esdeveniments||[]).length,numTasques:(d.accions||[]).length,
-      auditoria:'pendent de Claude',resultat:d};
-  }catch(e){return{id:item.id,esperat:item.esperat,ms:Math.round(performance.now()-start),
+      auditoria:'pendent de revisió semàntica ChatGPT',resultat:d};
+  }catch(e){return{id:item.id,esperat:item.expected??item.esperat,ms:Math.round(performance.now()-start),
     error:String(e),auditoria:'no verificat'};}
 }
 async function main(){
@@ -51,7 +57,7 @@ async function main(){
     break;
   }
  }
- results.sort((a,b)=>a.id-b.id);
+ results.sort((a,b)=>String(a.id).localeCompare(String(b.id),'en',{numeric:true}));
  const folder=path.resolve(process.env.NEXLUPA_QA_OUTPUT_DIR||os.tmpdir());
  fs.mkdirSync(folder,{recursive:true});
  const out=path.join(folder,'nexlupa-qa-result-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json');
