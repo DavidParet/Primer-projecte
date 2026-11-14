@@ -80,3 +80,15 @@ test('a separate explicit optional participation survives model omission', () =>
   assert.equal(result.accions[1].prioritat, 'baixa');
   assert.match(result.accions[1].accio, /disfressats/);
 });
+
+test('explicit optional materials and activities are retained independently', () => {
+  const result = analyze('Cal portar una carpeta. Podeu dur una càmera. La fotografia de grup és opcional.', {
+    accions: [
+      { accio: 'Portar una carpeta', prioritat: 'mitja' },
+      { accio: 'Portar una càmera', prioritat: 'mitja' }
+    ]
+  });
+  assert.deepEqual(result.accions.map(a => a.prioritat).sort(), ['baixa', 'baixa', 'mitja']);
+  assert.equal(result.accions.filter(a => /càmera/.test(a.accio)).length, 1);
+  assert.ok(result.accions.some(a => /fotografia/i.test(a.accio)));
+});
