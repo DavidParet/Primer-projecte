@@ -99,6 +99,34 @@
 
         <div id="panelText">
           <textarea id="txt" placeholder="Enganxa el teu missatge aquí…"></textarea>
+          <button type="button" class="tab-btn" id="pasteCopiedText">Enganxa el text copiat</button>
+          <p id="pasteCopiedStatus" class="btn-micro-copy" role="status"></p>
+          <script>
+            document.getElementById('pasteCopiedText').addEventListener('click', async function () {
+              const field = document.getElementById('txt');
+              const status = document.getElementById('pasteCopiedStatus');
+              status.textContent = '';
+              this.disabled = true;
+              try {
+                const text = await navigator.clipboard.readText();
+                if (!text.trim()) {
+                  status.textContent = 'Copia un missatge i torna-ho a provar.';
+                  return;
+                }
+                const start = field.selectionStart;
+                const end = field.selectionEnd;
+                const needsBreak = start === end && start === field.value.length && field.value && !field.value.endsWith('\n');
+                field.setRangeText(needsBreak ? '\n' + text : text, start, end, 'end');
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                status.textContent = 'Text enganxat.';
+              } catch {
+                field.focus();
+                status.textContent = 'Mantén premut el camp i tria Enganxa, o fes servir el teclat.';
+              } finally {
+                this.disabled = false;
+              }
+            });
+          </script>
 
         </div>
 
