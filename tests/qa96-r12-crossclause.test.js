@@ -65,3 +65,13 @@ test('R12: un termini d’una tasca no converteix en P1 una confirmació indepen
   assert.equal(confirmacio.prioritat, 'mitja', 'un termini aliè no pot elevar aquesta tasca a P1');
   assert.equal(fitxa.prioritat, 'alta');
 });
+
+test('R12: confirmació curta hereta només el seu termini explícit', () => {
+  const source = 'Confirmeu assistència abans del 19 de novembre. Podeu portar un mocador si voleu.';
+  const result = run({ resum:'Activitat', accions:[
+    { tipus:'tasca', accio:'Confirmar assistència', prioritat:'baixa' },
+    { tipus:'tasca', accio:'Portar mocador si voleu', prioritat:'alta' }
+  ]}, source);
+  assert.equal(result.accions.find(a => /Confirmar assistència/.test(a.accio)).prioritat, 'alta');
+  assert.equal(result.accions.find(a => /mocador/.test(a.accio)).prioritat, 'baixa');
+});
