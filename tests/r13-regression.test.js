@@ -131,3 +131,11 @@ test('a suspension explanation is not a fallback venue', () => {
   });
   assert.equal(result.esdeveniments[0].lloc, null);
 });
+
+test('an omitted kit instruction is recovered alongside an optional meal', () => {
+  const result = analyze('Qui es vulgui quedar a dinar que ho confirmi abans de dijous 26. Els jugadors porten la samarreta blanca.', {
+    accions: [{accio: 'Confirmar assistència al dinar', prioritat: 'alta', dataFi: '2026-11-26'}]
+  });
+  assert.equal(result.accions.find(action => /samarreta blanca/.test(action.accio)).prioritat, 'mitja');
+  assert.equal(result.accions.find(action => /confirmar/i.test(action.accio)).prioritat, 'baixa');
+});
