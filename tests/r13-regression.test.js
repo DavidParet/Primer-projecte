@@ -92,3 +92,11 @@ test('explicit optional materials and activities are retained independently', ()
   assert.equal(result.accions.filter(a => /càmera/.test(a.accio)).length, 1);
   assert.ok(result.accions.some(a => /fotografia/i.test(a.accio)));
 });
+
+test('an optional participation already extracted as a verb is not duplicated', () => {
+  const result = analyze('La participació en el sorteig és opcional.', {
+    accions: [{ accio: 'Participar en el sorteig', prioritat: 'baixa' }]
+  });
+  assert.equal(result.accions.length, 1);
+  assert.equal(result.accions[0].prioritat, 'baixa');
+});
