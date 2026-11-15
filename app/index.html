@@ -98,9 +98,24 @@
         </div>
 
         <div id="panelText">
-          <button type="button" class="tab-btn" style="display:block;flex:none;width:100%;margin:8px 0;color:var(--gold)" id="pasteCopiedText">Enganxa el text copiat</button>
-          <p id="pasteCopiedStatus" class="btn-micro-copy" role="status"></p>
+          <button type="button" class="tab-btn" id="pasteCopiedText">Enganxa el text copiat</button>
+          <p id="pasteCopiedStatus" role="status"></p>
           <textarea id="txt" placeholder="Enganxa el teu missatge aquí…"></textarea>
+          <style>
+            #pasteCopiedText {
+              display: block;
+              width: 100%;
+              flex: none;
+              margin: 6px 0;
+              color: var(--gold, #d4a849);
+            }
+            #pasteCopiedStatus { margin: 0; color: var(--gold, #d4a849); font-size: 12px; }
+            #pasteCopiedStatus:empty { display: none; }
+            @media (max-width: 899px) {
+              #pageInici .app-col-right .card:has(#pasteCopiedText) { overflow-y: auto; }
+              #panelText:has(#pasteCopiedText) { flex: 1 0 auto; }
+            }
+          </style>
           <script>
             document.getElementById('pasteCopiedText').addEventListener('click', async function () {
               const field = document.getElementById('txt');
