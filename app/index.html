@@ -112,9 +112,18 @@
             #pasteCopiedStatus { margin: 0; color: var(--gold, #d4a849); font-size: 12px; }
             #pasteCopiedStatus:empty { display: none; }
             @media (max-width: 899px) {
-              #pageInici .app-col-right .card:has(#pasteCopiedText) { overflow-y: auto; }
-              #panelText:has(#pasteCopiedText) { flex: 0 0 auto; }
-              #panelText #txt { display: block; box-sizing: border-box; flex: none; height: 132px; min-height: 0; }
+              #panelText:has(#pasteCopiedText):not([style*="none"]) {
+                display: flex !important;
+                flex: 1 1 auto;
+                min-height: 0;
+              }
+              #panelText #txt {
+                display: block;
+                box-sizing: border-box;
+                flex: 1 1 0;
+                height: auto;
+                min-height: 0;
+              }
               #pageInici #btnAnalyze { position: relative; inset: auto; flex: none; margin-top: 10px; }
             }
           </style>
