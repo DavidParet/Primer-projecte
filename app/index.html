@@ -113,7 +113,9 @@
             #pasteCopiedStatus:empty { display: none; }
             @media (max-width: 899px) {
               #pageInici .app-col-right .card:has(#pasteCopiedText) { overflow-y: auto; }
-              #panelText:has(#pasteCopiedText) { flex: 1 0 auto; }
+              #panelText:has(#pasteCopiedText) { flex: 0 0 auto; }
+              #panelText #txt { display: block; box-sizing: border-box; flex: none; height: 132px; min-height: 0; }
+              #pageInici #btnAnalyze { position: relative; inset: auto; flex: none; margin-top: 10px; }
             }
           </style>
           <script>
