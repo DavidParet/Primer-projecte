@@ -98,9 +98,9 @@
         </div>
 
         <div id="panelText">
-          <textarea id="txt" placeholder="Enganxa el teu missatge aquí…"></textarea>
-          <button type="button" class="tab-btn" id="pasteCopiedText">Enganxa el text copiat</button>
+          <button type="button" class="tab-btn" style="display:block;flex:none;width:100%;margin:8px 0;color:var(--gold)" id="pasteCopiedText">Enganxa el text copiat</button>
           <p id="pasteCopiedStatus" class="btn-micro-copy" role="status"></p>
+          <textarea id="txt" placeholder="Enganxa el teu missatge aquí…"></textarea>
           <script>
             document.getElementById('pasteCopiedText').addEventListener('click', async function () {
               const field = document.getElementById('txt');
