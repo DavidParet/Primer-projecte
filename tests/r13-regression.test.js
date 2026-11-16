@@ -139,3 +139,19 @@ test('an omitted kit instruction is recovered alongside an optional meal', () =>
   assert.equal(result.accions.find(action => /samarreta blanca/.test(action.accio)).prioritat, 'mitja');
   assert.equal(result.accions.find(action => /confirmar/i.test(action.accio)).prioritat, 'baixa');
 });
+
+test('conflicting weekday blocks urgency and asks for confirmation only on the affected task', () => {
+  const result = analyze("Reunió de famílies el dimecres 26 de novembre a les 19:00. Pagueu la quota abans del 30 de novembre.", {
+    decisio: 'Assistir a la reunió el 26 de novembre.',
+    mainEvent: {title: 'Reunió de famílies', data: '2026-11-26 19:00'},
+    accions: [
+      {accio: 'Assistir a la reunió el 26 de novembre', prioritat: 'alta'},
+      {accio: 'Pagar la quota', dataFi: '2026-11-30', prioritat: 'alta'}
+    ]
+  });
+  const meeting = result.accions.find(action => /reunió/.test(action.accio));
+  assert.equal(meeting.dataDubtosa, true);
+  assert.equal(meeting.prioritat, 'baixa');
+  assert.match(result.decisio, /Confirma la data/);
+  assert.equal(result.accions.find(action => /quota/.test(action.accio)).prioritat, 'alta');
+});
