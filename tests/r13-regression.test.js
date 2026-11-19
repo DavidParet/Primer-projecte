@@ -202,3 +202,17 @@ test('R14 required material list survives model omission',()=>{
  const r=analyze('El material necessari és una llibreta i un llapis; no cal comprar cap uniforme.',{decisio:'Cap acció necessària'});
  assert.equal(r.accions.length,1);assert.equal(r.accions[0].prioritat,'mitja');assert.match(r.accions[0].accio,/llibreta.*llapis/);
 });
+
+
+test('R14 weather-dependent excursion cannot be exported as confirmed',()=>{
+ const r=analyze('El 24/11 està prevista l’excursió al Parc de la Ciutadella, subjecta a la meteorologia.',{mainEvent:{title:'Excursió al Parc de la Ciutadella',data:'2026-11-24'}});
+ assert.equal(r.mainEvent.dataDubtosa,true);assert.match(r.avisDates,/provisional/);
+});
+test('R14 provisional workshop does not block a separate confirmed event',()=>{
+ const r=analyze('El taller del 20/11 només es farà si hi ha inscripcions suficients. El concert del 21/11 és a les 18h.',{esdeveniments:[{title:'Taller',data:'2026-11-20'},{title:'Concert',data:'2026-11-21 18:00'}]});
+ assert.equal(r.esdeveniments[0].dataDubtosa,true);assert.equal(r.esdeveniments[1].dataDubtosa,false);
+});
+test('R14 no-class notice is not an active class calendar event',()=>{
+ const r=analyze('Demà no hi ha classe. Dilluns 16/11 reprenem la classe a les 17h.',{esdeveniments:[{title:'No hi ha classe',data:'2026-11-15'},{title:'Classe',data:'2026-11-16 17:00'}]});
+ assert.equal(r.esdeveniments[0].estat,'suspes');assert.equal(r.esdeveniments[0].data,null);assert.equal(r.esdeveniments[1].data,'2026-11-16 17:00');
+});
