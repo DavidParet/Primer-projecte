@@ -155,3 +155,24 @@ test('conflicting weekday blocks urgency and asks for confirmation only on the a
   assert.match(result.decisio, /Confirma la data/);
   assert.equal(result.accions.find(action => /quota/.test(action.accio)).prioritat, 'alta');
 });
+
+
+test('future year in written deadline controls weekday conflict', () => {
+  const result = analyze('Pagueu la quota abans de dijous 26 de novembre de 2027.', {decisio:'Pagar la quota',accions:[{accio:'Pagar la quota',dataFi:'2027-11-26',prioritat:'alta'}]});
+  assert.equal(result.accions[0].dataDubtosa,true);
+  assert.match(result.decisio,/Confirma la data/);
+});
+test('coherent future deadline keeps priority', () => {
+  const result = analyze('Pagueu la quota abans de divendres 26 de novembre de 2027.', {decisio:'Pagar la quota',accions:[{accio:'Pagar la quota',dataFi:'2027-11-26',prioritat:'alta'}]});
+  assert.equal(result.accions[0].dataDubtosa,false);
+  assert.equal(result.accions[0].prioritat,'alta');
+});
+test('weekday evidence accepts Spanish día, Catalan apostrophes and spaced slash dates', () => {
+  const {extractSourceWeekdays}=require('../lib/nexlupa-result');
+  for(const [source,year,month,day] of [['viernes día 26 de noviembre de 2027',2027,11,26],['divendres 2 d’abril del 2027',2027,4,2],['dijous 26 / 11 / 26',2026,11,26]]) {
+    const [ref]=extractSourceWeekdays(source);
+    assert.equal(ref.year,year);
+    assert.equal(ref.month,month);
+    assert.equal(ref.day,day);
+  }
+});
