@@ -176,3 +176,29 @@ test('weekday evidence accepts Spanish día, Catalan apostrophes and spaced slas
     assert.equal(ref.day,day);
   }
 });
+
+
+test('R14 optional advance payment percentages without discount noun form one option',()=>{
+ const r=analyze('Podeu avançar el pagament amb un 7% fins al 19/11 o un 2% fins al 24/11; trieu-ne només un.',{accions:[{accio:'Realitzar el pagament amb un descompte del 7%',prioritat:'alta',dataFi:'2026-11-19'},{accio:'Realitzar el pagament amb un descompte del 2%',prioritat:'alta',dataFi:'2026-11-24'}]});
+ assert.equal(r.accions.length,1);assert.equal(r.accions[0].prioritat,'baixa');assert.match(r.accions[0].accio,/7%.*19.*2%.*24/);
+});
+test('R14 voluntary RSVP stays P3 despite deadline and separate required material',()=>{
+ const r=analyze('Porteu cantimplora; si voleu participar al berenar, confirmeu-ho abans del 20/11.',{accions:[{accio:'Portar cantimplora',prioritat:'mitja'},{accio:'Confirmar participació al berenar',prioritat:'alta',dataFi:'2026-11-20'}]});
+ assert.equal(r.accions[0].prioritat,'mitja');assert.equal(r.accions[1].prioritat,'baixa');
+});
+test('R14 explicit registration closing date is a task not a calendar event',()=>{
+ const r=analyze('El viernes día 26 de noviembre de 2027 finaliza la matrícula.',{decisio:'Cap acció necessària',mainEvent:{title:'Finalització de la matrícula',data:'2027-11-26'}});
+ assert.equal(r.esdeveniments.length,0);assert.equal(r.accions[0].prioritat,'alta');assert.equal(r.accions[0].dataFi,'2027-11-26');
+});
+test('R14 conflicting registration deadline asks for confirmation',()=>{
+ const r=analyze('El jueves día 26 de noviembre de 2027 acaba el plazo de matrícula.',{decisio:'Cap acció necessària',mainEvent:{title:'Final del termini de matrícula',data:'2027-11-26'}});
+ assert.equal(r.esdeveniments.length,0);assert.equal(r.accions[0].dataDubtosa,true);assert.match(r.decisio,/Confirma la data/);
+});
+test('R14 submission of work is a separate required action',()=>{
+ const r=analyze('El 18/11 es lliuren els treballs; qui vulgui pot afegir una portada decorativa.',{mainEvent:{title:'Lliurament de treballs',data:'2026-11-18'},accions:[{accio:'Afegir portada decorativa si es vol',prioritat:'baixa',dataFi:'2026-11-18'}]});
+ assert.equal(r.esdeveniments.length,0);assert.equal(r.accions.find(a=>/Lliurar/.test(a.accio)).prioritat,'alta');
+});
+test('R14 required material list survives model omission',()=>{
+ const r=analyze('El material necessari és una llibreta i un llapis; no cal comprar cap uniforme.',{decisio:'Cap acció necessària'});
+ assert.equal(r.accions.length,1);assert.equal(r.accions[0].prioritat,'mitja');assert.match(r.accions[0].accio,/llibreta.*llapis/);
+});
