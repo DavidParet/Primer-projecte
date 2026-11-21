@@ -2109,3 +2109,14 @@ body.dark #pageApp .app-col-right textarea:focus {
   border-radius: 20px; padding: 5px 12px;
   font-size: 12px; font-weight: 600; color: #8891a6;
 }
+
+/* NexLupa R8 F2 — resta de tasques plegades, però accessibles */
+.nx-more-actions-block { margin: 12px 0 18px; }
+.nx-more-actions-toggle {
+  background: transparent; border: 1px solid #596274; color: #e7e9ed;
+  border-radius: 10px; padding: 11px 14px; font: inherit; font-weight: 600;
+  cursor: pointer; width: 100%; text-align: left;
+}
+.nx-more-actions-toggle:focus-visible { outline: 2px solid #d4a830; outline-offset: 2px; }
+#nx-more-actions-content { margin-top: 12px; }
+#nx-more-actions-content .nx-action-card { margin-bottom: 8px; }
