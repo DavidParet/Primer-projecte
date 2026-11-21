@@ -43,7 +43,8 @@ test('Cas 3: sense accions amb dia sense classe al calendari', () => {
     esdeveniments:[{title:'No hi ha classe',data:'2026-11-13'}],accions:[]},
     'Demà divendres no hi ha classe');
   assert.equal(d.accions.length, 0);
-  assert.equal(d.esdeveniments[0].data, '2026-11-13');
+  assert.equal(d.esdeveniments[0].data, null);
+  assert.equal(d.esdeveniments[0].estat, 'suspes');
 });
 test('Cas 4: colònies amb interval de 3 dies i import/IBAN', () => {
   const d = analyze({resum:'x',mainEvent:{title:'Colònies 5è',data:'2027-01-13'},

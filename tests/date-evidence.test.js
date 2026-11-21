@@ -42,10 +42,11 @@ test('QA cas 15: corregeix dijous que ve mal resolt pel model',()=>{
     accions:[]},'Dijous que ve recuperem robòtica a les 17:00');
   assert.equal(data.mainEvent.data,'2026-11-19 17:00');
 });
-test('QA: demà sense data de la IA es recupera al calendari',()=>{
+test('QA: un avís de no classe no es converteix en classe activa al calendari',()=>{
   const data=analyze({resum:'x',esdeveniments:[{title:'No hi ha classe',data:null}],
     accions:[]},'Demà divendres no hi ha classe.');
-  assert.equal(data.esdeveniments[0].data,'2026-11-13');
+  assert.equal(data.esdeveniments[0].data,null);
+  assert.equal(data.esdeveniments[0].estat,'suspes');
   assert.equal(data.accions.length,0);
 });
 test('QA: si hi ha una tasca sense esdeveniment, n’ajusta el termini inequívoc',()=>{
