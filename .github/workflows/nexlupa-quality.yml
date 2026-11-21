@@ -35,8 +35,8 @@ jobs:
           node --check app/script.js
           node --check tests/run-qa50.js
           node --check tests/nexlupa-result.test.js
-      - name: Proves deterministes sense serveis externs
-        run: node --test tests/nexlupa-result.test.js
+      - name: Totes les proves de regressió deterministes (sense serveis externs)
+        run: npm test
       - name: Preparar assets sense desplegar
         run: |
           node scripts/inject-version.js
