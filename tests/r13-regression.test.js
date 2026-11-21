@@ -220,7 +220,7 @@ test('R14 no-class notice is not an active class calendar event',()=>{
 
 test('R14 authorization cutoff retains tomorrow and noon separately from rehearsal', () => {
  const source='Mañana hay ensayo a las 16:45; enviad antes de las 12 la autorización firmada.';
- const r=normalizeAnalysis({mainEvent:{title:'Assaig',data:'2026-11-13 16:45'},accions:[{accio:'Enviar autorització signada',prioritat:'alta'}]},source,'2026-11-12');
+ const r=normalizeAnalysis({mainEvent:{title:'Assaig',data:'2026-11-13 16:45'},accions:[{accio:'Enviar autorització signada',prioritat:'alta',data:'2026-11-12'}]},source,'2026-11-12');
  assert.equal(r.accions[0].dataFi,'2026-11-13 12:00');
  assert.equal(r.accions[0].dataDubtosa,false);
  assert.equal(r.mainEvent.data,'2026-11-13 16:45');
