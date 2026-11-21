@@ -216,3 +216,17 @@ test('R14 no-class notice is not an active class calendar event',()=>{
  const r=analyze('Demà no hi ha classe. Dilluns 16/11 reprenem la classe a les 17h.',{esdeveniments:[{title:'No hi ha classe',data:'2026-11-15'},{title:'Classe',data:'2026-11-16 17:00'}]});
  assert.equal(r.esdeveniments[0].estat,'suspes');assert.equal(r.esdeveniments[0].data,null);assert.equal(r.esdeveniments[1].data,'2026-11-16 17:00');
 });
+
+
+test('R14 authorization cutoff retains tomorrow and noon separately from rehearsal', () => {
+ const source='Mañana hay ensayo a las 16:45; enviad antes de las 12 la autorización firmada.';
+ const r=normalizeAnalysis({mainEvent:{title:'Assaig',data:'2026-11-13 16:45'},accions:[{accio:'Enviar autorització signada',prioritat:'alta'}]},source,'2026-11-12');
+ assert.equal(r.accions[0].dataFi,'2026-11-13 12:00');
+ assert.equal(r.accions[0].dataDubtosa,false);
+ assert.equal(r.mainEvent.data,'2026-11-13 16:45');
+});
+test('R14 unspecified resumption week does not create a specific calendar day', () => {
+ const r=normalizeAnalysis({esdeveniments:[{title:'Festa, no hi ha classe',data:'2026-11-13'},{title:'Reprenem horari habitual',data:'2026-11-16'}]},'No hi ha classe demà perquè és festa. La setmana següent horari habitual.','2026-11-12');
+ assert.equal(r.esdeveniments.length,1);
+ assert.equal(r.esdeveniments[0].estat,'suspes');
+});
