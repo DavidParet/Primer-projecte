@@ -158,7 +158,7 @@ function normalizeResult(raw) {
 
   var accions = d.accions;
   if (!Array.isArray(accions)) accions = [];
-  accions = accions.slice(0, 3).map(function (a) {
+  accions = accions.map(function (a) {
     if (typeof a === 'string') return a.trim();
     if (a && typeof a === 'object') return String(a.accio || a.text || a.descripcio || a.action || '').trim();
     return String(a || '').trim();
@@ -447,11 +447,11 @@ function applyPriorityHeuristics(accions) {
     var pa = priorRank[a.prioritat] !== undefined ? priorRank[a.prioritat] : 2;
     var pb = priorRank[b.prioritat] !== undefined ? priorRank[b.prioritat] : 2;
     if (pa !== pb) return pa - pb;
-    var aHasDate = !!(a.data && a.data !== 'null');
-    var bHasDate = !!(b.data && b.data !== 'null');
-    if (aHasDate && !bHasDate) return -1;
-    if (!aHasDate && bHasDate) return  1;
-    if (aHasDate && bHasDate && a.data !== b.data) return a.data < b.data ? -1 : 1;
+    var aDue = (a.dataFi || a.data || '').replace(/^null$/,'');
+    var bDue = (b.dataFi || b.data || '').replace(/^null$/,'');
+    if (aDue && !bDue) return -1;
+    if (!aDue && bDue) return  1;
+    if (aDue && bDue && aDue !== bDue) return aDue < bDue ? -1 : 1;
     return (a._origIdx || 0) - (b._origIdx || 0);
   });
 
@@ -475,6 +475,8 @@ function formatGCalDateTime(d) {
 }
 
 function addActionToCalendar(a) {
+  if (!a || a.estat === 'suspes' || a.estat === 'recurrent' || a.passada ||
+      a.dataDubtosa || a.vençut) return;
   var rawDate = String(a.data || '');
   if (!rawDate || rawDate === 'null') return;
   /* Només dates ISO validades; no inventem un "demà" de substitució. */
@@ -482,6 +484,7 @@ function addActionToCalendar(a) {
   if (!m) return;
   var startStr, endStr;
   var provisionalEnd = false;
+  var multiDayAllDay = false;
   var hasTime = !!(m[4] && !(m[4] === '00' && m[5] === '00'));
   function dateCompact(d) {
     return String(d.getUTCFullYear()).padStart(4,'0') +
@@ -492,16 +495,28 @@ function addActionToCalendar(a) {
       String(d.getUTCMinutes()).padStart(2,'0') + '00';
   }
   if (hasTime) {
-    var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
-    var endMatch = typeof a.dataFi === 'string' ?
-      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
-    var endDate = endMatch ?
-      new Date(Date.UTC(+endMatch[1],+endMatch[2]-1,+endMatch[3],+endMatch[4],+endMatch[5])) : null;
-    startStr = timeCompact(baseDate);
-    if (endDate && endDate > baseDate) endStr = timeCompact(endDate);
-    else {
-      endStr = timeCompact(new Date(baseDate.getTime() + 3600000));
-      provisionalEnd = true;
+    // A multi-day event with date-only end time MUST NOT become a one-hour event.
+    var firstDay = new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+    var endOnly = typeof a.dataFi === 'string' ?
+      a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+    var lastDay = endOnly ?
+      new Date(Date.UTC(+endOnly[1], +endOnly[2]-1, +endOnly[3])) : null;
+    if (lastDay && lastDay > firstDay) {
+      startStr = dateCompact(firstDay);
+      endStr = dateCompact(new Date(lastDay.getTime()+86400000));
+      multiDayAllDay = true;
+    } else {
+      var baseDate = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
+      var endMatch = typeof a.dataFi === 'string' ?
+        a.dataFi.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})$/) : null;
+      var endDate = endMatch ?
+        new Date(Date.UTC(+endMatch[1],+endMatch[2]-1,+endMatch[3],+endMatch[4],+endMatch[5])) : null;
+      startStr = timeCompact(baseDate);
+      if (endDate && endDate > baseDate) endStr = timeCompact(endDate);
+      else {
+        endStr = timeCompact(new Date(baseDate.getTime() + 3600000));
+        provisionalEnd = true;
+      }
     }
   } else {
     var first = new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
@@ -515,6 +530,9 @@ function addActionToCalendar(a) {
   }
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
+  if (multiDayAllDay) details += '\nActivitat de diversos dies: s’ha representat com a dies complets perquè l’hora final no consta. Revisa-ho abans de desar.';
+  var actionMapUrl = typeof mapsSearchUrl==='function' ? mapsSearchUrl(a.lloc) : null;
+  if (actionMapUrl) details += '\nMapa: ' + actionMapUrl;
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details, ctz: 'Europe/Madrid' };
   if (a.lloc) calParams.location = a.lloc;
   var params  = new URLSearchParams(calParams);
@@ -543,16 +561,31 @@ function categorizeAccions(accions) {
 }
 
 function canOpenMaps(lloc) {
-  return typeof lloc === 'string' && !!lloc.trim() && !/^(?:al |a la |el |la )?(?:pati|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(lloc.trim());
+  if(typeof lloc!=='string' || !lloc.trim())return false;
+  var name=lloc.trim();
+  if (/\b(?:mateixa sala|habitual|perqu[eè]|est[aà] inundat)\b/i.test(name) ||
+      /^(?:gimn[aà]s|pista(?: exterior)?|pati) de l['’]escola$/i.test(name)) return false;
+  if (/^(?:(?:a la|a l[’']|la|l[’'])\s*)?(?:porta|entrada|accés|acces|sortida)\s+(?:habitual|de sempre)$/i.test(name)) return false;
+  if(/\b(?:de sempre|sala de sempre|lloc habitual|mateix lloc|mateixa escola|mateix pavelló)\b/i.test(name))return false;
+  if(/^(?:al |a la |el |la |a l[’']\s*)?(?:escola|casa|sala)(?:\s*,\s*.*|\s+de sempre|\s+habitual)?$/i.test(name))return false;
+  if(/\b(?:serà|sera|dissabte|diumenge|dilluns|dimarts|dimecres|dijous|divendres)\b/i.test(name))return false;
+  return !/^(?:al |a la |el |la )?(?:pati|plaça|plaza|local|centre|sala(?:\s+\d+)?|aula(?: de .+)?|pista(?:\s+\d+)?|gimnàs|escola|la nostra escola|casa|a casa|mateix pavelló|mateixa escola|mateix lloc|el mateix lloc|pavelló de sempre|teatre|pavelló(?: visitant)?|lloc de sempre|adreça pendent|null|venue|\[ubicació\])$/i.test(name);
+}
+
+function mapsSearchUrl(lloc) {
+  if (!canOpenMaps(lloc) || typeof lloc!=='string' ||
+      lloc.trim().length>60 || /[),;]+$/.test(lloc.trim()) && !/\([^()]+\)$/.test(lloc.trim())) return null;
+  return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc.trim());
 }
 
 function _buildLlocLink(lloc) {
-  var el = document.createElement(canOpenMaps(lloc) ? 'a' : 'span');
+  var mapsUrl = mapsSearchUrl(lloc);
+  var el = document.createElement(mapsUrl ? 'a' : 'span');
   el.className = 'nx-card-lloc';
   el.textContent = '📍 ' + lloc;
   if (el.tagName === 'SPAN') return el;
   el.className = 'nx-card-lloc';
-  el.href      = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc);
+  el.href      = mapsUrl;
   el.target    = '_blank';
   el.rel       = 'noopener noreferrer';
   el.textContent = '📍 ' + lloc;
@@ -560,6 +593,8 @@ function _buildLlocLink(lloc) {
 }
 
 function _buildCalBtn(action) {
+  if (!action || !action.data || action.passada || action.dataDubtosa ||
+      action.vençut || action.estat === 'suspes' || action.estat === 'recurrent') return null;
   var btn = document.createElement('button');
   btn.className   = 'nx-btn-cal';
   btn.textContent = '📅 Afegir al calendari';
@@ -605,6 +640,25 @@ function buildEventCard(mainEvent) {
   nameEl.textContent = String(mainEvent.title || mainEvent.accio || '');
   card.appendChild(nameEl);
 
+  var note = null;
+  if (mainEvent.estat === 'suspes') note = 'Activitat suspesa · no es pot afegir al calendari';
+  else if (mainEvent.estat === 'recurrent') note = 'Activitat recurrent · no és una cita única';
+  else if (mainEvent.passada) note = 'Data passada · confirma-la abans de guardar';
+  else if (mainEvent.dataDubtosa) note = 'Data interpretada · pendent de confirmació';
+  else if (!mainEvent.data) note = 'Data pendent de confirmar';
+  if (note) {
+    var noteEl = document.createElement('div');
+    noteEl.className = 'nx-card-date';
+    noteEl.textContent = note;
+    card.appendChild(noteEl);
+  }
+  if (mainEvent.dataOriginal && (mainEvent.estat === 'suspes' || mainEvent.estat === 'recurrent')) {
+    var oldDate = document.createElement('div');
+    oldDate.className = 'nx-card-date';
+    oldDate.textContent = 'Data informativa original: ' +
+      (formatActionDate(mainEvent.dataOriginal) || mainEvent.dataOriginal);
+    card.appendChild(oldDate);
+  }
   var meta = document.createElement('div');
   meta.className = 'nx-event-meta';
 
@@ -655,7 +709,8 @@ function buildEventCard(mainEvent) {
   var btnRow = document.createElement('div');
   btnRow.className = 'nx-event-btn-row';
 
-  if (mainEvent.data && mainEvent.data !== 'null') {
+  if (mainEvent.data && mainEvent.data !== 'null' && !mainEvent.passada && !mainEvent.dataDubtosa &&
+      mainEvent.estat !== 'suspes' && mainEvent.estat !== 'recurrent') {
     var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc, dataFi: mainEvent.dataFi };
     var calBtn = document.createElement('button');
     calBtn.className   = 'nx-event-btn nx-event-btn-cal';
@@ -664,10 +719,10 @@ function buildEventCard(mainEvent) {
     btnRow.appendChild(calBtn);
   }
 
-  if (canOpenMaps(mainEvent.lloc)) {
+  if (typeof mapsSearchUrl==='function' && mapsSearchUrl(mainEvent.lloc)) {
     var mapsBtn = document.createElement('a');
     mapsBtn.className   = 'nx-event-btn nx-event-btn-maps';
-    mapsBtn.href        = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mainEvent.lloc);
+    mapsBtn.href        = mapsSearchUrl(mainEvent.lloc);
     mapsBtn.target      = '_blank';
     mapsBtn.rel         = 'noopener noreferrer';
     mapsBtn.textContent = '🗺️ Obrir Maps';
@@ -755,11 +810,24 @@ function buildActionCard(a, cardClass) {
     card.appendChild(dateEl);
   }
 
+  if (a.dataFi && a.dataFi !== a.data) {
+    var endLabel = document.createElement('div');
+    endLabel.className = 'nx-card-date';
+    endLabel.textContent = 'Fins: ' + (formatActionDate(a.dataFi) || a.dataFi);
+    card.appendChild(endLabel);
+  }
   if (a.vençut) {
     var expiredLabel = document.createElement('div');
     expiredLabel.className = 'nx-card-date';
     expiredLabel.textContent = 'Termini vençut: cal comprovar si encara es pot gestionar';
     card.appendChild(expiredLabel);
+  }
+  if (a.passada || a.dataDubtosa || (!a.data && a.dataOriginal)) {
+    var unsureLabel = document.createElement('div');
+    unsureLabel.className = 'nx-card-date';
+    unsureLabel.textContent = a.passada ? 'Data passada: confirma-la abans de guardar' :
+      'Data per confirmar; no s’exportarà al calendari';
+    card.appendChild(unsureLabel);
   }
   if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
   if (typeof a.enllac === 'string' && /^https?:\/\//i.test(a.enllac)) {
@@ -771,7 +839,8 @@ function buildActionCard(a, cardClass) {
     card.appendChild(actionLink);
   }
 
-  if (a.data && a.data !== 'null') card.appendChild(_buildCalBtn(a));
+  var calActionButton = _buildCalBtn(a);
+  if (calActionButton) card.appendChild(calActionButton);
 
   return card;
 }
@@ -807,8 +876,21 @@ function renderUsefulData(items) {
   if (!block || !container) return;
   container.textContent = '';
   if (!items || typeof items !== 'object') {block.style.display='none';return;}
+  if (items.origenImatge) {
+    var fromImageNote = document.createElement('div');
+    fromImageNote.className = 'nx-card-date';
+    fromImageNote.textContent = 'Dades llegides d’una imatge: comprova-les abans d’utilitzar-les.';
+    container.appendChild(fromImageNote);
+  }
+  if (Array.isArray(items.avisos)) items.avisos.forEach(function(av) {
+    var note = document.createElement('div');
+    note.className = 'nx-card-date';
+    note.textContent = String(av || '');
+    container.appendChild(note);
+  });
   var groups = [
-    ['enllacos','Enllaços'],['iban','Compte bancari'],['telefons','Telèfons'],
+    ['enllacos','Enllaços'],['iban','IBAN (dígits de control correctes)'],
+    ['ibanInvalids','IBAN no vàlid · no utilitzar per pagar'],['telefons','Telèfons'],
     ['imports','Imports'],['altres','Altres dades']
   ];
   var count = 0;
@@ -837,7 +919,8 @@ function renderUsefulData(items) {
       count++;
     });
   });
-  block.style.display = count ? '' : 'none';
+  block.style.display = count || items.origenImatge ||
+    (Array.isArray(items.avisos) && items.avisos.length) ? '' : 'none';
 }
 
 /* ── RENDER PRINCIPAL ── */
@@ -857,7 +940,13 @@ function renderResult(d) {
     if (typeof a === 'string') return { accio: a, tipus: 'tasca', data: null, prioritat: 'baixa', lloc: null };
     if (!a || typeof a !== 'object') return null;
     var txt = typeof a.accio === 'string' ? a.accio : String(a.accio || a.text || a.descripcio || '');
-    return { accio: txt.trim(), tipus: a.tipus || 'tasca', data: a.data || null, prioritat: (a.prioritat || 'baixa').toLowerCase(), lloc: a.lloc || null, enllac: a.enllac || null };
+    return { accio: txt.trim(), tipus: a.tipus || 'tasca',
+      data: a.data || null, dataFi: a.dataFi || null,
+      vençut: !!a.vençut, passada: !!a.passada,
+      dataDubtosa: !!a.dataDubtosa, dataOriginal: a.dataOriginal || null,
+      estat: a.estat || null,
+      prioritat: (a.prioritat || 'baixa').toLowerCase(),
+      lloc: a.lloc || null, enllac: a.enllac || null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
@@ -869,6 +958,11 @@ function renderResult(d) {
   }
 
   var cats = categorizeAccions(accions);
+  // F2: top tres VISUALS; totes les tasques queden disponibles en desplegar
+  // i es conserven intactes a _lastData, historial i text complet de compartir.
+  var rankedTasks=accions.filter(function(a){return a.tipus!=='informatiu' && a.tipus!=='calendari';});
+  var topThree=rankedTasks.slice(0,3);
+  var remainingTasks=rankedTasks.slice(3);
 
   /* DECISIÓ */
   var decisioEl    = document.getElementById('nx-decisio');
@@ -916,8 +1010,10 @@ function renderResult(d) {
   if (p1Block && p1Content) {
     p1Content.innerHTML = '';
     if (!noAction) {
-      if (cats.p1.length > 0) {
-        cats.p1.forEach(function(a) { p1Content.appendChild(buildActionCard(a, 'nx-p1-card')); });
+      if (cats.p1.some(function(a){return topThree.indexOf(a)!==-1;})) {
+        cats.p1.filter(function(a){return topThree.indexOf(a)!==-1;}).forEach(function(a) {
+          p1Content.appendChild(buildActionCard(a, 'nx-p1-card'));
+        });
         if (p1Empty) p1Empty.style.display = 'none';
       } else {
         if (p1Empty) p1Empty.style.display = '';
@@ -933,8 +1029,10 @@ function renderResult(d) {
   var p2Content = document.getElementById('nx-p2-content');
   if (p2Block && p2Content) {
     p2Content.innerHTML = '';
-    if (!noAction && cats.p2.length > 0) {
-      cats.p2.forEach(function(a) { p2Content.appendChild(buildActionCard(a, 'nx-p2-card')); });
+    if (!noAction && cats.p2.some(function(a){return topThree.indexOf(a)!==-1;})) {
+      cats.p2.filter(function(a){return topThree.indexOf(a)!==-1;}).forEach(function(a) {
+        p2Content.appendChild(buildActionCard(a, 'nx-p2-card'));
+      });
       p2Block.style.display = '';
     } else {
       p2Block.style.display = 'none';
@@ -946,12 +1044,36 @@ function renderResult(d) {
   var infoContent = document.getElementById('nx-info-content');
   if (infoBlock && infoContent) {
     infoContent.innerHTML = '';
-    if (cats.info.length > 0) {
-      cats.info.forEach(function(a) { infoContent.appendChild(buildActionCard(a, 'nx-info-card')); });
+    if (cats.info.some(function(a){return a.tipus==='informatiu'||topThree.indexOf(a)!==-1;})) {
+      cats.info.filter(function(a){return a.tipus==='informatiu'||topThree.indexOf(a)!==-1;}).forEach(function(a) {
+        infoContent.appendChild(buildActionCard(a, 'nx-info-card'));
+      });
       infoBlock.style.display = '';
     } else {
       infoBlock.style.display = 'none';
     }
+  }
+
+  /* F2 — tasques addicionals plegades (mai descartades) */
+  var moreBlock=document.getElementById('nx-more-actions-block');
+  var moreBtn=document.getElementById('nx-more-actions-toggle');
+  var moreContent=document.getElementById('nx-more-actions-content');
+  if (moreBlock && moreBtn && moreContent) {
+    moreContent.textContent='';
+    remainingTasks.forEach(function(a){
+      moreContent.appendChild(buildActionCard(a,
+        a.prioritat==='alta'?'nx-p1-card':a.prioritat==='mitja'?'nx-p2-card':'nx-info-card'));
+    });
+    moreContent.style.display='none';
+    moreBlock.style.display=remainingTasks.length?'':'none';
+    moreBtn.textContent='Veure-les totes ('+remainingTasks.length+')';
+    moreBtn.setAttribute('aria-expanded','false');
+    moreBtn.onclick=function(){
+      var open=moreContent.style.display==='none';
+      moreContent.style.display=open?'block':'none';
+      moreBtn.textContent=(open?'Amagar tasques':'Veure-les totes')+' ('+remainingTasks.length+')';
+      moreBtn.setAttribute('aria-expanded',open?'true':'false');
+    };
   }
 
   /* RESUM */
@@ -1011,64 +1133,7 @@ var MONTHS = {
   'july':7,'august':8,'september':9,'october':10,'november':11,'december':12
 };
 
-function parseDate(str) {
-  var now  = new Date();
-  var year = now.getFullYear();
-  var m1   = str.match(/(\d{1,2})\s+(?:de\s+)?([a-zç]+)/i);
-  if (m1) {
-    var day = parseInt(m1[1]);
-    var mon = MONTHS[m1[2].toLowerCase()];
-    if (mon) return new Date(year, mon - 1, day);
-  }
-  var m2 = str.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-  if (m2) {
-    var d2 = parseInt(m2[1]), mo = parseInt(m2[2]);
-    var y  = m2[3] ? parseInt(m2[3]) : year;
-    return new Date(y < 100 ? 2000 + y : y, mo - 1, d2);
-  }
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow;
-}
-
-function toGCalDate(date) {
-  var y = date.getFullYear();
-  var m = String(date.getMonth() + 1).padStart(2, '0');
-  var d = String(date.getDate()).padStart(2, '0');
-  return '' + y + m + d;
-}
-
-function addSingleToCalendar(dt) {
-  var date    = parseDate(dt.data);
-  var nextDay = new Date(date);
-  nextDay.setDate(nextDay.getDate() + 1);
-  var params = new URLSearchParams({
-    action:  'TEMPLATE',
-    text:    dt.descripcio,
-    dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-    details: '📌 ' + ((_lastData && _lastData.resum) || '') + '\n\nGenerat per nexlupa'
-  });
-  window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
-}
-
-function exportCalendar() {
-  if (!_lastData || !_lastData.dates || _lastData.dates.length === 0) return;
-  var resum = _lastData.resum || 'nexlupa';
-  _lastData.dates.forEach(function (dt, i) {
-    var date    = parseDate(dt.data);
-    var nextDay = new Date(date);
-    nextDay.setDate(nextDay.getDate() + 1);
-    var params = new URLSearchParams({
-      action:  'TEMPLATE',
-      text:    dt.descripcio,
-      dates:   toGCalDate(date) + '/' + toGCalDate(nextDay),
-      details: '📌 ' + resum + '\n\nGenerat per nexlupa'
-    });
-    setTimeout(function () {
-      window.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank');
-    }, i * 400);
-  });
-}
+/* Calendar legacy removed: never fall back to tomorrow on invalid dates. */
 
 /* ── SHARE ── */
 function tipusIcon(tipus) {
@@ -1082,6 +1147,10 @@ function buildShareText(d) {
   lines.push('');
 
   var decisio = (d.decisio || d.resum || '').trim();
+  var shareHasTasks = Array.isArray(d.accions) && d.accions.some(function(a) {
+    return a && typeof a === 'object' && a.tipus !== 'informatiu' && a.tipus !== 'calendari';
+  });
+  if (shareHasTasks && decisio.toLowerCase() === 'cap acció necessària') decisio = 'Hi ha tasques per revisar en aquest missatge';
   if (!decisio || decisio.toLowerCase() === 'cap acció necessària') {
     lines.push('No cal fer cap acció.');
   } else {
@@ -1095,9 +1164,14 @@ function buildShareText(d) {
     lines.push('📅 Esdeveniments:');
     events.forEach(function(e) {
       lines.push('• ' + String(e.title || e.accio || 'Activitat') +
-        (e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
+        (e.estat === 'suspes' ? ' — SUSPESA' :
+          e.estat === 'recurrent' ? ' — RECURRENT' :
+          e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
+        (e.passada || e.dataDubtosa ? ' (pendent de confirmació)' : '') +
         (e.dataFi ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
         (e.lloc ? ' · ' + e.lloc : ''));
+      var mapUrl = mapsSearchUrl(e.lloc);
+      if (mapUrl) lines.push('  🗺️ ' + mapUrl);
     });
   }
   if (Array.isArray(d.recordatoris) && d.recordatoris.length) {
@@ -1111,8 +1185,9 @@ function buildShareText(d) {
   if (d.avisDates) { lines.push(''); lines.push('Data per confirmar: ' + d.avisDates); }
   if (d.dadesUtils && typeof d.dadesUtils === 'object') {
     var dataLines = [];
-    [['enllacos','Enllaç'],['iban','IBAN'],['telefons','Telèfon'],
-     ['imports','Import'],['altres','Detall']].forEach(function(entry) {
+    [['enllacos','Enllaç'],['iban','IBAN'],
+     ['ibanInvalids','IBAN NO VÀLID (no utilitzar per pagar)'],
+     ['telefons','Telèfon'],['imports','Import'],['altres','Detall']].forEach(function(entry) {
       var items = d.dadesUtils[entry[0]];
       if (Array.isArray(items)) items.forEach(function(v) {
         if (typeof v === 'string' && v.trim()) dataLines.push(entry[1] + ': ' + v);
@@ -1190,7 +1265,9 @@ function buildSharePreviewHTML(d) {
 
   if (d.accions && d.accions.length > 0) {
     html += '<div class="sc-sep"></div><div class="sc-actions">';
-    d.accions.forEach(function (a) {
+    applyPriorityHeuristics(d.accions.map(function(a){
+      return typeof a==='object'&&a ? a : {accio:String(a),tipus:'tasca',prioritat:'baixa'};
+    })).slice(0,3).forEach(function (a) {
       var isObj = typeof a === 'object' && a !== null;
       var text  = isObj ? a.accio : a;
       var tipus = isObj ? (a.tipus || 'tasca') : 'tasca';
@@ -1201,6 +1278,7 @@ function buildSharePreviewHTML(d) {
       if (data) html += '<span class="sc-act-date"> · ' + escHtml(data) + '</span>';
       html += '</span></div>';
     });
+    if (d.accions.length>3) html += '<div class="sc-act-row">+'+(d.accions.length-3)+' tasques més a NexLupa</div>';
     html += '</div>';
   }
 
@@ -1353,7 +1431,15 @@ function saveToHistorial(d) {
     urgencia:      d.urgencia      || 0,
     urgencia_text: d.urgencia_text || '',
     accions:       cleanAccions,
-    dates:         cleanDates
+    dates:         cleanDates,
+    /* Camps del motor v2: sense ells, reobrir l'historial perd esdeveniments, dades útils i avisos. */
+    decisio:       d.decisio       || '',
+    mainEvent:     d.mainEvent     || null,
+    esdeveniments: Array.isArray(d.esdeveniments) ? d.esdeveniments : [],
+    recordatoris:  Array.isArray(d.recordatoris)  ? d.recordatoris  : [],
+    dadesUtils:    d.dadesUtils    || null,
+    avisDates:     d.avisDates     || null,
+    contingut:     d.contingut     || null
   };
   _historial.push(entry);
   if (_historial.length > 30) _historial.shift();
