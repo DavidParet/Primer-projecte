@@ -1,6 +1,6 @@
 # NexLupa · UI 2.8 — Coherència FREE / Premium 1.0
 
-Branca `ui-2.0` · Interfície 2.8.0 · 2026-11-25 · Main i producció sense canvis.
+Branca `ui-2.0` · Interfície 2.8.0 (actualitzat a 2.8.1: retirat «Altres correus / Outlook», que no consta a l'acta) · 2026-11-25 · Main i producció sense canvis.
 
 **Fonts:**
 - Acta estratègica amb addenda, incloent-hi l'actualització de coherència del 25/11/2026.
@@ -21,7 +21,6 @@ La transició d'anàlisi (lupa, llum, X i implosió) no s'ha tocat.
 | Obrir ubicacions a Maps | ✓ | ✓ |
 | Afegir manualment a Google Calendar | ✓ | ✓ |
 | Gmail amb reenviament selectiu automàtic | — | ✓ (previst) |
-| Altres correus: reenviament manual | — | ✓ (previst) · *pendent de decidir, vegeu les discrepàncies* |
 | Recordatoris de terminis per correu | — | ✓ (previst) |
 | Informe setmanal PDF | — | ✓ (previst) |
 
