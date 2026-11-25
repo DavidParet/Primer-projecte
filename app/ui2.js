@@ -124,7 +124,7 @@
     var dates = c.querySelectorAll('.nx-card-date');
     for (var i = 0; i < dates.length; i++) {
       var d = dates[i], txt = d.textContent || '';
-      if (/vençut|confirma|per confirmar|passada/i.test(txt)) { d.classList.add('ui2-warn'); continue; }
+      if (/vençut|confirma|per confirmar|passada|ja ha passat|possibles|no coincideix/i.test(txt)) { d.classList.add('ui2-warn'); continue; }
       var p = parseShown(txt); if (!p) continue;
       keep(d);
       var pre = (!info && i === 0 && !/^Fins/.test(txt) && isDeadline(t)) ? '<span class="ui2-term">Termini:</span> ' : '';
@@ -399,7 +399,8 @@
   }
   function taskCard(t, pr) {
     var a = taskInfo(t.text) || {}, info = a.tipus === 'informatiu';
-    var date = a.data ? longDate(a.data) : null;
+    var alt = (a.dataAlternatives && typeof window.formatAlternatives === 'function') ? window.formatAlternatives(a.dataAlternatives) : null;
+    var date = alt ? alt + ' · cal confirmar-ne una' : (a.data ? longDate(a.data) : null);
     var dateHtml = date ? '<div class="ui2-tdate">' + ico('cal', 15, 3.6) + '<span>' + (info || pr === 'done' || !isDeadline(t.text) ? '' : '<span class="ui2-term">Termini:</span> ') + esc(date) + '</span></div>' : '';
     if (a.vençut) dateHtml += '<div class="ui2-tdate ui2-warn">Termini vençut: cal comprovar si encara es pot gestionar</div>';
     var icName = pick(t.text, info ? 'info' : 'check');
@@ -563,7 +564,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.5.0';
+  var VERSION = '2.6.0';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';

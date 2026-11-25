@@ -748,3 +748,26 @@ html:has(body.ui2) { scroll-behavior: auto !important; }
 body.ui2 .ui2-tcard.ui2-done { opacity: 1 !important; background: rgba(20,32,48,.35) !important; }
 body.ui2 .ui2-tcard.ui2-done .ui2-ttitle { color: rgba(214,222,232,.72) !important; text-decoration-color: rgba(214,222,232,.35); }
 body.ui2 .ui2-tcard.ui2-done .ui2-tchk.on .ui2-tchk-dot { background: var(--gold) !important; border-color: var(--gold) !important; color: var(--navy) !important; opacity: .92 !important; }
+
+/* ================= UI 2.6 · retocs ================= */
+/* Nota: el botó negre flotant de les captures no és de l'app (cap element fix a baix a la dreta): és una drecera del sistema Android. */
+/* Calendari: menys farciment vertical, mateixa llegibilitat i distintiu de data */
+body.ui2 .nx-event-card.ui2-event { padding: 7px 10px 8px !important; margin-bottom: 7px !important; }
+body.ui2 .ui2-event > .ui2-cal-row { row-gap: 0; column-gap: 10px; }
+body.ui2 .ui2-event .ui2-datebox { height: 38px !important; }
+body.ui2 .ui2-event > .ui2-cal-row .ui2-cal-title { line-height: 1.25 !important; }
+body.ui2 .ui2-event .nx-event-meta { gap: 1px !important; margin: 4px 0 0 50px !important; }
+body.ui2 .nx-event-chip.ui2-tile { line-height: 1.35 !important; }
+body.ui2 .ui2-event .nx-event-btn-row { margin: 5px 0 0 50px !important; gap: 6px !important; }
+body.ui2 .ui2-event .nx-event-btn { min-height: 32px; padding: 2px 11px !important; }
+body.ui2 .ui2-event .nx-card-date { margin: 3px 0 0 50px !important; }
+body.ui2 .ui2-terminis .ui2-cal-row { padding: 4px 10px !important; margin-bottom: 4px !important; }
+body.ui2 .ui2-terminis .ui2-datebox { height: 34px !important; }
+body.ui2 #nx-event-block > .nx-section-label.ui2-head.ui2-sec { margin-bottom: 7px !important; }
+/* Avís general breu de dates */
+body.ui2 #nx-date-warning:not([hidden]) { display: flex !important; align-items: center; gap: 6px; margin: 8px 2px 4px !important; padding: 6px 10px !important;
+  font-size: 12.5px !important; font-weight: 500 !important; color: #E6C77A !important; background: rgba(233,193,74,.07) !important; border: 1px solid rgba(233,193,74,.22); border-radius: 10px; }
+body.ui2 #nx-date-warning:not([hidden])::before { content: '!'; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1.25px solid currentColor; font-size: 10.5px; font-weight: 700; flex: none; }
+/* Espai reservat al final de cada pantalla perquè cap botó flotant del sistema tapi els últims controls */
+body.ui2 #pageInici .app-col-right, body.ui2 #pageTasques, body.ui2 #pageHistorial, body.ui2 #pageConfig, body.ui2 #pagePremium { scroll-padding-bottom: 84px; }
+body.ui2 #pageInici .app-col-right::after, body.ui2 #pageTasques::after, body.ui2 #pageHistorial::after { content: ''; display: block; height: 76px; flex: none; }

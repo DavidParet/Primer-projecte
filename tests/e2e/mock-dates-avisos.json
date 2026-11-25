@@ -1,0 +1,15 @@
+{
+  "resum": "Sortida al parc el divendres 25 de setembre. L'autorització s'ha de portar a secretaria el 4 o 18 d'octubre.",
+  "decisio": "Portar l'autorització el 4 o 18 d'octubre",
+  "avisDates": "La data 2026-09-25 de «Sortida al parc» ja ha passat. Confirma-la. El missatge ofereix dues dates alternatives per a «Portar l'autorització a secretaria»; cal confirmar-ne una.",
+  "revisioDates": {"requereixRevisio": true, "camps": ["Sortida al parc"]},
+  "esdeveniments": [
+    {"title": "Sortida al parc", "data": "2026-09-25 09:30", "lloc": "Parc de la Ciutadella", "passada": true, "motiuDubte": "Aquesta data ja ha passat"},
+    {"title": "Festival de Nadal", "data": "2026-12-19 11:00", "lloc": "Pavelló municipal"}
+  ],
+  "accions": [
+    {"accio": "Portar l'autorització a secretaria", "data": "2026-10-04", "prioritat": "alta", "tipus": "tasca", "dataDubtosa": true, "dataAlternatives": ["2026-10-04", "2026-10-18"], "motiuDubte": "Dues dates possibles: cal confirmar-ne una"},
+    {"accio": "Portar esmorzar i aigua", "data": "2026-12-19", "prioritat": "mitja", "tipus": "tasca"}
+  ],
+  "recordatoris": []
+}

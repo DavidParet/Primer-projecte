@@ -25,7 +25,7 @@ function dom(){
     splitDateTime:date=>date?{date:'14 novembre',time:null}:{date:null,time:null},
     calcDiesRestants:()=>null,
     canOpenMaps:()=>false,
-    formatActionDate:v=>v,
+    formatActionDate:v=>v, formatAlternatives:()=>null,
     _buildLlocLink:lloc=>{const el=new Element('span');el.textContent=lloc;return el},
     _lastData:null
   };

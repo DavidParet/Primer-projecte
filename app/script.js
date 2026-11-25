@@ -423,6 +423,17 @@ function showErr(msg) {
 /* ── RENDER RESULTS ── */
 
 /* ── FORMAT DATA LLEGIBLE (ISO format: YYYY-MM-DD HH:MM o YYYY-MM-DDTHH:MM) ── */
+/* Q2: dues dates alternatives en format natural: «4 o 18 d’octubre» / «30 de setembre o 2 d’octubre» */
+function formatAlternatives(list) {
+  if (!Array.isArray(list) || list.length < 2) return null;
+  var MES = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+  var p = list.map(function (v) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v || ''); return m ? { d: +m[3], m: +m[2] - 1 } : null; }).filter(Boolean);
+  if (p.length < 2) return null;
+  var de = function (i) { return /^[aeiou]/.test(MES[i]) ? ' d’' : ' de '; };
+  if (p.every(function (x) { return x.m === p[0].m; }))
+    return p.map(function (x) { return x.d; }).join(' o ') + de(p[0].m) + MES[p[0].m];
+  return p.map(function (x) { return x.d + de(x.m) + MES[x.m]; }).join(' o ');
+}
 function formatActionDate(str) {
   if (!str || str === 'null') return null;
   var m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
@@ -643,8 +654,9 @@ function buildEventCard(mainEvent) {
   var note = null;
   if (mainEvent.estat === 'suspes') note = 'Activitat suspesa · no es pot afegir al calendari';
   else if (mainEvent.estat === 'recurrent') note = 'Activitat recurrent · no és una cita única';
-  else if (mainEvent.passada) note = 'Data passada · confirma-la abans de guardar';
-  else if (mainEvent.dataDubtosa) note = 'Data interpretada · pendent de confirmació';
+  else if (mainEvent.dataAlternatives) note = 'Dues dates possibles: ' + formatAlternatives(mainEvent.dataAlternatives) + ' · cal confirmar-ne una';
+  else if (mainEvent.passada) note = 'Aquesta data ja ha passat · confirma-la';
+  else if (mainEvent.dataDubtosa) note = (mainEvent.motiuDubte || 'Data interpretada') + ' · pendent de confirmació';
   else if (!mainEvent.data) note = 'Data pendent de confirmar';
   if (note) {
     var noteEl = document.createElement('div');
@@ -802,7 +814,7 @@ function buildActionCard(a, cardClass) {
   row.appendChild(textEl);
   card.appendChild(row);
 
-  var fmtDate = formatActionDate(a.data);
+  var fmtDate = formatAlternatives(a.dataAlternatives) || formatActionDate(a.data);
   if (fmtDate) {
     var dateEl = document.createElement('div');
     dateEl.className   = 'nx-card-date';
@@ -825,8 +837,9 @@ function buildActionCard(a, cardClass) {
   if (a.passada || a.dataDubtosa || (!a.data && a.dataOriginal)) {
     var unsureLabel = document.createElement('div');
     unsureLabel.className = 'nx-card-date';
-    unsureLabel.textContent = a.passada ? 'Data passada: confirma-la abans de guardar' :
-      'Data per confirmar; no s’exportarà al calendari';
+    unsureLabel.textContent = a.dataAlternatives ? 'Dues dates possibles: cal confirmar-ne una' :
+      a.passada ? 'Aquesta data ja ha passat: confirma-la' :
+      (a.motiuDubte || 'Data per confirmar') + '; no s’exportarà al calendari';
     card.appendChild(unsureLabel);
   }
   if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
@@ -944,6 +957,7 @@ function renderResult(d) {
       data: a.data || null, dataFi: a.dataFi || null,
       vençut: !!a.vençut, passada: !!a.passada,
       dataDubtosa: !!a.dataDubtosa, dataOriginal: a.dataOriginal || null,
+      dataAlternatives: Array.isArray(a.dataAlternatives) ? a.dataAlternatives : null, motiuDubte: a.motiuDubte || null,
       estat: a.estat || null,
       prioritat: (a.prioritat || 'baixa').toLowerCase(),
       lloc: a.lloc || null, enllac: a.enllac || null };
@@ -981,7 +995,8 @@ function renderResult(d) {
 
   var dateWarning = document.getElementById('nx-date-warning');
   if (dateWarning) {
-    dateWarning.textContent = typeof d.avisDates === 'string' ? d.avisDates : '';
+    /* Q2: avís general breu; el motiu concret es mostra a cada targeta afectada */
+    dateWarning.textContent = typeof d.avisDates === 'string' && d.avisDates.trim() ? 'Hi ha dates que cal confirmar' : '';
     dateWarning.hidden = !dateWarning.textContent;
   }
 
@@ -1230,8 +1245,8 @@ function buildShareText(d) {
       if (i > 0) lines.push('');
       lines.push('→ ' + a.text);
       if (a.data && a.data !== 'null') {
-        var fmtDate = formatActionDate(a.data);
-        if (fmtDate) lines.push(fmtDate);
+        var fmtDate = formatAlternatives(a.dataAlternatives) || formatActionDate(a.data);
+        if (fmtDate) lines.push(fmtDate + (a.dataAlternatives ? ' (cal confirmar-ne una)' : ''));
       }
     });
   }
@@ -1502,8 +1517,8 @@ function renderHistory(query) {
     var numAccions = item.accions ? item.accions.length : 0;
     var numDates   = item.dates   ? item.dates.length   : 0;
     var metaParts  = [escHtml(item.date)];
-    if (numAccions > 0) metaParts.push(numAccions + ' accions');
-    if (numDates   > 0) metaParts.push(numDates   + ' dates');
+    if (numAccions > 0) metaParts.push(numAccions + (numAccions === 1 ? ' acció' : ' accions'));
+    if (numDates   > 0) metaParts.push(numDates   + (numDates === 1 ? ' data' : ' dates'));
     div.innerHTML =
       '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
       '<div class="hist-meta">' + metaParts.join(' &nbsp;·&nbsp; ') + '</div>';
@@ -1527,8 +1542,8 @@ function renderHistorial() {
     var numAccions = item.accions ? item.accions.length : 0;
     var numDates   = item.dates   ? item.dates.length   : 0;
     var metaParts  = [escHtml(item.date)];
-    if (numAccions > 0) metaParts.push(numAccions + ' accions');
-    if (numDates   > 0) metaParts.push(numDates   + ' dates');
+    if (numAccions > 0) metaParts.push(numAccions + (numAccions === 1 ? ' acció' : ' accions'));
+    if (numDates   > 0) metaParts.push(numDates   + (numDates === 1 ? ' data' : ' dates'));
     div.innerHTML =
       '<div class="hist-title">' + escHtml(item.resum) + '</div>' +
       '<div class="hist-meta">' + metaParts.join(' · ') + '</div>';
