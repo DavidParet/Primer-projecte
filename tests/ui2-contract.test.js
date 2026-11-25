@@ -40,3 +40,14 @@ test('UI2: es conserven els IDs que fa servir el motor', () => {
     assert.match(html, new RegExp('id="' + id + '"'), id);
   }
 });
+test('UI2.1: reversible — no s’autoactiva, admet ?ui2=off i disable()', () => {
+  assert.doesNotMatch(ui2js, /classList\.add\(\s*['"]ui2['"]\s*\)/);
+  assert.match(ui2js, /ui2=off/);
+  assert.match(ui2js, /disable:\s*disable/);
+});
+test('UI2.1: l’indicador original només s’amaga mentre la capa animada és activa', () => {
+  const css = fs.readFileSync(path.join(root, 'app/ui2.css'), 'utf8');
+  assert.doesNotMatch(css, /body\.ui2 \.loading\.on \{ display: none/);
+  assert.match(css, /body\.ui2\.ui2-scanning \.loading\.on \{ display: none/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});
