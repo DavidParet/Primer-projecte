@@ -106,7 +106,8 @@ test('F1: Google Maps genera enllaç només per recinte concret',()=>{
 test('F1: les dades de calendari i de compartir contenen l’enllaç Maps segur',()=>{
  assert.match(SRC,/details \+= '\\nMapa: ' \+ actionMapUrl/);
  assert.match(SRC,/if \(mapUrl\) lines\.push\('  🗺️ ' \+ mapUrl\)/);
- assert.match(SRC,/mapsBtn\.href\s*=\s*mapsSearchUrl\(mainEvent\.lloc\)/);
+ assert.match(SRC,/mapsBtn\.href\s*=\s*placeMapsUrl\(mainEvent\)/);
+ assert.match(SRC,/function placeMapsUrl\(x\) \{ return x \? \(x\.adreca \? mapsSearchUrl\(x\.adreca\) : mapsSearchUrl\(x\.lloc\)\) : null; \}/);
 });
 test('F2: la vista limita a tres i conserva un desplegable accessible',()=>{
  const html=fs.readFileSync(require('node:path').join(__dirname,'../app/index.html'),'utf8');

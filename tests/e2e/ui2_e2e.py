@@ -4,7 +4,7 @@ Requisits locals: python3 + playwright + Chrome/Chromium. No usa serveis externs
 /api/analyze se simula dins del navegador amb respostes deterministes (tests/e2e/mock-*.json).
 Ús:  python3 tests/e2e/ui2_e2e.py [--shots DIR]
 Surt amb codi 1 si alguna comprovació falla."""
-import json, os, sys, threading, functools, http.server, pathlib
+import json, os, re, sys, threading, functools, http.server, pathlib
 from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 E2E = ROOT / 'tests' / 'e2e'
@@ -184,6 +184,39 @@ with sync_playwright() as p:
       const bg=L('rgb(34,54,76)');const r=s=>{const e=document.querySelector(s);if(!e)return null;const l=L(getComputedStyle(e).color);return +( (Math.max(l,bg)+.05)/(Math.min(l,bg)+.05) ).toFixed(2)};
       return {titol:r('.nx-p1-card .nx-card-text'),p1:r('.nx-p1-card .nx-card-date'),p2:r('.nx-p2-card .nx-card-date'),p3:r('.nx-info-card .nx-card-date'),resum:r('.nx-decisio-text')}}""")
     check(all(v and v >= 4.5 for v in cr.values()), f'contrast ≥ 4,5:1 {cr}')
+    c.close()
+
+    print('J · UI 2.9: proves reals d’imatges, terminis i lupa unificada')
+    for name in ('escola', 'cartell'):
+        mk = (E2E / f'mock-imatge-{name}.json').read_text()
+        for w, z in ((390, 1), (360, 1), (390, 1.3)):
+            c = ctx(w, 844); pg = c.new_page()
+            if z != 1: pg.add_init_script(f"document.addEventListener('DOMContentLoaded',function(){{document.documentElement.style.zoom='{z}'}});")
+            _, st = run(pg, mk, delay=400, wait=2600)
+            j = pg.evaluate("""()=>({chips:[...document.querySelectorAll('#nx-event-content .nx-event-chip')].map(e=>e.textContent.trim()).join(' | '),
+              maps:(document.querySelector('.nx-event-btn-maps')||{}).href||'', dates:[...document.querySelectorAll('#results .nx-card-date')].map(e=>e.textContent.trim()).join(' | '),
+              term:[...document.querySelectorAll('#ui2-terminis .ui2-termini')].map(e=>e.textContent.replace(/\\s+/g,' ').trim()),
+              utils:(document.getElementById('nx-utils-content')||{}).innerText||'', note:!document.getElementById('nx-image-note').hidden,
+              noteInUtils:/imatge/.test((document.getElementById('nx-utils-content')||{}).innerText||''),
+              cardTexts:[...document.querySelectorAll('#results .nx-card-text')].map(e=>e.textContent).join(' | ')})""")
+            tag = f'{name} {w}' + (' text 130%' if z != 1 else '')
+            check(st['resultsOn'] and not st['errs'] and not st['overflowX'], f'{tag}: resultat visible, sense errors ni desbordament')
+            check(j['note'] and not j['noteInUtils'], f'{tag}: avís d’imatge com a nota final, no com a dada útil')
+            check(all(len(t) < 80 for t in j['term']) and all('Tasques' in t for t in j['term']), f'{tag}: Terminis breus amb enllaç a Tasques')
+            if name == 'escola':
+                check('Sortida de l\'escola 8:45 h' in j['chips'] and 'Tornada cap a les 16:30 h' in j['chips'] and re.search(r'Destinació:? Museu Marítim de Barcelona', j['chips']), f'{tag}: sortida, tornada i destinació separades')
+                check('Abans del 3 de des' in j['dates'] and 'Abans del 4 de des' in j['dates'], f'{tag}: «abans del» als terminis')
+                check('El preu és de 14 €' in j['utils'] and 'esmorzar, dinar i aigua' in j['cardTexts'], f'{tag}: 14 € i esmorzar, dinar i aigua conservats')
+            else:
+                check('Pati de l\'escola · C/ dels Pins, 12, Sant Cugat' in j['chips'], f'{tag}: lloc i adreça literals')
+                check('query=C%2F%20dels%20Pins%2C%2012%2C%20Sant%20Cugat' in j['maps'], f'{tag}: Maps amb l’adreça escrita, sense coordenades')
+                check('Fins al 15 de des inclòs' in j['dates'], f'{tag}: «fins al» conservat')
+                check('Xocolatada solidària: 2 €' in j['utils'], f'{tag}: 2 € lligats a la xocolatada')
+            if SHOTS: shot(pg, f'J_{name}_{w}' + ('_z130' if z != 1 else ''), True)
+            c.close()
+    c = ctx(); pg = c.new_page(); mid, _ = run(pg, escola, delay=3000, wait=300)
+    lp = pg.evaluate("(()=>{const i=document.querySelector('.ui2-lupa-still');return i?i.getAttribute('src'):''})()")
+    check(lp.endswith('nexlupa-lupa.svg'), 'pantalla d’espera: lupa unificada (nexlupa-lupa.svg)')
     c.close()
     b.close()
 srv.shutdown()

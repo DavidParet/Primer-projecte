@@ -865,3 +865,22 @@ body.ui2 .ptest-row { display: flex; gap: 8px; margin-top: 8px; }
 body.ui2 .ptest-btn { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #EECB5A, #DDB43E); color: #0D1B2A; font-weight: 700; font-size: 13.5px; cursor: pointer; }
 body.ui2 .ptest-btn.ghost { background: transparent; border: 1px solid rgba(160,180,205,.3); color: #C9D2DD; font-weight: 500; }
 body.ui2 .ptest-status { font-size: 12.5px; color: #8FCBB2; margin: 8px 0 0; min-height: 1em; }
+
+/* ═══ UI 2.9 · lectura del resultat ═══ */
+body.ui2 a.ui2-termini { text-decoration: none; color: inherit; }
+body.ui2 .ui2-termini .ui2-cal-title { font-size: 14px; }
+body.ui2 .ui2-termini .ui2-cal-title small { text-transform: none; letter-spacing: 0; }
+body.ui2 .ui2-goto { font-size: 12px; font-weight: 600; color: #8A97B2; white-space: nowrap; }
+body.ui2 .ui2-cal-time small { display: block; font-size: 10px; font-weight: 600; letter-spacing: .02em; color: #8A97B2; line-height: 1.1; }
+body.ui2 .ui2-pulse { animation: ui2-pulse 1.2s ease-out 1; }
+@keyframes ui2-pulse { 0% { box-shadow: 0 0 0 0 rgba(250,188,54,.55); } 100% { box-shadow: 0 0 0 14px rgba(250,188,54,0); } }
+@media (prefers-reduced-motion: reduce) { body.ui2 .ui2-pulse { animation: none; outline: 2px solid #FABC36; outline-offset: 2px; } }
+.nx-image-note { margin: 18px 4px 6px; font-size: 12px; line-height: 1.45; color: #8A97B2; text-align: center; }
+body.ui2 .nx-image-note { color: #8A97B2; }
+
+/* UI 2.9 · lupa unificada (nexlupa-lupa.svg, extreta del logotip): llum i punt centrats al disc daurat */
+.ui2-scan24 .ui2-lens-glow { left: 38.03%; top: 39.07%; width: 35.44%; height: 35.44%; }
+.ui2-scan24 .ui2-lens-orbit { left: 38.03%; top: 39.07%; }
+.ui2-scan24 .ui2-lens-orbit i { transform: translateX(19.3px); }
+/* UI 2.9 · lupa monocroma dins les caselles d'icona (font-size 0 a la UI 2) */
+body.ui2 .c-icon .nx-lupa-mono, body.ui2 .feat-icon-sm .nx-lupa-mono { width: 18px; height: 18px; color: var(--gold); vertical-align: 0; }

@@ -289,7 +289,7 @@ function checkLimit() {
   }
   banner.style.display = 'none';
   btn.disabled = false;
-  btn.innerHTML = '🔍 &nbsp;Analitzar amb NexLupa';
+  btn.innerHTML = '<span class="nx-lupa-mono" aria-hidden="true"></span> &nbsp;Analitzar amb NexLupa';
   return true;
 }
 
@@ -506,6 +506,29 @@ function formatActionDate(str) {
   return out;
 }
 
+/* UI 2.9 · termini segons la font: «abans del» (el dia ja és tard) o «fins al» (el dia encara val) */
+function deadlineLabel(a, fmt) {
+  if (!a || !fmt) return fmt;
+  var m = /(\d{1,2})\s+(\S+)(?:\s*·\s*(\d{1,2}:\d{2}))?$/.exec(fmt.replace(/^\S+\s+/, ''));
+  var dayName = fmt.split(' ')[0].toLowerCase();
+  if (!m) return fmt;
+  var core = m[1] + ' de ' + m[2], tail = ' (' + dayName + ')' + (m[3] ? ' · ' + m[3] : '');
+  if (a.tipusTermini === 'abans') return 'Abans del ' + core + tail;
+  if (a.tipusTermini === 'fins') return 'Fins al ' + core + ' inclòs' + tail;
+  return fmt;
+}
+/* Lloc + adreça literal; Maps obre l'adreça escrita al missatge (mai coordenades inventades) */
+function placeText(x) { return x && x.lloc ? (x.adreca && x.adreca !== x.lloc ? x.lloc + ' · ' + x.adreca : x.lloc) : (x && x.adreca) || ''; }
+function placeMapsUrl(x) { return x ? (x.adreca ? mapsSearchUrl(x.adreca) : mapsSearchUrl(x.lloc)) : null; }
+function tripFrom(lloc) {
+  if (!lloc) return '';
+  var t = String(lloc).trim();
+  if (/^l['’]/i.test(t)) return ' de ' + t;
+  if (/^el\s/i.test(t)) return ' del ' + t.slice(3);
+  return ' de ' + t;
+}
+function shortHour(h) { return String(h || '').replace(/^0(\d)/, '$1'); }
+
 /* ── PRIORITY HEURISTICS ── */
 function applyPriorityHeuristics(accions) {
   var result = accions.map(function(a, i) {
@@ -602,10 +625,17 @@ function addActionToCalendar(a) {
   var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per NexLupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
   if (multiDayAllDay) details += '\nActivitat de diversos dies: s’ha representat com a dies complets perquè l’hora final no consta. Revisa-ho abans de desar.';
-  var actionMapUrl = typeof mapsSearchUrl==='function' ? mapsSearchUrl(a.lloc) : null;
+  if (a.desplacament) {
+    var dp = a.desplacament;
+    if (dp.sortida) details += '\nSortida' + tripFrom(dp.sortida.lloc) + ' a les ' + shortHour(dp.sortida.hora) + ' h';
+    if (dp.tornada) details += '\nTornada ' + (dp.tornada.aprox ? 'cap a les ' : 'a les ') + shortHour(dp.tornada.hora) + ' h';
+  }
+  if (a.tipusTermini === 'abans') details += '\nTermini: abans d’aquesta data (aquest dia ja és tard).';
+  if (a.tipusTermini === 'fins') details += '\nTermini: fins a aquesta data, inclosa.';
+  var actionMapUrl = typeof mapsSearchUrl==='function' ? placeMapsUrl(a) : null;
   if (actionMapUrl) details += '\nMapa: ' + actionMapUrl;
   var calParams = { action: 'TEMPLATE', text: String(a.accio || ''), dates: startStr + '/' + endStr, details: details, ctz: 'Europe/Madrid' };
-  if (a.lloc) calParams.location = a.lloc;
+  if (a.lloc || a.adreca) calParams.location = placeText(a);
   var params  = new URLSearchParams(calParams);
   /* Anchor click evita que el popup blocker talli l'obertura */
   var url  = 'https://calendar.google.com/calendar/render?' + params.toString();
@@ -649,8 +679,8 @@ function mapsSearchUrl(lloc) {
   return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lloc.trim());
 }
 
-function _buildLlocLink(lloc) {
-  var mapsUrl = mapsSearchUrl(lloc);
+function _buildLlocLink(lloc, url) {
+  var mapsUrl = url !== undefined ? url : mapsSearchUrl(lloc);
   var el = document.createElement(mapsUrl ? 'a' : 'span');
   el.className = 'nx-card-lloc';
   el.textContent = '📍 ' + lloc;
@@ -742,22 +772,37 @@ function buildEventCard(mainEvent) {
     dc.textContent = '📅 ' + dt.date;
     meta.appendChild(dc);
   }
+  var trip = mainEvent.desplacament || null;
   if (dt.time) {
     var tc = document.createElement('span');
     tc.className   = 'nx-event-chip';
     tc.textContent = '🕒 ' + dt.time;
     meta.appendChild(tc);
   }
-  if (mainEvent.dataFi && mainEvent.dataFi !== mainEvent.data) {
+  if (trip && trip.sortida) {
+    card.setAttribute('data-sortida', shortHour(trip.sortida.hora));
+    var sc = document.createElement('span');
+    sc.className = 'nx-event-chip nx-chip-trip';
+    sc.textContent = '🚌 Sortida' + tripFrom(trip.sortida.lloc) + ' · ' + shortHour(trip.sortida.hora) + ' h';
+    meta.appendChild(sc);
+  }
+  if (trip && trip.tornada) {
+    var rc = document.createElement('span');
+    rc.className = 'nx-event-chip nx-chip-trip';
+    rc.textContent = '↩️ Tornada ' + (trip.tornada.aprox ? 'cap a les ' : 'a les ') + shortHour(trip.tornada.hora) + ' h';
+    meta.appendChild(rc);
+  }
+  if (mainEvent.dataFi && mainEvent.dataFi !== mainEvent.data && !(trip && trip.tornada)) {
     var endChip = document.createElement('span');
     endChip.className = 'nx-event-chip';
-    endChip.textContent = 'Fins: ' + (formatActionDate(mainEvent.dataFi) || mainEvent.dataFi);
+    var sameDay = typeof mainEvent.data === 'string' && mainEvent.data.slice(0, 10) === String(mainEvent.dataFi).slice(0, 10) && /\d{2}:\d{2}$/.test(mainEvent.dataFi);
+    endChip.textContent = 'Fins: ' + (sameDay ? 'les ' + shortHour(String(mainEvent.dataFi).slice(11, 16)) + ' h' : (formatActionDate(mainEvent.dataFi) || mainEvent.dataFi));
     meta.appendChild(endChip);
   }
-  if (mainEvent.lloc) {
+  if (mainEvent.lloc || mainEvent.adreca) {
     var lc = document.createElement('span');
     lc.className   = 'nx-event-chip nx-chip-lloc';
-    lc.textContent = '📍 ' + mainEvent.lloc;
+    lc.textContent = '📍 ' + (mainEvent.desti ? 'Destinació: ' : '') + placeText(mainEvent);
     meta.appendChild(lc);
   }
   if (mainEvent.edat) {
@@ -783,7 +828,7 @@ function buildEventCard(mainEvent) {
 
   if (mainEvent.data && mainEvent.data !== 'null' && !mainEvent.passada && !mainEvent.dataDubtosa &&
       mainEvent.estat !== 'suspes' && mainEvent.estat !== 'recurrent') {
-    var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc, dataFi: mainEvent.dataFi };
+    var calAction = { accio: mainEvent.title || mainEvent.accio, data: mainEvent.data, lloc: mainEvent.lloc, adreca: mainEvent.adreca, dataFi: mainEvent.dataFi, desplacament: mainEvent.desplacament };
     var calBtn = document.createElement('button');
     calBtn.className   = 'nx-event-btn nx-event-btn-cal';
     calBtn.textContent = '📅 Afegir al calendari';
@@ -791,10 +836,10 @@ function buildEventCard(mainEvent) {
     btnRow.appendChild(calBtn);
   }
 
-  if (typeof mapsSearchUrl==='function' && mapsSearchUrl(mainEvent.lloc)) {
+  if (typeof mapsSearchUrl==='function' && placeMapsUrl(mainEvent)) {
     var mapsBtn = document.createElement('a');
     mapsBtn.className   = 'nx-event-btn nx-event-btn-maps';
-    mapsBtn.href        = mapsSearchUrl(mainEvent.lloc);
+    mapsBtn.href        = placeMapsUrl(mainEvent);
     mapsBtn.target      = '_blank';
     mapsBtn.rel         = 'noopener noreferrer';
     mapsBtn.textContent = '🗺️ Obrir Maps';
@@ -874,7 +919,7 @@ function buildActionCard(a, cardClass) {
   row.appendChild(textEl);
   card.appendChild(row);
 
-  var fmtDate = formatAlternatives(a.dataAlternatives) || formatActionDate(a.data);
+  var fmtDate = formatAlternatives(a.dataAlternatives) || deadlineLabel(a, formatActionDate(a.data));
   if (fmtDate) {
     var dateEl = document.createElement('div');
     dateEl.className   = 'nx-card-date';
@@ -902,7 +947,7 @@ function buildActionCard(a, cardClass) {
       (a.motiuDubte || 'Data per confirmar') + '; no s’exportarà al calendari';
     card.appendChild(unsureLabel);
   }
-  if (a.lloc) card.appendChild(_buildLlocLink(a.lloc));
+  if (a.lloc || a.adreca) card.appendChild(_buildLlocLink(placeText(a), placeMapsUrl(a)));
   if (typeof a.enllac === 'string' && /^https?:\/\//i.test(a.enllac)) {
     var actionLink = document.createElement('a');
     actionLink.href = a.enllac;
@@ -949,12 +994,6 @@ function renderUsefulData(items) {
   if (!block || !container) return;
   container.textContent = '';
   if (!items || typeof items !== 'object') {block.style.display='none';return;}
-  if (items.origenImatge) {
-    var fromImageNote = document.createElement('div');
-    fromImageNote.className = 'nx-card-date';
-    fromImageNote.textContent = 'Dades llegides d’una imatge: comprova-les abans d’utilitzar-les.';
-    container.appendChild(fromImageNote);
-  }
   if (Array.isArray(items.avisos)) items.avisos.forEach(function(av) {
     var note = document.createElement('div');
     note.className = 'nx-card-date';
@@ -967,6 +1006,14 @@ function renderUsefulData(items) {
     ['imports','Imports'],['altres','Altres dades']
   ];
   var count = 0;
+  /* Imports amb el seu concepte literal («Xocolatada solidària: 2 €»), sense perdre cap import */
+  var detail = Array.isArray(items.importsDetall) ? items.importsDetall : [];
+  var shownImports = detail.filter(function (x) { return x && x.concepte && x.concepte !== x.import; })
+    .map(function (x) { return x.concepte; });
+  var covered = detail.map(function (x) { return x && x.import; });
+  if (shownImports.length) {
+    items = Object.assign({}, items, { imports: shownImports.concat((items.imports || []).filter(function (v) { return covered.indexOf(v) < 0; })) });
+  }
   groups.forEach(function(group) {
     var arr = Array.isArray(items[group[0]]) ? items[group[0]] : [];
     if (!arr.length) return;
@@ -1020,7 +1067,8 @@ function renderResult(d) {
       dataAlternatives: Array.isArray(a.dataAlternatives) ? a.dataAlternatives : null, motiuDubte: a.motiuDubte || null,
       estat: a.estat || null,
       prioritat: (a.prioritat || 'baixa').toLowerCase(),
-      lloc: a.lloc || null, enllac: a.enllac || null };
+      lloc: a.lloc || null, adreca: a.adreca || null, enllac: a.enllac || null,
+      tipusTermini: a.tipusTermini === 'abans' || a.tipusTermini === 'fins' ? a.tipusTermini : null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
@@ -1077,6 +1125,8 @@ function renderResult(d) {
 
   renderFutureNotices(d.recordatoris);
   renderUsefulData(d.dadesUtils);
+  var imgNote = document.getElementById('nx-image-note');
+  if (imgNote) imgNote.hidden = !(d.origenImatge || (d.dadesUtils && d.dadesUtils.origenImatge));
 
   /* P1 — ACCIONS IMPRESCINDIBLES */
   var p1Block   = document.getElementById('nx-p1-block');
@@ -1243,9 +1293,11 @@ function buildShareText(d) {
           e.estat === 'recurrent' ? ' — RECURRENT' :
           e.data ? ' — ' + (formatActionDate(e.data) || e.data) : ' — data per confirmar') +
         (e.passada || e.dataDubtosa ? ' (pendent de confirmació)' : '') +
-        (e.dataFi ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
-        (e.lloc ? ' · ' + e.lloc : ''));
-      var mapUrl = mapsSearchUrl(e.lloc);
+        (e.dataFi && !(e.desplacament && e.desplacament.tornada) ? ' fins ' + (formatActionDate(e.dataFi) || e.dataFi) : '') +
+        ((e.lloc || e.adreca) ? ' · ' + (e.desti ? 'destinació: ' : '') + placeText(e) : ''));
+      if (e.desplacament && e.desplacament.sortida) lines.push('  Sortida' + tripFrom(e.desplacament.sortida.lloc) + ' a les ' + shortHour(e.desplacament.sortida.hora) + ' h');
+      if (e.desplacament && e.desplacament.tornada) lines.push('  Tornada ' + (e.desplacament.tornada.aprox ? 'cap a les ' : 'a les ') + shortHour(e.desplacament.tornada.hora) + ' h');
+      var mapUrl = placeMapsUrl(e);
       if (mapUrl) lines.push('  🗺️ ' + mapUrl);
     });
   }
@@ -1264,6 +1316,11 @@ function buildShareText(d) {
      ['ibanInvalids','IBAN NO VÀLID (no utilitzar per pagar)'],
      ['telefons','Telèfon'],['imports','Import'],['altres','Detall']].forEach(function(entry) {
       var items = d.dadesUtils[entry[0]];
+      if (entry[0] === 'imports' && Array.isArray(d.dadesUtils.importsDetall) && d.dadesUtils.importsDetall.length) {
+        var cov = d.dadesUtils.importsDetall.map(function (x) { return x.import; });
+        items = d.dadesUtils.importsDetall.map(function (x) { return x.concepte || x.import; })
+          .concat((items || []).filter(function (v) { return cov.indexOf(v) < 0; }));
+      }
       if (Array.isArray(items)) items.forEach(function(v) {
         if (typeof v === 'string' && v.trim()) dataLines.push(entry[1] + ': ' + v);
       });
@@ -1284,11 +1341,11 @@ function buildShareText(d) {
     text = text.trim();
     var data  = isObj ? (a.data || null) : null;
     var prior = isObj ? (a.prioritat || 'baixa') : 'baixa';
-    return text ? { accio: text, data: data, prioritat: prior } : null;
+    return text ? { accio: text, data: data, prioritat: prior, tipusTermini: isObj ? a.tipusTermini : null, dataAlternatives: isObj ? a.dataAlternatives : null } : null;
   }).filter(Boolean);
 
   var accions = applyPriorityHeuristics(rawAccions).map(function(a) {
-    return { text: a.accio, data: a.data };
+    return { text: a.accio, data: a.data, tipusTermini: a.tipusTermini, dataAlternatives: a.dataAlternatives };
   });
 
   /* Ordenar: primer les que tenen data */
@@ -1305,7 +1362,7 @@ function buildShareText(d) {
       if (i > 0) lines.push('');
       lines.push('→ ' + a.text);
       if (a.data && a.data !== 'null') {
-        var fmtDate = formatAlternatives(a.dataAlternatives) || formatActionDate(a.data);
+        var fmtDate = formatAlternatives(a.dataAlternatives) || deadlineLabel(a, formatActionDate(a.data));
         if (fmtDate) lines.push(fmtDate + (a.dataAlternatives ? ' (cal confirmar-ne una)' : ''));
       }
     });
@@ -1316,6 +1373,7 @@ function buildShareText(d) {
     lines.push('Resum:');
     lines.push(d.resum);
   }
+  if (d.origenImatge) { lines.push(''); lines.push('Nota: dades llegides d’una imatge; comprova-les abans d’utilitzar-les.'); }
 
   lines.push('');
   lines.push('—');
@@ -1390,7 +1448,7 @@ function copyCardText() {
 
 /* ── ONBOARDING ── */
 var OB_STEPS = [
-  { icon: '🔍', title: 'Benvingut a NexLupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
+  { icon: 'lupa', title: 'Benvingut a NexLupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
   { icon: '✅', title: 'Resum + Accions + Dates', desc: 'NexLupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
   { icon: '📅', title: 'Calendar, WhatsApp i historial', desc: 'Afegeix manualment les dates al Google Calendar, comparteix el resultat per WhatsApp i consulta l’historial dels missatges analitzats.' }
 ];
@@ -1406,7 +1464,8 @@ function nextStep() {
   _obStep++;
   if (_obStep >= OB_STEPS.length) { closeOnboarding(); return; }
   var s = OB_STEPS[_obStep];
-  document.getElementById('obIcon').textContent  = s.icon;
+  var obIc = document.getElementById('obIcon');
+  if (s.icon === 'lupa') obIc.innerHTML = '<span class="nx-lupa" aria-hidden="true"></span>'; else obIc.textContent = s.icon;
   document.getElementById('obTitle').textContent = s.title;
   document.getElementById('obDesc').textContent  = s.desc;
   document.getElementById('obStep').textContent  = 'PAS ' + (_obStep + 1) + ' DE ' + OB_STEPS.length;

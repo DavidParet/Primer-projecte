@@ -2120,3 +2120,8 @@ body.dark #pageApp .app-col-right textarea:focus {
 .nx-more-actions-toggle:focus-visible { outline: 2px solid #d4a830; outline-offset: 2px; }
 #nx-more-actions-content { margin-top: 12px; }
 #nx-more-actions-content .nx-action-card { margin-bottom: 8px; }
+
+/* UI 2.9 · lupa NexLupa unificada (assets/nexlupa-lupa.svg; versió monocroma per a icones petites) */
+.nx-lupa { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; background: url(assets/nexlupa-lupa.svg) center / contain no-repeat; }
+.nx-lupa-mono { display: inline-block; width: 1em; height: 1em; vertical-align: -0.14em; background-color: currentColor;
+  -webkit-mask: url(assets/nexlupa-lupa-mono.svg) center / contain no-repeat; mask: url(assets/nexlupa-lupa-mono.svg) center / contain no-repeat; }

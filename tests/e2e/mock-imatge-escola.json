@@ -1,0 +1,104 @@
+{
+ "resum": "Sortida al Museu Marítim de Barcelona el dimecres 9 de desembre. Sortirem de l'escola a les 8:45 h i tornarem cap a les 16:30 h.",
+ "decisio": "Fer el pagament de 14 € abans del 3 de desembre i portar l’autorització signada abans del 4.",
+ "esdeveniments": [
+  {
+   "title": "Sortida al Museu Marítim de Barcelona",
+   "data": "2026-12-09 08:45",
+   "dataDubtosa": false,
+   "dataFi": "2026-12-09 16:30",
+   "lloc": "Museu Marítim de Barcelona",
+   "edat": null,
+   "desplacament": {
+    "sortida": {
+     "hora": "08:45",
+     "lloc": "l'escola"
+    },
+    "tornada": {
+     "hora": "16:30",
+     "aprox": true
+    }
+   },
+   "desti": "Museu Marítim de Barcelona"
+  }
+ ],
+ "accions": [
+  {
+   "accio": "Fer el pagament de 14 € de la sortida abans del 3 de desembre",
+   "tipus": "tasca",
+   "data": "2026-12-03",
+   "prioritat": "alta",
+   "dataFi": null,
+   "dataDubtosa": false,
+   "lloc": null,
+   "enllac": null,
+   "tipusTermini": "abans"
+  },
+  {
+   "accio": "Portar l’autorització signada abans del 4 de desembre",
+   "tipus": "tasca",
+   "data": "2026-12-04",
+   "prioritat": "alta",
+   "dataFi": null,
+   "dataDubtosa": false,
+   "lloc": null,
+   "enllac": null,
+   "tipusTermini": "abans"
+  },
+  {
+   "accio": "Portar esmorzar, dinar i aigua el dia de la sortida",
+   "tipus": "tasca",
+   "data": "2026-12-09",
+   "prioritat": "mitja",
+   "dataFi": null,
+   "dataDubtosa": false,
+   "lloc": null,
+   "enllac": null
+  }
+ ],
+ "recordatoris": [],
+ "dadesUtils": {
+  "enllacos": [],
+  "iban": [],
+  "ibanInvalids": [],
+  "imports": [
+   "14 €"
+  ],
+  "telefons": [],
+  "altres": [],
+  "importsDetall": [
+   {
+    "import": "14 €",
+    "concepte": "El preu és de 14 €"
+   }
+  ]
+ },
+ "origenImatge": true,
+ "mainEvent": {
+  "title": "Sortida al Museu Marítim de Barcelona",
+  "data": "2026-12-09 08:45",
+  "dataDubtosa": false,
+  "dataFi": "2026-12-09 16:30",
+  "lloc": "Museu Marítim de Barcelona",
+  "edat": null,
+  "origen": "llista",
+  "desplacament": {
+   "sortida": {
+    "hora": "08:45",
+    "lloc": "l'escola"
+   },
+   "tornada": {
+    "hora": "16:30",
+    "aprox": true
+   }
+  },
+  "desti": "Museu Marítim de Barcelona"
+ },
+ "avisDates": null,
+ "revisioDates": {
+  "requereixRevisio": false,
+  "camps": []
+ },
+ "dataReferencia": "2026-11-25",
+ "textLlegit": "Bon dia, famílies!\n\nEl dimecres 9 de desembre farem la sortida\nal Museu Marítim de Barcelona.\nSortirem de l'escola a les 8:45 h i tornarem\ncap a les 16:30 h.\n\nEl preu és de 14 €. Cal fer el pagament\nabans del 3 de desembre.\nCal portar l'autorització signada abans del\n4 de desembre.\n\nPorteu esmorzar, dinar i aigua.\nGràcies!  — Laia, tutora de 3r B"
+}

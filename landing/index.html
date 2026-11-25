@@ -308,7 +308,9 @@
       .steps { grid-template-columns: 1fr 1fr; }
     }
 
-  </style>
+    .nav-logo-img { display:block; width:98px; height:auto; }
+  .nx-lupa { display:inline-block; width:1em; height:1em; vertical-align:-0.14em; background:url(../app/assets/nexlupa-lupa.svg) center / contain no-repeat; }
+</style>
 </head>
 <body>
 
@@ -320,7 +322,7 @@
   <!-- NAV -->
   <nav>
     <div class="nav-logo">
-      <span class="logo-ne">ne</span><span class="logo-x">x</span><span class="logo-lupa">lupa<span class="logo-dot">●</span></span>
+      <img class="nav-logo-img" src="../app/assets/nexlupa-logo-web.png" alt="neXlupa" width="98" height="18" decoding="async">
     </div>
     <button id="btnObrirApp3" class="nav-cta" onclick="window.location.href='https://app.nexlupa.app/app/'">⚡ Prova gratis</button>
   </nav>
@@ -431,7 +433,7 @@
       </div>
       <div class="step reveal">
         <div class="step-n">02</div>
-        <div class="step-icon">🔍</div>
+        <div class="step-icon"><span class="nx-lupa" aria-hidden="true"></span></div>
         <div class="step-title">Anàlisi IA</div>
         <div class="step-desc">nexlupa processa amb Claude API en temps real</div>
       </div>

@@ -8,7 +8,10 @@ const Module = require('module');
 
 function loadHandler(calls) {
   const fake = function () { return { chat: { completions: { create: async (o) => { calls.push(o);
-    return { choices: [{ message: { content: JSON.stringify({ resum: 'x', decisio: 'x', accions: [], recordatoris: [], esdeveniments: [] }) } }] }; } } } }; };
+    const ocr = /OCR/.test(String(o.messages[0].content));
+    const body = ocr ? { text: 'Dissabte 19 de desembre de 10:00 a 13:00 h. Pati de l\'escola. C/ dels Pins, 12 · Sant Cugat', context: '' }
+      : { resum: 'x', decisio: 'x', accions: [], recordatoris: [], esdeveniments: [] };
+    return { choices: [{ message: { content: JSON.stringify(body) } }] }; } } } }; };
   const orig = Module._load;
   Module._load = function (req, ...rest) { return req === 'openai' ? fake : orig.call(this, req, ...rest); };
   const p = require.resolve('../api/analyze'); delete require.cache[p];
@@ -66,8 +69,24 @@ test('Preview ui-2.0 amb la clau correcta: la imatge arriba al servei d’IA rea
   withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
     const calls = []; const h = loadHandler(calls);
     const r = await call(h, IMG, { 'x-nexlupa-premium-test': DUMMY });
-    assert.strictEqual(r.code, 200); assert.strictEqual(calls.length, 1);
+    assert.strictEqual(r.code, 200); assert.strictEqual(calls.length, 2, 'lectura literal + anàlisi');
     assert.ok(JSON.stringify(calls[0].messages).includes('image_url'));
+    assert.ok(!JSON.stringify(calls[1].messages).includes('image_url'), 'l’anàlisi es fa sobre el text llegit');
+    assert.ok(JSON.stringify(calls[1].messages).includes('C/ dels Pins, 12'));
+    assert.strictEqual(r.out.textLlegit.includes('Pati de l'), true);
+    assert.strictEqual(r.out.origenImatge, true);
+  }));
+
+test('Autoprova amb motor real: inaccessible sense clau, a producció o a altres branques', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const get = async (query) => { let code = 0; const res = { setHeader() {}, status(c) { code = c; return this; }, json() { return this; } };
+      await h({ method: 'GET', headers: {}, query }, res); return code; };
+    assert.strictEqual(await get({ selftest: 'escola' }), 404);
+    assert.strictEqual(await get({ selftest: 'escola', k: 'una-clau-inventada-qualsevol-123' }), 404);
+    process.env.VERCEL_ENV = 'production';
+    assert.strictEqual(await get({ selftest: 'escola', k: DUMMY }), 404);
+    assert.strictEqual(calls.length, 0);
   }));
 
 test('Preview amb clau incorrecta: 403 sense consumir IA', () =>

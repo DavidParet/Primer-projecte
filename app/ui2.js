@@ -14,7 +14,6 @@
 
   /* ---------------- pictogrames del vídeo (traç 48×48, punta arrodonida) ---------------- */
   var P = {
-    lupa: '<circle cx="27" cy="27" r="17"/><path d="M40 40L57 57" stroke-width="5.7"/>',
     sign: '<path d="M12 6h18l8 8v28H12z" stroke-linejoin="round"/><path d="M30 6v8h8"/><path d="M18 30l5 5 9-11" stroke-linecap="round" stroke-linejoin="round"/>',
     doc: '<path d="M10 4h20l10 10v30H10z" stroke-linejoin="round"/><path d="M30 4v10h10M17 27h16M17 34h16M17 20h8" stroke-linecap="round" stroke-linejoin="round"/>',
     pay: '<rect x="5" y="12" width="38" height="26" rx="5"/><path d="M5 20h38M12 31h9" stroke-linecap="round"/>',
@@ -47,8 +46,18 @@
     users: '<circle cx="17" cy="17" r="6"/><circle cx="33" cy="19" r="5"/><path d="M5 40c1-7 6-11 12-11s11 4 12 11M29 30c6 0 11 3 13 10" stroke-linecap="round"/>',
     free: '<rect x="6" y="12" width="36" height="24" rx="8"/><path d="M15 20v9M15 20h5M15 24h4M25 29v-9h4a2.5 2.5 0 0 1 0 5h-4M29 25l3 4" stroke-linecap="round" stroke-linejoin="round"/>'
   };
+  /* UI 2.9 · lupa NexLupa: mateixa geometria que assets/nexlupa-lupa.svg (extreta del logotip).
+     mono = un sol color (icones petites); si no, blanc + disc daurat. */
+  var LUPA_D = 'M0 324.67a324.67 324.67 0 1 0 649.34 0a324.67 324.67 0 1 0 -649.34 0zM122.78 322.85a217.99 217.99 0 1 0 435.98 0a217.99 217.99 0 1 0 -435.98 0z';
+  function lupaSvg(size, mono) {
+    return '<svg class="ui2-svg ui2-lupa-ico" width="' + size + '" height="' + size + '" viewBox="0 -27.25 896.09 896.09" aria-hidden="true" focusable="false">' +
+      '<path d="' + LUPA_D + '" fill="currentColor" fill-rule="evenodd"/>' +
+      '<line x1="564.14" y1="509.64" x2="833.51" y2="779.01" stroke="currentColor" stroke-width="125.16" stroke-linecap="round"/>' +
+      '<circle cx="340.79" cy="322.87" r="158.77" fill="' + (mono ? 'currentColor' : '#FABC36') + '"/></svg>';
+  }
   function ico(name, size, sw) {
-    var vb = name === 'lupa' ? '0 0 64 64' : '0 0 48 48';
+    if (name === 'lupa') return lupaSvg(size, true);
+    var vb = '0 0 48 48';
     return '<svg class="ui2-svg" width="' + size + '" height="' + size + '" viewBox="' + vb + '" fill="none" stroke="currentColor" stroke-width="' + (sw || 3.2) + '" aria-hidden="true" focusable="false">' + (P[name] || P.check) + '</svg>';
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -75,6 +84,15 @@
      Preparar o portar material per a l'activitat és una tasca, no un termini. */
   var DEADLINE = /avisa|comunica|notifica|inscri|matr[ií]cul|pag(a|ar|ament)|abona|ingr[eé]s|transfer|bizum|confirm|signa|firma|autoritz|retorn|entreg|lliura|presenta|envia|sol·licit|sollicit|reserva|apunta|respon|abans d|fins a?l? |termini|l[ií]mit|com a m[àa]xim|data m[àa]xima/i;
   var PREP = /^(?:portar|dur|preparar|endur|agafar|vestir|posar|recordar portar|cal portar|cal dur)\b/i;
+  /* Terminis: referència breu (la tasca completa és a «Tasques») */
+  function brief(text) {
+    var t = String(text || '').replace(/\s*\([^)]*\)/g, '')
+      .replace(/\s*(?:,|;|—|-)?\s*\b(?:abans del?|fins al?|fins el|com a m[àa]xim|el (?:dilluns|dimarts|dimecres|dijous|divendres|dissabte|diumenge)|el \d{1,2}|per al? \d{1,2})\b.*$/i, '')
+      .replace(/^(?:Cal |Heu de |Recordeu )/i, '').replace(/[.:;,]+$/, '').trim();
+    t = t.charAt(0).toUpperCase() + t.slice(1);
+    if (t.length > 40) { t = t.slice(0, 40); t = t.slice(0, Math.max(t.lastIndexOf(' '), 20)).replace(/[,;:\s]+$/, '') + '…'; }
+    return t || String(text || '').slice(0, 30);
+  }
   function isDeadline(text) { var t = String(text || '').trim(); return DEADLINE.test(t) && !(PREP.test(t) && !/abans d|fins a?l? |termini|l[ií]mit/i.test(t)); }
   function pick(text, fallback) {
     for (var i = 0; i < RULES.length; i++) if (RULES[i][0].test(text)) return RULES[i][1];
@@ -127,7 +145,7 @@
       if (/vençut|confirma|per confirmar|passada|ja ha passat|possibles|no coincideix/i.test(txt)) { d.classList.add('ui2-warn'); continue; }
       var p = parseShown(txt); if (!p) continue;
       keep(d);
-      var pre = (!info && i === 0 && !/^Fins/.test(txt) && isDeadline(t)) ? '<span class="ui2-term">Termini:</span> ' : '';
+      var pre = (!info && i === 0 && !/^(?:Fins|Abans)/.test(txt) && isDeadline(t)) ? '<span class="ui2-term">Termini:</span> ' : '';
       d.innerHTML = '<span class="ui2-date-ico">' + ico('cal', 15, 3.6) + '</span><span>' + pre + esc(txt) + '</span>';
       d.classList.add('ui2-date');
     }
@@ -152,10 +170,13 @@
     });
     var p = dateChip ? parseShown(dateChip.textContent) : null;
     var time = timeChip ? (timeChip.textContent.replace(/[^\d:]/g, '').replace(/^0(\d)/, '$1') + ' h') : null;
+    /* UI 2.9: si l'hora és la de sortida (no l'inici de l'acte), es diu */
+    if (time && card.getAttribute('data-sortida')) time = '<small>Sortida</small> ' + esc(card.getAttribute('data-sortida')) + ' h';
+    else if (time) time = esc(time);
     var row = injected('div', 'ui2-cal-row');
     var box = p ? '<div class="ui2-datebox"><b>' + p.day + '</b><span>' + esc(p.mon.toUpperCase()) + '</span></div>'
       : '<div class="ui2-datebox ui2-nodate"><span>DATA</span><span>?</span></div>';
-    row.innerHTML = box + '<div class="ui2-cal-title">' + esc(name ? name.textContent : '') + '</div>' + (time ? '<div class="ui2-cal-time">' + esc(time) + '</div>' : '');
+    row.innerHTML = box + '<div class="ui2-cal-title">' + esc(name ? name.textContent : '') + '</div>' + (time ? '<div class="ui2-cal-time">' + time + '</div>' : '');
     card.insertBefore(row, card.firstChild);
     card.classList.add('ui2-event');
     if (dateChip) dateChip.classList.add('ui2-hide');
@@ -165,12 +186,15 @@
     chips.forEach(function (ch) {
       if (ch === dateChip || ch === timeChip || ch.hasAttribute('data-ui2-html')) return;
       var tx = ch.textContent || '', name2 = 'info', lab = 'Detall';
-      if (/^📍/.test(tx)) { name2 = 'pin'; lab = 'Lloc'; }
+      if (/^📍\s*Destinació:/.test(tx)) { name2 = 'pin'; lab = 'Destinació'; tx = tx.replace('Destinació: ', ''); }
+      else if (/^📍/.test(tx)) { name2 = 'pin'; lab = 'Lloc'; }
+      else if (/^🚌/.test(tx)) { name2 = 'clock'; lab = 'Sortida'; tx = tx.replace(/^🚌\s*Sortida\s*/, '🚌 ').replace(/·\s*/, ''); }
+      else if (/^↩/.test(tx)) { name2 = 'clock'; lab = 'Tornada'; tx = tx.replace(/^↩️?\s*Tornada\s*/, '↩ '); }
       else if (/^⏳/.test(tx)) { name2 = 'clock'; lab = /Avui|Demà/.test(tx) ? '' : 'Falten'; }
       else if (/^👥/.test(tx)) { name2 = 'users'; lab = 'Edat'; }
       else if (/^Fins/.test(tx)) { name2 = 'cal'; lab = 'Fins'; }
       keep(ch); ch.classList.add('ui2-tile');
-      var val = tx.replace(/^(📍|⏳|👥|📅|🕒)️?\s*/, '').replace(/^Fins:\s*/, '');
+      var val = tx.replace(/^(📍|⏳|👥|📅|🕒|🚌|↩)️?\s*/, '').replace(/^Fins:\s*/, '');
       ch.innerHTML = '<span class="ui2-tile-ico">' + ico(name2, 14, 3.6) + '</span><span class="ui2-tile-txt">' + (lab ? '<small>' + lab + '</small> ' : '') + esc(val) + '</span>';
     });
     var btns = card.querySelectorAll('.nx-event-btn');
@@ -194,7 +218,9 @@
       var d = c.querySelector('.nx-card-date.ui2-date'); if (!d) continue;
       var p = parseShown(d.textContent); if (!p) continue;
       var pr = c.classList.contains('nx-p1-card') ? 'p1' : c.classList.contains('nx-p2-card') ? 'p2' : 'p3';
-      rows.push({ p: p, pr: pr, t: (c.querySelector('.nx-card-text') || {}).textContent || '' });
+      if (!c.id) c.id = 'ui2-task-' + i;
+      rows.push({ p: p, pr: pr, t: brief((c.querySelector('.nx-card-text') || {}).textContent || ''), id: c.id,
+        k: /^Fins/.test(d.textContent.trim()) ? 'Fins al' : /^Abans/.test(d.textContent.trim()) ? 'Abans del' : 'Termini' });
     }
     rows.sort(function (a, b) { return (monKey(a.p.mon) - monKey(b.p.mon)) || (a.p.day - b.p.day); });
     var sig = rows.map(function (r) { return r.pr + r.p.day + r.p.mon + r.t; }).join('|');
@@ -206,10 +232,18 @@
     var blk = injected('div', 'ui2-terminis'); blk.id = 'ui2-terminis'; blk.setAttribute('data-sig', sig);
     var html = '<div class="ui2-subhead">' + ico('calchk', 18, 3.4) + '<span>Terminis</span><small>dates límit, no són cites</small></div>';
     rows.forEach(function (r) {
-      html += '<div class="ui2-cal-row ui2-termini ui2-' + r.pr + '"><div class="ui2-datebox"><b>' + r.p.day + '</b><span>' + esc(r.p.mon.toUpperCase()) +
-        '</span></div><div class="ui2-cal-title"><small>Termini</small>' + esc(r.t) + '</div>' + (r.p.time ? '<div class="ui2-cal-time">' + esc(r.p.time) + '</div>' : '') + '</div>';
+      html += '<a class="ui2-cal-row ui2-termini ui2-' + r.pr + '" href="#' + esc(r.id) + '" data-ui2-goto="' + esc(r.id) + '"><div class="ui2-datebox"><b>' + r.p.day + '</b><span>' + esc(r.p.mon.toUpperCase()) +
+        '</span></div><div class="ui2-cal-title"><small>' + esc(r.k) + '</small>' + esc(r.t) + '</div><div class="ui2-cal-time ui2-goto">Tasques ›</div></a>';
     });
     blk.innerHTML = html;
+    blk.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('[data-ui2-goto]'); if (!a) return;
+      var t = doc.getElementById(a.getAttribute('data-ui2-goto')); if (!t) return;
+      e.preventDefault();
+      var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      try { t.scrollIntoView({ behavior: rm ? 'auto' : 'smooth', block: 'center' }); } catch (x) { t.scrollIntoView(); }
+      t.classList.remove('ui2-pulse'); void t.offsetWidth; t.classList.add('ui2-pulse');
+    });
     var evb = doc.getElementById('nx-event-block');
     var anchor = doc.getElementById('nx-what-block') || doc.getElementById('nx-p1-block');
     if (evb && evb.style.display !== 'none') evb.appendChild(blk);
@@ -461,7 +495,7 @@
       scan.appendChild(el('div', 'ui2-scan-bg'));
       var wait = el('div', 'ui2-wait');
       var box = el('div', 'ui2-lupa-box');
-      var lupa = el('img', 'ui2-lupa-still'); lupa.src = 'assets/ui2-lupa-sola.png'; lupa.alt = '';
+      var lupa = el('img', 'ui2-lupa-still'); lupa.src = 'assets/nexlupa-lupa.svg'; lupa.alt = '';
       box.appendChild(lupa); box.appendChild(el('div', 'ui2-lens-glow'));
       box.appendChild(el('div', 'ui2-lens-orbit', '<i></i>'));   /* punt de llum que recorre el vidre: la lupa «pensa» */
       wait.appendChild(box); wait.appendChild(el('div', 'ui2-wait-txt', 'Llegint el teu missatge…'));
@@ -556,7 +590,7 @@
     [].forEach.call(doc.querySelectorAll('[data-ui2-shown]'), function (e) { e.style.display = 'none'; e.removeAttribute('data-ui2-shown'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-aria]'), function (e) { e.removeAttribute('aria-label'); e.removeAttribute('title'); e.removeAttribute('data-ui2-aria'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-count],[data-ui2],[data-ui2-kind],[data-ui2-icon]'), function (e) { ['data-ui2-count', 'data-ui2', 'data-ui2-kind', 'data-ui2-icon'].forEach(function (a) { e.removeAttribute(a); }); });
-    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative', 'ui2-notinc', 'ui2-neutral', 'ui2-ready'].forEach(function (c) {
+    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative', 'ui2-pulse', 'ui2-notinc', 'ui2-neutral', 'ui2-ready'].forEach(function (c) {
       [].forEach.call(doc.querySelectorAll('.' + c), function (e) { e.classList.remove(c); });
     });
     body.classList.remove('ui2', 'ui2-scanning'); body.removeAttribute('data-ui2-page');
@@ -571,7 +605,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.8.1';
+  var VERSION = '2.9';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';

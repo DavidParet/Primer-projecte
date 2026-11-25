@@ -44,7 +44,7 @@
   <div class="onboarding-overlay" id="onboarding" style="display:none;">
     <div class="onboarding-card">
       <div class="ob-step" id="obStep">PAS 1 DE 3</div>
-      <div class="ob-icon" id="obIcon">🔍</div>
+      <div class="ob-icon" id="obIcon"><span class="nx-lupa" aria-hidden="true"></span></div>
       <div class="ob-title" id="obTitle">Benvingut a NexLupa</div>
       <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
       <div class="ob-dots">
@@ -160,7 +160,7 @@
       </div>
 
       <div class="loading" id="loading">
-        <span class="spin-lupa">🔍</span>
+        <span class="spin-lupa"><span class="nx-lupa-mono" aria-hidden="true"></span></span>
         <p>Analitzant el missatge...</p>
         <small>La lupa està treballant per tu</small>
       </div>
@@ -239,6 +239,9 @@
                   aria-controls="nx-more-actions-content" aria-expanded="false">Veure-les totes</button>
           <div id="nx-more-actions-content" style="display:none;"></div>
         </div>
+
+        <!-- UI 2.9 · nota discreta: el resultat s'ha llegit d'una imatge (no és una dada del missatge) -->
+        <p id="nx-image-note" class="nx-image-note" hidden>Llegit d’una imatge: comprova les dades abans d’utilitzar-les.</p>
 
         <!-- BOTONS: Compartir / Copiar / Analitzar -->
         <div class="nx-share-block">
@@ -323,7 +326,7 @@
 
       <div class="card">
         <div class="card-head"><div class="c-icon ci-gold">⭐</div><h2 class="c-label">Funcionalitats Premium 1.0</h2></div>
-        <div class="feat-item"><div class="feat-icon-sm fi-gold">🔍</div><div><div class="feat-ttl">Anàlisis incloses</div><div class="feat-dsc">Quotes previstes: cada mes, fins a 1.000 anàlisis de text (inclosos els correus) i 50 d’imatge.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-gold"><span class="nx-lupa-mono" aria-hidden="true"></span></div><div><div class="feat-ttl">Anàlisis incloses</div><div class="feat-dsc">Quotes previstes: cada mes, fins a 1.000 anàlisis de text (inclosos els correus) i 50 d’imatge.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-gold">📷</div><div><div class="feat-ttl">Imatges i captures</div><div class="feat-dsc">L’anàlisi d’imatges i captures és exclusiva de Premium.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Gmail amb reenviament automàtic</div><div class="feat-dsc">Configura una vegada quins correus de Gmail vols que arribin a NexLupa. A partir d’aquí, els correus triats entren sols i NexLupa en detecta les tasques i les dates.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Recordatoris de terminis per correu</div><div class="feat-dsc">Si un correu de l’escola diu que cal pagar una sortida abans de divendres, NexLupa et recorda per correu què has de fer i abans de quan.</div></div></div>
@@ -382,7 +385,7 @@
       </div>
 
       <div class="card" style="text-align:center;">
-        <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+        <div style="font-size:28px;margin-bottom:8px;color:var(--gold);"><span class="nx-lupa" aria-hidden="true"></span></div>
         <div style="font-size:14px;font-weight:800;color:var(--darker);">NexLupa motor</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>

@@ -25,7 +25,8 @@ function dom(){
     splitDateTime:date=>date?{date:'14 novembre',time:null}:{date:null,time:null},
     calcDiesRestants:()=>null,
     canOpenMaps:()=>false,
-    formatActionDate:v=>v, formatAlternatives:()=>null,
+    formatActionDate:v=>v, formatAlternatives:()=>null, deadlineLabel:(a,f)=>f,
+    placeText:x=>x&&x.lloc||'', placeMapsUrl:()=>null,
     _buildLlocLink:lloc=>{const el=new Element('span');el.textContent=lloc;return el},
     _lastData:null
   };
@@ -69,13 +70,22 @@ test('F4 · terminis vençuts i dates dubtoses bloquegen exportació de tasques'
   assert.equal(hasCalendarButton(b),false);
   assert.match(labels(b),/confirm/);
 });
-test('F5 · imatges i IBAN sospitosos mostren avís sense amagar dades',()=>{
+test('F5 · IBAN sospitosos mostren avís sense amagar dades; l’origen imatge és una nota final, no una dada útil',()=>{
   const ctx=dom();
   ctx.renderUsefulData({origenImatge:true,avisos:['IBAN no valid'],imports:['30 €']});
   const container=ctx.document.getElementById('nx-utils-content');
-  assert.match(labels(container),/Dades llegides d’una imatge/);
+  assert.doesNotMatch(labels(container),/imatge/);
   assert.match(labels(container),/IBAN no valid/);
   assert.match(labels(container),/30 €/);
+  const html=fs.readFileSync(path.join(__dirname,'../app/index.html'),'utf8');
+  assert.ok(html.indexOf('id="nx-image-note"')>html.indexOf('id="nx-info-block"'),'nota al final del resultat');
+  assert.match(source,/imgNote\.hidden = !\(d\.origenImatge/);
+});
+test('F5b · imports amb el seu concepte literal, sense perdre imports',()=>{
+  const ctx=dom();
+  ctx.renderUsefulData({imports:['2 €','5 €'],importsDetall:[{import:'2 €',concepte:'Xocolatada solidària: 2 €'}]});
+  const t=labels(ctx.document.getElementById('nx-utils-content'));
+  assert.match(t,/Xocolatada solidària: 2 €/); assert.match(t,/5 €/);
 });
 test('B1 · si la IA oblida dir suspès en el títol, la data no es publica',()=>{
   const d=normalizeAnalysis({resum:'x',accions:[],esdeveniments:[{title:'Partit',data:'2026-11-14'}]},

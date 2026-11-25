@@ -15,7 +15,7 @@ test('UI2: ui2.css es carrega després de style.css i ui2.js després de script.
   assert.match(html, /<body class="ui2">/);
 });
 test('UI2: el build estàtic publica tots els recursos UI 2.0 i existeixen', () => {
-  for (const f of ['app/ui2.css', 'app/ui2.js', 'app/assets/ui2-lupa-sola.png', 'app/assets/ui2-x.png']) {
+  for (const f of ['app/ui2.css', 'app/ui2.js', 'app/assets/nexlupa-lupa.svg', 'app/assets/nexlupa-lupa-mono.svg', 'app/assets/ui2-x.png']) {
     assert.ok(build.includes("'" + f + "'"), f + ' a build-static');
     assert.ok(fs.existsSync(path.join(root, f)), f + ' existeix');
   }
