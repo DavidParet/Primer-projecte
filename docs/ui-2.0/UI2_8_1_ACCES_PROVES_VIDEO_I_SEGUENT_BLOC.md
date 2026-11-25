@@ -26,7 +26,12 @@ El disseny aprovat no s'ha tocat: lupa, llum, X, implosió, halo, tipografia i d
 - **Interfície:** a Config apareix la targeta «Accés Premium de proves» només quan el servidor diu que l'accés està disponible, és a dir, només a la preview. Amb la clau validada pel servidor, la pestanya «Imatge · Premium» mostra la càrrega normal i fa servir el mateix recorregut d'anàlisi i el servei d'IA real.
 - **FREE:** la càrrega, l'arrossegament i les peticions directes continuen bloquejats.
 
-**Com s'hi entra:** obrir la preview → Config → «Accés Premium de proves» → enganxar la clau → «Activar». La clau no consta en aquest informe; s'ha lliurat a part.
+**Com s'hi entra:**
+1. El propietari defineix la clau a Vercel: projecte → Settings → Environment Variables → `NEXLUPA_PREMIUM_TEST_KEY`, entorn **Preview**, branca `ui-2.0`, tipus *Sensitive*, amb un valor llarg (20 caràcters o més) que només coneix l'equip.
+2. Es torna a desplegar la preview perquè agafi la variable.
+3. A la preview: Config → «Accés Premium de proves» → enganxar la clau → «Activar».
+
+La clau no consta en aquest informe ni al repositori. També hi ha una clau generada per Claude, de la qual el codi només guarda l'empremta, però no s'ha pogut lliurar per un canal privat; la variable d'entorn la substitueix.
 
 ## 3. Proves
 **Proves automàtiques** (`npm test` 280/280, amb una clau fictícia per variable d'entorn):
