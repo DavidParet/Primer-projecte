@@ -1,0 +1,16 @@
+{
+  "resum": "Sortida escolar al Museu de la Ciència de Barcelona el divendres 18 de desembre. Cal signar l'autorització, pagar 18 €, preparar el material i avisar d'al·lèrgies. El 22 de desembre les classes acaben a les 13 h.",
+  "decisio": "Signar l'autorització abans del dia 4 i pagar 18 € abans del 10 de desembre",
+  "esdeveniments": [
+    {"title": "Sortida al Museu de la Ciència", "data": "2026-12-18 08:15", "lloc": "Museu de la Ciència de Barcelona"},
+    {"title": "Final de classes", "data": "2026-12-22 13:00", "lloc": null}
+  ],
+  "accions": [
+    {"accio": "Entregar l'autorització signada", "tipus": "tasca", "data": "2026-12-04", "prioritat": "alta"},
+    {"accio": "Fer el pagament de 18 €", "tipus": "tasca", "data": "2026-12-10", "prioritat": "alta"},
+    {"accio": "Avisar si hi ha al·lèrgies alimentàries", "tipus": "tasca", "data": "2026-12-02", "prioritat": "mitja"},
+    {"accio": "Preparar esmorzar, dinar, aigua i roba còmoda", "tipus": "tasca", "data": "2026-12-18", "prioritat": "mitja"},
+    {"accio": "Ser a l'escola a les 8:15 h; l'autocar surt a les 8:30 h", "tipus": "informatiu", "data": "2026-12-18 08:15", "prioritat": "baixa"},
+    {"accio": "El 22 de desembre les classes acaben a les 13 h", "tipus": "informatiu", "data": "2026-12-22 13:00", "prioritat": "baixa"}
+  ]
+}

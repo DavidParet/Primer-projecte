@@ -1,0 +1,241 @@
+/* ==========================================================================
+   NexLupa UI 2.0 — capa visual derivada del vídeo comercial V9f (aprovat 25-11-2026)
+   S'aplica per sobre de style.css. NO canvia lògica, IDs ni estructura del DOM.
+   Desactivable traient la classe "ui2" del <body>.
+   ========================================================================== */
+body.ui2 {
+  --navy: #0D1B2A; --navy2: #122233;
+  --gold: #F5C518; --gold2: #D4A830; --ui2-gray: #9AA5B4;
+  --p1: #ef4444; --p1-label: #f87171; --p2: #D4A830; --p3: #9AA5B4;
+  --bg: #0D1B2A; --dark: #DFE6EE; --darker: #FFFFFF; --muted: #9AA5B4;
+  --border: rgba(245,197,24,.18); --gold-bg: rgba(245,197,24,.08);
+  --ui2-card: rgba(18,34,51,.86); --ui2-card-border: rgba(255,255,255,.08);
+  --ui2-radius: 20px;
+  background: radial-gradient(120% 80% at 50% 30%, #122233 0%, #0D1B2A 65%, #0D1B2A 100%) fixed !important;
+  color: var(--dark);
+  font-family: 'Inter', 'Nunito', system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+body.ui2 #pageApp, body.ui2 #pageApp main { background: transparent !important; }
+body.ui2 #pageApp *:not(svg):not(path):not(canvas) { font-family: inherit; }
+
+/* ---------- capçalera ---------- */
+body.ui2 #pageApp header { background: transparent !important; border-bottom: 1px solid rgba(255,255,255,.06) !important; box-shadow: none !important; }
+body.ui2 .logo-tagline .lt-gold { color: var(--gold) !important; font-weight: 600; }
+body.ui2 .logo-tagline .lt-white, body.ui2 .logo-tagline .lt-brand { color: #fff !important; }
+body.ui2 #dbg-ver { display: none !important; }
+body.ui2 .btn-premium-header {
+  background: rgba(245,197,24,.06) !important; color: #fff !important;
+  border: 1.5px solid var(--gold) !important; border-radius: 999px !important;
+  font-weight: 700 !important; letter-spacing: .2px; box-shadow: 0 0 18px rgba(245,197,24,.18) !important;
+}
+
+/* ---------- targetes ---------- */
+body.ui2 .card {
+  background: var(--ui2-card) !important; border: 1px solid var(--ui2-card-border) !important;
+  border-radius: var(--ui2-radius) !important; box-shadow: 0 10px 30px rgba(0,0,0,.28) !important;
+}
+body.ui2 .card-head .c-label { color: var(--gold) !important; letter-spacing: 2px; text-transform: uppercase; font-size: 11px !important; font-weight: 700 !important; }
+body.ui2 .c-icon { background: transparent !important; border: 1.5px solid rgba(245,197,24,.55) !important; border-radius: 12px !important; }
+
+/* ---------- entrada ---------- */
+body.ui2 .tab-btn { border-radius: 999px !important; background: transparent !important; border: 1.5px solid rgba(255,255,255,.12) !important; color: var(--ui2-gray) !important; font-weight: 600 !important; }
+body.ui2 .tab-btn.active { border-color: var(--gold) !important; color: #fff !important; background: rgba(245,197,24,.08) !important; }
+body.ui2 #pageApp textarea {
+  background: rgba(13,27,42,.75) !important; color: #EEF2F7 !important;
+  border: 1.5px solid rgba(245,197,24,.35) !important; border-radius: 18px !important; line-height: 1.6;
+}
+body.ui2 #pageApp textarea:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 4px rgba(245,197,24,.12) !important; }
+body.ui2 .btn-analyze {
+  background: var(--gold) !important; color: var(--navy) !important; border: none !important;
+  border-radius: 999px !important; font-weight: 800 !important; letter-spacing: .2px;
+  box-shadow: 0 8px 26px rgba(245,197,24,.32) !important;
+}
+body.ui2 .btn-analyze:disabled { background: rgba(245,197,24,.35) !important; box-shadow: none !important; }
+body.ui2 .btn-micro-copy { color: var(--ui2-gray) !important; }
+
+/* FREE: xip blanc com al vídeo */
+body.ui2 .usage-counter { justify-content: center; }
+body.ui2 .usage-plan-tag {
+  color: #fff !important; border: 2px solid rgba(255,255,255,.85); border-radius: 999px;
+  padding: 2px 12px; font-weight: 800; letter-spacing: 1px; background: rgba(13,27,42,.9);
+}
+body.ui2 .usage-quota { color: var(--ui2-gray) !important; }
+/* franja Premium: brillantor daurada subtil */
+body.ui2 .conv-strip {
+  background: linear-gradient(120deg, rgba(245,197,24,.10), rgba(18,34,51,.9) 45%, rgba(245,197,24,.06)) !important;
+  border: 1.5px solid rgba(245,197,24,.55) !important; border-radius: var(--ui2-radius) !important;
+}
+body.ui2 .conv-btn { background: var(--gold) !important; color: var(--navy) !important; border: none !important; border-radius: 999px !important; font-weight: 800 !important; }
+
+/* ---------- resultats ---------- */
+body.ui2 .nx-decisio-block {
+  background: var(--ui2-card); border: 2px solid rgba(245,197,24,.65); border-radius: var(--ui2-radius);
+  padding: 16px 18px 18px; box-shadow: 0 0 30px rgba(245,197,24,.10);
+}
+body.ui2 .ui2-done-pill {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 0 10px;
+  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  color: #6ee7b7; border: 1.5px solid rgba(110,231,183,.6); background: rgba(16,185,129,.08);
+}
+body.ui2 .nx-decisio-label { color: var(--gold) !important; letter-spacing: 2px; font-size: 11px !important; font-weight: 800 !important; text-transform: uppercase; }
+body.ui2 .nx-decisio-text { color: #fff !important; font-weight: 700 !important; line-height: 1.3 !important; }
+
+body.ui2 .nx-section-label {
+  display: inline-flex !important; align-items: center; gap: 8px; width: auto !important;
+  padding: 5px 12px !important; margin: 18px 0 10px !important; border-radius: 999px;
+  border: 1.5px solid rgba(245,197,24,.55); color: var(--gold) !important;
+  font-size: 12px !important; font-weight: 700 !important; letter-spacing: .3px !important; text-transform: none !important;
+  background: rgba(13,27,42,.6);
+}
+body.ui2 .nx-section-label .nxs-icon { display: none; }
+body.ui2 .nx-section-label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+body.ui2 .nx-p1-label { color: var(--p1-label) !important; border-color: var(--p1) !important; --ui2-c: var(--p1-label); }
+body.ui2 .nx-p2-label { color: var(--gold) !important; border-color: var(--p2) !important; }
+body.ui2 .nx-info-label { color: var(--p3) !important; border-color: var(--p3) !important; --ui2-c: var(--p3); }
+body.ui2 [data-ui2-count]::after {
+  content: attr(data-ui2-count); min-width: 20px; height: 20px; padding: 0 6px; margin-left: 2px;
+  border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; background: var(--ui2-c, var(--gold)); color: var(--navy);
+}
+/* el número ha de ser llegible sobre el color del xip */
+body.ui2 [data-ui2-count] { position: relative; }
+
+body.ui2 .nx-p1-card, body.ui2 .nx-p2-card, body.ui2 .nx-info-card, body.ui2 .nx-event-card {
+  background: var(--ui2-card) !important; border: 1px solid var(--ui2-card-border) !important;
+  border-radius: 18px !important; box-shadow: 0 6px 18px rgba(0,0,0,.22) !important; padding: 14px 16px !important;
+}
+body.ui2 .nx-p1-card { border-left: 4px solid var(--p1) !important; }
+body.ui2 .nx-p2-card { border-left: 4px solid var(--p2) !important; }
+body.ui2 .nx-info-card { border-left: 4px solid var(--p3) !important; }
+body.ui2 .nx-event-card { border: 1.5px solid rgba(245,197,24,.45) !important; }
+body.ui2 .nx-event-card::before { display: none !important; }
+body.ui2 .nx-card-row { align-items: center !important; gap: 12px !important; }
+body.ui2 .nx-card-icon.ui2-ico {
+  width: 42px; height: 42px; flex: none; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid currentColor; font-size: 0 !important; background: rgba(13,27,42,.55);
+}
+body.ui2 .nx-p1-card .ui2-ico { color: var(--gold); border-color: rgba(245,197,24,.7); }
+body.ui2 .nx-p2-card .ui2-ico { color: var(--gold); border-color: rgba(212,168,48,.7); }
+body.ui2 .nx-info-card .ui2-ico { color: var(--gold); border-color: rgba(154,165,180,.6); }
+body.ui2 .nx-card-text { color: #fff !important; font-weight: 600 !important; }
+body.ui2 .nx-card-date { color: var(--ui2-gray) !important; font-weight: 600 !important; }
+body.ui2 .nx-p1-card .nx-card-date { color: var(--p1-label) !important; }
+body.ui2 .nx-p2-card .nx-card-date { color: var(--gold2) !important; }
+body.ui2 .nx-event-name { color: #fff !important; font-weight: 800 !important; }
+body.ui2 .nx-event-chip {
+  background: rgba(13,27,42,.6) !important; border: 1.5px solid rgba(245,197,24,.45) !important;
+  color: #fff !important; border-radius: 12px !important; font-weight: 600 !important;
+}
+body.ui2 .nx-chip-days { border-color: rgba(110,231,183,.55) !important; color: #6ee7b7 !important; }
+body.ui2 .nx-event-btn-cal, body.ui2 .nx-btn-cal {
+  background: var(--gold) !important; color: var(--navy) !important; border: none !important;
+  border-radius: 999px !important; font-weight: 800 !important; box-shadow: 0 6px 20px rgba(245,197,24,.25);
+}
+body.ui2 .nx-event-btn-maps {
+  background: transparent !important; color: #fff !important; border: 1.5px solid var(--gold) !important; border-radius: 999px !important; font-weight: 700 !important;
+}
+body.ui2 .nx-more-actions-toggle { border: 1.5px solid rgba(245,197,24,.55) !important; border-radius: 999px !important; color: var(--gold) !important; background: transparent !important; font-weight: 700 !important; }
+body.ui2 .nx-btn-wa, body.ui2 .nx-btn-copy { border-radius: 999px !important; font-weight: 700 !important; }
+body.ui2 .nx-btn-copy { background: transparent !important; border: 1.5px solid rgba(255,255,255,.25) !important; color: #fff !important; }
+body.ui2 .nx-btn-reset { border-radius: 999px !important; background: transparent !important; border: 1.5px solid rgba(245,197,24,.55) !important; color: var(--gold) !important; font-weight: 700 !important; }
+body.ui2 .nx-resum-block { background: rgba(18,34,51,.6); border-radius: 16px; padding: 12px 16px; }
+body.ui2 .nx-resum-text { color: #DFE6EE !important; }
+body.ui2 .nx-what-detail-chip { border-radius: 12px !important; border: 1.5px solid rgba(245,197,24,.4) !important; background: rgba(13,27,42,.6) !important; color: #fff !important; }
+
+.ui2-chip-ico { display: inline-flex; vertical-align: -2px; margin-right: 6px; color: var(--gold); }
+body.ui2 .nx-event-btn-cal .ui2-chip-ico, body.ui2 .nx-btn-cal .ui2-chip-ico { color: var(--navy); }
+body.ui2 .nx-chip-days .ui2-chip-ico { color: #6ee7b7; }
+
+/* ---------- pantalla Tasques ---------- */
+body.ui2 .tsk-section-sep { color: var(--gold) !important; letter-spacing: 2px; font-weight: 800 !important; }
+body.ui2 .tsk-item {
+  background: var(--ui2-card) !important; border: 1px solid var(--ui2-card-border) !important;
+  border-left: 4px solid var(--p3) !important; border-radius: 16px !important; margin-bottom: 8px !important; opacity: 1 !important;
+}
+body.ui2 .tsk-item:has(.tsk-prior-alta) { border-left-color: var(--p1) !important; }
+body.ui2 .tsk-item:has(.tsk-prior-mitja) { border-left-color: var(--p2) !important; }
+body.ui2 .tsk-item.done { opacity: .55 !important; border-left-color: rgba(110,231,183,.6) !important; }
+body.ui2 .tsk-title { color: #fff !important; font-weight: 600 !important; }
+body.ui2 .tsk-src { color: var(--ui2-gray) !important; }
+body.ui2 .tsk-chk { border: 2px solid rgba(245,197,24,.6) !important; border-radius: 8px !important; background: transparent !important; }
+body.ui2 .tsk-chk-done { background: var(--gold) !important; color: var(--navy) !important; border-color: var(--gold) !important; }
+body.ui2 .tsk-badge-nou { background: var(--gold) !important; color: var(--navy) !important; border-radius: 999px !important; font-weight: 800 !important; }
+
+/* ---------- navegació inferior ---------- */
+body.ui2 .bottom-nav { background: rgba(9,19,30,.92) !important; border-top: 1px solid rgba(245,197,24,.14) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+body.ui2 .nav-btn span.ui2-nav-ico { filter: none !important; color: var(--ui2-gray); display: inline-flex; }
+body.ui2 .nav-btn.active span.ui2-nav-ico { color: var(--gold); filter: drop-shadow(0 0 6px rgba(245,197,24,.35)) !important; }
+body.ui2 .nav-btn small { color: var(--ui2-gray) !important; font-weight: 600 !important; }
+body.ui2 .nav-btn.active small { color: var(--gold) !important; }
+body.ui2 .nav-badge { background: var(--gold) !important; color: var(--navy) !important; font-weight: 800 !important; }
+
+/* ---------- Premium 1.0 ---------- */
+body.ui2 .premium-hero {
+  background: linear-gradient(160deg, rgba(245,197,24,.10), rgba(18,34,51,.92) 40%, rgba(13,27,42,.95)) !important;
+  border: 1.5px solid rgba(245,197,24,.6) !important; border-radius: 24px !important;
+  box-shadow: 0 0 40px rgba(245,197,24,.12) !important; position: relative; overflow: hidden;
+}
+body.ui2 .premium-hero::after { /* reflex daurat subtil */
+  content: ''; position: absolute; inset: -40% -60%; pointer-events: none;
+  background: linear-gradient(115deg, transparent 45%, rgba(255,236,150,.10) 50%, transparent 55%);
+  animation: ui2-sheen 6s ease-in-out infinite;
+}
+@keyframes ui2-sheen { 0%, 60% { transform: translateX(-30%); } 100% { transform: translateX(30%); } }
+body.ui2 .premium-badge { background: transparent !important; color: #fff !important; border: 1.5px solid var(--gold) !important; border-radius: 999px !important; font-weight: 800 !important; letter-spacing: .5px; }
+body.ui2 #premiumTitle { color: #fff !important; font-weight: 800 !important; }
+body.ui2 .plan-card { background: var(--ui2-card) !important; border: 1px solid var(--ui2-card-border) !important; border-radius: 18px !important; }
+body.ui2 .plan-card.active { border: 1.5px solid var(--gold) !important; box-shadow: 0 0 24px rgba(245,197,24,.18) !important; }
+body.ui2 .plan-badge { background: var(--gold) !important; color: var(--navy) !important; border-radius: 999px !important; font-weight: 800 !important; }
+body.ui2 .btn-buy-hero { background: var(--gold) !important; color: var(--navy) !important; border-radius: 999px !important; font-weight: 800 !important; box-shadow: 0 8px 26px rgba(245,197,24,.3) !important; }
+body.ui2 .feat-icon-sm { background: transparent !important; border: 1.5px solid rgba(245,197,24,.6) !important; border-radius: 12px !important; }
+body.ui2 .btn-back-page { color: var(--gold) !important; }
+
+/* ---------- animació corporativa: lupa + X ---------- */
+body.ui2 .loading.on { display: none !important; }        /* el substitueix la capa ui2-scan */
+.ui2-scan { position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.ui2-scan .ui2-scan-bg { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 35%, #122233, #0D1B2A 70%); opacity: 0; transition: opacity .35s ease; }
+.ui2-scan.on .ui2-scan-bg { opacity: 1; }
+.ui2-scan .ui2-scan-card {
+  position: relative; width: min(92vw, 520px); max-height: 62vh; overflow: hidden; padding: 18px 20px;
+  border-radius: 20px; border: 1.5px solid rgba(245,197,24,.45); background: rgba(18,34,51,.9);
+  color: #C9D3DE; font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; opacity: 0; transform: translateY(10px) scale(.98);
+  transition: opacity .35s ease, transform .35s ease;
+  -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent);
+}
+.ui2-scan.on .ui2-scan-card { opacity: 1; transform: none; }
+.ui2-scan mark { background: transparent; color: inherit; border-radius: 6px; padding: 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
+.ui2-scan mark.lit { background: rgba(245,197,24,.42); color: #fff; box-shadow: 0 0 0 3px rgba(245,197,24,.42), 0 0 16px rgba(245,197,24,.45); }
+.ui2-scan.fading mark.lit { background: rgba(245,197,24,0); box-shadow: none; transition: background .6s ease, box-shadow .6s ease; }
+.ui2-scan .ui2-lupa { position: absolute; left: 0; top: 0; width: 86px; height: auto; filter: drop-shadow(0 0 16px rgba(245,197,24,.75)); transition: transform .32s cubic-bezier(.4,.0,.2,1), opacity .3s; opacity: 0; will-change: transform; z-index: 3; }
+.ui2-scan.on .ui2-lupa { opacity: 1; }
+.ui2-scan .ui2-status { position: absolute; bottom: 14vh; left: 0; right: 0; text-align: center; color: var(--ui2-gray, #9AA5B4); font-size: 13px; font-weight: 600; letter-spacing: .3px; opacity: 0; transition: opacity .4s; }
+.ui2-scan.on .ui2-status { opacity: 1; }
+.ui2-scan .ui2-logo { position: absolute; width: min(78vw, 420px); opacity: 0; transform: scale(.96); transition: opacity .35s ease, transform .6s ease; z-index: 4; filter: drop-shadow(0 0 24px rgba(245,197,24,.3)); }
+.ui2-scan.converge .ui2-logo { opacity: 1; transform: scale(1); }
+.ui2-scan.converge .ui2-scan-card { opacity: .25; transition: opacity .4s; }
+.ui2-scan.converge .ui2-lupa, .ui2-scan.converge .ui2-status { opacity: 0; }
+.ui2-scan .ui2-spark { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #F5C518; box-shadow: 0 0 12px 4px rgba(245,197,24,.8); z-index: 5; opacity: 0; }
+.ui2-scan .ui2-core { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #fff; box-shadow: 0 0 40px 18px #F5C518; opacity: 0; z-index: 6; }
+.ui2-scan .ui2-flash { position: absolute; width: 240px; height: 240px; margin: -120px 0 0 -120px; border-radius: 50%; z-index: 6; opacity: 0;
+  background: radial-gradient(circle, #fff 0%, rgba(255,236,150,.95) 22%, rgba(245,197,24,.55) 48%, rgba(245,197,24,0) 72%); }
+.ui2-scan .ui2-ring { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border: 3px solid #F5C518; border-radius: 50%; opacity: 0; z-index: 6; box-shadow: 0 0 24px #F5C518; }
+.ui2-scan.burst .ui2-flash { animation: ui2-flash .6s ease-out forwards; }
+.ui2-scan.burst .ui2-ring { animation: ui2-ring .75s ease-out forwards; }
+.ui2-scan.burst .ui2-ring.r2 { animation-delay: .1s; }
+.ui2-scan.out { opacity: 0; transition: opacity .45s ease; }
+@keyframes ui2-flash { 0% { opacity: 1; transform: scale(.2); } 100% { opacity: 0; transform: scale(5); } }
+@keyframes ui2-ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(18); } }
+/* resultats que emergeixen de l'explosió */
+body.ui2 .results.on.ui2-emerge > * { animation: ui2-rise .55s cubic-bezier(.2,.7,.2,1) both; }
+body.ui2 .results.on.ui2-emerge > *:nth-child(2) { animation-delay: .06s; } body.ui2 .results.on.ui2-emerge > *:nth-child(3) { animation-delay: .12s; }
+body.ui2 .results.on.ui2-emerge > *:nth-child(4) { animation-delay: .18s; } body.ui2 .results.on.ui2-emerge > *:nth-child(n+5) { animation-delay: .24s; }
+@keyframes ui2-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ui2-scan *, body.ui2 .results.on.ui2-emerge > *, body.ui2 .premium-hero::after { animation: none !important; transition: none !important; }
+}
+/* escriptori: targetes una mica més aire */
+@media (min-width: 900px) {
+  body.ui2 .ui2-scan .ui2-scan-card { font-size: 15.5px; }
+}

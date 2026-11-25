@@ -1,0 +1,10 @@
+{
+  "resum": "Cal retornar el full d'inscripció, el termini ja ha passat. Reunió informativa el 15 de desembre.",
+  "decisio": "Comprovar si encara es pot entregar el full d'inscripció",
+  "esdeveniments": [{"title": "Reunió informativa", "data": "2026-12-15 17:00", "lloc": null}],
+  "accions": [
+    {"accio": "Entregar el full d'inscripció", "tipus": "tasca", "data": "2026-11-20", "prioritat": "alta", "vençut": true},
+    {"accio": "Portar la bata", "tipus": "tasca", "data": "2026-12-01", "dataFi": "2026-12-05", "prioritat": "mitja"},
+    {"accio": "La reunió es farà a la biblioteca", "tipus": "informatiu", "data": "2026-12-15 17:00", "prioritat": "baixa"}
+  ]
+}
