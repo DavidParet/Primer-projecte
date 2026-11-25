@@ -11,8 +11,25 @@ const SYSTEM_PROMPT = fs.readFileSync(
   'utf8'
 );
 
-// Sense sistema de comptes, cap petició és Premium verificada. No llegir mai el pla de req.body ni de capçaleres del client.
-function hasVerifiedPremium(req) { return false; }
+// PLANS: encara no hi ha comptes. Cap indicador del navegador («sóc Premium») es té en compte.
+// ACCÉS PREMIUM DE PROVES (temporal): només a la preview de la branca ui-2.0, mai a producció.
+// El navegador ha d'enviar una clau secreta; el servidor en compara l'empremta SHA-256.
+// La clau no és al repositori (només la seva empremta). Si es defineix NEXLUPA_PREMIUM_TEST_KEY a Vercel
+// (només Preview), té prioritat i substitueix l'empremta.
+const PREMIUM_TEST_SHA256 = 'b39bc2a7ec3222c40100d6c4dac5a0bec8fbd1b17ed1429972bef890437058e1';
+function premiumTestAvailable() {
+  return process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_GIT_COMMIT_REF === 'ui-2.0';
+}
+function sha256(v) { return crypto.createHash('sha256').update(String(v), 'utf8').digest(); }
+function hasVerifiedPremium(req) {
+  if (!premiumTestAvailable()) return false;                 // producció i altres branques: mai
+  const sent = String((req.headers && req.headers['x-nexlupa-premium-test']) || '');
+  if (sent.length < 20 || sent.length > 200) return false;
+  const expected = process.env.NEXLUPA_PREMIUM_TEST_KEY
+    ? sha256(process.env.NEXLUPA_PREMIUM_TEST_KEY)
+    : Buffer.from(PREMIUM_TEST_SHA256, 'hex');
+  return crypto.timingSafeEqual(sha256(sent), expected);
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
@@ -22,6 +39,11 @@ module.exports = async function handler(req, res) {
   }
 
   const { text: inputText, image, sourceDate, language, testReferenceDate } = req.body || {};
+
+  // Comprovació d'accés de proves, sense consumir IA.
+  if (req.body && req.body.premiumCheck === true) {
+    return res.status(200).json({ testAccess: premiumTestAvailable(), premium: hasVerifiedPremium(req) });
+  }
   const text = sanitizeNotice(inputText);
 
   if (!text && !image) {
@@ -30,8 +52,8 @@ module.exports = async function handler(req, res) {
 
   // PLANS (25/11/2026): l'anàlisi d'imatges i captures és exclusiva de Premium 1.0.
   // Es comprova al servidor ABANS de consumir l'API. No es confia en cap indicador enviat pel navegador.
-  // Encara no hi ha sistema de comptes ni permisos (Fase 1 de l'acta): cap petició pot acreditar Premium,
-  // per tant tota petició amb imatge es rebutja. Quan existeixin els comptes, verificar aquí la sessió i el pla.
+  // Encara no hi ha sistema de comptes ni permisos (Fase 1 de l'acta): fora de l'accés de proves de la preview,
+  // tota petició amb imatge es rebutja. Quan existeixin els comptes, verificar aquí la sessió i el pla.
   if (image && !hasVerifiedPremium(req)) {
     return res.status(403).json({ error: 'L’anàlisi d’imatges i captures és exclusiva de Premium.', code: 'PREMIUM_REQUIRED' });
   }

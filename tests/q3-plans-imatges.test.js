@@ -53,3 +53,57 @@ test('Textos de l’app: cap pantalla diu que el FREE inclou imatges ni pinta el
   assert.ok(/Afegir manualment a Google Calendar<\/span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free/.test(html));
   assert.ok(/Obrir ubicacions a Maps<\/span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free/.test(html));
 });
+
+// Accés Premium de proves: només preview de ui-2.0, clau verificada al servidor (en proves, clau fictícia per variable d'entorn).
+function withEnv(env, fn) {
+  const prev = { ...process.env }; Object.assign(process.env, env);
+  return Promise.resolve().then(fn).finally(() => { process.env = prev; });
+}
+const IMG = { image: 'data:image/png;base64,iVBORw0KGgo=' };
+const DUMMY = 'clau-ficticia-de-proves-0123456789';
+
+test('Preview ui-2.0 amb la clau correcta: la imatge arriba al servei d’IA real (mateix recorregut)', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const r = await call(h, IMG, { 'x-nexlupa-premium-test': DUMMY });
+    assert.strictEqual(r.code, 200); assert.strictEqual(calls.length, 1);
+    assert.ok(JSON.stringify(calls[0].messages).includes('image_url'));
+  }));
+
+test('Preview amb clau incorrecta: 403 sense consumir IA', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const r = await call(h, IMG, { 'x-nexlupa-premium-test': DUMMY + 'x' });
+    assert.strictEqual(r.code, 403); assert.strictEqual(calls.length, 0);
+  }));
+
+test('Producció: l’accés de proves està desactivat encara que la clau sigui correcta', () =>
+  withEnv({ VERCEL_ENV: 'production', VERCEL_GIT_COMMIT_REF: 'main', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const r = await call(h, IMG, { 'x-nexlupa-premium-test': DUMMY });
+    assert.strictEqual(r.code, 403); assert.strictEqual(calls.length, 0);
+    const c = await call(h, { premiumCheck: true }, { 'x-nexlupa-premium-test': DUMMY });
+    assert.deepStrictEqual(c.out, { testAccess: false, premium: false });
+  }));
+
+test('Una altra branca de preview tampoc té l’accés de proves', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'altra-branca', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const r = await call(h, IMG, { 'x-nexlupa-premium-test': DUMMY });
+    assert.strictEqual(r.code, 403); assert.strictEqual(calls.length, 0);
+  }));
+
+test('Sense variable d’entorn, una clau inventada no coincideix amb l’empremta guardada', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: '' }, async () => {
+    delete process.env.NEXLUPA_PREMIUM_TEST_KEY;
+    const calls = []; const h = loadHandler(calls);
+    const r = await call(h, IMG, { 'x-nexlupa-premium-test': 'una-clau-inventada-qualsevol-123' });
+    assert.strictEqual(r.code, 403); assert.strictEqual(calls.length, 0);
+  }));
+
+test('premiumCheck no consumeix IA', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
+    const calls = []; const h = loadHandler(calls);
+    const c = await call(h, { premiumCheck: true }, { 'x-nexlupa-premium-test': DUMMY });
+    assert.deepStrictEqual(c.out, { testAccess: true, premium: true }); assert.strictEqual(calls.length, 0);
+  }));

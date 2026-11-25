@@ -858,3 +858,10 @@ body.ui2 #pagePremium .compare-row > .compare-status { display: contents !import
 body.ui2 #pagePremium .compare-cell { min-width: 0; align-items: flex-end; }
 body.ui2 #pagePremium .compare-cell br { display: none; }
 body.ui2 #pagePremium .compare-note { display: block; margin-top: 2px; }
+/* Accés Premium de proves (Config, només preview) */
+body.ui2 .ptest-note { font-size: 12.5px; color: #B9C3CF; margin: 4px 0 10px; line-height: 1.4; }
+body.ui2 .ptest-input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(233,193,74,.35); background: rgba(8,16,28,.6); color: #fff; font-size: 14px; }
+body.ui2 .ptest-row { display: flex; gap: 8px; margin-top: 8px; }
+body.ui2 .ptest-btn { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #EECB5A, #DDB43E); color: #0D1B2A; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+body.ui2 .ptest-btn.ghost { background: transparent; border: 1px solid rgba(160,180,205,.3); color: #C9D2DD; font-weight: 500; }
+body.ui2 .ptest-status { font-size: 12.5px; color: #8FCBB2; margin: 8px 0 0; min-height: 1em; }

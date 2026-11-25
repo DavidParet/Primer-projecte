@@ -80,6 +80,7 @@ function tornarLanding() {
 
 /* ── LANDING: reveal on scroll + botons CTA ── */
 document.addEventListener('DOMContentLoaded', function () {
+  try { if (premiumTestKey()) checkPremiumTest(false); } catch (e) {}
   /* Connectar tots els botons que obren l'app */
   ['btnObrirApp1', 'btnObrirApp2', 'btnObrirApp3'].forEach(function (id) {
     var btn = document.getElementById(id);
@@ -318,7 +319,34 @@ var _imgBase64  = null;
 /* PLANS: l'anàlisi d'imatges i captures és exclusiva de Premium 1.0.
    Encara no hi ha comptes: cap usuari pot acreditar Premium. El servidor ho torna a comprovar
    (api/analyze rebutja les imatges abans de consumir l'API); aquí només s'informa. */
-function imagesAllowed() { return false; }
+/* Accés Premium de proves (només a la preview de ui-2.0): el servidor verifica una clau secreta.
+   El navegador només guarda la clau que l'equip introdueix a Config; mai decideix el pla per si mateix. */
+var _premiumTest = false;
+function imagesAllowed() { return _premiumTest === true; }
+function premiumTestKey() { try { return localStorage.getItem('nxl_ptest') || ''; } catch (e) { return ''; } }
+function checkPremiumTest(showCard) {
+  var key = premiumTestKey();
+  return fetch('/api/analyze', { method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, key ? { 'x-nexlupa-premium-test': key } : {}),
+    body: JSON.stringify({ premiumCheck: true }) })
+    .then(function (r) { return r.ok ? r.json() : { testAccess: false, premium: false }; })
+    .catch(function () { return { testAccess: false, premium: false }; })
+    .then(function (d) {
+      _premiumTest = !!d.premium;
+      var card = document.getElementById('cfgPremiumTest'), st = document.getElementById('cfgPremiumTestStatus');
+      if (card && showCard) card.style.display = d.testAccess ? '' : 'none';
+      if (st) st.textContent = !d.testAccess ? '' : (_premiumTest ? 'Accés Premium de proves actiu: imatges habilitades en aquesta preview.' :
+        (key ? 'Clau no vàlida.' : 'Sense accés: l’anàlisi d’imatges continua bloquejada.'));
+      if (_currentTab === 'img') showImagePremiumInfo(!_premiumTest);
+      return d;
+    });
+}
+function savePremiumTestKey() {
+  var i = document.getElementById('cfgPremiumTestKey'); if (!i) return;
+  try { if (i.value.trim()) localStorage.setItem('nxl_ptest', i.value.trim()); } catch (e) {}
+  i.value = ''; checkPremiumTest(true);
+}
+function clearPremiumTestKey() { try { localStorage.removeItem('nxl_ptest'); } catch (e) {} _premiumTest = false; checkPremiumTest(true); }
 var IMG_PREMIUM_MSG = 'L’anàlisi d’imatges i captures és exclusiva de Premium.';
 function showImagePremiumInfo(show) {
   var drop = document.getElementById('imgDrop'), lock = document.getElementById('imgPremiumLock');
@@ -408,9 +436,10 @@ async function analyze() {
   try {
     var body = isImg ? { image: _imgBase64 } : { text: text };
 
+    var _ptk = isImg ? premiumTestKey() : '';
     var r = await fetch('/api/analyze', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: Object.assign({ 'Content-Type': 'application/json' }, _ptk ? { 'x-nexlupa-premium-test': _ptk } : {}),
       body: JSON.stringify(body)
     });
 
@@ -1412,6 +1441,7 @@ function navTo(page) {
   else if (page === 'historial') { document.getElementById('pageHistorial').style.display = 'block'; renderHistory(); }
   else if (page === 'tasques')   { document.getElementById('pageTasques').style.display = 'block'; renderTasques(); }
   else if (page === 'config')    { document.getElementById('pageConfig').style.display = 'block'; }
+  if (page === 'config') { try { checkPremiumTest(true); } catch (e) {} }
   else if (page === 'premium')   {
     document.getElementById('pagePremium').style.display = 'block';
     var appEl = document.getElementById('pageApp');
