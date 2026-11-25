@@ -462,6 +462,7 @@
       var box = el('div', 'ui2-lupa-box');
       var lupa = el('img', 'ui2-lupa-still'); lupa.src = 'assets/ui2-lupa-sola.png'; lupa.alt = '';
       box.appendChild(lupa); box.appendChild(el('div', 'ui2-lens-glow'));
+      box.appendChild(el('div', 'ui2-lens-orbit', '<i></i>'));   /* punt de llum que recorre el vidre: la lupa «pensa» */
       wait.appendChild(box); wait.appendChild(el('div', 'ui2-wait-txt', 'Llegint el teu missatge…'));
       scan.appendChild(wait);
       if (!REDUCED) {
@@ -569,7 +570,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.7.0';
+  var VERSION = '2.7.1';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';

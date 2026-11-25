@@ -819,3 +819,18 @@ body.ui2 .btn-micro-copy { margin-top: 0 !important; }
   body.ui2 #pageInici .usage-counter { margin-top: 10px !important; }
   body.ui2 #pageInici .conv-strip { margin-top: 8px !important; }
 }
+
+/* ================= UI 2.7.1 · la lupa «pensa» durant l'espera ================= */
+/* La lupa continua quieta: només un punt de llum càlida recorre lentament el vidre i la llum interior respira una mica més */
+.ui2-scan24 .ui2-lens-orbit { position: absolute; left: 38.5%; top: 38.5%; width: 0; height: 0; pointer-events: none;
+  animation: ui2-orbit 2.8s linear infinite; }
+.ui2-scan24 .ui2-lens-orbit i { position: absolute; left: 0; top: 0; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%;
+  transform: translateX(20px); background: #FFF3CF; box-shadow: 0 0 6px 2px rgba(255,214,120,.75), 0 0 14px 4px rgba(233,193,74,.35);
+  animation: ui2-orbit-fade 2.8s ease-in-out infinite; }
+@keyframes ui2-orbit { to { transform: rotate(360deg); } }
+@keyframes ui2-orbit-fade { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.ui2-scan24 .ui2-lens-glow { animation-duration: 2.2s; }
+@keyframes ui2-lens { 0%, 100% { opacity: .2; } 50% { opacity: .78; } }
+.ui2-scan24.fading .ui2-lens-orbit { opacity: 0; transition: opacity .2s; }
+.ui2-scan24.still .ui2-lens-orbit { display: none; }
+@media (prefers-reduced-motion: reduce) { .ui2-scan24 .ui2-lens-orbit { display: none !important; } }
