@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
 const crypto = require('crypto');
-const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis, sanitizeNotice } = require('../lib/nexlupa-result');
+const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis, sanitizeNotice, explicitDayMonthInSource } = require('../lib/nexlupa-result');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -92,7 +92,10 @@ module.exports = async function handler(req, res) {
     const ntext = typeof text === 'string'
       ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
     const futureText = /\b(?:dema|passat dema|manana|pasado manana|que ve|vinent|setmana vinent|semana que viene|proper|proxim|proximo|siguiente)\b/.test(ntext);
-    const isPast = x => x && x.data && x.data.slice(0, 10) < today && !x.vençut && !(original);
+    // Q1: una data passada que el missatge diu explícitament («7 de novembre») és un fet, no un error:
+    // no es demana al model que la «corregeixi» (podria canviar-ne el mes) i es mostra marcada per confirmar.
+    const isPast = x => x && x.data && x.data.slice(0, 10) < today && !x.vençut && !(original) &&
+      !(typeof text === 'string' && explicitDayMonthInSource(text, x.data.slice(0, 10)));
     const pastFuture = futureText && (
       parsed.esdeveniments.some(isPast) || parsed.accions.some(isPast)
     );

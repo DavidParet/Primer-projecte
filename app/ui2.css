@@ -682,3 +682,7 @@ body.ui2 .ui2-event .nx-event-meta, body.ui2 .nx-event-chip.ui2-tile { justify-c
 body.ui2 .ui2-event .nx-event-meta { align-items: flex-start !important; }
 body.ui2 .ui2-new { width: 6px !important; height: 6px !important; min-width: 6px; padding: 0 !important; font-size: 0 !important; vertical-align: middle; opacity: .8; }
 body.ui2 #ui2-tasks-head.ui2-hide, body.ui2 #nx-future-block.ui2-hide { display: none !important; }
+/* Pròximament: la data va sota el text, no en una columna lateral que l'estreny */
+body.ui2 #nx-future-content .nx-info-card { display: block !important; padding: 7px 10px !important; }
+body.ui2 #nx-future-content .nx-card-text { display: block; }
+body.ui2 #nx-future-content .nx-card-date { display: block !important; margin: 2px 0 0 !important; text-align: left !important; }

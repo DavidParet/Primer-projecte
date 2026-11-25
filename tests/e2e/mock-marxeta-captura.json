@@ -1,0 +1,8 @@
+{
+  "resum": "La 6a Marxeta Infantil de la UME tindrà lloc el 7 de desembre amb sortida des de la plaça Jaume Balmes. Per a infants de 3 a 13 anys; inscripció de 3 euros.",
+  "decisio": "Cap acció necessària",
+  "esdeveniments": [ {"title": "6a Marxeta Infantil de la UME", "data": "2026-12-07", "lloc": "plaça Jaume Balmes", "edat": "3 a 13 anys"} ],
+  "accions": [],
+  "recordatoris": [ {"text": "La 6a Marxeta Infantil de la UME serà el 7 de desembre amb sortida des de la plaça Jaume Balmes.", "data": "2026-12-07"} ],
+  "dadesUtils": { "imports": ["3 euros"] }
+}
