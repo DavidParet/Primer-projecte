@@ -549,7 +549,7 @@
     [].forEach.call(doc.querySelectorAll('[data-ui2-shown]'), function (e) { e.style.display = 'none'; e.removeAttribute('data-ui2-shown'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-aria]'), function (e) { e.removeAttribute('aria-label'); e.removeAttribute('title'); e.removeAttribute('data-ui2-aria'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-count],[data-ui2],[data-ui2-kind],[data-ui2-icon]'), function (e) { ['data-ui2-count', 'data-ui2', 'data-ui2-kind', 'data-ui2-icon'].forEach(function (a) { e.removeAttribute(a); }); });
-    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative', 'ui2-notinc', 'ui2-neutral'].forEach(function (c) {
+    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative', 'ui2-notinc', 'ui2-neutral', 'ui2-ready'].forEach(function (c) {
       [].forEach.call(doc.querySelectorAll('.' + c), function (e) { e.classList.remove(c); });
     });
     body.classList.remove('ui2', 'ui2-scanning'); body.removeAttribute('data-ui2-page');
@@ -564,7 +564,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.6.0';
+  var VERSION = '2.6.1';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';
@@ -585,7 +585,27 @@
     if (b) b.style.display = on ? '' : 'none';
     if (on) { try { err.scrollIntoView({ block: 'center' }); } catch (e) {} }
   }
+  /* «Analitzar ara»: reflex de llum suau només quan hi ha text o imatge a punt (mai durant l'anàlisi) */
+  function syncReady() {
+    var btn = doc.getElementById('btnAnalyze'); if (!btn) return;
+    var txt = (doc.getElementById('txt') || {}).value || '';
+    var img = window._currentTab === 'img' ? !!window._imgBase64 : false;
+    var ready = !btn.disabled && !body.classList.contains('ui2-scanning') && (window._currentTab === 'img' ? img : txt.trim().length > 0);
+    if (btn.classList.contains('ui2-ready') !== ready) btn.classList.toggle('ui2-ready', ready);
+  }
+  function watchReady() {
+    var t = doc.getElementById('txt'); if (t) t.addEventListener('input', syncReady);
+    var i = doc.getElementById('imgInput'); if (i) i.addEventListener('change', function () { setTimeout(syncReady, 350); setTimeout(syncReady, 1200); });
+    ['tabText', 'tabImg'].forEach(function (id) { var b = doc.getElementById(id); if (b) b.addEventListener('click', function () { setTimeout(syncReady, 0); }); });
+    var btn = doc.getElementById('btnAnalyze'); if (btn) watch(btn, { attributes: true, attributeFilter: ['disabled'] }, syncReady);
+    watch(body, { attributes: true, attributeFilter: ['class'] }, function () {
+      var b = doc.getElementById('btnAnalyze'), want = !!b && b.classList.contains('ui2-ready');
+      if (want && body.classList.contains('ui2-scanning')) b.classList.remove('ui2-ready');
+    });
+    syncReady();
+  }
   function init() {
+    watchReady();
     decorateStatic(); updatePage(); decorateHistory(); versionMark();
     var load = doc.getElementById('loading'), res = doc.getElementById('results');
     watch(load, { attributes: true, attributeFilter: ['class'] }, function () {

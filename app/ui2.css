@@ -771,3 +771,19 @@ body.ui2 #nx-date-warning:not([hidden])::before { content: '!'; display: inline-
 /* Espai reservat al final de cada pantalla perquè cap botó flotant del sistema tapi els últims controls */
 body.ui2 #pageInici .app-col-right, body.ui2 #pageTasques, body.ui2 #pageHistorial, body.ui2 #pageConfig, body.ui2 #pagePremium { scroll-padding-bottom: 84px; }
 body.ui2 #pageInici .app-col-right::after, body.ui2 #pageTasques::after, body.ui2 #pageHistorial::after { content: ''; display: block; height: 76px; flex: none; }
+
+/* ================= UI 2.6.1 · «Analitzar ara»: reflex suau quan hi ha contingut ================= */
+/* Sense batecs ni canvis de mida: s'anul·len la respiració, el reflex permanent i l'escala en passar-hi per sobre */
+body.ui2 .btn-analyze { animation: none !important; transition: box-shadow .12s ease, filter .12s ease, transform .12s ease !important; }
+body.ui2 .btn-analyze::before { animation: none !important; opacity: 0;
+  background-image: linear-gradient(105deg, transparent 0%, transparent 38%, rgba(255,250,225,.6) 48%, rgba(255,250,225,.22) 55%, transparent 66%, transparent 100%) !important; background-repeat: no-repeat; mix-blend-mode: soft-light;
+  background-size: 260% 100%; background-position: 130% 0; }
+body.ui2 .btn-analyze.ui2-ready:not(:disabled)::before { opacity: 1; animation: ui2-sheen 6s ease-in-out 1.2s infinite !important; }
+/* el reflex travessa el botó en ~1,1 s i després reposa fins al següent cicle */
+@keyframes ui2-sheen { 0% { background-position: 130% 0; } 18%, 100% { background-position: -30% 0; } }
+body.ui2 .btn-analyze:hover:not(:disabled) { transform: none !important; }
+/* en prémer: enfonsament breu */
+body.ui2 .btn-analyze:active:not(:disabled) { transform: translateY(1px) !important; filter: brightness(.95);
+  box-shadow: 0 2px 8px rgba(233,193,74,.14), inset 0 2px 5px rgba(90,60,0,.28) !important; }
+body.ui2.ui2-scanning .btn-analyze::before, body.ui2 .btn-analyze:disabled::before { animation: none !important; opacity: 0 !important; }
+@media (prefers-reduced-motion: reduce) { body.ui2 .btn-analyze.ui2-ready::before { animation: none !important; opacity: 0 !important; } }
