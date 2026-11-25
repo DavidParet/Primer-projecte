@@ -2,7 +2,7 @@
 
 **Branca:** `ui-2.0` · **Base:** `fix/qa96-deterministic-dates-20261112` @ `220e252` (motor QA96 més recent, 23-11-2026)
 **Referència visual oficial:** vídeo comercial V9f (aprovat 25-11-2026) — «adaptar l'aplicació al vídeo, no el vídeo a l'aplicació».
-**Estat:** preview independent. **Producció NO modificada** (`main` intacta; Vercel només desplega `main` a producció).
+**Estat:** preview independent a Vercel — `https://primer-projecte-git-ui-20-davidparets-projects.vercel.app/app/` (desplegament `dpl_EQLbMkmhDtNEtWx7LVZmA7DfUvzS`, destí *preview*, commit `290ee50`; protegida per l'autenticació de Vercel, `x-robots-tag: noindex`). **Producció NO modificada** (`main` intacta; Vercel només desplega `main` a producció).
 
 ---
 
