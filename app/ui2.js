@@ -504,5 +504,5 @@
   }
   try { if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init); else init(); }
   catch (e) { body.classList.remove('ui2-scanning'); }
-  window.NexLupaUI2 = { version: '2.1.0', icon: ico, disable: disable };
+  window.NexLupaUI2 = { version: '2.2.0', icon: ico, disable: disable };
 })();

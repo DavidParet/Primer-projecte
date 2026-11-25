@@ -362,3 +362,119 @@ body.ui2 .results.on.ui2-emerge > *:nth-child(n+4) { animation-delay: .15s; }
   body.ui2 .ui2-head { font-size: 21px !important; }
 }
 @media (min-width: 900px) { body.ui2 .ui2-scan .ui2-scan-card { font-size: 15.5px; } }
+
+/* ==========================================================================
+   UI 2.2 — refinament visual (no redisseny)
+   · P1/P2/P3 com a xips lleugers · paleta menys saturada · menys alçada
+   · halos ambientals subtils (estàtics) · calendari i pictogrames conservats
+   ========================================================================== */
+body.ui2 {
+  /* paleta suavitzada: mateixa identitat, menys saturació */
+  --gold: #E9C14A; --gold2: #CDA94E;
+  --p1: #C96A63; --p1-txt: #E39A93;
+  --p2: #C4A453; --p2-txt: #D9BC6A;
+  --p3: #8593A6; --p3-txt: #A9B4C3;
+  --ok: #8FCBB2;
+  --card: linear-gradient(180deg, rgba(34,51,72,.72) 0%, rgba(26,41,59,.74) 100%);
+  --card-border: rgba(160,180,205,.11);
+  --card-shadow: 0 8px 22px rgba(3,10,20,.30), inset 0 1px 0 rgba(255,255,255,.045);
+  --r: 18px;
+  /* halos: el «aire top» del vídeo — llum càlida difusa darrere el contingut */
+  --glow-a: rgba(233,193,74,.075); --glow-b: rgba(205,169,78,.05);
+  background-image:
+    radial-gradient(48% 26% at 50% 34%, rgba(233,193,74,.055), transparent 72%),
+    radial-gradient(60% 38% at 84% 6%, var(--glow-a), transparent 70%),
+    radial-gradient(55% 40% at 6% 64%, var(--glow-b), transparent 72%),
+    radial-gradient(120% 70% at 50% 26%, var(--tint), transparent 75%),
+    linear-gradient(180deg, #102236 0%, #0D1B2A 45%, #0A1622 100%) !important;
+}
+body.ui2[data-ui2-page="tasques"]  { --glow-a: rgba(201,106,99,.05); --glow-b: rgba(233,193,74,.06); }
+body.ui2[data-ui2-page="premium"]  { --glow-a: rgba(233,193,74,.11); --glow-b: rgba(233,193,74,.06); }
+
+/* halo suau al voltant dels blocs clau (com al vídeo) */
+body.ui2 .nx-decisio-block { border-width: 1.5px; border-color: rgba(233,193,74,.5); padding: 12px 16px 14px;
+  box-shadow: 0 0 46px rgba(233,193,74,.09), 0 0 0 1px rgba(233,193,74,.04), var(--card-shadow); }
+body.ui2 .premium-hero { border-width: 1.5px !important; border-color: rgba(233,193,74,.55) !important; box-shadow: 0 0 60px rgba(233,193,74,.12), var(--card-shadow) !important; }
+body.ui2 .conv-strip { border-width: 1px !important; border-color: rgba(233,193,74,.45) !important; box-shadow: 0 0 34px rgba(233,193,74,.08) !important; }
+body.ui2 .nx-event-card { box-shadow: 0 0 30px rgba(233,193,74,.05), var(--card-shadow) !important; }
+
+/* 1 · P1/P2/P3: xips lleugers de secció */
+body.ui2 .nx-section-label {
+  padding: 2px 10px !important; margin: 12px 0 7px !important; gap: 6px; border-width: 1px;
+  font-size: 12px !important; font-weight: 700 !important; letter-spacing: .3px !important;
+  background: transparent; opacity: .95;
+}
+body.ui2 .nx-section-label::before { width: 6px; height: 6px; }
+body.ui2 .nx-p1-label, body.ui2 .ui2-chip-p1 { border-color: rgba(201,106,99,.55) !important; }
+body.ui2 .nx-p2-label, body.ui2 .ui2-chip-p2 { border-color: rgba(196,164,83,.55) !important; }
+body.ui2 .nx-info-label, body.ui2 .ui2-chip-p3 { border-color: rgba(133,147,166,.5) !important; }
+body.ui2 [data-ui2-count]::after {      /* comptador discret: número en color, fons translúcid */
+  min-width: 16px; height: 16px; padding: 0 5px; font-size: 10.5px; font-weight: 700;
+  background: rgba(255,255,255,.07); color: var(--ui2-c, var(--gold)); border: 1px solid currentColor; opacity: .85;
+}
+/* fitxes del Resum → fila compacta de xips (no targetes grosses) */
+body.ui2 .ui2-sumtiles { gap: 6px; margin: 8px 0 2px; flex-wrap: wrap; }
+body.ui2 .ui2-sumtile {
+  flex: 0 0 auto; min-width: 0; flex-direction: row; align-items: baseline; gap: 5px;
+  padding: 3px 10px; border-radius: 999px; border-width: 1px; background: rgba(11,22,35,.35); box-shadow: none;
+}
+body.ui2 .ui2-sumtile b { font-size: 14px; }
+body.ui2 .ui2-sumtile span { font-size: 12px; margin: 0; font-weight: 700; }
+body.ui2 .ui2-sumtile small { font-size: 11.5px; color: #B8C3D0; }
+body.ui2 .ui2-sumtile.ui2-p1 { border-color: rgba(201,106,99,.5); } body.ui2 .ui2-sumtile.ui2-p2 { border-color: rgba(196,164,83,.5); } body.ui2 .ui2-sumtile.ui2-p3 { border-color: rgba(133,147,166,.45); }
+body.ui2 .ui2-sumtile.ui2-p2 b { color: var(--p2-txt); }
+
+/* 2 · intensitat: contorns i daurats més suaus */
+body.ui2 .ui2-ico { border-width: 1.5px; border-color: rgba(233,193,74,.5); }
+body.ui2 .c-icon, body.ui2 .feat-icon-sm { border-width: 1.5px !important; border-color: rgba(233,193,74,.5) !important; }
+body.ui2 .ui2-tile-ico { border-width: 1.5px; border-color: rgba(233,193,74,.5); }
+body.ui2 .btn-analyze, body.ui2 .nx-btn-wa, body.ui2 .btn-buy-hero, body.ui2 .conv-btn {
+  background: linear-gradient(180deg, #EECB5A, #DDB43E) !important; box-shadow: 0 6px 18px rgba(233,193,74,.18), inset 0 1px 0 rgba(255,255,255,.3) !important;
+}
+body.ui2 .nx-btn-cal, body.ui2 .nx-event-btn-cal, body.ui2 .nx-event-btn-maps, body.ui2 .nx-more-actions-toggle, body.ui2 .nx-btn-reset {
+  border-width: 1.5px !important; border-color: rgba(233,193,74,.7) !important; box-shadow: none !important;
+}
+body.ui2 .ui2-done-pill { color: var(--ok); border-color: rgba(143,203,178,.45); background: rgba(143,203,178,.06); padding: 3px 10px; font-size: 12px; }
+body.ui2 .nx-chip-days .ui2-tile-ico { border-color: rgba(143,203,178,.45); color: var(--ok); }
+body.ui2 .nx-chip-days .ui2-tile-txt small { color: var(--ok); }
+body.ui2 .cfg-danger-btn { border-width: 1.5px !important; border-color: rgba(201,106,99,.5) !important; }
+body.ui2 .usage-plan-tag { border-width: 1.5px; }
+
+/* 3 · ergonomia: menys alçada, més informació a la vista */
+body.ui2 .nx-decisio-label.ui2-head { font-size: 20px !important; margin: 4px 0 6px !important; }
+body.ui2 .nx-decisio-text { font-size: 17.5px !important; line-height: 1.32 !important; font-weight: 700 !important; }
+body.ui2 .ui2-head, body.ui2 .nx-section-label.ui2-head { font-size: 19px !important; margin: 16px 2px 10px !important; }
+body.ui2 .ui2-page-title { font-size: 22px !important; margin: 2px 2px 8px !important; }
+body.ui2 .nx-p1-card, body.ui2 .nx-p2-card, body.ui2 .nx-info-card, body.ui2 .ui2-tcard {
+  border-left-width: 4px !important; padding: 10px 12px 10px 11px !important; margin-bottom: 7px !important;
+}
+body.ui2 .nx-card-row { gap: 11px !important; }
+body.ui2 .ui2-ico { width: 42px; height: 42px; min-width: 42px; border-radius: 12px; }
+body.ui2 .ui2-ico .ui2-svg { width: 22px; height: 22px; }
+body.ui2 .nx-card-text, body.ui2 .ui2-ttitle { font-size: 15.5px !important; font-weight: 650 !important; line-height: 1.3 !important; }
+body.ui2 .nx-card-date { font-size: 13px !important; font-weight: 600 !important; }
+body.ui2 .ui2-date, body.ui2 .ui2-tdate { margin-top: 3px; gap: 6px; }
+body.ui2 .nx-p1-card .nx-card-date, body.ui2 .nx-p2-card .nx-card-date, body.ui2 .nx-info-card .nx-card-date,
+body.ui2 .nx-p1-card .nx-btn-cal, body.ui2 .nx-p2-card .nx-btn-cal, body.ui2 .nx-info-card .nx-btn-cal { margin-left: 53px; }
+body.ui2 .nx-btn-cal { min-height: 34px; padding: 5px 14px !important; font-size: 13px !important; margin-top: 6px; }
+body.ui2 .ui2-tchk { width: 30px; height: 30px; min-width: 30px; border-width: 1.5px; }
+body.ui2 .ui2-tchk .ui2-svg { width: 15px; height: 15px; }
+body.ui2 .ui2-subhead { margin: 12px 2px 8px; font-size: 13px; }
+body.ui2 .ui2-terminis .ui2-cal-row { padding: 10px 14px; margin-bottom: 8px; }
+body.ui2 .nx-resum-block { padding: 10px 14px; }
+body.ui2 .nx-resum-text { font-size: 14px !important; }
+body.ui2 .hist-item { padding: 9px 4px !important; }
+body.ui2 .hist-item .ui2-ico { width: 38px; height: 38px; min-width: 38px; }
+body.ui2 .hist-meta { padding-left: 52px; }
+@media (max-width: 370px) {
+  body.ui2 .nx-p1-card .nx-card-date, body.ui2 .nx-p2-card .nx-card-date, body.ui2 .nx-info-card .nx-card-date,
+  body.ui2 .nx-p1-card .nx-btn-cal, body.ui2 .nx-p2-card .nx-btn-cal, body.ui2 .nx-info-card .nx-btn-cal { margin-left: 0; }
+}
+body.ui2 .ui2-sumtiles { flex-wrap: nowrap; }
+body.ui2 .ui2-sumtile { align-items: center; padding: 2px 9px; }
+body.ui2 .ui2-sumtile::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--p3); }
+body.ui2 .ui2-sumtile.ui2-p1::before { background: var(--p1); } body.ui2 .ui2-sumtile.ui2-p2::before { background: var(--p2); }
+body.ui2 .ui2-sumtile small { display: none; }
+@media (min-width: 400px) { body.ui2 .ui2-sumtile small { display: inline; } }
+body.ui2 #pagePremium strong[style*="69d99a"] { color: var(--ok) !important; }
+body.ui2 .compare-no, body.ui2 .pchk-item.no { color: #B9A4A2 !important; }
