@@ -161,18 +161,19 @@
       if (ch === dateChip || ch === timeChip || ch.hasAttribute('data-ui2-html')) return;
       var tx = ch.textContent || '', name2 = 'info', lab = 'Detall';
       if (/^📍/.test(tx)) { name2 = 'pin'; lab = 'Lloc'; }
-      else if (/^⏳/.test(tx)) { name2 = 'clock'; lab = 'Falten'; }
+      else if (/^⏳/.test(tx)) { name2 = 'clock'; lab = /Avui|Demà/.test(tx) ? '' : 'Falten'; }
       else if (/^👥/.test(tx)) { name2 = 'users'; lab = 'Edat'; }
       else if (/^Fins/.test(tx)) { name2 = 'cal'; lab = 'Fins'; }
       keep(ch); ch.classList.add('ui2-tile');
       var val = tx.replace(/^(📍|⏳|👥|📅|🕒)️?\s*/, '').replace(/^Fins:\s*/, '');
-      ch.innerHTML = '<span class="ui2-tile-ico">' + ico(name2, 18, 3.4) + '</span><span class="ui2-tile-txt"><small>' + lab + '</small>' + esc(val) + '</span>';
+      ch.innerHTML = '<span class="ui2-tile-ico">' + ico(name2, 14, 3.6) + '</span><span class="ui2-tile-txt">' + (lab ? '<small>' + lab + '</small> ' : '') + esc(val) + '</span>';
     });
     var btns = card.querySelectorAll('.nx-event-btn');
     for (var i = 0; i < btns.length; i++) {
       var b = btns[i]; if (b.hasAttribute('data-ui2-html')) continue; keep(b);
       var isMaps = b.classList.contains('nx-event-btn-maps');
-      b.innerHTML = ico(isMaps ? 'pin' : 'cal', 17, 3.6) + '<span>' + (isMaps ? 'Obrir a Google Maps' : 'Afegir al calendari') + '</span>';
+      b.innerHTML = ico(isMaps ? 'pin' : 'calchk', 15, 3.6) + '<span>' + (isMaps ? 'Maps' : 'Afegir') + '</span>';
+      if (!b.hasAttribute('aria-label')) { b.setAttribute('aria-label', isMaps ? 'Obrir a Google Maps' : 'Afegir al calendari'); b.setAttribute('data-ui2-aria', '1'); }
     }
   }
 
@@ -236,7 +237,43 @@
     tiles.innerHTML = h; blk.parentNode.insertBefore(tiles, blk.nextSibling);
   }
 
+  var NOACT = /^(?:cap acci[oó] necess[aà]ria|no cal fer res|no has de fer res|no hi ha cap acci[oó] necess[aà]ria)\.?$/i;
+  function informativeSummary() {      /* només presentació: usa el resum que ja ha donat el motor */
+    var el2 = doc.getElementById('nx-decisio'), D = window._lastData;
+    var rb = doc.getElementById('nx-resum-block');   /* el resum ja és a dalt: no es repeteix al peu */
+    if (rb) rb.classList.toggle('ui2-hide', !!(el2 && el2.classList.contains('nx-no-action') && D && typeof D.resum === 'string' && D.resum.trim() && !NOACT.test(D.resum.trim())));
+    if (!el2 || !el2.classList.contains('nx-no-action') || el2.classList.contains('ui2-informative')) return;
+    var r = D && typeof D.resum === 'string' ? D.resum.trim() : '';
+    if (!r || NOACT.test(r)) return;
+    el2.removeAttribute('data-ui2-html'); keep(el2);
+    el2.innerHTML = '<span class="ui2-sum-main">' + esc(r) + '</span><span class="ui2-sum-note">' + ico('check', 12, 4.5) + 'Cap acció obligatòria</span>';
+    el2.classList.add('ui2-informative');
+    var lab = doc.getElementById('nx-decisio-label'); if (lab && lab.style.display === 'none') { lab.style.display = ''; lab.setAttribute('data-ui2-shown', '1'); }
+  }
+  function dedupeFuture() {          /* «Pròximament» no repeteix un acte que ja surt al Calendari */
+    var fb = doc.getElementById('nx-future-block'); if (!fb || fb.style.display === 'none') return;
+    var evs = [].map.call(doc.querySelectorAll('#nx-event-content .nx-event-card'), function (c) {
+      var t = (c.querySelector('.nx-event-name') || {}).textContent || '', dc = c.querySelector('.ui2-datebox b');
+      return { words: words(t), day: dc ? dc.textContent : null };
+    });
+    var cards = fb.querySelectorAll('#nx-future-content .nx-info-card'), hidden = 0;
+    [].forEach.call(cards, function (c) {
+      var t = (c.querySelector('.nx-card-text') || c).textContent || '', d = (c.querySelector('.nx-card-date') || {}).textContent || '';
+      var p = parseShown(d), w = words(t);
+      var dup = evs.some(function (e) {
+        var common = w.filter(function (x) { return e.words.indexOf(x) >= 0; }).length;
+        return common >= 2 || (common >= 1 && p && e.day && +e.day === p.day);
+      });
+      if (dup) { c.classList.add('ui2-hide'); hidden++; } else c.classList.remove('ui2-hide');
+    });
+    fb.classList.toggle('ui2-hide', cards.length > 0 && hidden === cards.length);
+  }
+  function words(t) {
+    return String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/)
+      .filter(function (x) { return x.length >= 4 && !/^(?:amb|dels|les|per|que|una|aquest|aquesta|seran|sera)$/.test(x); });
+  }
   function decorateDecision() {
+    informativeSummary();
     var blk = doc.querySelector('.nx-decisio-block');
     if (!blk || blk.querySelector('.ui2-done-pill')) return;
     blk.insertBefore(injected('div', 'ui2-done-pill', ico('check', 14, 4.5) + '<span>Anàlisi completada</span>'), blk.firstChild);
@@ -245,7 +282,8 @@
   function tasksHead() {
     var p1 = doc.getElementById('nx-p1-block'); if (!p1 || !p1.parentNode) return;
     var vis = ['nx-p1-block', 'nx-p2-block', 'nx-info-block', 'nx-more-actions-block'].some(function (id) {
-      var e = doc.getElementById(id); return e && e.style.display !== 'none';
+      var e = doc.getElementById(id);
+      return e && e.style.display !== 'none' && !!e.querySelector('.nx-p1-card, .nx-p2-card, .nx-info-card');
     });
     var h = doc.getElementById('ui2-tasks-head');
     if (!h) {
@@ -253,7 +291,7 @@
       h.innerHTML = '<span class="ui2-head-ico">' + ico('tasks', 22, 3.4) + '</span><span>Tasques</span>';
       p1.parentNode.insertBefore(h, p1);
     }
-    var want = vis ? '' : 'none'; if (h.style.display !== want) h.style.display = want;
+    if (h.classList.contains('ui2-hide') === vis) h.classList.toggle('ui2-hide', !vis);
   }
 
   var busy = false;
@@ -266,6 +304,7 @@
       var evs = res.querySelectorAll('.nx-event-card'); for (var j = 0; j < evs.length; j++) decorateEvent(evs[j]);
       if (res.classList.contains('on')) buildTerminis();
       tasksHead();
+      dedupeFuture();
       updateCounts();
       decorateStatic();
     } catch (e) { if (window.console) console.warn('UI2', e); } finally { busy = false; }
@@ -500,9 +539,10 @@
     abortScan();
     [].forEach.call(doc.querySelectorAll('.ui2-injected'), function (e) { if (e.parentNode) e.parentNode.removeChild(e); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-html]'), function (e) { e.innerHTML = decodeURIComponent(e.getAttribute('data-ui2-html')); e.removeAttribute('data-ui2-html'); });
+    [].forEach.call(doc.querySelectorAll('[data-ui2-shown]'), function (e) { e.style.display = 'none'; e.removeAttribute('data-ui2-shown'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-aria]'), function (e) { e.removeAttribute('aria-label'); e.removeAttribute('title'); e.removeAttribute('data-ui2-aria'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-count],[data-ui2],[data-ui2-kind],[data-ui2-icon]'), function (e) { ['data-ui2-count', 'data-ui2', 'data-ui2-kind', 'data-ui2-icon'].forEach(function (a) { e.removeAttribute(a); }); });
-    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge'].forEach(function (c) {
+    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative'].forEach(function (c) {
       [].forEach.call(doc.querySelectorAll('.' + c), function (e) { e.classList.remove(c); });
     });
     body.classList.remove('ui2', 'ui2-scanning'); body.removeAttribute('data-ui2-page');
@@ -517,8 +557,17 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
+  var VERSION = '2.4.0';
+  function buildTag() {
+    var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
+    return m ? m[1].slice(0, 8) : 'local';
+  }
+  function versionMark() {
+    var cfg = doc.querySelector('#pageConfig .card[style*="text-align:center"]'); if (!cfg || doc.getElementById('ui2-ver')) return;
+    var v = injected('div', 'ui2-ver', 'Interfície ' + VERSION + ' · ' + esc(buildTag())); v.id = 'ui2-ver'; cfg.appendChild(v);
+  }
   function init() {
-    decorateStatic(); updatePage(); decorateHistory();
+    decorateStatic(); updatePage(); decorateHistory(); versionMark();
     doc.addEventListener('scroll', onAnyScroll, true);
     var load = doc.getElementById('loading'), res = doc.getElementById('results');
     watch(load, { attributes: true, attributeFilter: ['class'] }, function () {
@@ -527,6 +576,9 @@
     });
     watch(res, { attributes: true, attributeFilter: ['class'] }, function () { if (res.classList.contains('on')) { onResults(); if (scan) finishScan(true); } });
     watch(res, { childList: true, subtree: true }, function () { onResults(); });
+    ['nx-p1-block', 'nx-p2-block', 'nx-info-block', 'nx-more-actions-block', 'nx-future-block', 'nx-event-block'].forEach(function (id) {
+      watch(doc.getElementById(id), { attributes: true, attributeFilter: ['style'] }, function () { onResults(); });
+    });
     watch(doc.getElementById('tasquesList'), { childList: true }, function () { if (body.getAttribute('data-ui2-page') === 'tasques') buildTasksView(); });
     ['pageInici', 'pageTasques', 'pageHistorial', 'pageConfig', 'pagePremium'].forEach(function (id) {
       watch(doc.getElementById(id), { attributes: true, attributeFilter: ['style'] }, updatePage);
@@ -535,5 +587,5 @@
   }
   try { if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init); else init(); }
   catch (e) { body.classList.remove('ui2-scanning'); }
-  window.NexLupaUI2 = { version: '2.3.0', icon: ico, disable: disable };
+  window.NexLupaUI2 = { version: VERSION, build: buildTag(), icon: ico, disable: disable };
 })();

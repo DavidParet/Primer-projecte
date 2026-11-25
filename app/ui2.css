@@ -605,3 +605,80 @@ body.ui2 .nx-p1-card > .nx-card-date ~ .nx-card-date, body.ui2 .nx-p2-card > .nx
 body.ui2 .nx-p1-card > .nx-btn-cal, body.ui2 .nx-p2-card > .nx-btn-cal, body.ui2 .nx-info-card > .nx-btn-cal { margin: 4px 0 0 auto !important; }
 body.ui2 .btn-premium-header, body.ui2 .conv-btn { min-height: 32px !important; display: inline-flex !important; align-items: center; }
 body.ui2 .nx-p1-card .nx-btn-cal, body.ui2 .nx-p2-card .nx-btn-cal, body.ui2 .nx-info-card .nx-btn-cal { padding: 3px 11px !important; gap: 6px; }
+
+/* ================= UI 2.4 · compactació real al mòbil ================= */
+/* Tasques (pàgina) i targetes del resultat: menys volum, més amplada per al text */
+body.ui2 .ui2-page-title { font-size: 16px !important; font-weight: 650 !important; margin: 0 2px 6px !important; gap: 8px; }
+body.ui2 .ui2-page-title .ui2-head-ico .ui2-svg { width: 18px; height: 18px; }
+body.ui2 .ui2-tasks .nx-section-label { margin: 10px 2px 5px !important; }
+body.ui2 .ui2-tcard, body.ui2 .nx-p1-card, body.ui2 .nx-p2-card, body.ui2 .nx-info-card {
+  padding: 6px 4px 6px 9px !important; margin-bottom: 5px !important; border-radius: 11px !important; gap: 7px !important;
+  border-left-width: 2px !important; box-shadow: none !important; }
+body.ui2 .ui2-tcard .ui2-ico, body.ui2 .nx-card-icon.ui2-ico, body.ui2 .ui2-hist-ico {
+  width: 24px !important; height: 24px !important; min-width: 24px !important; border: 0 !important; background: rgba(233,193,74,.07) !important; border-radius: 7px !important; }
+body.ui2 .ui2-tcard .ui2-ico .ui2-svg, body.ui2 .nx-card-icon.ui2-ico .ui2-svg, body.ui2 .ui2-hist-ico .ui2-svg { width: 14px; height: 14px; }
+body.ui2 .nx-card-text, body.ui2 .ui2-ttitle { font-size: 13.5px !important; font-weight: 450 !important; line-height: 1.33 !important; }
+body.ui2 .nx-card-date, body.ui2 .ui2-tdate { font-size: 12px !important; font-weight: 450 !important; }
+body.ui2 .ui2-tdate, body.ui2 .ui2-date { margin-top: 1px !important; gap: 5px !important; }
+body.ui2 .ui2-term { font-weight: 600 !important; }
+body.ui2 .ui2-new { font-size: 9.5px !important; padding: 0 5px !important; margin-right: 5px !important; }
+body.ui2 .ui2-tchk, body.ui2 .ui2-tchk.on { width: 40px; height: 40px; min-width: 40px; margin: -8px -2px -8px 0; }
+body.ui2 .ui2-tchk-dot { width: 17px; height: 17px; border-width: 1.25px; }
+body.ui2 .ui2-tchk-dot .ui2-svg { width: 10px; height: 10px; }
+/* Completades: menys protagonisme */
+body.ui2 .ui2-done-head { margin: 12px 2px 4px !important; font-size: 12px !important; opacity: .8; }
+body.ui2 .ui2-tcard.ui2-done { opacity: .5; background: transparent !important; border-color: rgba(160,180,205,.08) !important; border-left-color: rgba(143,203,178,.35) !important; padding-top: 3px !important; padding-bottom: 3px !important; }
+body.ui2 .ui2-tcard.ui2-done .ui2-ico { display: none !important; }
+body.ui2 .ui2-tcard.ui2-done .ui2-ttitle { font-size: 12.5px !important; text-decoration: line-through; text-decoration-color: rgba(255,255,255,.25); }
+body.ui2 .ui2-tcard.ui2-done .ui2-tdate { display: none !important; }
+/* Botó «Afegir» de les tasques del resultat */
+body.ui2 .nx-p1-card > .nx-btn-cal, body.ui2 .nx-p2-card > .nx-btn-cal, body.ui2 .nx-info-card > .nx-btn-cal {
+  min-height: 32px; padding: 2px 10px !important; font-size: 12px !important; font-weight: 500 !important; margin-top: 2px !important; }
+body.ui2 .nx-p1-card > .nx-card-date, body.ui2 .nx-p2-card > .nx-card-date, body.ui2 .nx-info-card > .nx-card-date { margin-left: 31px !important; }
+body.ui2 .nx-card-row { gap: 7px !important; }
+
+/* Calendari: dades en línies compactes, sense targetes dins de targetes */
+body.ui2 .nx-event-card.ui2-event { padding: 10px 11px !important; border-radius: 14px !important; }
+body.ui2 .ui2-event > .ui2-cal-row { display: grid !important; grid-template-columns: 40px 1fr; column-gap: 11px; row-gap: 1px; align-items: center; }
+body.ui2 .ui2-event > .ui2-cal-row .ui2-cal-title { font-size: 14.5px !important; font-weight: 600 !important; line-height: 1.3 !important; }
+body.ui2 .ui2-event > .ui2-cal-row .ui2-cal-time { grid-column: 2; font-size: 12.5px !important; font-weight: 600 !important; margin: 0 !important; text-align: left !important; }
+body.ui2 .ui2-event .ui2-datebox, body.ui2 .ui2-terminis .ui2-datebox { width: 40px !important; min-width: 40px !important; height: 42px !important; border-radius: 10px !important; border-width: 1.25px !important; grid-row: span 2; }
+body.ui2 .ui2-event .ui2-datebox b, body.ui2 .ui2-terminis .ui2-datebox b { font-size: 17px !important; line-height: 1 !important; }
+body.ui2 .ui2-event .ui2-datebox span, body.ui2 .ui2-terminis .ui2-datebox span { font-size: 9px !important; letter-spacing: 1px !important; }
+body.ui2 .ui2-event .nx-event-meta { display: flex !important; flex-direction: column; gap: 3px !important; margin: 7px 0 0 51px !important; }
+body.ui2 .nx-event-chip.ui2-tile { display: flex !important; align-items: center; gap: 6px; padding: 0 !important; margin: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; min-height: 0 !important; font-size: 12.5px !important; font-weight: 450 !important; color: var(--txt) !important; }
+body.ui2 .nx-event-chip.ui2-tile .ui2-tile-ico { width: auto !important; height: auto !important; min-width: 0 !important; border: 0 !important; background: none !important; color: var(--gold); opacity: .8; }
+body.ui2 .nx-event-chip.ui2-tile .ui2-tile-ico .ui2-svg { width: 13px; height: 13px; }
+body.ui2 .nx-event-chip.ui2-tile .ui2-tile-txt { display: block !important; }
+body.ui2 .nx-event-chip.ui2-tile .ui2-tile-txt small { display: inline !important; font-size: 12.5px !important; letter-spacing: 0 !important; text-transform: none !important; font-weight: 450 !important; color: var(--muted) !important; }
+body.ui2 .nx-chip-days.ui2-tile .ui2-tile-ico, body.ui2 .nx-chip-days.ui2-tile { color: var(--ok) !important; }
+body.ui2 .ui2-event .nx-event-btn-row { display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 6px !important; margin: 8px 0 0 51px !important; }
+body.ui2 .ui2-event .nx-event-btn { width: auto !important; flex: 0 0 auto; min-height: 34px; padding: 4px 12px !important; font-size: 12.5px !important; font-weight: 500 !important; margin: 0 !important; gap: 6px; }
+body.ui2 .ui2-event .nx-card-date { margin: 4px 0 0 51px !important; }
+/* Terminis: fila més baixa, text amb tota l'amplada */
+body.ui2 .ui2-terminis .ui2-cal-row { padding: 6px 10px !important; margin-bottom: 5px !important; gap: 10px !important; }
+body.ui2 .ui2-terminis .ui2-cal-title { font-size: 13px !important; font-weight: 450 !important; }
+body.ui2 .ui2-terminis .ui2-cal-title small { font-size: 9.5px !important; }
+body.ui2 .ui2-terminis .ui2-datebox { height: 38px !important; grid-row: auto; }
+
+/* Resum informatiu quan no hi ha accions */
+body.ui2 .ui2-informative { display: flex !important; flex-direction: column; gap: 6px; }
+body.ui2 .ui2-sum-main { font-size: 15px; font-weight: 550; line-height: 1.38; color: #fff; }
+body.ui2 .ui2-sum-note { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 450; color: var(--ok); opacity: .85; }
+
+/* Historial: files encara més baixes */
+body.ui2 #historyList .hist-item { padding: 7px 4px !important; gap: 9px !important; }
+body.ui2 .ui2-ver { font-size: 10.5px; color: var(--muted, #8B9AAD); opacity: .7; margin-top: 6px; }
+
+/* Text ampliat del sistema: res no pot tallar-se */
+body.ui2 .nx-card-text, body.ui2 .ui2-ttitle, body.ui2 .ui2-cal-title, body.ui2 .ui2-tile-txt { overflow-wrap: anywhere; }
+body.ui2 .ui2-event .nx-event-meta, body.ui2 .nx-event-chip.ui2-tile { justify-content: flex-start !important; text-align: left !important; }
+/* Fora d'Inici la capçalera sempre compacta: més alçada útil */
+@media (max-width: 899px) {
+  body.ui2:not([data-ui2-page="inici"]) #pageApp header { padding: 4px 14px 4px !important; align-items: center; }
+  body.ui2:not([data-ui2-page="inici"]) #pageApp header .nexlupa-logo { width: 96px !important; height: 48px !important; }
+  body.ui2:not([data-ui2-page="inici"]) .logo-tagline { max-height: 0; opacity: 0; margin: 0 !important; overflow: hidden; }
+}
+body.ui2 .ui2-event .nx-event-meta { align-items: flex-start !important; }
+body.ui2 .ui2-new { width: 6px !important; height: 6px !important; min-width: 6px; padding: 0 !important; font-size: 0 !important; vertical-align: middle; opacity: .8; }
+body.ui2 #ui2-tasks-head.ui2-hide, body.ui2 #nx-future-block.ui2-hide { display: none !important; }

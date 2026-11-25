@@ -116,7 +116,7 @@ with sync_playwright() as p:
 
     print('C · Missatge sense accions')
     c = ctx(); pg = c.new_page(); _, st = run(pg, res0)
-    check('No has de fer res' in st['decisio'], 'veredicte «No has de fer res»')
+    check('felicitació' in st['decisio'] and 'Cap acció obligatòria' in st['decisio'], 'sense accions: es mostra el resum i «Cap acció obligatòria» com a nota')
     check(not st['p1Visible'] and st['b1'] is None and not st['termDays'], 'sense bloc P1, comptadors ni terminis')
     c.close()
 
