@@ -111,3 +111,12 @@ test('Motor real: el termini mostrat és el del missatge, no la data interna (ab
   assert.deepStrictEqual(d.accions[1].termini, { tipus: 'abans', data: '2026-12-04' });
   assert.strictEqual(d.accions[2].termini, undefined);
 });
+
+test('Motor real: la tornada aproximada es conserva al resum («cap a les 16:30»)', () => {
+  const d = run({ resum: 'Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada a les 16:30 h.', decisio: 'x',
+    esdeveniments: [{ title: 'Sortida al Museu Marítim de Barcelona', data: '2026-12-09 08:45', lloc: 'Museu Marítim de Barcelona' }],
+    accions: [], recordatoris: [{ text: 'Sortida amb tornada a les 16:30 h.', data: '2026-12-09' }] }, ESCOLA);
+  assert.ok(/tornada cap a les 16:30 h/.test(d.resum), d.resum);
+  assert.ok(/tornada cap a les 16:30 h/.test(d.recordatoris[0].text));
+  assert.ok(/sortida a les 8:45 h/.test(d.resum));
+});

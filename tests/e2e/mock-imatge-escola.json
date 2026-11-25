@@ -1,5 +1,5 @@
 {
- "resum": "Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada a les 16:30 h.",
+ "resum": "Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada cap a les 16:30 h.",
  "decisio": "Fer el pagament de 14 € abans del 3 de desembre i portar l'autorització signada abans del 4 de desembre.",
  "mainEvent": {
   "title": "Sortida al Museu Marítim de Barcelona",
@@ -86,7 +86,7 @@
  ],
  "recordatoris": [
   {
-   "text": "Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada a les 16:30 h.",
+   "text": "Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada cap a les 16:30 h.",
    "data": "2026-12-09",
    "tipus": "informatiu"
   }
