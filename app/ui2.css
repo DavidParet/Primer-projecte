@@ -787,3 +787,35 @@ body.ui2 .btn-analyze:active:not(:disabled) { transform: translateY(1px) !import
   box-shadow: 0 2px 8px rgba(233,193,74,.14), inset 0 2px 5px rgba(90,60,0,.28) !important; }
 body.ui2.ui2-scanning .btn-analyze::before, body.ui2 .btn-analyze:disabled::before { animation: none !important; opacity: 0 !important; }
 @media (prefers-reduced-motion: reduce) { body.ui2 .btn-analyze.ui2-ready::before { animation: none !important; opacity: 0 !important; } }
+
+/* ================= UI 2.7 · capçaleres (Inici vs interiors) i «Analitzar ara» ================= */
+/* El PNG del logotip té molt marge transparent: l'art ocupa x 11,9–88,1 % i y 36,2–63,8 % del canvas.
+   Les mides es fixen per l'art visible i els marges negatius eviten que el buit ompli la capçalera. */
+@media (max-width: 899px) {
+  body.ui2 #pageApp header { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 10px; }
+  body.ui2 #pageApp header .header-brand { display: contents !important; }
+  body.ui2 #pageApp header .nexlupa-logo { grid-column: 1; grid-row: 1; align-self: center; }
+  body.ui2 #pageApp header .btn-premium-header { grid-column: 2; grid-row: 1; align-self: center; }
+  body.ui2 #pageApp header .logo-tagline { grid-column: 1 / -1; grid-row: 2; }
+  /* INICI: art ~99 px (−13 %), centrat amb Premium; lema a sota amb poca separació */
+  body.ui2:not(.ui2-hdr-compact) #pageApp header { padding: 10px 14px 10px !important; row-gap: 6px; }
+  body.ui2:not(.ui2-hdr-compact) #pageApp header .nexlupa-logo { width: 130px !important; height: 65px !important; margin: -23px 0 -23px -15px !important; }
+  body.ui2:not(.ui2-hdr-compact) .logo-tagline { margin: 0 !important; max-height: none; line-height: 1.35 !important; }
+  /* INTERIORS (Tasques, Historial, Config, resultats): art ~90 px (+23 %), mateixa alçada de capçalera */
+  body.ui2.ui2-hdr-compact #pageApp header { padding: 8px 14px !important; row-gap: 0; }
+  body.ui2.ui2-hdr-compact #pageApp header .nexlupa-logo,
+  body.ui2:not([data-ui2-page="inici"]) #pageApp header .nexlupa-logo { width: 118px !important; height: 59px !important; margin: -21px 0 -21px -14px !important; }
+  body.ui2.ui2-hdr-compact .logo-tagline { display: none !important; }
+}
+/* «Analitzar ara»: daurat visible ~32 px (−17 %), però zona tàctil de 48 px amb una vora transparent */
+body.ui2 .btn-analyze { height: 48px !important; min-height: 48px; padding: 0 18px !important; border: 8px solid transparent !important; border-left-width: 0 !important; border-right-width: 0 !important; background-clip: padding-box !important;
+  font-size: 14.5px !important; gap: 6px !important; box-sizing: border-box !important; margin-top: 10px !important;
+  box-shadow: 0 3px 10px -2px rgba(233,193,74,.20) !important; }
+body.ui2 .btn-analyze .nxl-spark { width: 12px; height: 12px; }
+body.ui2 .btn-analyze:active:not(:disabled) { box-shadow: 0 1px 4px rgba(233,193,74,.12) !important; filter: brightness(.94); }
+body.ui2 .btn-micro-copy { margin-top: 0 !important; }
+/* Equilibri de l'Inici: separacions homogènies entre formulari, comptador FREE i promoció */
+@media (max-width: 899px) {
+  body.ui2 #pageInici .usage-counter { margin-top: 10px !important; }
+  body.ui2 #pageInici .conv-strip { margin-top: 8px !important; }
+}

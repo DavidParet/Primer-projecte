@@ -346,7 +346,12 @@
       keep(e); e.classList.add('ui2-neutral'); e.innerHTML = '<span class="ui2-neutral-ico" aria-hidden="true">' + ico('info', 15, 3.4) + '</span><span>' + esc(sp.textContent) + '</span>';
     });
   }
+  function brandName() {    /* al text del lema: «NexLupa» (el logotip gràfic neXlupa no es toca) */
+    var b = doc.querySelector('.logo-tagline .lt-brand');
+    if (b && !b.hasAttribute('data-ui2-html') && /nexlupa/i.test(b.textContent)) { keep(b); b.textContent = b.textContent.replace(/nexlupa/i, 'NexLupa'); }
+  }
   function decorateStatic() {
+    brandName();
     premiumMarks();
     NAV.forEach(function (s) {
       var e = doc.querySelector(s[0]); if (!e || e.hasAttribute('data-ui2-html')) return;
@@ -564,7 +569,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.6.1';
+  var VERSION = '2.7.0';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';
