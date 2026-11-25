@@ -1,9 +1,19 @@
 {
- "resum": "Festa de Nadal de l’AMPA Escola Els Pins el dissabte 19 de desembre, de 10:00 a 13:00, al pati de l’escola. Xocolatada solidària: 2 €. Hi haurà un taller de fanalets per a infants.",
- "decisio": "Inscriure els infants al taller fins al 15 de desembre.",
+ "resum": "Festa de Nadal el 19 de desembre amb xocolatada solidària i taller de fanalets.",
+ "decisio": "Inscriure's al taller de fanalets fins al 15 de desembre.",
+ "mainEvent": {
+  "title": "Festa de Nadal",
+  "data": "2026-12-19 10:00",
+  "dataDubtosa": false,
+  "dataFi": "2026-12-19 13:00",
+  "lloc": "Pati de l'escola",
+  "edat": null,
+  "origen": "principal",
+  "adreca": "C/ dels Pins, 12, Sant Cugat"
+ },
  "esdeveniments": [
   {
-   "title": "Festa de Nadal de l’AMPA",
+   "title": "Festa de Nadal",
    "data": "2026-12-19 10:00",
    "dataDubtosa": false,
    "dataFi": "2026-12-19 13:00",
@@ -14,18 +24,28 @@
  ],
  "accions": [
   {
-   "accio": "Inscriure els infants al taller de fanalets fins al 15 de desembre a ampa@elspins.cat",
+   "accio": "Inscriure's al taller de fanalets enviant un correu a ampa@elspins.cat fins al 15 de desembre.",
    "tipus": "tasca",
-   "data": "2026-12-15",
+   "data": null,
+   "dataFi": "2026-12-15",
    "prioritat": "alta",
-   "dataFi": null,
-   "dataDubtosa": false,
    "lloc": null,
    "enllac": null,
-   "tipusTermini": "fins"
+   "dataDubtosa": false,
+   "tipusTermini": "fins",
+   "termini": {
+    "tipus": "fins",
+    "data": "2026-12-15"
+   }
   }
  ],
- "recordatoris": [],
+ "recordatoris": [
+  {
+   "text": "Festa de Nadal el 19 de desembre de 10:00 a 13:00 al Pati de l'escola.",
+   "data": "2026-12-19",
+   "tipus": "informatiu"
+  }
+ ],
  "dadesUtils": {
   "enllacos": [],
   "iban": [],
@@ -44,22 +64,13 @@
    }
   ]
  },
- "origenImatge": true,
- "mainEvent": {
-  "title": "Festa de Nadal de l’AMPA",
-  "data": "2026-12-19 10:00",
-  "dataDubtosa": false,
-  "dataFi": "2026-12-19 13:00",
-  "lloc": "Pati de l'escola",
-  "edat": null,
-  "origen": "llista",
-  "adreca": "C/ dels Pins, 12, Sant Cugat"
- },
+ "contingut": null,
  "avisDates": null,
+ "origenImatge": true,
  "revisioDates": {
   "requereixRevisio": false,
   "camps": []
  },
  "dataReferencia": "2026-11-25",
- "textLlegit": "FESTA DE NADAL\nAMPA Escola Els Pins\nDissabte 19 de desembre\nde 10:00 a 13:00 h\nPati de l'escola\nC/ dels Pins, 12 · Sant Cugat\nXocolatada solidària: 2 €\nTaller de fanalets per a infants\nInscripcions al taller fins al\n15 de desembre a ampa@elspins.cat"
+ "textLlegit": "FESTA DE NADAL\nAMPA Escola Els Pins\n\nDissabte 19 de desembre\nde 10:00 a 13:00 h\n\nPati de l'escola\nC/ dels Pins, 12 · Sant Cugat\n\nXocolatada solidària: 2 €\nTaller de fanalets per a infants\n\nInscripcions al taller fins al\n15 de desembre a ampa@elspins.cat"
 }

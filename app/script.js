@@ -920,7 +920,9 @@ function buildActionCard(a, cardClass) {
   row.appendChild(textEl);
   card.appendChild(row);
 
-  var fmtDate = formatAlternatives(a.dataAlternatives) || deadlineLabel(a, formatActionDate(a.data));
+  /* UI 2.9: el termini es mostra tal com el diu el missatge («Abans del 4 de des»), no com la data interna */
+  var shownTerm = a.termini && !a.dataAlternatives ? a.termini.data : null;
+  var fmtDate = formatAlternatives(a.dataAlternatives) || deadlineLabel(a, formatActionDate(shownTerm || a.data));
   if (fmtDate) {
     var dateEl = document.createElement('div');
     dateEl.className   = 'nx-card-date';
@@ -928,7 +930,7 @@ function buildActionCard(a, cardClass) {
     card.appendChild(dateEl);
   }
 
-  if (a.dataFi && a.dataFi !== a.data) {
+  if (a.dataFi && a.dataFi !== a.data && !shownTerm) {
     var endLabel = document.createElement('div');
     endLabel.className = 'nx-card-date';
     endLabel.textContent = 'Fins: ' + (formatActionDate(a.dataFi) || a.dataFi);
@@ -1069,7 +1071,8 @@ function renderResult(d) {
       estat: a.estat || null,
       prioritat: (a.prioritat || 'baixa').toLowerCase(),
       lloc: a.lloc || null, adreca: a.adreca || null, enllac: a.enllac || null,
-      tipusTermini: a.tipusTermini === 'abans' || a.tipusTermini === 'fins' ? a.tipusTermini : null };
+      tipusTermini: a.tipusTermini === 'abans' || a.tipusTermini === 'fins' ? a.tipusTermini : null,
+      termini: a.termini && /^\d{4}-\d{2}-\d{2}$/.test(a.termini.data || '') ? a.termini : null };
   }).filter(function(a) { return a && a.accio.length > 0; });
   accions = applyPriorityHeuristics(accions);
 
@@ -1342,6 +1345,7 @@ function buildShareText(d) {
     text = text.trim();
     var data  = isObj ? (a.data || null) : null;
     var prior = isObj ? (a.prioritat || 'baixa') : 'baixa';
+    if (isObj && a.termini && a.termini.data) data = a.termini.data;
     return text ? { accio: text, data: data, prioritat: prior, tipusTermini: isObj ? a.tipusTermini : null, dataAlternatives: isObj ? a.dataAlternatives : null } : null;
   }).filter(Boolean);
 

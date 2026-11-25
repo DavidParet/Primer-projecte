@@ -93,3 +93,21 @@ test('Regles generals: adreces només literals i amb número; sortida/tornada; t
   assert.strictEqual(deadlineKind('Pagament abans del 3 de desembre', '2026-12-03'), 'abans');
   assert.strictEqual(deadlineKind('El 3 de desembre hi ha reunió', '2026-12-03'), null);
 });
+
+// Resposta REAL del model a la preview (25/11/2026, captura de l'escola): «abans del 3/4» guardats com a dataFi 2 i 3.
+test('Motor real: el termini mostrat és el del missatge, no la data interna (abans del 3 → dataFi 2)', () => {
+  const d = run({
+    resum: 'Sortida al Museu Marítim de Barcelona el 9 de desembre amb sortida a les 8:45 h i tornada a les 16:30 h.',
+    decisio: "Fer el pagament de 14 € abans del 3 de desembre i portar l'autorització signada abans del 4 de desembre.",
+    mainEvent: { title: 'Sortida al Museu Marítim de Barcelona', data: '2026-12-09 08:45', dataFi: null, lloc: 'Museu Marítim de Barcelona' },
+    esdeveniments: [{ title: 'Sortida al Museu Marítim de Barcelona', data: '2026-12-09 08:45', dataFi: null, lloc: 'Museu Marítim de Barcelona' }],
+    accions: [
+      { accio: 'Fer el pagament de 14 € abans del 3 de desembre', tipus: 'tasca', data: null, dataFi: '2026-12-02', prioritat: 'alta' },
+      { accio: "Portar l'autorització signada abans del 4 de desembre", tipus: 'tasca', data: null, dataFi: '2026-12-03', prioritat: 'alta' },
+      { accio: 'Portar esmorzar, dinar i aigua el dia de la sortida', tipus: 'tasca', data: '2026-12-09', dataFi: null, prioritat: 'mitja' }],
+    recordatoris: [], dadesUtils: { imports: ['14 €'] }
+  }, ESCOLA);
+  assert.deepStrictEqual(d.accions[0].termini, { tipus: 'abans', data: '2026-12-03' });
+  assert.deepStrictEqual(d.accions[1].termini, { tipus: 'abans', data: '2026-12-04' });
+  assert.strictEqual(d.accions[2].termini, undefined);
+});
