@@ -36,7 +36,9 @@ def init_js(body, status=200, delay=2500):
 
 STATE = r"""()=>{const ld=document.getElementById('loading');const r=document.getElementById('results');const q=s=>[...document.querySelectorAll(s)];
  const lab=id=>{const e=document.querySelector(id+' .nx-section-label');return e?e.getAttribute('data-ui2-count'):null};
- return {resultsOn:r.classList.contains('on'), overlay:!!document.querySelector('.ui2-scan'),
+ const st=document.querySelector('.ui2-scan.still'), gl=st&&st.querySelector('.ui2-lens-glow');
+ return {resultsOn:r.classList.contains('on'), overlay:!!document.querySelector('.ui2-scan'), still: !!st && (!gl || getComputedStyle(gl).animationName==='none'),
+  waitTxt:(document.querySelector('.ui2-wait-txt')||{}).textContent||'', origVisible: !!document.querySelector('.ui2-scan .ui2-scan-card'),
   p1:q('#results .nx-p1-card').length, p2:q('#results .nx-p2-card').length, p3:q('#nx-info-content .nx-info-card, #nx-more-actions-content .nx-info-card').length,
   b1:lab('#nx-p1-block'), b2:lab('#nx-p2-block'), b3:lab('#nx-info-block'),
   p1Visible:getComputedStyle(document.getElementById('nx-p1-block')).display!=='none',
@@ -74,6 +76,7 @@ with sync_playwright() as p:
     print('A · Missatge escolar (mòbil 390×844)')
     c = ctx(); pg = c.new_page(); mid, st = run(pg, escola)
     check(mid['overlay'], 'l’animació de la lupa apareix mentre s’analitza')
+    check(mid['waitTxt'] == 'Llegint el teu missatge…' and not mid['origVisible'], 'espera: «Llegint el teu missatge…» i sense el missatge original de fons')
     check(not st['overlay'] and st['resultsOn'], 'la capa desapareix i es mostren els resultats')
     check((st['p1'], st['p2'], st['p3']) == (2, 2, 2), f"targetes P1/P2/P3 = 2/2/2 (obtingut {st['p1']}/{st['p2']}/{st['p3']})")
     check((st['b1'], st['b2'], st['b3']) == ('2', '2', '2'), f"comptadors coincideixen amb les targetes ({st['b1']}/{st['b2']}/{st['b3']})")
@@ -86,7 +89,7 @@ with sync_playwright() as p:
     bad = [(t, icons.get(t), w) for t, w in want.items() if icons.get(t) != w]
     check(not bad, f'pictogrames segons el contingut (document, targeta, avís, rellotge, escola) {bad}')
     check(st['calDays'] == ['18', '22'] and st['calTimes'] == ['8:15 h', '13:00 h'], f"calendari: 18 DES 8:15 h i 22 DES 13:00 h ({st['calDays']} {st['calTimes']})")
-    check(st['termDays'] == ['2', '4', '10', '18'] and all(l.lower() == 'termini' for l in st['termLabels']), f"terminis separats i ordenats 2, 4, 10, 18 ({st['termDays']})")
+    check(st['termDays'] == ['2', '4', '10'] and all(l.lower() == 'termini' for l in st['termLabels']), f"terminis reals ordenats 2, 4, 10; preparar material (18) no és termini ({st['termDays']})")
     tiles = pg.evaluate("[...document.querySelectorAll('#ui2-sumtiles .ui2-sumtile b')].map(e=>e.textContent)")
     check(tiles == ['2', '2', '2'], f'fitxes del Resum = recompte de targetes ({tiles})')
     check(not st['emoji'], f"sense emojis a navegació, pestanyes ni botons {st['emoji'][:5]}")
@@ -124,6 +127,8 @@ with sync_playwright() as p:
     c = ctx(); pg = c.new_page(); _, st = run(pg, json.dumps({'error': 'Error de prova controlat'}), status=500, delay=800, wait=1500)
     check(not st['overlay'], 'la capa d’animació es retira')
     check('Error de prova controlat' in st['err'] and st['inputVisible'], 'es mostra l’error i torna el formulari')
+    rt = pg.evaluate("(()=>{const b=document.getElementById('ui2-retry');return {shown:!!b&&b.offsetParent!==null, txt:(document.getElementById('txt')||{}).value||''}})()")
+    check(rt['shown'] and len(rt['txt']) > 20, 'botó «Tornar-ho a provar» visible i missatge introduït conservat')
     c.close()
 
     print('E · Resposta molt ràpida (50 ms) i navegació durant l’anàlisi')
@@ -140,7 +145,7 @@ with sync_playwright() as p:
 
     print('F · Moviment reduït (accessibilitat)')
     c = ctx(reduced=True); pg = c.new_page(); mid, st = run(pg, escola, delay=1500, wait=2500)
-    check(not mid['overlay'] and mid['loaderShown'], 'sense capa animada: es veu l’indicador original')
+    check(mid['overlay'] and mid['still'], 'lupa i text estàtics, sense pulsació')
     check(st['resultsOn'] and (st['b1'], st['b2'], st['b3']) == ('2', '2', '2'), 'resultats i comptadors iguals')
     anim = pg.evaluate("[...document.querySelectorAll('#results *')].some(e=>{const s=getComputedStyle(e);return s.animationName!=='none' && parseFloat(s.animationDuration)>0})")
     check(not anim, 'cap animació activa als resultats')

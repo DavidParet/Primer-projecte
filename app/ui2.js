@@ -71,6 +71,11 @@
     [/escola|institut/i, 'school'],
     [/reuni|tutoria|entrevista/i, 'users']
   ];
+  /* «Termini» només per a dates límit reals (inscriure's, pagar, confirmar, signar, retornar… abans d'una data).
+     Preparar o portar material per a l'activitat és una tasca, no un termini. */
+  var DEADLINE = /avisa|comunica|notifica|inscri|matr[ií]cul|pag(a|ar|ament)|abona|ingr[eé]s|transfer|bizum|confirm|signa|firma|autoritz|retorn|entreg|lliura|presenta|envia|sol·licit|sollicit|reserva|apunta|respon|abans d|fins a?l? |termini|l[ií]mit|com a m[àa]xim|data m[àa]xima/i;
+  var PREP = /^(?:portar|dur|preparar|endur|agafar|vestir|posar|recordar portar|cal portar|cal dur)\b/i;
+  function isDeadline(text) { var t = String(text || '').trim(); return DEADLINE.test(t) && !(PREP.test(t) && !/abans d|fins a?l? |termini|l[ií]mit/i.test(t)); }
   function pick(text, fallback) {
     for (var i = 0; i < RULES.length; i++) if (RULES[i][0].test(text)) return RULES[i][1];
     return fallback;
@@ -122,7 +127,7 @@
       if (/vençut|confirma|per confirmar|passada/i.test(txt)) { d.classList.add('ui2-warn'); continue; }
       var p = parseShown(txt); if (!p) continue;
       keep(d);
-      var pre = (!info && i === 0 && !/^Fins/.test(txt)) ? '<span class="ui2-term">Termini:</span> ' : '';
+      var pre = (!info && i === 0 && !/^Fins/.test(txt) && isDeadline(t)) ? '<span class="ui2-term">Termini:</span> ' : '';
       d.innerHTML = '<span class="ui2-date-ico">' + ico('cal', 15, 3.6) + '</span><span>' + pre + esc(txt) + '</span>';
       d.classList.add('ui2-date');
     }
@@ -185,6 +190,7 @@
     var cards = res.querySelectorAll('.nx-p1-card, .nx-p2-card, .nx-info-card');
     for (var i = 0; i < cards.length; i++) {
       var c = cards[i]; if (c.getAttribute('data-ui2-kind') !== 'task') continue;
+      if (!isDeadline((c.querySelector('.nx-card-text') || {}).textContent)) continue;
       var d = c.querySelector('.nx-card-date.ui2-date'); if (!d) continue;
       var p = parseShown(d.textContent); if (!p) continue;
       var pr = c.classList.contains('nx-p1-card') ? 'p1' : c.classList.contains('nx-p2-card') ? 'p2' : 'p3';
@@ -329,7 +335,19 @@
       return;
     }
   }
+  function premiumMarks() {
+    [].forEach.call(doc.querySelectorAll('#pagePremium strong.compare-no'), function (e) {
+      if (e.hasAttribute('data-ui2-html') || !/✕\s*Free/.test(e.textContent)) return;
+      keep(e); e.classList.add('ui2-notinc'); e.innerHTML = '<span class="ui2-xmark" aria-hidden="true">✕</span><span>No inclòs al Free</span>';
+    });
+    [].forEach.call(doc.querySelectorAll('#pagePremium .pchk-item.no'), function (e) {
+      if (e.hasAttribute('data-ui2-html')) return;
+      var sp = e.querySelector('span'); if (!sp) return;
+      keep(e); e.classList.add('ui2-neutral'); e.innerHTML = '<span class="ui2-neutral-ico" aria-hidden="true">' + ico('info', 15, 3.4) + '</span><span>' + esc(sp.textContent) + '</span>';
+    });
+  }
   function decorateStatic() {
+    premiumMarks();
     NAV.forEach(function (s) {
       var e = doc.querySelector(s[0]); if (!e || e.hasAttribute('data-ui2-html')) return;
       keep(e); e.classList.add('ui2-nav-ico'); e.innerHTML = ico(s[1], 22, 3.2);
@@ -382,7 +400,7 @@
   function taskCard(t, pr) {
     var a = taskInfo(t.text) || {}, info = a.tipus === 'informatiu';
     var date = a.data ? longDate(a.data) : null;
-    var dateHtml = date ? '<div class="ui2-tdate">' + ico('cal', 15, 3.6) + '<span>' + (info || pr === 'done' ? '' : '<span class="ui2-term">Termini:</span> ') + esc(date) + '</span></div>' : '';
+    var dateHtml = date ? '<div class="ui2-tdate">' + ico('cal', 15, 3.6) + '<span>' + (info || pr === 'done' || !isDeadline(t.text) ? '' : '<span class="ui2-term">Termini:</span> ') + esc(date) + '</span></div>' : '';
     if (a.vençut) dateHtml += '<div class="ui2-tdate ui2-warn">Termini vençut: cal comprovar si encara es pot gestionar</div>';
     var icName = pick(t.text, info ? 'info' : 'check');
     return '<div class="ui2-tcard ui2-' + pr + '"><span class="ui2-ico" data-ui2-icon="' + icName + '">' + ico(icName, 18, 3.4) + '</span>' +
@@ -409,11 +427,12 @@
       if (cur !== 'inici' && scan) abortScan();
     }
     if (cur === 'tasques') buildTasksView();
+    syncHeader();
   }
 
   /* ---------------- transició d'anàlisi: lupa sola → X → esclat de la X → resum ---------------- */
   var scan = null, scanStart = 0, scanTimer = null, finishing = false;
-  var MIN_SCAN = 800;                      /* només per evitar un parpelleig si l'API respon a l'instant */
+  var MIN_SCAN = 500;                      /* només per evitar un parpelleig si l'API respon a l'instant */
   var XFX = (2026 - 1480 - 12) / 1070, XFY = 472 / 837;   /* centre del rombe daurat dins ui2-x.png (retall del logotip oficial) */
   var HL = /(\b(?:dilluns|dimarts|dimecres|dijous|divendres|dissabte|diumenge)(?:\s+\d{1,2}(?:\s+de\s+[a-zç]+)?)?\b|\babans\s+del?\s+(?:(?:dia|dilluns|dimarts|dimecres|dijous|divendres)\s+)?\d{1,2}(?:\s+de\s+[a-zç]+)?\b|\b\d{1,2}\s+de\s+(?:gener|febrer|març|abril|maig|juny|juliol|agost|setembre|octubre|novembre|desembre)\b|\b\d{1,2}[.:]\d{2}(?:\s*h\b)?|\b\d+(?:[.,]\d+)?\s*€|\bautoritzaci[oó](?:\s+signada)?\b|\bal·l[eè]rgi[a-z]*|\bpagament\b)/gi;
   function buildText() {
@@ -427,38 +446,27 @@
   function navHeight() { var n = doc.querySelector('.bottom-nav'); return n ? Math.round(n.getBoundingClientRect().height) : 0; }
 
   function startScan() {
-    if (scan || REDUCED) return;        /* moviment reduït: es manté l'indicador original, sense desplaçaments */
+    if (scan) return;
     try {
       finishing = false;
-      scan = el('div', 'ui2-scan'); scan.setAttribute('aria-hidden', 'true');
+      scan = el('div', 'ui2-scan ui2-scan24' + (REDUCED ? ' still' : '')); scan.setAttribute('role', 'status'); scan.setAttribute('aria-live', 'polite');
       scan.style.bottom = navHeight() + 'px';               /* la navegació continua accessible */
       scan.appendChild(el('div', 'ui2-scan-bg'));
-      var card = el('div', 'ui2-scan-card', buildText()); scan.appendChild(card);
-      var lupa = el('img', 'ui2-lupa'); lupa.src = 'assets/ui2-lupa-sola.png'; lupa.alt = ''; scan.appendChild(lupa);
-      scan.appendChild(el('div', 'ui2-status', 'La lupa està treballant per tu…'));
-      var xw = el('div', 'ui2-xwrap'); var xi = el('img', 'ui2-x'); xi.src = 'assets/ui2-x.png'; xi.alt = ''; xw.appendChild(xi); scan.appendChild(xw);
-      scan.appendChild(el('div', 'ui2-bloom')); scan.appendChild(el('div', 'ui2-ring'));
-      scan.addEventListener('click', function () { if (finishing) quickEnd(); });   /* tocar durant el final: salta l'animació */
+      var wait = el('div', 'ui2-wait');
+      var box = el('div', 'ui2-lupa-box');
+      var lupa = el('img', 'ui2-lupa-still'); lupa.src = 'assets/ui2-lupa-sola.png'; lupa.alt = '';
+      box.appendChild(lupa); box.appendChild(el('div', 'ui2-lens-glow'));
+      wait.appendChild(box); wait.appendChild(el('div', 'ui2-wait-txt', 'Llegint el teu missatge…'));
+      scan.appendChild(wait);
+      if (!REDUCED) {
+        var xw = el('div', 'ui2-xwrap'); var xi = el('img', 'ui2-x'); xi.src = 'assets/ui2-x.png'; xi.alt = ''; xw.appendChild(xi); scan.appendChild(xw);
+        scan.appendChild(el('div', 'ui2-bloom')); scan.appendChild(el('div', 'ui2-ring'));
+        scan.addEventListener('click', function () { if (finishing) quickEnd(); });   /* tocar durant el final: salta l'animació */
+      }
       body.appendChild(scan);
       body.classList.add('ui2-scanning');                    /* només ara s'amaga l'indicador original */
       scanStart = Date.now();
       requestAnimationFrame(function () { if (scan) scan.classList.add('on'); });
-      var marks = card.querySelectorAll('mark'), i = 0;
-      var step = function () {
-        if (!scan || finishing) return;
-        var cr = card.getBoundingClientRect(), sr = scan.getBoundingClientRect();
-        var target = marks.length ? marks[i % marks.length] : null, x, y;
-        if (target) {
-          var r = target.getBoundingClientRect();
-          if (r.bottom > cr.bottom - 10) { card.scrollTop += r.top - cr.top - 40; r = target.getBoundingClientRect(); }
-          x = r.left + r.width / 2; y = r.top + r.height / 2; target.classList.add('lit');
-        } else { x = cr.left + cr.width * (0.25 + 0.5 * Math.random()); y = cr.top + cr.height * (0.2 + 0.6 * Math.random()); }
-        lupa.style.transform = 'translate(' + (x - sr.left - 24) + 'px,' + (y - sr.top - 24) + 'px)';   /* centre de la lent */
-        i++;
-        if (marks.length && i % marks.length === 0) { for (var k = 0; k < marks.length; k++) marks[k].classList.remove('lit'); card.scrollTop = 0; }
-        scanTimer = setTimeout(step, 300);
-      };
-      setTimeout(step, 80);
     } catch (e) { abortScan(); }
   }
   function finishScan(success) {
@@ -467,41 +475,43 @@
     var s0 = scan, wait = Math.max(0, MIN_SCAN - (Date.now() - scanStart));
     setTimeout(function () {
       try {
-        clearTimeout(scanTimer);
         var s = scan; if (!s || s !== s0) return;
-        if (!success) { end(s, false); return; }
-        /* 1) l'ombrejat s'esvaeix i la lupa marxa; apareix la X de marca */
-        s.classList.add('fading', 'xin');
-        var xw = s.querySelector('.ui2-xwrap'), sr = s.getBoundingClientRect();
+        if (!success || REDUCED) { end(s, success && !REDUCED); return; }
+        /* 1) la lupa i el text es dissolen */
+        s.classList.add('fading');
         setTimeout(function () {
           if (scan !== s) return;
-          var xr = xw.getBoundingClientRect();
-          var xc = xr.left - sr.left + xr.width * XFX, yc = xr.top - sr.top + xr.height * XFY;
-          /* 2) l'energia de les frases convergeix al rombe i la X s'il·lumina */
-          var marks = s.querySelectorAll('mark'), sparks = [];
-          for (var k = 0; k < Math.min(10, Math.max(6, marks.length)); k++) {
-            var m = marks.length ? marks[k % marks.length].getBoundingClientRect() : { left: sr.width * Math.random(), top: sr.height * Math.random(), width: 0, height: 0 };
-            var sp = el('div', 'ui2-spark'); s.appendChild(sp);
-            sp.style.transform = 'translate(' + (m.left - sr.left + m.width / 2) + 'px,' + (m.top - sr.top + m.height / 2) + 'px)'; sparks.push(sp);
-          }
-          requestAnimationFrame(function () {
-            sparks.forEach(function (sp, k) {
-              sp.style.transition = 'transform .42s cubic-bezier(.5,0,.75,0) ' + (k * 0.012) + 's, opacity .15s';
-              sp.style.opacity = 1; sp.style.transform = 'translate(' + (xc - 3) + 'px,' + (yc - 3) + 'px) scale(.5)';
-            });
-          });
-          s.classList.add('xglow');
-          var bloom = s.querySelector('.ui2-bloom'), ring = s.querySelector('.ui2-ring');
-          [bloom, ring].forEach(function (e) { e.style.left = xc + 'px'; e.style.top = yc + 'px'; });
-          /* 3) esclat càlid de la mateixa X */
+          /* 2) apareix la X; la llum convergeix al rombe i s'il·lumina */
+          s.classList.add('xin');
+          var xw = s.querySelector('.ui2-xwrap'), sr = s.getBoundingClientRect();
           setTimeout(function () {
             if (scan !== s) return;
-            sparks.forEach(function (sp) { sp.remove(); });
-            s.classList.add('xburst');
-            /* 4) el resum entra amb la llum de l'esclat */
-            setTimeout(function () { end(s, true); }, 260);
-          }, 460);
-        }, 240);
+            var xr = xw.getBoundingClientRect();
+            var xc = xr.left - sr.left + xr.width * XFX, yc = xr.top - sr.top + xr.height * XFY, sparks = [];
+            for (var k = 0; k < 9; k++) {
+              var a = k / 9 * Math.PI * 2 + 0.3, rr = 90 + (k % 3) * 18;
+              var sp = el('div', 'ui2-spark'); s.appendChild(sp);
+              sp.style.transform = 'translate(' + (xc - 3 + Math.cos(a) * rr) + 'px,' + (yc - 3 + Math.sin(a) * rr) + 'px)'; sparks.push(sp);
+            }
+            requestAnimationFrame(function () {
+              sparks.forEach(function (sp, k) {
+                sp.style.transition = 'transform .42s cubic-bezier(.5,0,.75,0) ' + (k * 0.012) + 's, opacity .15s';
+                sp.style.opacity = 1; sp.style.transform = 'translate(' + (xc - 3) + 'px,' + (yc - 3) + 'px) scale(.5)';
+              });
+            });
+            s.classList.add('xglow');
+            var bloom = s.querySelector('.ui2-bloom'), ring = s.querySelector('.ui2-ring');
+            [bloom, ring].forEach(function (e) { e.style.left = xc + 'px'; e.style.top = yc + 'px'; });
+            /* 3) esclat càlid de la mateixa X */
+            setTimeout(function () {
+              if (scan !== s) return;
+              sparks.forEach(function (sp) { sp.remove(); });
+              s.classList.add('xburst');
+              /* 4) el resum entra amb la llum de l'esclat */
+              setTimeout(function () { end(s, true); }, 260);
+            }, 460);
+          }, 240);
+        }, 280);
       } catch (e) { abortScan(); }
     }, wait);
   }
@@ -521,28 +531,24 @@
   }
 
   /* ---------------- capçalera compacta en desplaçar (mòbil) ---------------- */
-  var hdrTimer = null;
-  function onAnyScroll(e) {
-    var t = e.target; if (!t || t === doc) t = doc.scrollingElement || doc.documentElement;
-    if (hdrTimer) return;
-    hdrTimer = requestAnimationFrame(function () {
-      hdrTimer = null;
-      var y = t.scrollTop || 0;
-      if (y > 36) body.classList.add('ui2-hdr-compact'); else if (y < 8) body.classList.remove('ui2-hdr-compact');
-    });
+  /* Capçalera compacta segons l'estat (resultat visible o fora d'Inici), MAI segons la posició del scroll:
+     canviar-ne l'alçada mentre el dit llisca encongia/estirava el contenidor i el contingut saltava. */
+  function syncHeader() {
+    var res = doc.getElementById('results');
+    var want = !!(res && res.classList.contains('on')) || body.getAttribute('data-ui2-page') !== 'inici';
+    if (body.classList.contains('ui2-hdr-compact') !== want) body.classList.toggle('ui2-hdr-compact', want);
   }
-
   /* ---------------- reversibilitat completa ---------------- */
   function disable() {
     observers.forEach(function (o) { o.disconnect(); }); observers = [];
-    doc.removeEventListener('scroll', onAnyScroll, true); body.classList.remove('ui2-hdr-compact');
+    body.classList.remove('ui2-hdr-compact');
     abortScan();
     [].forEach.call(doc.querySelectorAll('.ui2-injected'), function (e) { if (e.parentNode) e.parentNode.removeChild(e); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-html]'), function (e) { e.innerHTML = decodeURIComponent(e.getAttribute('data-ui2-html')); e.removeAttribute('data-ui2-html'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-shown]'), function (e) { e.style.display = 'none'; e.removeAttribute('data-ui2-shown'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-aria]'), function (e) { e.removeAttribute('aria-label'); e.removeAttribute('title'); e.removeAttribute('data-ui2-aria'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-count],[data-ui2],[data-ui2-kind],[data-ui2-icon]'), function (e) { ['data-ui2-count', 'data-ui2', 'data-ui2-kind', 'data-ui2-icon'].forEach(function (a) { e.removeAttribute(a); }); });
-    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative'].forEach(function (c) {
+    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge', 'ui2-informative', 'ui2-notinc', 'ui2-neutral'].forEach(function (c) {
       [].forEach.call(doc.querySelectorAll('.' + c), function (e) { e.classList.remove(c); });
     });
     body.classList.remove('ui2', 'ui2-scanning'); body.removeAttribute('data-ui2-page');
@@ -557,7 +563,7 @@
       if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
-  var VERSION = '2.4.0';
+  var VERSION = '2.5.0';
   function buildTag() {
     var sc = doc.querySelector('script[src*="ui2.js"]'), m = sc && /[?&]v=([0-9a-f]{6,})/i.exec(sc.getAttribute('src') || '');
     return m ? m[1].slice(0, 8) : 'local';
@@ -566,15 +572,26 @@
     var cfg = doc.querySelector('#pageConfig .card[style*="text-align:center"]'); if (!cfg || doc.getElementById('ui2-ver')) return;
     var v = injected('div', 'ui2-ver', 'Interfície ' + VERSION + ' · ' + esc(buildTag())); v.id = 'ui2-ver'; cfg.appendChild(v);
   }
+  /* error: missatge clar i botó per tornar-ho a provar; el text introduït es conserva (script.js no l'esborra) */
+  function errRetry() {
+    var err = doc.getElementById('errMsg'); if (!err) return;
+    var b = doc.getElementById('ui2-retry'), on = err.classList.contains('on');
+    if (on && !b) {
+      b = injected('button', 'ui2-retry', ico('history', 15, 3.6) + '<span>Tornar-ho a provar</span>'); b.id = 'ui2-retry'; b.type = 'button';
+      b.addEventListener('click', function () { if (typeof window.analyze === 'function') window.analyze(); });
+      err.parentNode.insertBefore(b, err.nextSibling);
+    }
+    if (b) b.style.display = on ? '' : 'none';
+    if (on) { try { err.scrollIntoView({ block: 'center' }); } catch (e) {} }
+  }
   function init() {
     decorateStatic(); updatePage(); decorateHistory(); versionMark();
-    doc.addEventListener('scroll', onAnyScroll, true);
     var load = doc.getElementById('loading'), res = doc.getElementById('results');
     watch(load, { attributes: true, attributeFilter: ['class'] }, function () {
       if (load.classList.contains('on')) startScan();
       else if (scan && !(res && res.classList.contains('on'))) setTimeout(function () { if (scan && !(res && res.classList.contains('on'))) finishScan(false); }, 60);
     });
-    watch(res, { attributes: true, attributeFilter: ['class'] }, function () { if (res.classList.contains('on')) { onResults(); if (scan) finishScan(true); } });
+    watch(res, { attributes: true, attributeFilter: ['class'] }, function () { syncHeader(); if (res.classList.contains('on')) { onResults(); if (scan) finishScan(true); } });
     watch(res, { childList: true, subtree: true }, function () { onResults(); });
     ['nx-p1-block', 'nx-p2-block', 'nx-info-block', 'nx-more-actions-block', 'nx-future-block', 'nx-event-block'].forEach(function (id) {
       watch(doc.getElementById(id), { attributes: true, attributeFilter: ['style'] }, function () { onResults(); });
@@ -584,6 +601,7 @@
       watch(doc.getElementById(id), { attributes: true, attributeFilter: ['style'] }, updatePage);
     });
     watch(doc.getElementById('historyList'), { childList: true }, decorateHistory);
+    watch(doc.getElementById('errMsg'), { attributes: true, attributeFilter: ['class'] }, errRetry);
   }
   try { if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init); else init(); }
   catch (e) { body.classList.remove('ui2-scanning'); }

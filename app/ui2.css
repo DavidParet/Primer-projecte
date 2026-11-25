@@ -686,3 +686,65 @@ body.ui2 #ui2-tasks-head.ui2-hide, body.ui2 #nx-future-block.ui2-hide { display:
 body.ui2 #nx-future-content .nx-info-card { display: block !important; padding: 7px 10px !important; }
 body.ui2 #nx-future-content .nx-card-text { display: block; }
 body.ui2 #nx-future-content .nx-card-date { display: block !important; margin: 2px 0 0 !important; text-align: left !important; }
+
+/* ================= UI 2.5 · pantalla d'anàlisi: lupa quieta → X → esclat ================= */
+.ui2-scan.ui2-scan24 .ui2-scan-bg { background: radial-gradient(90% 65% at 50% 45%, #0F1D31 0%, #0A1322 55%, #060A12 100%); transition: opacity .25s ease; }
+.ui2-scan24 .ui2-wait { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 18px; z-index: 3; transition: opacity .28s ease; }
+.ui2-scan24 .ui2-lupa-box { position: relative; width: 92px; height: 92px; }
+.ui2-scan24 .ui2-lupa-still { display: block; width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(233,193,74,.28)); }
+/* llum daurada dins el vidre (centre i radi mesurats al dibuix: 38,5 % i 17,8 %) */
+.ui2-scan24 .ui2-lens-glow { position: absolute; left: 38.5%; top: 38.5%; width: 35.6%; height: 35.6%; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle at 42% 40%, rgba(255,246,214,.95) 0%, rgba(255,222,140,.55) 38%, rgba(233,193,74,0) 72%);
+  mix-blend-mode: screen; opacity: .18; animation: ui2-lens 2.6s ease-in-out infinite; pointer-events: none; }
+@keyframes ui2-lens { 0%, 100% { opacity: .14; } 50% { opacity: .62; } }
+.ui2-scan24 .ui2-wait-txt { font-size: 13px; font-weight: 400; letter-spacing: .2px; color: rgba(236,233,226,.82); text-align: center; opacity: 0; transition: opacity .6s ease .15s; }
+.ui2-scan24 .ui2-wait { opacity: 0; }
+.ui2-scan24.on .ui2-wait, .ui2-scan24.on .ui2-wait-txt { opacity: 1; }
+.ui2-scan24.fading .ui2-wait { opacity: 0; }
+.ui2-scan24 .ui2-xwrap { top: 46%; }
+/* res del missatge original ni del logotip complet */
+.ui2-scan24 .ui2-scan-card, .ui2-scan24 .ui2-status, .ui2-scan24 .ui2-lupa, .ui2-scan24 .ui2-logo, .ui2-scan24 .ui2-core, .ui2-scan24 .ui2-flash { display: none !important; }
+/* l'esclat no torna a enfosquir: el fons passa a càlid i es fon cap al resultat */
+.ui2-scan24.xburst .ui2-scan-bg { background: radial-gradient(90% 60% at 50% 46%, #2A271F, #13223A 48%, #0A1322 85%); }
+/* Moviment reduït: lupa i text quiets, i directament al resultat */
+.ui2-scan24.still .ui2-lens-glow { animation: none; opacity: .3; }
+.ui2-scan24.still, .ui2-scan24.still * { transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .ui2-scan.ui2-scan24 { display: flex !important; } }
+/* Resum amb halo càlid subtil permanent */
+body.ui2 .results.on .nx-decisio-block { box-shadow: 0 0 0 1px rgba(233,193,74,.16), 0 10px 34px -12px rgba(233,193,74,.26), 0 0 60px -20px rgba(255,214,140,.18) !important; }
+/* Error amb reintent */
+body.ui2 .ui2-retry { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 40px; margin-top: 8px; border-radius: 12px;
+  background: transparent; border: 1px solid rgba(233,193,74,.45); color: var(--gold); font: 500 13.5px 'Inter', sans-serif; cursor: pointer; }
+
+/* ================= UI 2.5 · retocs (halo, Free/Premium, scroll, completades) ================= */
+/* Halo ambiental càlid coherent a Inici, Tasques i Historial (com a Premium), estàtic */
+body.ui2[data-ui2-page="inici"], body.ui2[data-ui2-page="tasques"], body.ui2[data-ui2-page="historial"] { --glow-a: rgba(233,193,74,.10); --glow-b: rgba(233,193,74,.06); }
+body.ui2 #pageInici .app-col-right::before, body.ui2 #pageTasques::before, body.ui2 #pageHistorial::before {
+  content: ''; position: fixed; left: 50%; top: 70px; width: 120vw; height: 46vh; transform: translateX(-50%); pointer-events: none; z-index: 0;
+  background: radial-gradient(50% 50% at 50% 30%, rgba(233,193,74,.085), rgba(233,193,74,.03) 45%, transparent 72%); }
+body.ui2 #pageInici .app-col-right > *, body.ui2 #pageTasques > *, body.ui2 #pageHistorial > * { position: relative; z-index: 1; }
+/* Resum: contorn daurat + resplendor difusa perceptible, permanent */
+body.ui2 .nx-decisio-block { border: 1.5px solid rgba(233,193,74,.55) !important;
+  box-shadow: 0 0 0 1px rgba(233,193,74,.06), 0 0 26px rgba(233,193,74,.20), 0 0 70px rgba(233,193,74,.12), var(--card-shadow) !important; }
+body.ui2 .results.on .nx-decisio-block { box-shadow: 0 0 0 1px rgba(233,193,74,.06), 0 0 26px rgba(233,193,74,.20), 0 0 70px rgba(233,193,74,.12), var(--card-shadow) !important; }
+body.ui2 #results { overflow: visible; }
+
+/* Free vs Premium: creu vermella clara + text; prestació disponible com a dada neutra */
+body.ui2 #pagePremium .ui2-notinc { color: #F08C86 !important; display: inline-flex; align-items: center; gap: 5px; font-weight: 600 !important; font-size: 12px; }
+body.ui2 #pagePremium .ui2-notinc .ui2-xmark { font-size: 13px; line-height: 1; }
+body.ui2 #pagePremium small.compare-no { color: var(--muted) !important; }
+body.ui2 #pagePremium .pchk-item.ui2-neutral { color: #C9D2DD !important; font-weight: 500 !important; }
+body.ui2 #pagePremium .pchk-item.ui2-neutral .ui2-neutral-ico { color: #9AA8BA; display: inline-flex; }
+body.ui2 #pagePremium .pchk-item.ui2-neutral span { color: #C9D2DD !important; }
+
+/* Scroll estable: sense animar l'alçada de la capçalera i sense encadenar scrolls */
+@media (max-width: 899px) {
+  body.ui2 #pageApp header, body.ui2 #pageApp header .nexlupa-logo, body.ui2 .logo-tagline { transition: none !important; }
+}
+body.ui2 #pageInici .app-col-right, body.ui2 #pageTasques, body.ui2 #pageHistorial, body.ui2 #pageConfig, body.ui2 #pagePremium { overscroll-behavior: contain; }
+html:has(body.ui2) { scroll-behavior: auto !important; }
+
+/* Tasques completades: segon pla però llegibles; el ✓ conserva el contrast */
+body.ui2 .ui2-tcard.ui2-done { opacity: 1 !important; background: rgba(20,32,48,.35) !important; }
+body.ui2 .ui2-tcard.ui2-done .ui2-ttitle { color: rgba(214,222,232,.72) !important; text-decoration-color: rgba(214,222,232,.35); }
+body.ui2 .ui2-tcard.ui2-done .ui2-tchk.on .ui2-tchk-dot { background: var(--gold) !important; border-color: var(--gold) !important; color: var(--navy) !important; opacity: .92 !important; }
