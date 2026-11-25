@@ -478,3 +478,130 @@ body.ui2 .ui2-sumtile small { display: none; }
 @media (min-width: 400px) { body.ui2 .ui2-sumtile small { display: inline; } }
 body.ui2 #pagePremium strong[style*="69d99a"] { color: var(--ok) !important; }
 body.ui2 .compare-no, body.ui2 .pchk-item.no { color: #B9A4A2 !important; }
+
+/* ==========================================================================
+   UI 2.3 — respirar: menys negreta, símbols més petits, més contingut útil,
+   jerarquia Resum / Calendari / Tasques, capçalera compacta i transició
+   lupa sola → X → esclat de la X → resum. Paleta suau de la 2.2.
+   ========================================================================== */
+body.ui2 { --txt: #E3E9F0; --ico: #D6B458; --ico-line: rgba(233,193,74,.30); }
+
+/* ---- tipografia: pes normal/mitjà per al contingut ---- */
+body.ui2 .nx-decisio-label.ui2-head { font-size: 13px !important; letter-spacing: 1.8px !important; margin: 2px 0 6px !important; color: #D9C483 !important; font-weight: 700 !important; }
+body.ui2 .nx-decisio-text { font-size: 15.5px !important; font-weight: 600 !important; line-height: 1.42 !important; color: #F2F5F8 !important; }
+body.ui2 .ui2-done-pill { font-size: 11px; padding: 2px 9px; font-weight: 600; }
+body.ui2 .nx-card-text, body.ui2 .ui2-ttitle { font-size: 14px !important; font-weight: 500 !important; line-height: 1.38 !important; color: var(--txt) !important; }
+body.ui2 .nx-card-date, body.ui2 .ui2-tdate { font-size: 12.5px !important; font-weight: 500 !important; }
+body.ui2 .ui2-term { font-weight: 600; }
+body.ui2 .nx-resum-text { font-size: 13.5px !important; line-height: 1.5 !important; color: #C9D3DE !important; }
+body.ui2 .ui2-cal-title { font-weight: 650; font-size: 16px; }
+body.ui2 .ui2-terminis .ui2-cal-title { font-size: 14.5px; font-weight: 600; }
+
+/* ---- jerarquia: Resum (caixa) · Calendari · Tasques (seccions amb filet subtil) ---- */
+body.ui2 .ui2-head, body.ui2 .nx-section-label.ui2-head {
+  font-size: 13.5px !important; letter-spacing: 1.8px !important; font-weight: 700 !important; color: #EEF2F6 !important; gap: 9px; margin: 0 2px 10px !important;
+}
+body.ui2 .ui2-sec { display: flex !important; width: auto !important; margin-top: 22px !important; padding-top: 14px !important;
+  border-top: 1px solid transparent !important; border-image: linear-gradient(90deg, rgba(233,193,74,.28), rgba(160,180,205,.08) 45%, transparent) 1 !important; }
+body.ui2 .ui2-head .ui2-head-ico { color: var(--ico); }
+body.ui2 .ui2-page-title { font-size: 18px !important; font-weight: 700 !important; gap: 10px; }
+body.ui2 .ui2-subhead { font-size: 12px; font-weight: 700; margin: 10px 2px 7px; }
+body.ui2 .nx-section-label:not(.ui2-head) { margin: 8px 0 6px !important; }
+
+/* ---- pictogrames i targetes més petits; més amplada per al text ---- */
+body.ui2 .ui2-ico { width: 30px; height: 30px; min-width: 30px; border-radius: 9px; border: 1px solid var(--ico-line); color: var(--ico); background: rgba(11,22,35,.35); }
+body.ui2 .ui2-ico .ui2-svg { width: 17px; height: 17px; }
+body.ui2 .c-icon, body.ui2 .feat-icon-sm { width: 34px !important; height: 34px !important; min-width: 34px; border-radius: 10px !important; border-width: 1px !important; border-color: var(--ico-line) !important; }
+body.ui2 .c-icon .ui2-svg, body.ui2 .feat-icon-sm .ui2-svg { width: 18px; height: 18px; }
+body.ui2 .ui2-tile-ico { width: 30px; height: 30px; min-width: 30px; border-radius: 9px; border-width: 1px; border-color: var(--ico-line); }
+body.ui2 .ui2-tile-ico .ui2-svg { width: 15px; height: 15px; }
+body.ui2 .nx-p1-card, body.ui2 .nx-p2-card, body.ui2 .nx-info-card, body.ui2 .ui2-tcard {
+  padding: 8px 8px 8px 9px !important; margin-bottom: 6px !important; border-left-width: 3px !important; border-radius: 14px !important;
+}
+body.ui2 .nx-card-row, body.ui2 .ui2-tcard { gap: 9px !important; }
+body.ui2 .nx-p1-card .nx-card-date, body.ui2 .nx-p2-card .nx-card-date, body.ui2 .nx-info-card .nx-card-date,
+body.ui2 .nx-p1-card .nx-btn-cal, body.ui2 .nx-p2-card .nx-btn-cal, body.ui2 .nx-info-card .nx-btn-cal { margin-left: 39px; }
+body.ui2 .ui2-date-ico .ui2-svg, body.ui2 .ui2-tdate .ui2-svg { width: 13px; height: 13px; }
+body.ui2 .nx-btn-cal { min-height: 32px; padding: 3px 12px !important; font-size: 12.5px !important; font-weight: 600 !important; margin-top: 5px; border-width: 1px !important; }
+body.ui2 .nx-btn-cal .ui2-svg { width: 14px; height: 14px; }
+/* completar tasca: cercle petit, zona tàctil de 40 px */
+body.ui2 .ui2-tchk, body.ui2 .ui2-tchk.on { width: 40px; height: 40px; min-width: 40px; border: none; background: transparent; box-shadow: none; margin: -6px -4px -6px 0; }
+body.ui2 .ui2-tchk-dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(233,193,74,.45); display: inline-flex; align-items: center; justify-content: center; color: transparent; }
+body.ui2 .ui2-tchk:hover .ui2-tchk-dot, body.ui2 .ui2-tchk:focus-visible .ui2-tchk-dot { color: rgba(233,193,74,.7); box-shadow: 0 0 0 3px rgba(233,193,74,.15); }
+body.ui2 .ui2-tchk.on .ui2-tchk-dot { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+body.ui2 .ui2-tchk:focus-visible { outline: none; }
+/* Resum i esdeveniments: menys farciment */
+body.ui2 .nx-decisio-block { padding: 10px 14px 12px; border-radius: 16px; }
+body.ui2 .nx-event-card { padding: 11px 12px !important; border-radius: 16px !important; }
+body.ui2 .nx-event-meta { gap: 8px !important; margin-top: 9px !important; }
+body.ui2 .nx-event-chip.ui2-tile { padding: 7px 10px !important; font-size: 13px !important; font-weight: 600 !important; border-radius: 13px !important; gap: 8px; }
+body.ui2 .nx-event-btn-row { gap: 8px !important; margin-top: 9px !important; }
+body.ui2 .nx-event-btn { min-height: 40px; font-size: 13.5px !important; font-weight: 650 !important; border-width: 1px !important; }
+body.ui2 .ui2-terminis .ui2-cal-row { padding: 8px 12px; margin-bottom: 6px; border-radius: 14px; gap: 12px; }
+body.ui2 .ui2-terminis .ui2-datebox { width: 46px; min-width: 46px; height: 46px; border-radius: 12px; border-width: 1.5px; }
+body.ui2 .ui2-terminis .ui2-datebox b { font-size: 19px; }
+body.ui2 .ui2-terminis .ui2-datebox span { font-size: 10px; }
+body.ui2 .nx-btn-wa, body.ui2 .nx-btn-copy, body.ui2 .nx-btn-reset, body.ui2 .nx-more-actions-toggle { font-weight: 650 !important; font-size: 14px !important; }
+
+/* ---- Historial: files compactes amb extracte i accés al contingut ---- */
+body.ui2 .hist-item { display: grid !important; grid-template-columns: 30px 1fr 16px; column-gap: 10px; row-gap: 2px; align-items: center; padding: 9px 2px !important; cursor: pointer; }
+body.ui2 .hist-item .ui2-ico { width: 30px; height: 30px; min-width: 30px; grid-row: 1 / span 2; }
+body.ui2 .hist-title { grid-column: 2; font-size: 13.5px !important; font-weight: 500 !important; color: var(--txt) !important; line-height: 1.4 !important;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+body.ui2 .hist-meta { grid-column: 2; padding-left: 0; width: auto; font-size: 11.5px !important; font-weight: 500 !important; color: #BFA560 !important; }
+body.ui2 .ui2-hist-go { grid-column: 3; grid-row: 1 / span 2; color: #7F8DA0; display: inline-flex; }
+body.ui2 #historySearch { padding: 9px 16px !important; font-size: 14px !important; }
+
+/* ---- capçalera: més petita en repòs i compacta en desplaçar (mòbil) ---- */
+@media (max-width: 899px) {
+  body.ui2 #pageApp header { padding: 8px 14px 9px !important; transition: padding .25s ease; }
+  body.ui2 #pageApp header .nexlupa-logo { width: 150px !important; height: 75px !important; transition: width .25s ease, height .25s ease; }
+  body.ui2 .logo-tagline { font-size: 12px !important; max-height: 40px; overflow: hidden; transition: max-height .25s ease, opacity .2s ease; }
+  body.ui2 .btn-premium-header { padding: 4px 11px !important; font-size: 12px !important; }
+  body.ui2.ui2-hdr-compact #pageApp header { padding: 4px 14px 4px !important; align-items: center; }
+  body.ui2.ui2-hdr-compact #pageApp header .nexlupa-logo { width: 96px !important; height: 48px !important; }
+  body.ui2.ui2-hdr-compact .logo-tagline { max-height: 0; opacity: 0; margin: 0 !important; }
+}
+
+/* ---- transició: lupa sola → X → esclat de la X → resum ---- */
+.ui2-scan .ui2-lupa { width: 52px; filter: drop-shadow(0 0 12px rgba(233,193,74,.55)); }
+.ui2-scan .ui2-logo, .ui2-scan .ui2-core, .ui2-scan .ui2-flash { display: none !important; }
+.ui2-scan .ui2-xwrap { position: absolute; left: 50%; top: 44%; width: min(30vw, 132px); z-index: 4; opacity: 0;
+  transform: translate(-50%, -50%) scale(.82); transition: opacity .24s ease, transform .4s cubic-bezier(.2,.8,.2,1); }
+.ui2-scan .ui2-x { display: block; width: 100%; height: auto; transition: filter .45s ease; }
+.ui2-scan.xin .ui2-xwrap { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.ui2-scan.xin .ui2-lupa, .ui2-scan.xin .ui2-status { opacity: 0; transition: opacity .2s; }
+.ui2-scan.xin .ui2-scan-card { opacity: .16; transition: opacity .3s; }
+.ui2-scan.xglow .ui2-x { filter: brightness(1.12) drop-shadow(0 0 8px rgba(255,214,120,.6)) drop-shadow(0 0 26px rgba(233,193,74,.42)); }
+.ui2-scan .ui2-bloom { position: absolute; width: 280px; height: 280px; margin: -140px 0 0 -140px; border-radius: 50%; z-index: 5; pointer-events: none; opacity: 0; transform: scale(.2);
+  background: radial-gradient(circle, rgba(255,243,214,.9) 0%, rgba(255,219,140,.55) 20%, rgba(233,193,74,.22) 45%, rgba(233,193,74,0) 70%); }
+.ui2-scan.xglow .ui2-bloom { opacity: .4; transform: scale(.42); transition: opacity .45s ease, transform .45s ease; }
+.ui2-scan.xburst .ui2-bloom { opacity: 0; transform: scale(4.4); transition: transform .8s cubic-bezier(.15,.7,.2,1), opacity .8s ease-out; }
+.ui2-scan.xburst .ui2-xwrap { opacity: 0; transform: translate(-50%, -50%) scale(1.22); transition: opacity .45s ease, transform .6s ease; }
+.ui2-scan .ui2-ring { width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 1.5px solid rgba(255,222,150,.65); box-shadow: 0 0 18px rgba(233,193,74,.5); }
+.ui2-scan.xburst .ui2-ring { animation: ui2-ring23 .8s ease-out forwards; }
+@keyframes ui2-ring23 { 0% { opacity: .65; transform: scale(1); } 100% { opacity: 0; transform: scale(13); } }
+.ui2-scan.xburst .ui2-scan-bg { background: radial-gradient(90% 60% at 50% 44%, #2A2A22, #13263A 45%, #0D1B2A 80%); transition: background .5s; }
+.ui2-scan .ui2-spark { width: 6px; height: 6px; background: #F1D27A; box-shadow: 0 0 10px 3px rgba(233,193,74,.6); }
+/* el resum entra amb la llum càlida de l'esclat */
+body.ui2 #results { position: relative; }
+body.ui2 #results.ui2-emerge::before { content: ''; position: absolute; left: -20px; right: -20px; top: -30px; height: 460px; pointer-events: none; z-index: 2;
+  background: radial-gradient(60% 45% at 50% 18%, rgba(255,222,150,.26), rgba(233,193,74,.08) 45%, transparent 72%); animation: ui2-warm 1.3s ease-out forwards; }
+@keyframes ui2-warm { 0% { opacity: 1; } 100% { opacity: 0; } }
+body.ui2 .results.on.ui2-emerge > * { animation: ui2-rise23 .55s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes ui2-rise23 { from { opacity: 0; transform: translateY(10px) scale(.99); filter: brightness(1.18); } to { opacity: 1; transform: none; filter: none; } }
+@media (prefers-reduced-motion: reduce) { body.ui2 #results.ui2-emerge::before { display: none; } }
+body.ui2 .btn-premium-header, body.ui2 .conv-btn { min-height: 32px; }
+/* separació de seccions (prevalença sobre .ui2-head) */
+body.ui2 .nx-section-label.ui2-head.ui2-sec { margin: 24px 2px 10px !important; padding-top: 14px !important;
+  border: 0 !important; border-top: 1px solid rgba(160,180,205,.10) !important; border-radius: 0 !important; width: 100% !important; box-sizing: border-box; }
+body.ui2 .nx-section-label.ui2-head.ui2-sec::before { display: none !important; }
+body.ui2 #nx-event-block > .nx-section-label.ui2-head.ui2-sec { margin-top: 18px !important; }
+/* data i botó de calendari a la mateixa línia quan hi caben */
+body.ui2 .nx-p1-card, body.ui2 .nx-p2-card, body.ui2 .nx-info-card { display: flex !important; flex-wrap: wrap; align-items: center; column-gap: 8px; }
+body.ui2 .nx-p1-card > .nx-card-row, body.ui2 .nx-p2-card > .nx-card-row, body.ui2 .nx-info-card > .nx-card-row { flex: 1 1 100%; }
+body.ui2 .nx-p1-card > .nx-card-date, body.ui2 .nx-p2-card > .nx-card-date, body.ui2 .nx-info-card > .nx-card-date { flex: 0 1 auto; }
+body.ui2 .nx-p1-card > .nx-card-date ~ .nx-card-date, body.ui2 .nx-p2-card > .nx-card-date ~ .nx-card-date, body.ui2 .nx-info-card > .nx-card-date ~ .nx-card-date { flex-basis: 100%; }
+body.ui2 .nx-p1-card > .nx-btn-cal, body.ui2 .nx-p2-card > .nx-btn-cal, body.ui2 .nx-info-card > .nx-btn-cal { margin: 4px 0 0 auto !important; }
+body.ui2 .btn-premium-header, body.ui2 .conv-btn { min-height: 32px !important; display: inline-flex !important; align-items: center; }
+body.ui2 .nx-p1-card .nx-btn-cal, body.ui2 .nx-p2-card .nx-btn-cal, body.ui2 .nx-info-card .nx-btn-cal { padding: 3px 11px !important; gap: 6px; }

@@ -1,0 +1,20 @@
+{
+  "resum": "Excursió de final de trimestre i diverses gestions pendents de l'escola: autoritzacions, pagaments, material i reunions.",
+  "decisio": "Signar dues autoritzacions abans del dia 3 i pagar 25 € abans del 9 de desembre",
+  "esdeveniments": [
+    {"title": "Excursió a la granja escola", "data": "2026-12-11 09:00", "lloc": "Granja Escola Can Pujades, Llinars del Vallès"},
+    {"title": "Reunió de famílies", "data": "2026-12-15 17:30", "lloc": "Biblioteca de l'escola"},
+    {"title": "Festival de Nadal", "data": "2026-12-19 11:00", "lloc": null}
+  ],
+  "accions": [
+    {"accio": "Signar l'autorització de l'excursió", "tipus": "tasca", "data": "2026-12-03", "prioritat": "alta"},
+    {"accio": "Signar l'autorització de drets d'imatge", "tipus": "tasca", "data": "2026-12-03", "prioritat": "alta"},
+    {"accio": "Fer el pagament de 25 € de l'excursió", "tipus": "tasca", "data": "2026-12-09", "prioritat": "alta"},
+    {"accio": "Confirmar assistència a la reunió de famílies", "tipus": "tasca", "data": "2026-12-12", "prioritat": "mitja"},
+    {"accio": "Portar botes d'aigua, impermeable i motxilla petita", "tipus": "tasca", "data": "2026-12-11", "prioritat": "mitja"},
+    {"accio": "Avisar si l'infant té alguna intolerància alimentària", "tipus": "tasca", "data": "2026-12-05", "prioritat": "mitja"},
+    {"accio": "Preparar la roba vermella per al festival", "tipus": "tasca", "data": "2026-12-18", "prioritat": "mitja"},
+    {"accio": "L'autocar surt a les 9:00 h i torna a les 17:00 h", "tipus": "informatiu", "data": "2026-12-11 09:00", "prioritat": "baixa"},
+    {"accio": "El 22 de desembre les classes acaben a les 13 h", "tipus": "informatiu", "data": "2026-12-22 13:00", "prioritat": "baixa"}
+  ]
+}

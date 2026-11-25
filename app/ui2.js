@@ -101,9 +101,9 @@
       keep(lab); lab.innerHTML = '<span>' + LABELS[id] + '</span>';
     });
     var ev = doc.querySelector('#nx-event-block > .nx-section-label');
-    if (ev && !ev.hasAttribute('data-ui2-html')) { keep(ev); ev.classList.add('ui2-head'); ev.innerHTML = '<span class="ui2-head-ico">' + ico('cal', 30, 3.4) + '</span><span>Calendari</span>'; }
+    if (ev && !ev.hasAttribute('data-ui2-html')) { keep(ev); ev.classList.add('ui2-head', 'ui2-sec'); ev.innerHTML = '<span class="ui2-head-ico">' + ico('cal', 22, 3.4) + '</span><span>Calendari</span>'; }
     var lab2 = doc.getElementById('nx-decisio-label');
-    if (lab2 && !lab2.hasAttribute('data-ui2-html')) { keep(lab2); lab2.classList.add('ui2-head'); lab2.innerHTML = '<span class="ui2-head-ico">' + ico('spark', 26, 3.4) + '</span><span>Resum</span>'; }
+    if (lab2 && !lab2.hasAttribute('data-ui2-html')) { keep(lab2); lab2.classList.add('ui2-head'); lab2.innerHTML = '<span class="ui2-head-ico">' + ico('spark', 20, 3.4) + '</span><span>Resum</span>'; }
   }
 
   function decorateCard(c) {
@@ -115,7 +115,7 @@
     c.setAttribute('data-ui2-kind', info ? 'info' : 'task');
     keep(iconEl); iconEl.classList.add('ui2-ico');
     var icName = pick(t, info ? 'info' : 'check'); iconEl.setAttribute('data-ui2-icon', icName);
-    iconEl.innerHTML = ico(icName, 26, 3.3);
+    iconEl.innerHTML = ico(icName, 18, 3.4);
     var dates = c.querySelectorAll('.nx-card-date');
     for (var i = 0; i < dates.length; i++) {
       var d = dates[i], txt = d.textContent || '';
@@ -127,7 +127,11 @@
       d.classList.add('ui2-date');
     }
     var btn = c.querySelector('.nx-btn-cal');
-    if (btn && !btn.hasAttribute('data-ui2-html')) { keep(btn); btn.innerHTML = ico('cal', 16, 3.6) + '<span>Afegir al calendari</span>'; }
+    if (btn && !btn.hasAttribute('data-ui2-html')) {
+      keep(btn); btn.innerHTML = ico('calchk', 15, 3.6) + '<span>Afegir</span>';
+      if (!btn.hasAttribute('aria-label')) { btn.setAttribute('aria-label', 'Afegir al calendari'); btn.setAttribute('data-ui2-aria', '1'); }
+      btn.setAttribute('title', 'Afegir al calendari');
+    }
   }
 
   function decorateEvent(card) {
@@ -203,7 +207,7 @@
     var anchor = doc.getElementById('nx-what-block') || doc.getElementById('nx-p1-block');
     if (evb && evb.style.display !== 'none') evb.appendChild(blk);
     else if (anchor && anchor.parentNode) {
-      blk.insertAdjacentHTML('afterbegin', '<div class="nx-section-label ui2-head"><span class="ui2-head-ico">' + ico('cal', 30, 3.4) + '</span><span>Calendari</span></div>');
+      blk.insertAdjacentHTML('afterbegin', '<div class="nx-section-label ui2-head ui2-sec"><span class="ui2-head-ico">' + ico('cal', 22, 3.4) + '</span><span>Calendari</span></div>');
       anchor.parentNode.insertBefore(blk, anchor);
     }
   }
@@ -238,6 +242,20 @@
     blk.insertBefore(injected('div', 'ui2-done-pill', ico('check', 14, 4.5) + '<span>Anàlisi completada</span>'), blk.firstChild);
   }
 
+  function tasksHead() {
+    var p1 = doc.getElementById('nx-p1-block'); if (!p1 || !p1.parentNode) return;
+    var vis = ['nx-p1-block', 'nx-p2-block', 'nx-info-block', 'nx-more-actions-block'].some(function (id) {
+      var e = doc.getElementById(id); return e && e.style.display !== 'none';
+    });
+    var h = doc.getElementById('ui2-tasks-head');
+    if (!h) {
+      h = injected('div', 'nx-section-label ui2-head ui2-sec'); h.id = 'ui2-tasks-head';
+      h.innerHTML = '<span class="ui2-head-ico">' + ico('tasks', 22, 3.4) + '</span><span>Tasques</span>';
+      p1.parentNode.insertBefore(h, p1);
+    }
+    var want = vis ? '' : 'none'; if (h.style.display !== want) h.style.display = want;
+  }
+
   var busy = false;
   function onResults() {
     if (busy) return; busy = true;
@@ -247,6 +265,7 @@
       var cards = res.querySelectorAll('.nx-p1-card, .nx-p2-card, .nx-info-card'); for (var i = 0; i < cards.length; i++) decorateCard(cards[i]);
       var evs = res.querySelectorAll('.nx-event-card'); for (var j = 0; j < evs.length; j++) decorateEvent(evs[j]);
       if (res.classList.contains('on')) buildTerminis();
+      tasksHead();
       updateCounts();
       decorateStatic();
     } catch (e) { if (window.console) console.warn('UI2', e); } finally { busy = false; }
@@ -302,7 +321,7 @@
     if (!T) { page.classList.remove('ui2-tv'); return; }
     var view = injected('div', 'ui2-tasks'); view.id = 'ui2-tasks';
     var pend = T.filter(function (t) { return !t.done; }), done = T.filter(function (t) { return t.done; });
-    var html = '<h2 class="ui2-page-title"><span class="ui2-head-ico">' + ico('tasks', 34, 3.2) + '</span>Tasques i prioritats</h2>';
+    var html = '<h2 class="ui2-page-title"><span class="ui2-head-ico">' + ico('tasks', 22, 3.4) + '</span>Tasques i prioritats</h2>';
     if (!T.length) html += '<p class="ui2-empty">Encara no hi ha tasques pendents.</p>';
     [['alta', 'p1', 'P1 · Imprescindible'], ['mitja', 'p2', 'P2 · Preparació'], ['baixa', 'p3', 'P3 · Informació']].forEach(function (g) {
       var items = pend.filter(function (t) { return (t.prioritat || 'baixa') === g[0]; });
@@ -327,10 +346,10 @@
     var dateHtml = date ? '<div class="ui2-tdate">' + ico('cal', 15, 3.6) + '<span>' + (info || pr === 'done' ? '' : '<span class="ui2-term">Termini:</span> ') + esc(date) + '</span></div>' : '';
     if (a.vençut) dateHtml += '<div class="ui2-tdate ui2-warn">Termini vençut: cal comprovar si encara es pot gestionar</div>';
     var icName = pick(t.text, info ? 'info' : 'check');
-    return '<div class="ui2-tcard ui2-' + pr + '"><span class="ui2-ico" data-ui2-icon="' + icName + '">' + ico(icName, 26, 3.3) + '</span>' +
+    return '<div class="ui2-tcard ui2-' + pr + '"><span class="ui2-ico" data-ui2-icon="' + icName + '">' + ico(icName, 18, 3.4) + '</span>' +
       '<div class="ui2-tbody"><div class="ui2-ttitle">' + (t.isNew && !t.done ? '<span class="ui2-new" title="Nova" aria-label="Nova">Nou</span>' : '') + esc(t.text) + '</div>' + dateHtml + '</div>' +
       '<button type="button" class="ui2-tchk' + (t.done ? ' on' : '') + '" data-text="' + esc(t.text) + '" aria-pressed="' + (t.done ? 'true' : 'false') +
-      '" aria-label="' + (t.done ? 'Marcar com a pendent' : 'Marcar com a feta') + '">' + ico('check', 18, 4.5) + '</button></div>';
+      '" aria-label="' + (t.done ? 'Marcar com a pendent' : 'Marcar com a feta') + '"><span class="ui2-tchk-dot">' + ico('check', 12, 5) + '</span></button></div>';
   }
   function proxyCheck(text) {     /* fa servir el control original: la lògica de desar és la de script.js */
     var items = doc.querySelectorAll('#tasquesList .tsk-item');
@@ -353,10 +372,10 @@
     if (cur === 'tasques') buildTasksView();
   }
 
-  /* ---------------- animació corporativa: lupa + X ---------------- */
+  /* ---------------- transició d'anàlisi: lupa sola → X → esclat de la X → resum ---------------- */
   var scan = null, scanStart = 0, scanTimer = null, finishing = false;
-  var MIN_SCAN = 1100;
-  var XFX = 2026 / 5630, XFY = 472 / 1020;   /* rombe daurat de la X al logotip oficial */
+  var MIN_SCAN = 800;                      /* només per evitar un parpelleig si l'API respon a l'instant */
+  var XFX = (2026 - 1480 - 12) / 1070, XFY = 472 / 837;   /* centre del rombe daurat dins ui2-x.png (retall del logotip oficial) */
   var HL = /(\b(?:dilluns|dimarts|dimecres|dijous|divendres|dissabte|diumenge)(?:\s+\d{1,2}(?:\s+de\s+[a-zç]+)?)?\b|\babans\s+del?\s+(?:(?:dia|dilluns|dimarts|dimecres|dijous|divendres)\s+)?\d{1,2}(?:\s+de\s+[a-zç]+)?\b|\b\d{1,2}\s+de\s+(?:gener|febrer|març|abril|maig|juny|juliol|agost|setembre|octubre|novembre|desembre)\b|\b\d{1,2}[.:]\d{2}(?:\s*h\b)?|\b\d+(?:[.,]\d+)?\s*€|\bautoritzaci[oó](?:\s+signada)?\b|\bal·l[eè]rgi[a-z]*|\bpagament\b)/gi;
   function buildText() {
     var raw = (doc.getElementById('txt') || {}).value || '';
@@ -376,10 +395,10 @@
       scan.style.bottom = navHeight() + 'px';               /* la navegació continua accessible */
       scan.appendChild(el('div', 'ui2-scan-bg'));
       var card = el('div', 'ui2-scan-card', buildText()); scan.appendChild(card);
-      var lupa = el('img', 'ui2-lupa'); lupa.src = 'assets/ui2-lupa.png'; lupa.alt = ''; scan.appendChild(lupa);
+      var lupa = el('img', 'ui2-lupa'); lupa.src = 'assets/ui2-lupa-sola.png'; lupa.alt = ''; scan.appendChild(lupa);
       scan.appendChild(el('div', 'ui2-status', 'La lupa està treballant per tu…'));
-      var logo = el('img', 'ui2-logo'); logo.src = 'assets/ui2-logo.png'; logo.alt = ''; scan.appendChild(logo);
-      scan.appendChild(el('div', 'ui2-flash')); scan.appendChild(el('div', 'ui2-ring')); scan.appendChild(el('div', 'ui2-ring r2')); scan.appendChild(el('div', 'ui2-core'));
+      var xw = el('div', 'ui2-xwrap'); var xi = el('img', 'ui2-x'); xi.src = 'assets/ui2-x.png'; xi.alt = ''; xw.appendChild(xi); scan.appendChild(xw);
+      scan.appendChild(el('div', 'ui2-bloom')); scan.appendChild(el('div', 'ui2-ring'));
       scan.addEventListener('click', function () { if (finishing) quickEnd(); });   /* tocar durant el final: salta l'animació */
       body.appendChild(scan);
       body.classList.add('ui2-scanning');                    /* només ara s'amaga l'indicador original */
@@ -395,70 +414,66 @@
           if (r.bottom > cr.bottom - 10) { card.scrollTop += r.top - cr.top - 40; r = target.getBoundingClientRect(); }
           x = r.left + r.width / 2; y = r.top + r.height / 2; target.classList.add('lit');
         } else { x = cr.left + cr.width * (0.25 + 0.5 * Math.random()); y = cr.top + cr.height * (0.2 + 0.6 * Math.random()); }
-        lupa.style.transform = 'translate(' + (x - sr.left - 34) + 'px,' + (y - sr.top - 32) + 'px)';
+        lupa.style.transform = 'translate(' + (x - sr.left - 24) + 'px,' + (y - sr.top - 24) + 'px)';   /* centre de la lent */
         i++;
         if (marks.length && i % marks.length === 0) { for (var k = 0; k < marks.length; k++) marks[k].classList.remove('lit'); card.scrollTop = 0; }
-        scanTimer = setTimeout(step, 320);
+        scanTimer = setTimeout(step, 300);
       };
-      setTimeout(step, 100);
+      setTimeout(step, 80);
     } catch (e) { abortScan(); }
   }
   function finishScan(success) {
     if (!scan || finishing) return;
     finishing = true;
-    var s0 = scan;
-    var wait = Math.max(0, MIN_SCAN - (Date.now() - scanStart));
+    var s0 = scan, wait = Math.max(0, MIN_SCAN - (Date.now() - scanStart));
     setTimeout(function () {
       try {
         clearTimeout(scanTimer);
         var s = scan; if (!s || s !== s0) return;
         if (!success) { end(s, false); return; }
-        s.classList.add('fading', 'converge');
-        var logo = s.querySelector('.ui2-logo');
+        /* 1) l'ombrejat s'esvaeix i la lupa marxa; apareix la X de marca */
+        s.classList.add('fading', 'xin');
+        var xw = s.querySelector('.ui2-xwrap'), sr = s.getBoundingClientRect();
         setTimeout(function () {
           if (scan !== s) return;
-          var lr = logo.getBoundingClientRect(), sr = s.getBoundingClientRect();
-          var xc = lr.left - sr.left + lr.width * XFX, yc = lr.top - sr.top + lr.height * XFY;
+          var xr = xw.getBoundingClientRect();
+          var xc = xr.left - sr.left + xr.width * XFX, yc = xr.top - sr.top + xr.height * XFY;
+          /* 2) l'energia de les frases convergeix al rombe i la X s'il·lumina */
           var marks = s.querySelectorAll('mark'), sparks = [];
-          for (var k = 0; k < Math.min(16, Math.max(8, marks.length * 2)); k++) {
+          for (var k = 0; k < Math.min(10, Math.max(6, marks.length)); k++) {
             var m = marks.length ? marks[k % marks.length].getBoundingClientRect() : { left: sr.width * Math.random(), top: sr.height * Math.random(), width: 0, height: 0 };
             var sp = el('div', 'ui2-spark'); s.appendChild(sp);
-            var x0 = m.left - sr.left + m.width * ((k * 0.37) % 1), y0 = m.top - sr.top + m.height / 2;
-            sp.style.transform = 'translate(' + x0 + 'px,' + y0 + 'px)'; sparks.push(sp);
+            sp.style.transform = 'translate(' + (m.left - sr.left + m.width / 2) + 'px,' + (m.top - sr.top + m.height / 2) + 'px)'; sparks.push(sp);
           }
           requestAnimationFrame(function () {
             sparks.forEach(function (sp, k) {
-              sp.style.transition = 'transform .5s cubic-bezier(.5,0,.75,0) ' + (k * 0.01) + 's, opacity .2s';
-              sp.style.opacity = 1; sp.style.transform = 'translate(' + (xc - 3) + 'px,' + (yc - 3) + 'px) scale(.6)';
+              sp.style.transition = 'transform .42s cubic-bezier(.5,0,.75,0) ' + (k * 0.012) + 's, opacity .15s';
+              sp.style.opacity = 1; sp.style.transform = 'translate(' + (xc - 3) + 'px,' + (yc - 3) + 'px) scale(.5)';
             });
           });
-          var core = s.querySelector('.ui2-core'), flash = s.querySelector('.ui2-flash'), rings = s.querySelectorAll('.ui2-ring');
-          [core, flash, rings[0], rings[1]].forEach(function (e) { e.style.left = xc + 'px'; e.style.top = yc + 'px'; });
-          core.style.transition = 'opacity .3s, transform .3s'; setTimeout(function () { core.style.opacity = 1; core.style.transform = 'scale(2.2)'; }, 300);
+          s.classList.add('xglow');
+          var bloom = s.querySelector('.ui2-bloom'), ring = s.querySelector('.ui2-ring');
+          [bloom, ring].forEach(function (e) { e.style.left = xc + 'px'; e.style.top = yc + 'px'; });
+          /* 3) esclat càlid de la mateixa X */
           setTimeout(function () {
             if (scan !== s) return;
             sparks.forEach(function (sp) { sp.remove(); });
-            core.style.opacity = 0; s.classList.add('burst');
-            for (var q = 0; q < 24; q++) {
-              var p = el('div', 'ui2-spark'); s.appendChild(p);
-              var ang = q / 24 * 6.283 + (q % 3) * .3, d = 90 + (q * 37 % 9) * 22;
-              p.style.transform = 'translate(' + (xc - 3) + 'px,' + (yc - 3) + 'px)'; p.style.opacity = 1;
-              (function (p, ang, d) { requestAnimationFrame(function () { p.style.transition = 'transform .75s cubic-bezier(.1,.7,.2,1), opacity .75s ease'; p.style.transform = 'translate(' + (xc - 3 + Math.cos(ang) * d) + 'px,' + (yc - 3 + Math.sin(ang) * d * .85 + 30) + 'px) scale(.4)'; p.style.opacity = 0; }); })(p, ang, d);
-            }
-            setTimeout(function () { end(s, true); }, 330);
-          }, 560);
-        }, 300);
+            s.classList.add('xburst');
+            /* 4) el resum entra amb la llum de l'esclat */
+            setTimeout(function () { end(s, true); }, 260);
+          }, 460);
+        }, 240);
       } catch (e) { abortScan(); }
     }, wait);
   }
   function quickEnd() { if (scan) end(scan, true); }
   function end(s, success) {
     var res = doc.getElementById('results');
-    if (res && success) { res.classList.remove('ui2-emerge'); void res.offsetWidth; res.classList.add('ui2-emerge'); }
+    if (res && success) { res.classList.remove('ui2-emerge'); void res.offsetWidth; res.classList.add('ui2-emerge'); setTimeout(function () { res.classList.remove('ui2-emerge'); }, 1400); }
     s.classList.add('out');
     body.classList.remove('ui2-scanning');
     if (scan === s) { scan = null; finishing = false; }
-    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 400);
+    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 420);
   }
   function abortScan() {
     clearTimeout(scanTimer); body.classList.remove('ui2-scanning');
@@ -466,14 +481,28 @@
     if (s && s.parentNode) s.parentNode.removeChild(s);
   }
 
+  /* ---------------- capçalera compacta en desplaçar (mòbil) ---------------- */
+  var hdrTimer = null;
+  function onAnyScroll(e) {
+    var t = e.target; if (!t || t === doc) t = doc.scrollingElement || doc.documentElement;
+    if (hdrTimer) return;
+    hdrTimer = requestAnimationFrame(function () {
+      hdrTimer = null;
+      var y = t.scrollTop || 0;
+      if (y > 36) body.classList.add('ui2-hdr-compact'); else if (y < 8) body.classList.remove('ui2-hdr-compact');
+    });
+  }
+
   /* ---------------- reversibilitat completa ---------------- */
   function disable() {
     observers.forEach(function (o) { o.disconnect(); }); observers = [];
+    doc.removeEventListener('scroll', onAnyScroll, true); body.classList.remove('ui2-hdr-compact');
     abortScan();
     [].forEach.call(doc.querySelectorAll('.ui2-injected'), function (e) { if (e.parentNode) e.parentNode.removeChild(e); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-html]'), function (e) { e.innerHTML = decodeURIComponent(e.getAttribute('data-ui2-html')); e.removeAttribute('data-ui2-html'); });
+    [].forEach.call(doc.querySelectorAll('[data-ui2-aria]'), function (e) { e.removeAttribute('aria-label'); e.removeAttribute('title'); e.removeAttribute('data-ui2-aria'); });
     [].forEach.call(doc.querySelectorAll('[data-ui2-count],[data-ui2],[data-ui2-kind],[data-ui2-icon]'), function (e) { ['data-ui2-count', 'data-ui2', 'data-ui2-kind', 'data-ui2-icon'].forEach(function (a) { e.removeAttribute(a); }); });
-    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge'].forEach(function (c) {
+    ['ui2-hide', 'ui2-tile', 'ui2-date', 'ui2-warn', 'ui2-ico', 'ui2-event', 'ui2-head', 'ui2-sec', 'ui2-nav-ico', 'ui2-swapped', 'ui2-tv', 'ui2-emerge'].forEach(function (c) {
       [].forEach.call(doc.querySelectorAll('.' + c), function (e) { e.classList.remove(c); });
     });
     body.classList.remove('ui2', 'ui2-scanning'); body.removeAttribute('data-ui2-page');
@@ -484,11 +513,13 @@
   function decorateHistory() {
     [].forEach.call(doc.querySelectorAll('#historyList .hist-item'), function (h) {
       if (h.querySelector('.ui2-hist-ico')) return;
-      h.insertBefore(injected('span', 'ui2-hist-ico ui2-ico', ico(pick(h.textContent, 'doc'), 22, 3.3)), h.firstChild);
+      h.insertBefore(injected('span', 'ui2-hist-ico ui2-ico', ico(pick(h.textContent, 'doc'), 16, 3.4)), h.firstChild);
+      if (!h.querySelector('.ui2-hist-go')) h.appendChild(injected('span', 'ui2-hist-go', '<svg width="14" height="14" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M18 10l14 14-14 14" stroke-linecap="round" stroke-linejoin="round"/></svg>'));
     });
   }
   function init() {
     decorateStatic(); updatePage(); decorateHistory();
+    doc.addEventListener('scroll', onAnyScroll, true);
     var load = doc.getElementById('loading'), res = doc.getElementById('results');
     watch(load, { attributes: true, attributeFilter: ['class'] }, function () {
       if (load.classList.contains('on')) startScan();
@@ -504,5 +535,5 @@
   }
   try { if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init); else init(); }
   catch (e) { body.classList.remove('ui2-scanning'); }
-  window.NexLupaUI2 = { version: '2.2.0', icon: ico, disable: disable };
+  window.NexLupaUI2 = { version: '2.3.0', icon: ico, disable: disable };
 })();
