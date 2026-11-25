@@ -80,7 +80,7 @@ function tornarLanding() {
 
 /* ── LANDING: reveal on scroll + botons CTA ── */
 document.addEventListener('DOMContentLoaded', function () {
-  try { if (premiumTestKey()) checkPremiumTest(false); } catch (e) {}
+  try { applyPremiumTestLink(); if (premiumTestKey()) checkPremiumTest(false); } catch (e) {}
   /* Connectar tots els botons que obren l'app */
   ['btnObrirApp1', 'btnObrirApp2', 'btnObrirApp3'].forEach(function (id) {
     var btn = document.getElementById(id);
@@ -323,7 +323,19 @@ var _imgBase64  = null;
    El navegador només guarda la clau que l'equip introdueix a Config; mai decideix el pla per si mateix. */
 var _premiumTest = false;
 function imagesAllowed() { return _premiumTest === true; }
-function premiumTestKey() { try { return localStorage.getItem('nxl_ptest') || ''; } catch (e) { return ''; } }
+function applyPremiumTestLink() {
+  // Private preview link: fragment never reaches HTTP logs or referrers.
+  var p = new URLSearchParams(location.hash.slice(1));
+  var key = p.get('premium-test'), free = p.get('mode') === 'free';
+  if (key === null && !free) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  // Keep test modes separate between tabs; server still verifies every image.
+  try {
+    sessionStorage.removeItem('nxl_ptest');
+    if (!free && key && /^[A-Za-z0-9_-]{20,200}$/.test(key)) sessionStorage.setItem('nxl_ptest', key);
+  } catch (e) {}
+}
+function premiumTestKey() { try { return sessionStorage.getItem('nxl_ptest') || ''; } catch (e) { return ''; } }
 function checkPremiumTest(showCard) {
   var key = premiumTestKey();
   return fetch('/api/analyze', { method: 'POST',
@@ -343,10 +355,10 @@ function checkPremiumTest(showCard) {
 }
 function savePremiumTestKey() {
   var i = document.getElementById('cfgPremiumTestKey'); if (!i) return;
-  try { if (i.value.trim()) localStorage.setItem('nxl_ptest', i.value.trim()); } catch (e) {}
+  try { if (i.value.trim()) sessionStorage.setItem('nxl_ptest', i.value.trim()); } catch (e) {}
   i.value = ''; checkPremiumTest(true);
 }
-function clearPremiumTestKey() { try { localStorage.removeItem('nxl_ptest'); } catch (e) {} _premiumTest = false; checkPremiumTest(true); }
+function clearPremiumTestKey() { try { sessionStorage.removeItem('nxl_ptest'); } catch (e) {} _premiumTest = false; checkPremiumTest(true); }
 var IMG_PREMIUM_MSG = 'L’anàlisi d’imatges i captures és exclusiva de Premium.';
 function showImagePremiumInfo(show) {
   var drop = document.getElementById('imgDrop'), lock = document.getElementById('imgPremiumLock');
