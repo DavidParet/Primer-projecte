@@ -33,9 +33,14 @@ function validTestKey(sent) {
   if (process.env.NEXLUPA_PREMIUM_TEST_KEY) expected.unshift(sha256(process.env.NEXLUPA_PREMIUM_TEST_KEY));
   return expected.reduce((ok, e) => crypto.timingSafeEqual(got, e) || ok, false);
 }
+// Enllaç directe de proves (UI 2.9): la preview de ui-2.0 ja és privada (protecció de Vercel per a
+// tots els desplegaments excepte els dominis propis), així que l'enllaç «#mode=premium» no necessita clau.
+// Producció (dominis propis) i altres branques: sempre denegat.
+const PREVIEW_LINK = 'enllac-preview-protegida';
 function hasVerifiedPremium(req) {
   if (!premiumTestAvailable()) return false;                 // producció i altres branques: mai
-  return validTestKey(req.headers && req.headers['x-nexlupa-premium-test']);
+  const sent = String((req.headers && req.headers['x-nexlupa-premium-test']) || '');
+  return sent === PREVIEW_LINK || validTestKey(sent);
 }
 
 // ── IMATGES (UI 2.9): primer es llegeix el text literal de la imatge i després s'analitza exactament
@@ -70,8 +75,8 @@ const SELFTEST = {
 };
 async function selftest(req, res) {
   const q = req.query || {};
-  if (process.env.VERCEL_ENV !== 'preview' || !['ui-2.0', 'ui-2.0-proves'].includes(process.env.VERCEL_GIT_COMMIT_REF) ||
-      !validTestKey(q.k)) return res.status(404).json({ error: 'Not found' });
+  // Només a la preview privada de ui-2.0 (protecció de Vercel); a producció no existeix.
+  if (!premiumTestAvailable()) return res.status(404).json({ error: 'Not found' });
   const c = SELFTEST[q.selftest]; if (!c) return res.status(400).json({ error: 'cas desconegut' });
   const t0 = Date.now();
   const input = { testReferenceDate: q.ref || '2026-11-25', language: 'ca', trace: true };

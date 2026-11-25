@@ -327,6 +327,7 @@ function applyPremiumTestLink() {
   // Private preview link: fragment never reaches HTTP logs or referrers.
   var p = new URLSearchParams(location.hash.slice(1));
   var key = p.get('premium-test'), free = p.get('mode') === 'free';
+  if (p.get('mode') === 'premium') key = 'enllac-preview-protegida'; // UI 2.9: el servidor només l'accepta a la preview privada
   if (key === null && !free) return;
   history.replaceState(null, '', location.pathname + location.search);
   // Keep test modes separate between tabs; server still verifies every image.

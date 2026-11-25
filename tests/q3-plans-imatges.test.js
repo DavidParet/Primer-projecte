@@ -77,14 +77,15 @@ test('Preview ui-2.0 amb la clau correcta: la imatge arriba al servei d’IA rea
     assert.strictEqual(r.out.origenImatge, true);
   }));
 
-test('Autoprova amb motor real: inaccessible sense clau, a producció o a altres branques', () =>
+test('Autoprova amb motor real: inaccessible a producció i a altres branques', () =>
   withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0', NEXLUPA_PREMIUM_TEST_KEY: DUMMY }, async () => {
     const calls = []; const h = loadHandler(calls);
     const get = async (query) => { let code = 0; const res = { setHeader() {}, status(c) { code = c; return this; }, json() { return this; } };
       await h({ method: 'GET', headers: {}, query }, res); return code; };
+    process.env.VERCEL_GIT_COMMIT_REF = 'altra-branca';
     assert.strictEqual(await get({ selftest: 'escola' }), 404);
-    assert.strictEqual(await get({ selftest: 'escola', k: 'una-clau-inventada-qualsevol-123' }), 404);
-    process.env.VERCEL_ENV = 'production';
+    process.env.VERCEL_GIT_COMMIT_REF = 'ui-2.0'; process.env.VERCEL_ENV = 'production';
+    assert.strictEqual(await get({ selftest: 'escola' }), 404);
     assert.strictEqual(await get({ selftest: 'escola', k: DUMMY }), 404);
     assert.strictEqual(calls.length, 0);
   }));
@@ -125,4 +126,15 @@ test('premiumCheck no consumeix IA', () =>
     const calls = []; const h = loadHandler(calls);
     const c = await call(h, { premiumCheck: true }, { 'x-nexlupa-premium-test': DUMMY });
     assert.deepStrictEqual(c.out, { testAccess: true, premium: true }); assert.strictEqual(calls.length, 0);
+  }));
+
+test('Enllaç directe Premium de proves: només a la preview privada de ui-2.0', () =>
+  withEnv({ VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'ui-2.0' }, async () => {
+    const H = { 'x-nexlupa-premium-test': 'enllac-preview-protegida' };
+    let calls = []; let h = loadHandler(calls);
+    assert.strictEqual((await call(h, IMG, H)).code, 200);
+    process.env.VERCEL_ENV = 'production'; calls = []; h = loadHandler(calls);
+    assert.strictEqual((await call(h, IMG, H)).code, 403); assert.strictEqual(calls.length, 0);
+    process.env.VERCEL_ENV = 'preview'; process.env.VERCEL_GIT_COMMIT_REF = 'altra-branca'; calls = []; h = loadHandler(calls);
+    assert.strictEqual((await call(h, IMG, H)).code, 403); assert.strictEqual(calls.length, 0);
   }));
