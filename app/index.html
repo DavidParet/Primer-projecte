@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <meta name="color-scheme" content="only dark"/>
-  <title>nexlupa — App</title>
+  <title>NexLupa — App</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -29,7 +29,7 @@
   <header>
     <div class="header-brand">
       <canvas class="nexlupa-logo" width="432" height="216" role="img" aria-label="nexlupa"></canvas>
-      <p class="logo-tagline"><span class="lt-gold">Enganxa el missatge.</span><span class="lt-white"> La resta ho fa <span class="lt-brand">nexlupa.</span></span></p>
+      <p class="logo-tagline"><span class="lt-gold">Enganxa el missatge.</span><span class="lt-white"> La resta ho fa <span class="lt-brand">NexLupa.</span></span></p>
       <p id="dbg-ver" style="font-size:10px;opacity:0.4;margin:0;text-align:center;">v260bb2c</p>
     </div>
     <button class="btn-premium-header" onclick="navTo('premium')">⭐ Premium</button>
@@ -45,7 +45,7 @@
     <div class="onboarding-card">
       <div class="ob-step" id="obStep">PAS 1 DE 3</div>
       <div class="ob-icon" id="obIcon">🔍</div>
-      <div class="ob-title" id="obTitle">Benvingut a nexlupa</div>
+      <div class="ob-title" id="obTitle">Benvingut a NexLupa</div>
       <div class="ob-desc" id="obDesc">La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtén el que importa en 10 segons.</div>
       <div class="ob-dots">
         <div class="ob-dot active" id="obDot0"></div>
@@ -59,7 +59,7 @@
 
   <!-- LIMIT BANNER -->
   <div id="limitBanner" style="display:none; padding:6px 16px; font-size:12px; color:#999; font-family:'Nunito',sans-serif; text-align:center; border-bottom:1px solid rgba(255,255,255,.08);">
-    Límit diari assolit. Torna demà per 3 anàlisis més. <span id="limitCount" style="display:none;"></span>
+    Límit diari assolit. Torna demà per 3 anàlisis de text més. <span id="limitCount" style="display:none;"></span>
   </div>
 
   <!-- MAIN CONTENT -->
@@ -71,7 +71,7 @@
 
       <div class="app-col-left">
         <h1 class="app-left-h1">De la informació<br><span>a la decisió</span></h1>
-        <p class="app-left-p">No cal llegir-ho tot. <strong>nexlupa</strong> ho fa automàticament per tu.</p>
+        <p class="app-left-p">No cal llegir-ho tot. <strong>NexLupa</strong> ho fa automàticament per tu.</p>
         <div class="app-left-feats">
           <div class="app-feat-item">⚡ Resum en 10 segons</div>
           <div class="app-feat-item">✅ Accions detectades automàticament</div>
@@ -95,7 +95,7 @@
 
         <div class="input-tabs">
           <button class="tab-btn active" id="tabText" onclick="switchTab('text')">✏️ Text</button>
-          <button class="tab-btn" id="tabImg"  onclick="switchTab('img')">📷 Imatge</button>
+          <button class="tab-btn" id="tabImg"  onclick="switchTab('img')" aria-label="Imatge (Premium)">📷 Imatge · Premium</button>
         </div>
 
         <div id="panelText">
@@ -113,6 +113,12 @@
             <img id="imgPreview" style="display:none;max-width:100%;border-radius:10px;margin-top:10px;" alt="preview"/>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="handleImg(event)"/>
+          <div id="imgPremiumLock" class="img-premium-lock" style="display:none;" role="note">
+            <p class="ipl-title">⭐ Imatges i captures · Premium</p>
+            <p class="ipl-text">L’anàlisi d’imatges i captures és exclusiva de Premium 1.0, que arribarà properament. Amb el FREE pots analitzar 3 missatges de text al dia.</p>
+            <button type="button" class="ipl-btn" onclick="navTo('premium')">Veure Premium</button>
+            <button type="button" class="ipl-back" onclick="switchTab('text')">Tornar a Text</button>
+          </div>
         </div>
 
         <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">
@@ -271,22 +277,23 @@
       <button type="button" class="btn-back-page" onclick="navTo('inici')">← Tornar a l’inici</button>
 
       <div class="premium-hero">
-        <div class="premium-badge">⭐ nexlupa PREMIUM</div>
+        <div class="premium-badge">⭐ NexLupa PREMIUM</div>
         <h1 id="premiumTitle" style="font-size:24px;color:#fff;">Els teus pendents, a punt</h1>
         <p style="font-size:13px;color:#fff;">Amb Gmail, els correus que triïs entren sols. Amb altres proveïdors, es preveu el reenviament manual.</p>
 
         <div class="premium-checklist">
           <div class="pchk-item yes">✔ <span>Gmail amb reenviament automàtic</span></div>
-          <div class="pchk-item yes">✔ <span>Avisos automàtics per correu</span></div>
-          <div class="pchk-item yes">✔ <span><strong style="color:#69d99a;">Anàlisis incloses</strong> (1.000 de text + 50 d’imatge al mes)</span></div>
-          <div class="pchk-item no">✖ <span>Amb el FREE, 3 anàlisis al dia</span></div>
+          <div class="pchk-item yes">✔ <span>Recordatoris de terminis per correu</span></div>
+          <div class="pchk-item yes">✔ <span>Anàlisi d’imatges i captures, exclusiva de Premium</span></div>
+          <div class="pchk-item yes">✔ <span><strong style="color:#69d99a;">Anàlisis incloses</strong> (previstes: 1.000 de text, correus inclosos, i 50 d’imatge al mes)</span></div>
+          <div class="pchk-item info"><span>Amb el FREE: 3 anàlisis de text al dia</span></div>
         </div>
 
         <div class="plans-row">
           <div class="plan-card">
             <div class="plan-name">Free</div>
             <div class="plan-price">0 €</div>
-            <div class="plan-desc">3 anàlisis al dia</div>
+            <div class="plan-desc">3 anàlisis de text al dia</div>
           </div>
           <div class="plan-card active">
             <div class="plan-badge">PROPERAMENT</div>
@@ -301,30 +308,28 @@
 
       <div class="card">
         <div class="card-head"><div class="c-icon ci-gold">🆓</div><h2 class="c-label">Free vs Premium 1.0</h2></div>
-        <div class="compare-row">
-          <span>Anàlisis incloses</span>
-          <span class="compare-status">
-            <span><strong class="compare-yes">✓ Free</strong><br><small class="compare-no">3 al dia en total</small></span>
-            <span><strong class="compare-yes">✓ Premium</strong><br><small>1.000 de text + 50 d’imatge al mes</small></span>
-          </span>
-        </div>
-        <div class="compare-row"><span>Anàlisi de text i imatges</span><span class="compare-status"><span><strong class="compare-yes">✓ Free</strong><br><small class="compare-no">3 anàlisis/dia</small></span><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Resum, accions i dates</span><span class="compare-status"><strong class="compare-yes">✓ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Compartir per WhatsApp</span><span class="compare-status"><strong class="compare-yes">✓ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Tasques i historial</span><span class="compare-status"><strong class="compare-yes">✓ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Ubicacions i Maps</span><span class="compare-status"><strong class="compare-yes">✓ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Afegir a Google Calendar</span><span class="compare-status"><strong class="compare-yes">✓ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Gmail amb reenviament automàtic</span><span class="compare-status"><strong class="compare-no">✕ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Altres correus: reenviament manual previst</span><span class="compare-status"><strong class="compare-no">✕ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
-        <div class="compare-row"><span>Avisos automàtics per correu</span><span class="compare-status"><strong class="compare-no">✕ Free</strong><strong class="compare-yes">✓ Premium</strong></span></div>
+        <div class="compare-row"><span>Anàlisi de text (copiar i enganxar)</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong><br><small class="compare-note">3 al dia</small></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">1.000 al mes, correus inclosos · previst</small></span></span></div>
+        <div class="compare-row"><span>Anàlisi d’imatges i captures</span><span class="compare-status"><span class="compare-cell"><span class="compare-none">— No inclòs</span></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">50 al mes · previst</small></span></span></div>
+        <div class="compare-row"><span>Resum, accions i prioritats, dates, terminis, imports i ubicacions</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong></span></span></div>
+        <div class="compare-row"><span>Tasques i historial</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong></span></span></div>
+        <div class="compare-row"><span>Compartir el resultat per WhatsApp</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong></span></span></div>
+        <div class="compare-row"><span>Obrir ubicacions a Maps</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong></span></span></div>
+        <div class="compare-row"><span>Afegir manualment a Google Calendar</span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free</strong></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong></span></span></div>
+        <div class="compare-row"><span>Gmail amb reenviament selectiu automàtic</span><span class="compare-status"><span class="compare-cell"><span class="compare-none">— No inclòs</span></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">previst</small></span></span></div>
+        <div class="compare-row"><span>Altres correus: reenviament manual</span><span class="compare-status"><span class="compare-cell"><span class="compare-none">— No inclòs</span></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">previst</small></span></span></div>
+        <div class="compare-row"><span>Recordatoris de terminis per correu</span><span class="compare-status"><span class="compare-cell"><span class="compare-none">— No inclòs</span></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">previst</small></span></span></div>
+        <div class="compare-row"><span>Informe setmanal PDF</span><span class="compare-status"><span class="compare-cell"><span class="compare-none">— No inclòs</span></span><span class="compare-cell"><strong class="compare-yes">✓ Premium</strong><br><small class="compare-note">previst</small></span></span></div>
+        <p class="compare-legend">✓ inclòs al pla · «previst»: inclòs a Premium 1.0, encara no disponible</p>
       </div>
 
       <div class="card">
         <div class="card-head"><div class="c-icon ci-gold">⭐</div><h2 class="c-label">Funcionalitats Premium 1.0</h2></div>
-        <div class="feat-item"><div class="feat-icon-sm fi-gold">🔍</div><div><div class="feat-ttl">Anàlisis incloses</div><div class="feat-dsc">Cada mes, fins a 1.000 anàlisis de text (inclosos els correus) i 50 d’imatge.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-gold">🔍</div><div><div class="feat-ttl">Anàlisis incloses</div><div class="feat-dsc">Quotes previstes: cada mes, fins a 1.000 anàlisis de text (inclosos els correus) i 50 d’imatge.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-gold">📷</div><div><div class="feat-ttl">Imatges i captures</div><div class="feat-dsc">L’anàlisi d’imatges i captures és exclusiva de Premium.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Gmail amb reenviament automàtic</div><div class="feat-dsc">Configura una vegada quins correus de Gmail vols que arribin a NexLupa. A partir d’aquí, els correus triats entren sols i NexLupa en detecta les tasques i les dates.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Outlook i altres proveïdors</div><div class="feat-dsc">Es preveu poder reenviar manualment els correus a l’adreça de NexLupa. Amb el correu d’empresa, cal que l’organització ho permeti.</div></div></div>
-        <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Avisos automàtics per correu</div><div class="feat-dsc">Si un correu de l’escola diu que cal pagar una sortida abans de divendres, NexLupa et recorda per correu què has de fer i abans de quan.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Recordatoris de terminis per correu</div><div class="feat-dsc">Si un correu de l’escola diu que cal pagar una sortida abans de divendres, NexLupa et recorda per correu què has de fer i abans de quan.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-gold">📄</div><div><div class="feat-ttl">Informe setmanal PDF</div><div class="feat-dsc">Prestació prevista de Premium 1.0.</div></div></div>
       </div>
       <div class="card">
         <div class="card-head"><div class="c-icon ci-gold">⭐</div><h2 class="c-label">Més endavant</h2></div>
@@ -344,7 +349,7 @@
             <input id="cfgNom" type="text" placeholder="El teu nom"
               style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;border:none;outline:none;background:transparent;color:var(--darker);width:180px;"
               oninput="saveConfig()"/>
-            <div style="font-size:11px;color:var(--muted);">Usuari nexlupa</div>
+            <div style="font-size:11px;color:var(--muted);">Usuari NexLupa</div>
           </div>
         </div>
       </div>
@@ -369,7 +374,7 @@
 
       <div class="card" style="text-align:center;">
         <div style="font-size:28px;margin-bottom:8px;">🔍</div>
-        <div style="font-size:14px;font-weight:800;color:var(--darker);">nexlupa motor</div>
+        <div style="font-size:14px;font-weight:800;color:var(--darker);">NexLupa motor</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">v2.0</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">La lupa que treballa sola</div>
       </div>
@@ -416,7 +421,7 @@
   </nav>
 
   <div class="bottom-spacer"></div>
-  <footer>La lupa que treballa sola · <b>nexlupa</b></footer>
+  <footer>La lupa que treballa sola · <b>NexLupa</b></footer>
 
 </div><!-- fi pageApp -->
 

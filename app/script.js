@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
     drop.addEventListener('drop', function (e) {
       e.preventDefault();
       var file = e.dataTransfer.files[0];
+      if (!imagesAllowed()) { showImagePremiumInfo(true); return; }
       if (file && file.type.startsWith('image/')) {
         handleImg({ target: { files: [file] } });
       }
@@ -287,7 +288,7 @@ function checkLimit() {
   }
   banner.style.display = 'none';
   btn.disabled = false;
-  btn.innerHTML = '🔍 &nbsp;Analitzar amb nexlupa';
+  btn.innerHTML = '🔍 &nbsp;Analitzar amb NexLupa';
   return true;
 }
 
@@ -314,8 +315,24 @@ function showInputCard() {
 var _currentTab = 'text';
 var _imgBase64  = null;
 
+/* PLANS: l'anàlisi d'imatges i captures és exclusiva de Premium 1.0.
+   Encara no hi ha comptes: cap usuari pot acreditar Premium. El servidor ho torna a comprovar
+   (api/analyze rebutja les imatges abans de consumir l'API); aquí només s'informa. */
+function imagesAllowed() { return false; }
+var IMG_PREMIUM_MSG = 'L’anàlisi d’imatges i captures és exclusiva de Premium.';
+function showImagePremiumInfo(show) {
+  var drop = document.getElementById('imgDrop'), lock = document.getElementById('imgPremiumLock');
+  if (drop) drop.style.display = show ? 'none' : '';
+  if (lock) lock.style.display = show ? 'block' : 'none';
+  var btn = document.getElementById('btnAnalyze');
+  if (btn) btn.style.display = show ? 'none' : '';
+  var micro = document.querySelector('.btn-micro-copy');
+  if (micro) micro.style.display = show ? 'none' : '';
+}
+
 function switchTab(tab) {
   _currentTab = tab;
+  showImagePremiumInfo(tab === 'img' && !imagesAllowed());
   var panelText = document.getElementById('panelText');
   var panelImg  = document.getElementById('panelImg');
   var tabText   = document.getElementById('tabText');
@@ -327,6 +344,7 @@ function switchTab(tab) {
 }
 
 function handleImg(e) {
+  if (!imagesAllowed()) { _imgBase64 = null; if (e && e.target && 'value' in e.target) e.target.value = ''; showImagePremiumInfo(true); return; }
   var file = e.target.files[0];
   if (!file) return;
   var reader = new FileReader();
@@ -371,6 +389,7 @@ async function analyze() {
   text = text.trim();
 
   if (!isImg && !text) return;
+  if (isImg && !imagesAllowed()) { showErr(IMG_PREMIUM_MSG); return; }
   if (isImg && !_imgBase64) return;
 
   var btn  = document.getElementById('btnAnalyze');
@@ -539,7 +558,7 @@ function addActionToCalendar(a) {
     startStr = dateCompact(first);
     endStr = dateCompact(new Date(last.getTime() + 86400000)); // fi exclusiva Google Calendar
   }
-  var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per nexlupa';
+  var details = (_lastData && _lastData.resum ? '📌 ' + _lastData.resum + '\n\n' : '') + 'Generat per NexLupa';
   if (provisionalEnd) details += '\nHora de fi provisional. Ajusta-la abans de desar.';
   if (multiDayAllDay) details += '\nActivitat de diversos dies: s’ha representat com a dies complets perquè l’hora final no consta. Revisa-ho abans de desar.';
   var actionMapUrl = typeof mapsSearchUrl==='function' ? mapsSearchUrl(a.lloc) : null;
@@ -1330,9 +1349,9 @@ function copyCardText() {
 
 /* ── ONBOARDING ── */
 var OB_STEPS = [
-  { icon: '🔍', title: 'Benvingut a nexlupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
-  { icon: '✅', title: 'Resum + Accions + Dates', desc: 'nexlupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
-  { icon: '📅', title: 'Tot sincronitzat', desc: 'Afegeix les dates al Google Calendar, comparteix per WhatsApp i guarda historial de tots els missatges analitzats.' }
+  { icon: '🔍', title: 'Benvingut a NexLupa', desc: 'La lupa que treballa sola. Enganxa qualsevol missatge llarg i obtens el que importa en 10 segons.' },
+  { icon: '✅', title: 'Resum + Accions + Dates', desc: 'NexLupa extreu automàticament el resum, les tasques pendents i les dates importants de qualsevol missatge.' },
+  { icon: '📅', title: 'Calendar, WhatsApp i historial', desc: 'Afegeix manualment les dates al Google Calendar, comparteix el resultat per WhatsApp i consulta l’historial dels missatges analitzats.' }
 ];
 var _obStep = 0;
 

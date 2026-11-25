@@ -834,3 +834,27 @@ body.ui2 .btn-micro-copy { margin-top: 0 !important; }
 .ui2-scan24.fading .ui2-lens-orbit { opacity: 0; transition: opacity .2s; }
 .ui2-scan24.still .ui2-lens-orbit { display: none; }
 @media (prefers-reduced-motion: reduce) { .ui2-scan24 .ui2-lens-orbit { display: none !important; } }
+
+/* ================= UI 2.8 · coherència FREE / Premium 1.0 ================= */
+/* Comparativa: marca verda quan el pla inclou la funció; límits en text neutre; no inclosos amb guió neutre */
+body.ui2 #pagePremium .compare-yes { color: #8FCBB2 !important; font-weight: 600 !important; }
+body.ui2 #pagePremium .compare-cell { display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right; min-width: 92px; }
+body.ui2 #pagePremium .compare-status { gap: 10px; align-items: flex-start; }
+body.ui2 #pagePremium .compare-none { color: #9AA8BA !important; font-size: 12px; font-weight: 500; }
+body.ui2 #pagePremium .compare-note { color: #B9C3CF !important; font-size: 11px; font-weight: 450; line-height: 1.3; }
+body.ui2 #pagePremium .compare-legend { margin: 10px 2px 2px; font-size: 11px; color: #9AA8BA; line-height: 1.4; }
+body.ui2 #pagePremium .pchk-item.info { color: #C9D2DD !important; font-weight: 500 !important; padding-left: 22px; }
+body.ui2 #pagePremium .pchk-item.info span { color: #C9D2DD !important; }
+/* Pestanya Imatge marcada com a Premium i panell informatiu per al FREE */
+body.ui2 .ui2-tab-prem { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 999px; border: 1px solid rgba(233,193,74,.45); color: var(--gold); font-size: 10.5px; font-weight: 600; line-height: 16px; }
+.img-premium-lock { padding: 14px 14px 12px; border-radius: 14px; border: 1px solid rgba(233,193,74,.35); background: rgba(233,193,74,.06); text-align: center; }
+.img-premium-lock .ipl-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--gold, #E9C14A); }
+.img-premium-lock .ipl-text { margin: 0 0 12px; font-size: 13px; line-height: 1.45; color: #DCE3EB; }
+.img-premium-lock .ipl-btn { display: block; width: 100%; min-height: 44px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #EECB5A, #DDB43E); color: #0D1B2A; font-weight: 700; font-size: 14px; cursor: pointer; }
+.img-premium-lock .ipl-back { display: block; width: 100%; min-height: 40px; margin-top: 6px; border: 0; background: transparent; color: #B9C3CF; font-size: 13px; cursor: pointer; }
+/* Comparativa en tres columnes: funció | Free | Premium */
+body.ui2 #pagePremium .compare-row { display: grid !important; grid-template-columns: minmax(0, 1fr) 76px 104px; column-gap: 8px; align-items: start; }
+body.ui2 #pagePremium .compare-row > .compare-status { display: contents !important; }
+body.ui2 #pagePremium .compare-cell { min-width: 0; align-items: flex-end; }
+body.ui2 #pagePremium .compare-cell br { display: none; }
+body.ui2 #pagePremium .compare-note { display: block; margin-top: 2px; }

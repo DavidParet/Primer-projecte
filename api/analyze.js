@@ -11,6 +11,9 @@ const SYSTEM_PROMPT = fs.readFileSync(
   'utf8'
 );
 
+// Sense sistema de comptes, cap petició és Premium verificada. No llegir mai el pla de req.body ni de capçaleres del client.
+function hasVerifiedPremium(req) { return false; }
+
 module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
@@ -23,6 +26,14 @@ module.exports = async function handler(req, res) {
 
   if (!text && !image) {
     return res.status(400).json({ error: 'El camp text és obligatori' });
+  }
+
+  // PLANS (25/11/2026): l'anàlisi d'imatges i captures és exclusiva de Premium 1.0.
+  // Es comprova al servidor ABANS de consumir l'API. No es confia en cap indicador enviat pel navegador.
+  // Encara no hi ha sistema de comptes ni permisos (Fase 1 de l'acta): cap petició pot acreditar Premium,
+  // per tant tota petició amb imatge es rebutja. Quan existeixin els comptes, verificar aquí la sessió i el pla.
+  if (image && !hasVerifiedPremium(req)) {
+    return res.status(403).json({ error: 'L’anàlisi d’imatges i captures és exclusiva de Premium.', code: 'PREMIUM_REQUIRED' });
   }
 
   try {
