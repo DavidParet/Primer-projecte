@@ -30,7 +30,9 @@ const files = [
   'landing/index.html',
   'landing/script.js',
   'landing/style.css',
-  'landing/hero.png'
+  'landing/hero.png',
+  'pilot-auth/index.html',
+  'pilot-auth/script.js'
 ];
 
 fs.rmSync(output, { recursive: true, force: true });

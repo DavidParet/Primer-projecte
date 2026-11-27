@@ -70,6 +70,7 @@ test('La capçalera del pla reflecteix l’accés Premium que ha validat el serv
     document: { getElementById },
     DEV_MODE: true,
     _premiumTest: false,
+    _freeUsage: null,
     _currentTab: 'text',
     imagesAllowed: () => context._premiumTest,
     premiumTestKey: () => '',

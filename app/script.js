@@ -81,6 +81,10 @@ function tornarLanding() {
 /* ── LANDING: reveal on scroll + botons CTA ── */
 document.addEventListener('DOMContentLoaded', function () {
   try { applyPremiumTestLink(); if (premiumTestKey()) checkPremiumTest(false); } catch (e) {}
+  fetch('/api/analyze?freeUsage=1')
+    .then(function (r) { return r.json(); })
+    .then(applyFreeUsage)
+    .catch(function () { /* La quota es tornarà a comprovar al servidor en analitzar. */ });
   /* Connectar tots els botons que obren l'app */
   ['btnObrirApp1', 'btnObrirApp2', 'btnObrirApp3'].forEach(function (id) {
     var btn = document.getElementById(id);
@@ -256,6 +260,7 @@ function toggleDemo() {
 /* ── USAGE LIMIT ── */
 var DEV_MODE = true; /* proves il·limitades — canviar a false per activar límit */
 var FREE_LIMIT = 3;
+var _freeUsage = null;
 
 function getUsageToday() {
   if (DEV_MODE) return 0;
@@ -301,6 +306,14 @@ function updateCounter() {
   if (plan) plan.textContent = premium ? 'Premium' : 'FREE';
   if (promo) promo.style.display = premium ? 'none' : '';
   if (!el) return;
+  if (!premium && _freeUsage) {
+    if (Number.isInteger(_freeUsage.used)) {
+      el.textContent = _freeUsage.used + '/' + _freeUsage.limit + ' avui';
+    } else {
+      el.textContent = _freeUsage.code === 'SIGN_IN_REQUIRED' ? 'Sessió requerida' : 'Quota no disponible';
+    }
+    return;
+  }
   if (premium || DEV_MODE) {
     el.textContent = 'Mode de proves';
     return;
@@ -309,6 +322,14 @@ function updateCounter() {
   el.textContent = used >= FREE_LIMIT
     ? 'Límit assolit'
     : used + '/' + FREE_LIMIT + ' avui';
+}
+
+function applyFreeUsage(usage) {
+  if (!usage || usage.pilot !== true) return;
+  _freeUsage = usage;
+  var link = document.getElementById('freeUsageSignIn');
+  if (link) link.hidden = usage.code !== 'SIGN_IN_REQUIRED';
+  updateCounter();
 }
 
 /* ── ANALYZE ── */
@@ -467,6 +488,7 @@ async function analyze() {
     });
 
     var d = await r.json();
+    applyFreeUsage(d.usage);
 
     if (!r.ok) {
       throw new Error(d.error || 'Hi ha hagut un error. Torna-ho a intentar.');

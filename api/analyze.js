@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const path   = require('path');
 const fs     = require('fs');
 const crypto = require('crypto');
+const { isFreeUsagePilot, checkFreeUsage } = require('../lib/free-usage');
 const { madridToday, weekdayForISO, validIsoDate, normalizeAnalysis, sanitizeNotice, explicitDayMonthInSource } = require('../lib/nexlupa-result');
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -93,6 +94,13 @@ async function selftest(req, res) {
 module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
+  const quotaPilot = isFreeUsagePilot();
+  if (req.method === 'GET' && req.query?.freeUsage === '1') {
+    res.setHeader('Cache-Control', 'no-store, private');
+    if (!quotaPilot) return res.status(200).json({ pilot: false });
+    const quota = await checkFreeUsage(req);
+    return res.status(quota.status).json(quota.body);
+  }
   if (req.method === 'GET' && req.query && req.query.selftest) return selftest(req, res);
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -118,6 +126,14 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'L’anàlisi d’imatges i captures és exclusiva de Premium.', code: 'PREMIUM_REQUIRED' });
   }
 
+  let usage;
+  if (quotaPilot) {
+    res.setHeader('Cache-Control', 'no-store, private');
+    const quota = await checkFreeUsage(req, { reserve: true });
+    if (quota.status !== 200) return res.status(quota.status).json({ ...quota.body, usage: quota.body });
+    usage = quota.body;
+  }
+
   try {
     const previewQa = process.env.VERCEL_ENV === 'preview' &&
       ['fix/claude-50-casos-20261112','fix/qa96-deterministic-dates-20261112'].includes(process.env.VERCEL_GIT_COMMIT_REF);
@@ -127,15 +143,15 @@ module.exports = async function handler(req, res) {
       crypto.timingSafeEqual(Buffer.from(sentKey), Buffer.from(process.env.NEXLUPA_QA_KEY));
     const r = await runAnalysis({ text: inputText, image, sourceDate, language, testReferenceDate },
       { allowTestReference: previewQa || keyQa });
-    return res.status(r.status).json(r.body);
+    return res.status(r.status).json(usage ? { ...r.body, usage } : r.body);
   } catch (err) {
     if (err instanceof SyntaxError) {
-      return res.status(500).json({ error: 'No hem pogut completar l’anàlisi. Torna-ho a provar.' });
+      return res.status(500).json({ error: 'No hem pogut completar l’anàlisi. Torna-ho a provar.', usage });
     }
     if (err.status === 401) {
-      return res.status(500).json({ error: 'Clau API no configurada al servidor' });
+      return res.status(500).json({ error: 'Clau API no configurada al servidor', usage });
     }
-    return res.status(500).json({ error: 'Error connectant amb OpenAI' });
+    return res.status(500).json({ error: 'Error connectant amb OpenAI', usage });
   }
 };
 
