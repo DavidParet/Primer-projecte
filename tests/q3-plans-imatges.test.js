@@ -5,6 +5,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');
+const vm = require('node:vm');
 
 function loadHandler(calls) {
   const fake = function () { return { chat: { completions: { create: async (o) => { calls.push(o);
@@ -55,6 +56,55 @@ test('Textos de l’app: cap pantalla diu que el FREE inclou imatges ni pinta el
   assert.ok(/Informe setmanal PDF/.test(html));
   assert.ok(/Afegir manualment a Google Calendar<\/span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free/.test(html));
   assert.ok(/Obrir ubicacions a Maps<\/span><span class="compare-status"><span class="compare-cell"><strong class="compare-yes">✓ Free/.test(html));
+});
+
+test('La capçalera del pla reflecteix l’accés Premium que ha validat el servidor', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'app', 'script.js'), 'utf8');
+  const elements = new Map();
+  const getElementById = id => {
+    if (!elements.has(id)) elements.set(id, { textContent: '', style: {} });
+    return elements.get(id);
+  };
+  let access = false;
+  const context = vm.createContext({
+    document: { getElementById },
+    DEV_MODE: true,
+    _premiumTest: false,
+    _currentTab: 'text',
+    imagesAllowed: () => context._premiumTest,
+    premiumTestKey: () => '',
+    fetch: async () => ({ ok: true, json: async () => ({ testAccess: true, premium: access }) }),
+  });
+  for (const name of ['updateCounter', 'checkPremiumTest']) {
+    const fn = source.match(new RegExp('^function ' + name + '\\([^]*?^\\}', 'm'));
+    assert.ok(fn, 'falta la funció ' + name);
+    vm.runInContext(fn[0], context);
+  }
+
+  await context.checkPremiumTest(false);
+  assert.equal(getElementById('usagePlan').textContent, 'FREE');
+  assert.equal(getElementById('usageText').textContent, 'Mode de proves');
+  assert.equal(getElementById('convStrip').style.display, '');
+
+  access = true;
+  await context.checkPremiumTest(false);
+  assert.equal(getElementById('usagePlan').textContent, 'Premium');
+  assert.equal(getElementById('usageText').textContent, 'Mode de proves');
+  assert.equal(getElementById('convStrip').style.display, 'none');
+
+  access = false;
+  await context.checkPremiumTest(false);
+  assert.equal(getElementById('usagePlan').textContent, 'FREE');
+  assert.equal(getElementById('convStrip').style.display, '');
+});
+
+test('La portada i la landing indiquen el pla de les imatges i el calendari manual', () => {
+  for (const relative of ['index.html', 'landing/index.html']) {
+    const html = fs.readFileSync(path.join(__dirname, '..', relative), 'utf8');
+    assert.match(html, /Imatges i captures amb Premium 1\.0, properament/);
+    assert.match(html, /Afegeix manualment una cita a Google Calendar/);
+    assert.doesNotMatch(html, /Dates sincronitzades|Sense registre|Text, imatge o pantallàs/);
+  }
 });
 
 // Accés Premium de proves: només preview de ui-2.0, clau verificada al servidor (en proves, clau fictícia per variable d'entorn).

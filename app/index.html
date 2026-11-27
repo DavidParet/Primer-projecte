@@ -107,7 +107,7 @@
           <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgInput').click()">
             <div id="imgDropContent">
               <span style="font-size:36px;">📷</span>
-              <p style="font-size:14px;font-weight:700;margin:8px 0 4px;">Puja una imatge o pantallàs</p>
+              <p style="font-size:14px;font-weight:700;margin:8px 0 4px;">Puja una imatge o una captura</p>
               <p style="font-size:12px;color:var(--muted);">Clica aquí o arrossega la imatge</p>
             </div>
             <img id="imgPreview" style="display:none;max-width:100%;border-radius:10px;margin-top:10px;" alt="preview"/>
@@ -140,19 +140,18 @@
         <div class="err" id="errMsg"></div>
       </div>
 
-      <!-- Free status — entre la card i el premium strip -->
+      <!-- Estat del pla -->
       <div class="usage-counter" id="usageCounter">
-        <span class="usage-plan-tag">FREE</span>
+        <span class="usage-plan-tag" id="usagePlan">FREE</span>
         <span class="usage-sep">·</span>
-        <span class="usage-quota" id="usageText">0/3 avui</span>
+        <span class="usage-quota" id="usageText" aria-live="polite">Mode de proves</span>
       </div>
 
       <!-- Conv strip: FORA de la card → sibling en app-col-right flex column -->
       <div class="conv-strip" id="convStrip" style="animation:none;margin-top:8px;padding:8px 12px;" onclick="navTo('premium')">
         <div class="conv-left">
-          <div class="conv-title"><strong style="color:var(--gold);">⭐ Premium</strong></div>
-          <div class="conv-sub">Menys gestions, més tranquil·litat.</div>
-          <div class="conv-sub">Fins a 1.000 anàlisis de text al mes.</div>
+          <div class="conv-title"><strong style="color:var(--gold);">⭐ Premium 1.0</strong></div>
+          <div class="conv-sub">Properament: correus seleccionats de Gmail i avisos de terminis per correu.</div>
         </div>
         <div class="conv-right">
           <button class="conv-btn" onclick="event.stopPropagation();navTo('premium')">Veure el pla →</button>
@@ -282,11 +281,11 @@
       <div class="premium-hero">
         <div class="premium-badge">⭐ NexLupa PREMIUM</div>
         <h1 id="premiumTitle" style="font-size:24px;color:#fff;">Els teus pendents, a punt</h1>
-        <p style="font-size:13px;color:#fff;">Amb Gmail, els correus que triïs entren sols.</p>
+        <p style="font-size:13px;color:#fff;">Properament podràs triar quins correus de Gmail vols reenviar a NexLupa.</p>
 
         <div class="premium-checklist">
-          <div class="pchk-item yes">✔ <span>Gmail amb reenviament automàtic</span></div>
-          <div class="pchk-item yes">✔ <span>Recordatoris de terminis per correu</span></div>
+          <div class="pchk-item yes">✔ <span>Reenviament selectiu de Gmail · previst</span></div>
+          <div class="pchk-item yes">✔ <span>Recordatoris de terminis per correu · previstos</span></div>
           <div class="pchk-item yes">✔ <span>Anàlisi d’imatges i captures, exclusiva de Premium</span></div>
           <div class="pchk-item yes">✔ <span><strong style="color:#69d99a;">Anàlisis incloses</strong> (previstes: 1.000 de text, correus inclosos, i 50 d’imatge al mes)</span></div>
           <div class="pchk-item info"><span>Amb el FREE: 3 anàlisis de text al dia</span></div>
@@ -302,7 +301,7 @@
             <div class="plan-badge">PROPERAMENT</div>
             <div class="plan-name">Premium 1.0</div>
             <div class="plan-price" style="font-size:17px;">4,99 €/mes</div>
-            <div class="plan-desc">Preu previst quan el reenviament automàtic de Gmail i els avisos funcionin<br>Prova gratuïta de 14 dies prevista</div>
+            <div class="plan-desc">Preu previst<br>Prova gratuïta de 14 dies prevista</div>
           </div>
         </div>
 
@@ -328,8 +327,8 @@
         <div class="card-head"><div class="c-icon ci-gold">⭐</div><h2 class="c-label">Funcionalitats Premium 1.0</h2></div>
         <div class="feat-item"><div class="feat-icon-sm fi-gold"><span class="nx-lupa-mono" aria-hidden="true"></span></div><div><div class="feat-ttl">Anàlisis incloses</div><div class="feat-dsc">Quotes previstes: cada mes, fins a 1.000 anàlisis de text (inclosos els correus) i 50 d’imatge.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-gold">📷</div><div><div class="feat-ttl">Imatges i captures</div><div class="feat-dsc">L’anàlisi d’imatges i captures és exclusiva de Premium.</div></div></div>
-        <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Gmail amb reenviament automàtic</div><div class="feat-dsc">Configura una vegada quins correus de Gmail vols que arribin a NexLupa. A partir d’aquí, els correus triats entren sols i NexLupa en detecta les tasques i les dates.</div></div></div>
-        <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Recordatoris de terminis per correu</div><div class="feat-dsc">Si un correu de l’escola diu que cal pagar una sortida abans de divendres, NexLupa et recorda per correu què has de fer i abans de quan.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-blue">✉️</div><div><div class="feat-ttl">Gmail amb reenviament automàtic</div><div class="feat-dsc">Prestació prevista. Podràs triar quins correus de Gmail es reenvien a NexLupa per extreure’n tasques i dates.</div></div></div>
+        <div class="feat-item"><div class="feat-icon-sm fi-red">🔔</div><div><div class="feat-ttl">Recordatoris de terminis per correu</div><div class="feat-dsc">Prestació prevista. Quan es detecti un termini clar, rebràs un correu amb què cal fer i abans de quan.</div></div></div>
         <div class="feat-item"><div class="feat-icon-sm fi-gold">📄</div><div><div class="feat-ttl">Informe setmanal PDF</div><div class="feat-dsc">Prestació prevista de Premium 1.0.</div></div></div>
       </div>
       <div class="card">

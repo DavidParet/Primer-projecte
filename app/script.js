@@ -294,9 +294,18 @@ function checkLimit() {
 }
 
 function updateCounter() {
-  var used = getUsageToday();
-  var el   = document.getElementById('usageText');
+  var premium = imagesAllowed();
+  var plan = document.getElementById('usagePlan');
+  var promo = document.getElementById('convStrip');
+  var el = document.getElementById('usageText');
+  if (plan) plan.textContent = premium ? 'Premium' : 'FREE';
+  if (promo) promo.style.display = premium ? 'none' : '';
   if (!el) return;
+  if (premium || DEV_MODE) {
+    el.textContent = 'Mode de proves';
+    return;
+  }
+  var used = getUsageToday();
   el.textContent = used >= FREE_LIMIT
     ? 'Límit assolit'
     : used + '/' + FREE_LIMIT + ' avui';
@@ -346,6 +355,7 @@ function checkPremiumTest(showCard) {
     .catch(function () { return { testAccess: false, premium: false }; })
     .then(function (d) {
       _premiumTest = !!d.premium;
+      updateCounter();
       var card = document.getElementById('cfgPremiumTest'), st = document.getElementById('cfgPremiumTestStatus');
       if (card && showCard) card.style.display = d.testAccess ? '' : 'none';
       if (st) st.textContent = !d.testAccess ? '' : (_premiumTest ? 'Accés Premium de proves actiu: imatges habilitades en aquesta preview.' :
